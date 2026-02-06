@@ -38,12 +38,10 @@ libdiffblas_include = include_directories('BLAS/include', 'TAPENADE/include')
 
 # Sources
 libdiffblas_src = []
-
-# Sources
 subdir('BLAS')
 subdir('TAPENADE')
 
-# Libraries
+# Library
 libdiffblas = library('diffblas',
                       sources : libdiffblas_src,
                       dependencies : libblas,
