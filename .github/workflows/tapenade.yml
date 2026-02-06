@@ -1,0 +1,75 @@
+name: Tapenade
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  check-tapenade:
+    runs-on: ubuntu-latest
+
+    env:
+      JAVA_VERSION: '17.0.1'
+      PATH_TO_ANTLR: ${{ github.workspace }}/ANTLR
+      PATH_TO_JARS: ${{ github.workspace }}/Java/jar
+      TAPENADE_HOME: ${{ github.workspace }}/tapenade
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Verify Java
+        run: java --version
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y git wget unzip
+
+      - name: Clone Tapenade from GitLab
+        run: git clone https://gitlab.inria.fr/tapenade/tapenade.git
+
+      - name: Build Tapenade
+        working-directory: tapenade
+        run: |
+          git checkout develop
+          # git checkout feature/sparsity
+          git submodule update --init --recursive
+          ./gradlew clean
+          ./gradlew
+          echo "$PWD/bin" >> $GITHUB_PATH
+
+      - name: Check Tapenade installation
+        run: tapenade --version
+
+      - name: Clone LAPACK from GitHub
+        run: |
+          git clone https://github.com/Reference-LAPACK/lapack.git
+          cd lapack
+          git checkout v3.12.1
+          echo "LAPACKDIR=$PWD" >> $GITHUB_ENV
+
+      - name: Generate the content of diff-BLAS
+        run: |
+          python3 run_tapenade_blas.py --input-dir=$LAPACKDIR/BLAS/SRC --out-dir=./BLAS --flat
+
+      # - name: Show diff for diff-BLAS
+      #   run: |
+      #     git status
+      #     git diff --stat
+      #     git diff > blas.diff
+      #     git diff --quiet || exit 1
+
+      # - uses: actions/upload-artifact@v4
+      #   if: always()
+      #   with:
+      #     name: blas-diff
+      #     path: blas.diff

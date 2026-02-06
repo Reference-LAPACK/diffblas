@@ -1,0 +1,168 @@
+name: diff-BLAS
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  run-mode:
+    name: "Mode ${{ matrix.mode_name }}"
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - mode_name: forward
+            mode_option: -d
+          - mode_name: reverse
+            mode_option: -b
+          - mode_name: vector-forward
+            mode_option: -dv
+          - mode_name: vector-reverse
+            mode_option: -bv
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y make gfortran git
+
+      - name: Clone BLAS / LAPACK
+        run: |
+          git clone https://github.com/Reference-LAPACK/lapack.git
+          cd lapack
+          git checkout v3.12.1
+          echo "LAPACKDIR=$PWD" >> $GITHUB_ENV
+
+      - name: Compile BLAS / LAPACK
+        run: |
+          cd $LAPACKDIR
+          mkdir build && cd build
+          cmake .. \
+             -DCBLAS=ON \
+             -DLAPACKE=ON \
+             -DCMAKE_INSTALL_PREFIX=$LAPACKDIR \
+             -DCMAKE_BUILD_TYPE=Debug \
+             -DBUILD_SHARED_LIBS=OFF \
+             -DBUILD_INDEX64_EXT_API=OFF \
+             -DTEST_FORTRAN_COMPILER=OFF \
+             -DLAPACKE_WITH_TMG=OFF
+          make -j$(nproc)
+          make install
+          cp $LAPACKDIR/lib/libblas.a $LAPACKDIR/librefblas.a
+          cp $LAPACKDIR/lib/libcblas.a $LAPACKDIR/librefcblas.a
+          cp $LAPACKDIR/lib/liblapack.a $LAPACKDIR/libreflapack.a
+          cp $LAPACKDIR/lib/liblapacke.a $LAPACKDIR/libreflapacke.a
+
+      - name: Clone Tapenade
+        run: |
+          git clone https://gitlab.inria.fr/tapenade/tapenade.git
+          cd tapenade
+          git checkout develop
+          echo "TAPENADEDIR=$PWD" >> $GITHUB_ENV
+
+      - name: Build tests for mode ${{ matrix.mode_name }}
+        run: |
+          cd BLAS
+          make ${{ matrix.mode_name }}
+
+      - name: Run tests for mode ${{ matrix.mode_name }} -- v1
+        run: |
+          cd BLAS
+          chmod +x run_tests.sh
+          ./run_tests.sh ${{ matrix.mode_option }}
+
+      - name: Run tests for mode ${{ matrix.mode_name }} -- v2
+        run: |
+          cd BLAS
+          chmod +x run_tests_v2.sh
+          ./run_tests_v2.sh ${{ matrix.mode_option }}
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: results-${{ matrix.mode_name }}
+          path: BLAS/results-${{ matrix.mode_name }}.log
+
+  dashboard-summary:
+    name: "Dashboard"
+    needs: run-mode
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: results-forward
+          path: results/
+      - uses: actions/download-artifact@v4
+        with:
+          name: results-vector-forward
+          path: results/
+      - uses: actions/download-artifact@v4
+        with:
+          name: results-reverse
+          path: results/
+      - uses: actions/download-artifact@v4
+        with:
+          name: results-vector-reverse
+          path: results/
+
+      - name: Install Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1"
+          arch: x64
+
+      - name: Run Julia dashboard
+        run: julia ./.github/julia/make_dashboard.jl
+
+      - name: Display dashboard
+        run: |
+          echo "### Dashboard" >> $GITHUB_STEP_SUMMARY
+          cat dashboard.md >> $GITHUB_STEP_SUMMARY
+
+      # - name: Comment dashboard in PR
+      #   if: github.event.pull_request.head.repo.fork == false
+      #   uses: actions/github-script@v6
+      #   with:
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     script: |
+      #       const fs = require('fs');
+      #       const filePath = 'dashboard.md';
+      #       const msg = fs.readFileSync(filePath, 'utf8');
+
+      #       const prNumber = context.payload.pull_request.number;
+
+      #       // Fetch existing comments on the PR
+      #       const { data: comments } = await github.rest.issues.listComments({
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         issue_number: prNumber
+      #       });
+
+      #       // Look for previous comment by GitHub Actions bot (id 41898282)
+      #       const botComment = comments.find(c => c.user.id === 41898282);
+
+      #       if (botComment) {
+      #         await github.rest.issues.updateComment({
+      #           owner: context.repo.owner,
+      #           repo: context.repo.repo,
+      #           comment_id: botComment.id,
+      #           body: msg
+      #         });
+      #       } else {
+      #         await github.rest.issues.createComment({
+      #           owner: context.repo.owner,
+      #           repo: context.repo.repo,
+      #           issue_number: prNumber,
+      #           body: msg
+      #         });
+      #       }

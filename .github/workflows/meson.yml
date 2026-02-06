@@ -1,0 +1,91 @@
+name: Meson
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  build:
+    name: ${{ matrix.os }}/${{ matrix.arch }}/${{ matrix.compiler }}-v${{ matrix.version }}/Mode-${{ matrix.mode }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        compiler: ['gcc']
+        version: ['14']
+        mode: ['static']  # ['shared']
+        include:
+          - os: ubuntu-24.04-arm
+            compiler: gcc
+            version: '14'
+            arch: 'arm64'
+            mode: 'static'
+          # - os: ubuntu-24.04-arm
+          #   compiler: gcc
+          #   version: '14'
+          #   arch: 'arm64'
+          #   mode: 'shared'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out diffblas
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Meson and Ninja
+        shell: bash
+        run: |
+          pip install meson
+          pip install ninja
+
+      - name: Install compilers
+        uses: fortran-lang/setup-fortran@main
+        with:
+          compiler: ${{ matrix.compiler }}
+          version: ${{ matrix.version }}
+
+      # Uncomment this section to obtain ssh access to VM
+      # - name: Setup tmate session
+      #   if: matrix.os == 'macos-latest'
+      #   uses: mxschmitt/action-tmate@v3
+
+      - name: Setup diffblas
+        shell: bash
+        run: |
+          meson setup builddir --buildtype=debug \
+                               --prefix=$(pwd) \
+                               -Ddefault_library=${{ matrix.mode }}
+
+      - name: Build diffblas
+        shell: bash
+        run: |
+          meson compile -C builddir
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: ${{ matrix.os }}_${{ matrix.compiler }}-v${{ matrix.version }}_${{ matrix.mode }}_meson-log.txt
+          path: builddir/meson-logs/meson-log.txt
+
+      - name: Install diffblas
+        shell: bash
+        run: |
+          meson install -C builddir
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: ${{ matrix.os }}_${{ matrix.compiler }}-v${{ matrix.version }}_${{ matrix.mode }}_install-log.txt
+          path: builddir/meson-logs/install-log.txt
+
+      # - name: Test diffblas
+      #   shell: bash
+      #   run: |
+      #     meson test -C builddir
+      # - uses: actions/upload-artifact@v4
+      #   if: failure()
+      #   with:
+      #     name: ${{ matrix.os }}_${{ matrix.compiler }}-v${{ matrix.version }}_${{ matrix.mode }}_testlog.txt
+      #     path: builddir/meson-logs/testlog.txt

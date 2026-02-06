@@ -1,0 +1,14 @@
+option('modules',
+       type : 'boolean',
+       value : true,
+       description : 'option to install Fortran modules')
+
+option('libblas',
+       type : 'string',
+       value : 'blas',
+       description : 'BLAS library against which to link')
+
+option('libblas_path',
+       type : 'array',
+       value : [],
+       description : 'Additional directories to search for the BLAS library')
