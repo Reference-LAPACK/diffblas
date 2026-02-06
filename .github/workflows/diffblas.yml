@@ -1,4 +1,4 @@
-name: diff-BLAS
+name: diffblas
 
 on:
   push:
@@ -72,17 +72,17 @@ jobs:
           cd BLAS
           make ${{ matrix.mode_name }}
 
-      - name: Run tests for mode ${{ matrix.mode_name }} -- v1
+      - name: Run tests for mode ${{ matrix.mode_name }}
         run: |
           cd BLAS
           chmod +x run_tests.sh
           ./run_tests.sh ${{ matrix.mode_option }}
 
-      - name: Run tests for mode ${{ matrix.mode_name }} -- v2
+      - name: Dashboard for mode ${{ matrix.mode_name }}
         run: |
           cd BLAS
-          chmod +x run_tests_v2.sh
-          ./run_tests_v2.sh ${{ matrix.mode_option }}
+          chmod +x dashboard.sh
+          ./dashboard.sh ${{ matrix.mode_option }}
 
       - name: Upload results
         uses: actions/upload-artifact@v4
