@@ -8666,6 +8666,14 @@ else
 BLAS_LIB ?= -lrefblas
 endif
 
+# Optional: DIFFSIZES_access.o when using F77 ISIZE globals (run_tapenade_blas.py writes DIFFSIZES_access.f)
+# Must be defined before any rule that uses it as a prerequisite, so "make forward" (etc.) builds it first.
+ifneq ($(wildcard $(SRC_DIR)/DIFFSIZES_access.f),)
+DIFFSIZES_ACCESS_OBJ := $(BUILD_DIR)/DIFFSIZES_access.o
+else
+DIFFSIZES_ACCESS_OBJ :=
+endif
+
 # Unified library targets (one library per mode containing all differentiated code)
 # Note: Original BLAS functions come from $(BLAS_LIB) (librefblas in LAPACKDIR)
 LIB_D := $(BUILD_DIR)/libdiffblas_d.a
@@ -8876,13 +8884,6 @@ $(BUILD_DIR)/libdiffblas_d.a: compile-d $(DIFFSIZES_ACCESS_OBJ)
 
 $(BUILD_DIR)/libdiffblas_d.so: compile-d
 	@$(FC) -shared -o $@ $$(ls $(BUILD_DIR)/*_d.o 2>/dev/null)
-
-# Optional: DIFFSIZES_access.o when using F77 ISIZE globals (run_tapenade_blas.py writes DIFFSIZES_access.f)
-ifneq ($(wildcard $(SRC_DIR)/DIFFSIZES_access.f),)
-DIFFSIZES_ACCESS_OBJ := $(BUILD_DIR)/DIFFSIZES_access.o
-else
-DIFFSIZES_ACCESS_OBJ :=
-endif
 
 # Single library for all reverse mode differentiated code
 $(BUILD_DIR)/libdiffblas_b.a: compile-b $(DIFFSIZES_ACCESS_OBJ)
