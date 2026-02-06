@@ -111,40 +111,40 @@ jobs:
           name: diffblas_binaries.${{ github.ref_name }}.x86_64-w64-mingw32-libgfortran5.zip
           path: ./diffblas_binaries.${{ github.ref_name }}.x86_64-w64-mingw32-libgfortran5.zip
 
-  build-mac-x64:
-    name: diffblas -- macOS (x86_64) -- Release ${{ github.ref_name }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout diffblas
-        uses: actions/checkout@v4
+  # build-mac-x64:
+  #   name: diffblas -- macOS (x86_64) -- Release ${{ github.ref_name }}
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout diffblas
+  #       uses: actions/checkout@v4
 
-      - name: Install Julia
-        uses: julia-actions/setup-julia@v2
-        with:
-          version: "1.7"
-          arch: x64
+  #     - name: Install Julia
+  #       uses: julia-actions/setup-julia@v2
+  #       with:
+  #         version: "1.7"
+  #         arch: x64
 
-      - name: Set the environment variables BINARYBUILDER_AUTOMATIC_APPLE, DIFFBLAS_RELEASE, DIFFBLAS_COMMIT, DIFFBLAS_URL
-        shell: bash
-        run: |
-          echo "BINARYBUILDER_AUTOMATIC_APPLE=true" >> $GITHUB_ENV
-          echo "DIFFBLAS_RELEASE=${{ github.ref_name }}" >> $GITHUB_ENV
-          echo "DIFFBLAS_COMMIT=${{ github.sha }}" >> $GITHUB_ENV
-          echo "DIFFBLAS_URL=https://github.com/${{ github.repository }}.git" >> $GITHUB_ENV
+  #     - name: Set the environment variables BINARYBUILDER_AUTOMATIC_APPLE, DIFFBLAS_RELEASE, DIFFBLAS_COMMIT, DIFFBLAS_URL
+  #       shell: bash
+  #       run: |
+  #         echo "BINARYBUILDER_AUTOMATIC_APPLE=true" >> $GITHUB_ENV
+  #         echo "DIFFBLAS_RELEASE=${{ github.ref_name }}" >> $GITHUB_ENV
+  #         echo "DIFFBLAS_COMMIT=${{ github.sha }}" >> $GITHUB_ENV
+  #         echo "DIFFBLAS_URL=https://github.com/${{ github.repository }}.git" >> $GITHUB_ENV
 
-      - name: Cross-compilation of diffblas -- x86_64-apple-darwin-libgfortran5
-        run: |
-          julia --color=yes -e 'using Pkg; Pkg.add("BinaryBuilder")'
-          julia --color=yes .github/julia/build_tarballs.jl x86_64-apple-darwin-libgfortran5 --verbose
+  #     - name: Cross-compilation of diffblas -- x86_64-apple-darwin-libgfortran5
+  #       run: |
+  #         julia --color=yes -e 'using Pkg; Pkg.add("BinaryBuilder")'
+  #         julia --color=yes .github/julia/build_tarballs.jl x86_64-apple-darwin-libgfortran5 --verbose
 
-      - name: Archive artifact
-        run: julia --color=yes .github/julia/generate_binaries.jl
+  #     - name: Archive artifact
+  #       run: julia --color=yes .github/julia/generate_binaries.jl
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: diffblas_binaries.${{ github.ref_name }}.x86_64-apple-darwin-libgfortran5.tar.gz
-          path: ./diffblas_binaries.${{ github.ref_name }}.x86_64-apple-darwin-libgfortran5.tar.gz
+  #     - name: Upload artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: diffblas_binaries.${{ github.ref_name }}.x86_64-apple-darwin-libgfortran5.tar.gz
+  #         path: ./diffblas_binaries.${{ github.ref_name }}.x86_64-apple-darwin-libgfortran5.tar.gz
 
   build-mac-aarch64:
     name: diffblas -- macOS (aarch64) -- Release ${{ github.ref_name }}
@@ -183,7 +183,7 @@ jobs:
 
   release:
     name: Create Release and Upload Binaries
-    needs: [build-windows-x64, build-linux-x64, build-linux-aarch64, build-mac-x64, build-mac-aarch64]
+    needs: [build-windows-x64, build-linux-x64, build-linux-aarch64, build-mac-aarch64]  # build-mac-x64
     runs-on: ubuntu-latest
     steps:
       - name: Checkout diffblas
@@ -217,12 +217,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Mac (x86_64) artifact
-        run: |
-          gh release upload ${{ github.ref_name }} \
-            diffblas_binaries.${{ github.ref_name }}.x86_64-apple-darwin-libgfortran5.tar.gz/diffblas_binaries.${{ github.ref_name }}.x86_64-apple-darwin-libgfortran5.tar.gz#diffblas.${{ github.ref_name }}.mac.x86_64.tar.gz
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Upload Mac (x86_64) artifact
+      #   run: |
+      #     gh release upload ${{ github.ref_name }} \
+      #       diffblas_binaries.${{ github.ref_name }}.x86_64-apple-darwin-libgfortran5.tar.gz/diffblas_binaries.${{ github.ref_name }}.x86_64-apple-darwin-libgfortran5.tar.gz#diffblas.${{ github.ref_name }}.mac.x86_64.tar.gz
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Mac (aarch64) artifact
         run: |

@@ -17,7 +17,7 @@ platforms = [
 #  ("powerpc64le-linux-gnu-libgfortran5" , "lib", "so"   ),
 #  ("x86_64-apple-darwin-libgfortran3"   , "lib", "dylib"),
 #  ("x86_64-apple-darwin-libgfortran4"   , "lib", "dylib"),
-   ("x86_64-apple-darwin-libgfortran5"   , "lib", "dylib"),
+#  ("x86_64-apple-darwin-libgfortran5"   , "lib", "dylib"),
 #  ("x86_64-linux-gnu-libgfortran3"      , "lib", "so"   ),
 #  ("x86_64-linux-gnu-libgfortran4"      , "lib", "so"   ),
    ("x86_64-linux-gnu-libgfortran5"      , "lib", "so"   ),
@@ -49,7 +49,7 @@ for (platform, libdir, ext) in platforms
 
     # Create a folder with the version number of the package
     mkdir("$(package)_binaries.$version2")
-    for folder in ("lib")
+    for folder in ("lib", )
       cp(folder, "$(package)_binaries.$version2/$folder")
     end
 

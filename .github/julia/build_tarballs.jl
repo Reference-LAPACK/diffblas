@@ -17,7 +17,7 @@ script = raw"""
 # Update Ninja
 cp ${host_prefix}/bin/ninja /usr/bin/ninja
 
-cd ${WORKSPACE}/srcdir/diff-lapack
+cd ${WORKSPACE}/srcdir/diffblas
 meson setup builddir --cross-file=${MESON_TARGET_TOOLCHAIN%.*}_gcc.meson --prefix=$prefix
 meson compile -C builddir
 meson install -C builddir
