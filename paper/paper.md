@@ -28,13 +28,13 @@ bibliography: paper.bib
 # Summary
 
 `diffblas` is a library that provides BLAS routines algorithmically differentiated using algorithmic differentiation principles [@griewank2008] from their reference implementations in [LAPACK](https://github.com/Reference-LAPACK/lapack) on GitHub using the automatic differentiation tool Tapenade [@tapenade].
-It supports four modes: forward (`_d`), vector forward (`_dv`), reverse (`_b`), and vector reverse (`_bv`).
+It supports four modes: tangent (`_d`), vector tangent (`_dv`), adjoint (`_b`), and vector adjoint (`_bv`).
 
 In addition to differentiating the standard Fortran-style `BLAS` interface, `diffblas` also provides differentiated `CBLAS` routines, facilitating interoperability with C and other languages.
 Its API mirrors BLAS / CBLAS, with additional arguments specifying differentiation variables, making integration into existing workflows straightforward.
 
-`diffblas` calls the underlying standard `BLAS `implementation, and is agnostic to the backend (OpenBLAS, BLIS, MKL, Apple Accelerate), ensuring both performance and portability.
-Precompiled artifacts are available on GitHub to simplify installation and usage across different programming environments.
+`diffblas` relies on the underlying standard BLAS implementation and is agnostic to the backend (OpenBLAS, BLIS, MKL, Apple Accelerate, or libblastrampoline), ensuring both high performance and portability.
+Precompiled artifacts are available on GitHub, simplifying installation and use across different programming environments.
 
 By providing efficient and accurate derivatives of linear algebra operations, `diffblas` facilitates gradient-based optimization, sensitivity analysis, and derivative-based workflows in scientific computing.
 
