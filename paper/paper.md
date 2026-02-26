@@ -20,7 +20,7 @@ affiliations:
    index: 1
  - name: Inria de Saclay, Palaiseau, France
    index: 2
-date: 22 February 2026
+date: 25 February 2026
 bibliography: paper.bib
 
 ---
@@ -49,8 +49,7 @@ Existing approaches rely on hand-coded derivatives or generic automatic differen
 # State of the field
 
 Automatic source-to-source differentiation tools, such as Tapenade [@tapenade], ADOL-C [@ADOLC], or TAF [@TAF], provide general mechanisms to compute derivatives of code.
-However, naively applying AD to low-level BLAS or LAPACK routines can be inefficient due to loop structures, memory layout, and caching constraints [@jonasson2020].
-`diffblas` addresses these challenges by generating differentiated routines directly from reference LAPACK implementations, combining the reliability and performance of LAPACK with the efficiency of algorithmic differentiation.
+...
 
 # Research impact statement
 
