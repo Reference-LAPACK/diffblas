@@ -1,0 +1,410 @@
+#ifndef CBLAS_F77_DV_LOADED
+#define CBLAS_F77_DV_LOADED
+#include "cblas_f77.h"
+#include <stdarg.h>
+#include <stddef.h>
+/* Forward declaration for differentiated Fortran routine */
+void caxpy_dv_();
+#define F77_caxpy_dv_base F77_GLOBAL_SUFFIX(caxpy_dv,CAXPY_DV)
+#define F77_caxpy_dv(...) F77_caxpy_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void ccopy_dv_();
+#define F77_ccopy_dv_base F77_GLOBAL_SUFFIX(ccopy_dv,CCOPY_DV)
+#define F77_ccopy_dv(...) F77_ccopy_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void cdotcsub_dv_();
+#define F77_cdotcsub_dv_base F77_GLOBAL_SUFFIX(cdotcsub_dv,CDOTCSUB_DV)
+#define F77_cdotcsub_dv(...) F77_cdotcsub_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void cdotusub_dv_();
+#define F77_cdotusub_dv_base F77_GLOBAL_SUFFIX(cdotusub_dv,CDOTUSUB_DV)
+#define F77_cdotusub_dv(...) F77_cdotusub_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void cgbmv_dv_();
+#define F77_cgbmv_dv_base F77_GLOBAL_SUFFIX(cgbmv_dv,CGBMV_DV)
+#define F77_cgbmv_dv(...) F77_cgbmv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void cgemm_dv_();
+#define F77_cgemm_dv_base F77_GLOBAL_SUFFIX(cgemm_dv,CGEMM_DV)
+#define F77_cgemm_dv(...) F77_cgemm_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void cgemv_dv_();
+#define F77_cgemv_dv_base F77_GLOBAL_SUFFIX(cgemv_dv,CGEMV_DV)
+#define F77_cgemv_dv(...) F77_cgemv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void cgerc_dv_();
+#define F77_cgerc_dv_base F77_GLOBAL_SUFFIX(cgerc_dv,CGERC_DV)
+#define F77_cgerc_dv(...) F77_cgerc_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void cgeru_dv_();
+#define F77_cgeru_dv_base F77_GLOBAL_SUFFIX(cgeru_dv,CGERU_DV)
+#define F77_cgeru_dv(...) F77_cgeru_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void chbmv_dv_();
+#define F77_chbmv_dv_base F77_GLOBAL_SUFFIX(chbmv_dv,CHBMV_DV)
+#define F77_chbmv_dv(...) F77_chbmv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void chemm_dv_();
+#define F77_chemm_dv_base F77_GLOBAL_SUFFIX(chemm_dv,CHEMM_DV)
+#define F77_chemm_dv(...) F77_chemm_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void chemv_dv_();
+#define F77_chemv_dv_base F77_GLOBAL_SUFFIX(chemv_dv,CHEMV_DV)
+#define F77_chemv_dv(...) F77_chemv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void cscal_dv_();
+#define F77_cscal_dv_base F77_GLOBAL_SUFFIX(cscal_dv,CSCAL_DV)
+#define F77_cscal_dv(...) F77_cscal_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void cswap_dv_();
+#define F77_cswap_dv_base F77_GLOBAL_SUFFIX(cswap_dv,CSWAP_DV)
+#define F77_cswap_dv(...) F77_cswap_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void csymm_dv_();
+#define F77_csymm_dv_base F77_GLOBAL_SUFFIX(csymm_dv,CSYMM_DV)
+#define F77_csymm_dv(...) F77_csymm_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void csyr2k_dv_();
+#define F77_csyr2k_dv_base F77_GLOBAL_SUFFIX(csyr2k_dv,CSYR2K_DV)
+#define F77_csyr2k_dv(...) F77_csyr2k_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void csyrk_dv_();
+#define F77_csyrk_dv_base F77_GLOBAL_SUFFIX(csyrk_dv,CSYRK_DV)
+#define F77_csyrk_dv(...) F77_csyrk_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void ctbmv_dv_();
+#define F77_ctbmv_dv_base F77_GLOBAL_SUFFIX(ctbmv_dv,CTBMV_DV)
+#define F77_ctbmv_dv(...) F77_ctbmv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void ctpmv_dv_();
+#define F77_ctpmv_dv_base F77_GLOBAL_SUFFIX(ctpmv_dv,CTPMV_DV)
+#define F77_ctpmv_dv(...) F77_ctpmv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void ctrmm_dv_();
+#define F77_ctrmm_dv_base F77_GLOBAL_SUFFIX(ctrmm_dv,CTRMM_DV)
+#define F77_ctrmm_dv(...) F77_ctrmm_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void ctrmv_dv_();
+#define F77_ctrmv_dv_base F77_GLOBAL_SUFFIX(ctrmv_dv,CTRMV_DV)
+#define F77_ctrmv_dv(...) F77_ctrmv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void ctrsm_dv_();
+#define F77_ctrsm_dv_base F77_GLOBAL_SUFFIX(ctrsm_dv,CTRSM_DV)
+#define F77_ctrsm_dv(...) F77_ctrsm_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void ctrsv_dv_();
+#define F77_ctrsv_dv_base F77_GLOBAL_SUFFIX(ctrsv_dv,CTRSV_DV)
+#define F77_ctrsv_dv(...) F77_ctrsv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dasumsub_dv_();
+#define F77_dasumsub_dv_base F77_GLOBAL_SUFFIX(dasumsub_dv,DASUMSUB_DV)
+#define F77_dasumsub_dv(...) F77_dasumsub_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void daxpy_dv_();
+#define F77_daxpy_dv_base F77_GLOBAL_SUFFIX(daxpy_dv,DAXPY_DV)
+#define F77_daxpy_dv(...) F77_daxpy_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dcopy_dv_();
+#define F77_dcopy_dv_base F77_GLOBAL_SUFFIX(dcopy_dv,DCOPY_DV)
+#define F77_dcopy_dv(...) F77_dcopy_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void ddotsub_dv_();
+#define F77_ddotsub_dv_base F77_GLOBAL_SUFFIX(ddotsub_dv,DDOTSUB_DV)
+#define F77_ddotsub_dv(...) F77_ddotsub_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dgbmv_dv_();
+#define F77_dgbmv_dv_base F77_GLOBAL_SUFFIX(dgbmv_dv,DGBMV_DV)
+#define F77_dgbmv_dv(...) F77_dgbmv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dgemm_dv_();
+#define F77_dgemm_dv_base F77_GLOBAL_SUFFIX(dgemm_dv,DGEMM_DV)
+#define F77_dgemm_dv(...) F77_dgemm_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dgemv_dv_();
+#define F77_dgemv_dv_base F77_GLOBAL_SUFFIX(dgemv_dv,DGEMV_DV)
+#define F77_dgemv_dv(...) F77_dgemv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dger_dv_();
+#define F77_dger_dv_base F77_GLOBAL_SUFFIX(dger_dv,DGER_DV)
+#define F77_dger_dv(...) F77_dger_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dnrm2sub_dv_();
+#define F77_dnrm2sub_dv_base F77_GLOBAL_SUFFIX(dnrm2sub_dv,DNRM2SUB_DV)
+#define F77_dnrm2sub_dv(...) F77_dnrm2sub_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dsbmv_dv_();
+#define F77_dsbmv_dv_base F77_GLOBAL_SUFFIX(dsbmv_dv,DSBMV_DV)
+#define F77_dsbmv_dv(...) F77_dsbmv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dscal_dv_();
+#define F77_dscal_dv_base F77_GLOBAL_SUFFIX(dscal_dv,DSCAL_DV)
+#define F77_dscal_dv(...) F77_dscal_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dspmv_dv_();
+#define F77_dspmv_dv_base F77_GLOBAL_SUFFIX(dspmv_dv,DSPMV_DV)
+#define F77_dspmv_dv(...) F77_dspmv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dspr2_dv_();
+#define F77_dspr2_dv_base F77_GLOBAL_SUFFIX(dspr2_dv,DSPR2_DV)
+#define F77_dspr2_dv(...) F77_dspr2_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dspr_dv_();
+#define F77_dspr_dv_base F77_GLOBAL_SUFFIX(dspr_dv,DSPR_DV)
+#define F77_dspr_dv(...) F77_dspr_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dswap_dv_();
+#define F77_dswap_dv_base F77_GLOBAL_SUFFIX(dswap_dv,DSWAP_DV)
+#define F77_dswap_dv(...) F77_dswap_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dsymm_dv_();
+#define F77_dsymm_dv_base F77_GLOBAL_SUFFIX(dsymm_dv,DSYMM_DV)
+#define F77_dsymm_dv(...) F77_dsymm_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dsymv_dv_();
+#define F77_dsymv_dv_base F77_GLOBAL_SUFFIX(dsymv_dv,DSYMV_DV)
+#define F77_dsymv_dv(...) F77_dsymv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dsyr2_dv_();
+#define F77_dsyr2_dv_base F77_GLOBAL_SUFFIX(dsyr2_dv,DSYR2_DV)
+#define F77_dsyr2_dv(...) F77_dsyr2_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dsyr2k_dv_();
+#define F77_dsyr2k_dv_base F77_GLOBAL_SUFFIX(dsyr2k_dv,DSYR2K_DV)
+#define F77_dsyr2k_dv(...) F77_dsyr2k_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dsyr_dv_();
+#define F77_dsyr_dv_base F77_GLOBAL_SUFFIX(dsyr_dv,DSYR_DV)
+#define F77_dsyr_dv(...) F77_dsyr_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dsyrk_dv_();
+#define F77_dsyrk_dv_base F77_GLOBAL_SUFFIX(dsyrk_dv,DSYRK_DV)
+#define F77_dsyrk_dv(...) F77_dsyrk_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dtbmv_dv_();
+#define F77_dtbmv_dv_base F77_GLOBAL_SUFFIX(dtbmv_dv,DTBMV_DV)
+#define F77_dtbmv_dv(...) F77_dtbmv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dtpmv_dv_();
+#define F77_dtpmv_dv_base F77_GLOBAL_SUFFIX(dtpmv_dv,DTPMV_DV)
+#define F77_dtpmv_dv(...) F77_dtpmv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dtrmm_dv_();
+#define F77_dtrmm_dv_base F77_GLOBAL_SUFFIX(dtrmm_dv,DTRMM_DV)
+#define F77_dtrmm_dv(...) F77_dtrmm_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dtrmv_dv_();
+#define F77_dtrmv_dv_base F77_GLOBAL_SUFFIX(dtrmv_dv,DTRMV_DV)
+#define F77_dtrmv_dv(...) F77_dtrmv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dtrsm_dv_();
+#define F77_dtrsm_dv_base F77_GLOBAL_SUFFIX(dtrsm_dv,DTRSM_DV)
+#define F77_dtrsm_dv(...) F77_dtrsm_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void dtrsv_dv_();
+#define F77_dtrsv_dv_base F77_GLOBAL_SUFFIX(dtrsv_dv,DTRSV_DV)
+#define F77_dtrsv_dv(...) F77_dtrsv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void sasumsub_dv_();
+#define F77_sasumsub_dv_base F77_GLOBAL_SUFFIX(sasumsub_dv,SASUMSUB_DV)
+#define F77_sasumsub_dv(...) F77_sasumsub_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void saxpy_dv_();
+#define F77_saxpy_dv_base F77_GLOBAL_SUFFIX(saxpy_dv,SAXPY_DV)
+#define F77_saxpy_dv(...) F77_saxpy_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void scopy_dv_();
+#define F77_scopy_dv_base F77_GLOBAL_SUFFIX(scopy_dv,SCOPY_DV)
+#define F77_scopy_dv(...) F77_scopy_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void sdotsub_dv_();
+#define F77_sdotsub_dv_base F77_GLOBAL_SUFFIX(sdotsub_dv,SDOTSUB_DV)
+#define F77_sdotsub_dv(...) F77_sdotsub_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void sgbmv_dv_();
+#define F77_sgbmv_dv_base F77_GLOBAL_SUFFIX(sgbmv_dv,SGBMV_DV)
+#define F77_sgbmv_dv(...) F77_sgbmv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void sgemm_dv_();
+#define F77_sgemm_dv_base F77_GLOBAL_SUFFIX(sgemm_dv,SGEMM_DV)
+#define F77_sgemm_dv(...) F77_sgemm_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void sgemv_dv_();
+#define F77_sgemv_dv_base F77_GLOBAL_SUFFIX(sgemv_dv,SGEMV_DV)
+#define F77_sgemv_dv(...) F77_sgemv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void sger_dv_();
+#define F77_sger_dv_base F77_GLOBAL_SUFFIX(sger_dv,SGER_DV)
+#define F77_sger_dv(...) F77_sger_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void snrm2sub_dv_();
+#define F77_snrm2sub_dv_base F77_GLOBAL_SUFFIX(snrm2sub_dv,SNRM2SUB_DV)
+#define F77_snrm2sub_dv(...) F77_snrm2sub_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void ssbmv_dv_();
+#define F77_ssbmv_dv_base F77_GLOBAL_SUFFIX(ssbmv_dv,SSBMV_DV)
+#define F77_ssbmv_dv(...) F77_ssbmv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void sscal_dv_();
+#define F77_sscal_dv_base F77_GLOBAL_SUFFIX(sscal_dv,SSCAL_DV)
+#define F77_sscal_dv(...) F77_sscal_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void sspmv_dv_();
+#define F77_sspmv_dv_base F77_GLOBAL_SUFFIX(sspmv_dv,SSPMV_DV)
+#define F77_sspmv_dv(...) F77_sspmv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void sspr2_dv_();
+#define F77_sspr2_dv_base F77_GLOBAL_SUFFIX(sspr2_dv,SSPR2_DV)
+#define F77_sspr2_dv(...) F77_sspr2_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void sspr_dv_();
+#define F77_sspr_dv_base F77_GLOBAL_SUFFIX(sspr_dv,SSPR_DV)
+#define F77_sspr_dv(...) F77_sspr_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void sswap_dv_();
+#define F77_sswap_dv_base F77_GLOBAL_SUFFIX(sswap_dv,SSWAP_DV)
+#define F77_sswap_dv(...) F77_sswap_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void ssymm_dv_();
+#define F77_ssymm_dv_base F77_GLOBAL_SUFFIX(ssymm_dv,SSYMM_DV)
+#define F77_ssymm_dv(...) F77_ssymm_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void ssymv_dv_();
+#define F77_ssymv_dv_base F77_GLOBAL_SUFFIX(ssymv_dv,SSYMV_DV)
+#define F77_ssymv_dv(...) F77_ssymv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void ssyr2_dv_();
+#define F77_ssyr2_dv_base F77_GLOBAL_SUFFIX(ssyr2_dv,SSYR2_DV)
+#define F77_ssyr2_dv(...) F77_ssyr2_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void ssyr2k_dv_();
+#define F77_ssyr2k_dv_base F77_GLOBAL_SUFFIX(ssyr2k_dv,SSYR2K_DV)
+#define F77_ssyr2k_dv(...) F77_ssyr2k_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void ssyr_dv_();
+#define F77_ssyr_dv_base F77_GLOBAL_SUFFIX(ssyr_dv,SSYR_DV)
+#define F77_ssyr_dv(...) F77_ssyr_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void ssyrk_dv_();
+#define F77_ssyrk_dv_base F77_GLOBAL_SUFFIX(ssyrk_dv,SSYRK_DV)
+#define F77_ssyrk_dv(...) F77_ssyrk_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void stbmv_dv_();
+#define F77_stbmv_dv_base F77_GLOBAL_SUFFIX(stbmv_dv,STBMV_DV)
+#define F77_stbmv_dv(...) F77_stbmv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void stpmv_dv_();
+#define F77_stpmv_dv_base F77_GLOBAL_SUFFIX(stpmv_dv,STPMV_DV)
+#define F77_stpmv_dv(...) F77_stpmv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void strmm_dv_();
+#define F77_strmm_dv_base F77_GLOBAL_SUFFIX(strmm_dv,STRMM_DV)
+#define F77_strmm_dv(...) F77_strmm_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void strmv_dv_();
+#define F77_strmv_dv_base F77_GLOBAL_SUFFIX(strmv_dv,STRMV_DV)
+#define F77_strmv_dv(...) F77_strmv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void strsm_dv_();
+#define F77_strsm_dv_base F77_GLOBAL_SUFFIX(strsm_dv,STRSM_DV)
+#define F77_strsm_dv(...) F77_strsm_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void strsv_dv_();
+#define F77_strsv_dv_base F77_GLOBAL_SUFFIX(strsv_dv,STRSV_DV)
+#define F77_strsv_dv(...) F77_strsv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void zaxpy_dv_();
+#define F77_zaxpy_dv_base F77_GLOBAL_SUFFIX(zaxpy_dv,ZAXPY_DV)
+#define F77_zaxpy_dv(...) F77_zaxpy_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void zcopy_dv_();
+#define F77_zcopy_dv_base F77_GLOBAL_SUFFIX(zcopy_dv,ZCOPY_DV)
+#define F77_zcopy_dv(...) F77_zcopy_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void zdotcsub_dv_();
+#define F77_zdotcsub_dv_base F77_GLOBAL_SUFFIX(zdotcsub_dv,ZDOTCSUB_DV)
+#define F77_zdotcsub_dv(...) F77_zdotcsub_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void zdotusub_dv_();
+#define F77_zdotusub_dv_base F77_GLOBAL_SUFFIX(zdotusub_dv,ZDOTUSUB_DV)
+#define F77_zdotusub_dv(...) F77_zdotusub_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void zdscal_dv_();
+#define F77_zdscal_dv_base F77_GLOBAL_SUFFIX(zdscal_dv,ZDSCAL_DV)
+#define F77_zdscal_dv(...) F77_zdscal_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void zgbmv_dv_();
+#define F77_zgbmv_dv_base F77_GLOBAL_SUFFIX(zgbmv_dv,ZGBMV_DV)
+#define F77_zgbmv_dv(...) F77_zgbmv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void zgemm_dv_();
+#define F77_zgemm_dv_base F77_GLOBAL_SUFFIX(zgemm_dv,ZGEMM_DV)
+#define F77_zgemm_dv(...) F77_zgemm_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void zgemv_dv_();
+#define F77_zgemv_dv_base F77_GLOBAL_SUFFIX(zgemv_dv,ZGEMV_DV)
+#define F77_zgemv_dv(...) F77_zgemv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void zgerc_dv_();
+#define F77_zgerc_dv_base F77_GLOBAL_SUFFIX(zgerc_dv,ZGERC_DV)
+#define F77_zgerc_dv(...) F77_zgerc_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void zgeru_dv_();
+#define F77_zgeru_dv_base F77_GLOBAL_SUFFIX(zgeru_dv,ZGERU_DV)
+#define F77_zgeru_dv(...) F77_zgeru_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void zhbmv_dv_();
+#define F77_zhbmv_dv_base F77_GLOBAL_SUFFIX(zhbmv_dv,ZHBMV_DV)
+#define F77_zhbmv_dv(...) F77_zhbmv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void zhemm_dv_();
+#define F77_zhemm_dv_base F77_GLOBAL_SUFFIX(zhemm_dv,ZHEMM_DV)
+#define F77_zhemm_dv(...) F77_zhemm_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void zhemv_dv_();
+#define F77_zhemv_dv_base F77_GLOBAL_SUFFIX(zhemv_dv,ZHEMV_DV)
+#define F77_zhemv_dv(...) F77_zhemv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void zscal_dv_();
+#define F77_zscal_dv_base F77_GLOBAL_SUFFIX(zscal_dv,ZSCAL_DV)
+#define F77_zscal_dv(...) F77_zscal_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void zswap_dv_();
+#define F77_zswap_dv_base F77_GLOBAL_SUFFIX(zswap_dv,ZSWAP_DV)
+#define F77_zswap_dv(...) F77_zswap_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void zsymm_dv_();
+#define F77_zsymm_dv_base F77_GLOBAL_SUFFIX(zsymm_dv,ZSYMM_DV)
+#define F77_zsymm_dv(...) F77_zsymm_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void zsyr2k_dv_();
+#define F77_zsyr2k_dv_base F77_GLOBAL_SUFFIX(zsyr2k_dv,ZSYR2K_DV)
+#define F77_zsyr2k_dv(...) F77_zsyr2k_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void zsyrk_dv_();
+#define F77_zsyrk_dv_base F77_GLOBAL_SUFFIX(zsyrk_dv,ZSYRK_DV)
+#define F77_zsyrk_dv(...) F77_zsyrk_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void ztbmv_dv_();
+#define F77_ztbmv_dv_base F77_GLOBAL_SUFFIX(ztbmv_dv,ZTBMV_DV)
+#define F77_ztbmv_dv(...) F77_ztbmv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void ztpmv_dv_();
+#define F77_ztpmv_dv_base F77_GLOBAL_SUFFIX(ztpmv_dv,ZTPMV_DV)
+#define F77_ztpmv_dv(...) F77_ztpmv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void ztrmm_dv_();
+#define F77_ztrmm_dv_base F77_GLOBAL_SUFFIX(ztrmm_dv,ZTRMM_DV)
+#define F77_ztrmm_dv(...) F77_ztrmm_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void ztrmv_dv_();
+#define F77_ztrmv_dv_base F77_GLOBAL_SUFFIX(ztrmv_dv,ZTRMV_DV)
+#define F77_ztrmv_dv(...) F77_ztrmv_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void ztrsm_dv_();
+#define F77_ztrsm_dv_base F77_GLOBAL_SUFFIX(ztrsm_dv,ZTRSM_DV)
+#define F77_ztrsm_dv(...) F77_ztrsm_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void ztrsv_dv_();
+#define F77_ztrsv_dv_base F77_GLOBAL_SUFFIX(ztrsv_dv,ZTRSV_DV)
+#define F77_ztrsv_dv(...) F77_ztrsv_dv_base(__VA_ARGS__)
+#endif
