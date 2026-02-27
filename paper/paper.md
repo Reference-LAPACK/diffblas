@@ -55,7 +55,7 @@ Derivatives of linear algebra routines are available in Python packages such as 
 
 # Research impact statement
 
-This work was inspired in part by a need to differentiate a Fortran code [@HFBTHO] that uses BLAS and LAPACK routines, and to use the differentiated application for gradient-based optimization.
+This work was inspired in part by a need to differentiate a Fortran code [@HFBTHO] that uses BLAS and LAPACK routines, and to use the differentiated application for gradient-based optimization. We were able to to differentiate HFBTHO using Tapenade by providing the source code for the BLAS routines used by HFBTHO and their dependencies to Tapenade [@HFBTHOAD]. We handcoded the derivatives for the LAPACK routine `DSYEVR`. 
 
 Providing both the standard and CBLAS interfaces ensures that diffblas can be adopted across different programming environments, facilitating derivative computations in diverse scientific computing projects.
 Precompiled artifacts on GitHub further simplify integration, enabling rapid deployment in multiple languages and scientific computing projects.
