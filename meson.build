@@ -19,6 +19,10 @@ if fc.get_id() == 'nagfor'
   add_global_arguments('-dcfuns', language : 'fortran')
 endif
 
+# Tapenade-generated CBLAS code uses NBDirsMax as the maximum number
+# of differentiation directions. Keep this in sync with DIFFSIZESC.inc.
+add_global_arguments('-DNBDirsMax=4', language : 'c')
+
 # Options
 install_modules = get_option('modules')
 libblas_name = get_option('libblas')
@@ -42,7 +46,14 @@ endif
 
 # Headers
 libdiffblas_include = include_directories('BLAS/include', 'TAPENADE/include')
-libdiffcblas_include = include_directories('CBLAS/src/tmp', 'TAPENADE/include')
+libdiffcblas_inc_dirs = ['CBLAS/include', 'TAPENADE/include']
+
+# Allow the user to provide external CBLAS headers (e.g. Lapack's CBLAS/include)
+foreach p : libcblas_path
+  libdiffcblas_inc_dirs += p
+endforeach
+
+libdiffcblas_include = include_directories(libdiffcblas_inc_dirs)
 
 # Sources
 libdiffblas_src = []
