@@ -33,6 +33,12 @@ endif
 if libblas_path != [] or not libblas.found()
     libblas = fc.find_library(libblas_name, dirs : libblas_path, required : false)
 endif
+if libcblas_path == []
+    libcblas = dependency(libcblas_name, required : false)
+endif
+if libcblas_path != [] or not libcblas.found()
+    libcblas = fc.find_library(libcblas_name, dirs : libcblas_path, required : false)
+endif
 
 # Headers
 libdiffblas_include = include_directories('BLAS/include', 'TAPENADE/include')
