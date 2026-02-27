@@ -42,13 +42,15 @@ By providing efficient and accurate derivatives of linear algebra operations, `d
 
 Linear algebra routines such as those in LAPACK are widely used in scientific computing, optimization, and machine learning. However, they do not provide derivatives, which are often required for gradient-based algorithms.
 
-Existing approaches rely on hand-coded derivatives or generic automatic differentiation applied to high-level code, which can be inefficient or error-prone [@jonasson2020].
-
 `diffblas` addresses this gap by providing algorithmically differentiated BLAS routines directly from reference LAPACK implementations and following relevant differntiation rules [@giles2008].
 
 # State of the field
 
 Automatic source-to-source differentiation tools, such as Tapenade [@tapenade], ADOL-C [@ADOLC], or TAF [@TAF], provide general mechanisms to compute derivatives of code.
+
+[@jonasson2020] derives scalar reverse mode derivative formulae for BLAS routines and provides their Fortran code. Such an approach is generally more efficient that differentiating through the BLAS routines using an AD tool [@jonasson2020]. They do not however consider the forward mode or vector modes. 
+
+Derivatives of linear algebra routines are available in Python packages such as JAX [@jax] and PyTorch [@pytorch]. These implementations are not available outside these frameworks. Enzyme and Enzyme.jl perform optimized BLAS and CuBLAS differentiation at the MLIR level[@Enzyme] but the derivative code is not available externally. 
 ...
 
 # Research impact statement
