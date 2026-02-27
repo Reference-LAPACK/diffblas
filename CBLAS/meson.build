@@ -4,6 +4,8 @@
 # DIFFSIZESF.inc, DIFFSIZESC.inc, DIFFSIZES.f90) are used via
 # libdiffcblas_include = include_directories('CBLAS/include') in root meson.build.
 
+libdiffcblas_src += files('include/DIFFSIZES.f90')
+
 # Forward mode (_d) sources - C wrappers
 libdiffcblas_src += files(
   'src/cblas_caxpy_d.c',

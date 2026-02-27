@@ -12,3 +12,13 @@ option('libblas_path',
        type : 'array',
        value : [],
        description : 'Additional directories to search for the BLAS library')
+
+option('libcblas',
+       type : 'string',
+       value : 'cblas',
+       description : 'CBLAS library against which to link')
+
+option('libcblas_path',
+       type : 'array',
+       value : [],
+       description : 'Additional directories to search for the CBLAS library')
