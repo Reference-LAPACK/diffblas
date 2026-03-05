@@ -165,16 +165,6 @@ contains
       ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
       ! For pure inputs: use adjoint directly
       vjp_ad = 0.0
-      vjp_ad = vjp_ad + sa_dir * sab(k)
-      ! Compute and sort products for sy
-      n_products = n
-      do i = 1, n
-        temp_products(i) = sy_dir(i) * syb(k,i)
-      end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_ad = vjp_ad + temp_products(i)
-      end do
       ! Compute and sort products for sx
       n_products = n
       do i = 1, n
@@ -184,6 +174,16 @@ contains
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
+      ! Compute and sort products for sy
+      n_products = n
+      do i = 1, n
+        temp_products(i) = sy_dir(i) * syb(k,i)
+      end do
+      call sort_array(temp_products, n_products)
+      do i = 1, n_products
+        vjp_ad = vjp_ad + temp_products(i)
+      end do
+      vjp_ad = vjp_ad + sa_dir * sab(k)
       
       ! Error check: |vjp_fd - vjp_ad| > atol + rtol * |vjp_ad|
       abs_error = abs(vjp_fd - vjp_ad)

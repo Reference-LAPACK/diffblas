@@ -30,8 +30,8 @@ program test_dtrmv
   real(8), dimension(max_size) :: x_output
 
   ! Array restoration variables for numerical differentiation
-  real(8), dimension(max_size,max_size) :: a_orig
   real(8), dimension(max_size) :: x_orig
+  real(8), dimension(max_size,max_size) :: a_orig
 
   ! Variables for central difference computation
   real(8), dimension(max_size) :: x_forward, x_backward
@@ -65,18 +65,18 @@ program test_dtrmv
   incx_val = 1  ! INCX 1
 
   ! Initialize input derivatives to random values
-  call random_number(a_d)
-  a_d = a_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(x_d)
   x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+  call random_number(a_d)
+  a_d = a_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
   ! Store initial derivative values after random initialization
   a_d_orig = a_d
   x_d_orig = x_d
 
   ! Store original values for central difference computation
-  a_orig = a
   x_orig = x
+  a_orig = a
 
   write(*,*) 'Testing DTRMV'
   ! Store input values of inout parameters before first function call
@@ -128,15 +128,15 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    a = a_orig + h * a_d_orig
     x = x_orig + h * x_d_orig
+    a = a_orig + h * a_d_orig
     call dtrmv(uplo, trans, diag, nsize, a, lda_val, x, incx_val)
     ! Store forward perturbation results
     x_forward = x
     
     ! Backward perturbation: f(x - h)
-    a = a_orig - h * a_d_orig
     x = x_orig - h * x_d_orig
+    a = a_orig - h * a_d_orig
     call dtrmv(uplo, trans, diag, nsize, a, lda_val, x, incx_val)
     ! Store backward perturbation results
     x_backward = x

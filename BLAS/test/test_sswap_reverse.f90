@@ -31,12 +31,12 @@ program test_sswap_reverse
   real(4), dimension(max_size) :: sy_orig
 
   ! Variables for VJP verification via finite differences
-  real(4), dimension(max_size) :: sy_plus, sy_minus
   real(4), dimension(max_size) :: sx_plus, sx_minus
+  real(4), dimension(max_size) :: sy_plus, sy_minus
 
   ! Saved cotangents (output adjoints) for VJP verification
-  real(4), dimension(max_size) :: syb_orig
   real(4), dimension(max_size) :: sxb_orig
+  real(4), dimension(max_size) :: syb_orig
   real(4), parameter :: h = 1.0e-3
   real(4) :: vjp_ad, vjp_fd, relative_error, max_error, abs_error, abs_reference, error_bound
   logical :: has_large_errors
@@ -66,15 +66,15 @@ program test_sswap_reverse
 
   ! Initialize output adjoints (cotangents) with random values
   ! These are the 'seeds' for reverse mode
-  call random_number(syb)
-  syb = syb * 2.0 - 1.0
   call random_number(sxb)
   sxb = sxb * 2.0 - 1.0
+  call random_number(syb)
+  syb = syb * 2.0 - 1.0
 
   ! Save output adjoints (cotangents) for VJP verification
   ! Note: output adjoints may be modified by reverse mode function
-  syb_orig = syb
   sxb_orig = sxb
+  syb_orig = syb
 
   ! Initialize input adjoints to zero (they will be computed)
 
@@ -98,8 +98,8 @@ contains
     real(4), dimension(max_size) :: sx_dir
     real(4), dimension(max_size) :: sy_dir
     
-    real(4), dimension(max_size) :: sy_central_diff
     real(4), dimension(max_size) :: sx_central_diff
+    real(4), dimension(max_size) :: sy_central_diff
     
     max_error = 0.0
     has_large_errors = .false.
@@ -119,37 +119,37 @@ contains
     sx = sx_orig + h * sx_dir
     sy = sy_orig + h * sy_dir
     call sswap(nsize, sx, incx_val, sy, incy_val)
-    sy_plus = sy
     sx_plus = sx
+    sy_plus = sy
     
     ! Backward perturbation: f(x - h*dir)
     sx = sx_orig - h * sx_dir
     sy = sy_orig - h * sy_dir
     call sswap(nsize, sx, incx_val, sy, incy_val)
-    sy_minus = sy
     sx_minus = sx
+    sy_minus = sy
     
     ! Compute central differences: (f(x+h*dir) - f(x-h*dir)) / (2h)
-    sy_central_diff = (sy_plus - sy_minus) / (2.0d0 * h)
     sx_central_diff = (sx_plus - sx_minus) / (2.0d0 * h)
+    sy_central_diff = (sy_plus - sy_minus) / (2.0d0 * h)
     
     ! VJP verification:
     ! cotangent^T @ central_diff should equal direction^T @ computed_adjoint
     ! Left side: cotangent^T @ Jacobian @ direction (via finite differences, with sorted summation)
     vjp_fd = 0.0
-    ! Compute and sort products for sy (FD)
+    ! Compute and sort products for sx (FD)
     n_products = n
     do i = 1, n
-      temp_products(i) = syb_orig(i) * sy_central_diff(i)
+      temp_products(i) = sxb_orig(i) * sx_central_diff(i)
     end do
     call sort_array(temp_products, n_products)
     do i = 1, n_products
       vjp_fd = vjp_fd + temp_products(i)
     end do
-    ! Compute and sort products for sx (FD)
+    ! Compute and sort products for sy (FD)
     n_products = n
     do i = 1, n
-      temp_products(i) = sxb_orig(i) * sx_central_diff(i)
+      temp_products(i) = syb_orig(i) * sy_central_diff(i)
     end do
     call sort_array(temp_products, n_products)
     do i = 1, n_products

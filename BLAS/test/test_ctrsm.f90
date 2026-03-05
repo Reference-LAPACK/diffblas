@@ -35,8 +35,8 @@ program test_ctrsm
 
   ! Array restoration variables for numerical differentiation
   complex(4) :: alpha_orig
-  complex(4), dimension(max_size,max_size) :: a_orig
   complex(4), dimension(max_size,max_size) :: b_orig
+  complex(4), dimension(max_size,max_size) :: a_orig
 
   ! Variables for central difference computation
   complex(4), dimension(max_size,max_size) :: b_forward, b_backward
@@ -46,8 +46,8 @@ program test_ctrsm
 
   ! Variables for storing original derivative values
   complex(4) :: alpha_d_orig
-  complex(4), dimension(max_size,max_size) :: a_d_orig
   complex(4), dimension(max_size,max_size) :: b_d_orig
+  complex(4), dimension(max_size,max_size) :: a_d_orig
 
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
@@ -93,26 +93,26 @@ program test_ctrsm
     do j = 1, lda
       call random_number(temp_real)
       call random_number(temp_imag)
-      a_d(i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      b_d(i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
     end do
   end do
   do i = 1, lda
     do j = 1, lda
       call random_number(temp_real)
       call random_number(temp_imag)
-      b_d(i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      a_d(i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
     end do
   end do
 
   ! Store initial derivative values after random initialization
   alpha_d_orig = alpha_d
-  a_d_orig = a_d
   b_d_orig = b_d
+  a_d_orig = a_d
 
   ! Store original values for central difference computation
   alpha_orig = alpha
-  a_orig = a
   b_orig = b
+  a_orig = a
 
   write(*,*) 'Testing CTRSM'
   ! Store input values of inout parameters before first function call
@@ -168,16 +168,16 @@ contains
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
     alpha = alpha_orig + cmplx(h, 0.0) * alpha_d_orig
-    a = a_orig + cmplx(h, 0.0) * a_d_orig
     b = b_orig + cmplx(h, 0.0) * b_d_orig
+    a = a_orig + cmplx(h, 0.0) * a_d_orig
     call ctrsm(side, uplo, transa, diag, msize, nsize, alpha, a, lda_val, b, ldb_val)
     ! Store forward perturbation results
     b_forward = b
     
     ! Backward perturbation: f(x - h)
     alpha = alpha_orig - cmplx(h, 0.0) * alpha_d_orig
-    a = a_orig - cmplx(h, 0.0) * a_d_orig
     b = b_orig - cmplx(h, 0.0) * b_d_orig
+    a = a_orig - cmplx(h, 0.0) * a_d_orig
     call ctrsm(side, uplo, transa, diag, msize, nsize, alpha, a, lda_val, b, ldb_val)
     ! Store backward perturbation results
     b_backward = b

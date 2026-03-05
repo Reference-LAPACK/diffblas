@@ -7544,7 +7544,32 @@ def create_diffsizes_file(out_dir, nbdirsmax=4, src_file=None, func_name=None, m
                 unique_size_params.append(param)
                 seen.add(param)
         size_params = unique_size_params
-    
+
+    # In cumulative mode, also scan ALL *_bv.f and *_dv.f in scan_dir for complete ISIZE coverage
+    if cumulative and scan_dir:
+        scan_path = Path(scan_dir)
+        for pattern in ("*_bv.f", "*_dv.f"):
+            for fpath in scan_path.glob(pattern):
+                try:
+                    with open(fpath, 'r') as f:
+                        content = f.read()
+                    isize_patterns = re.findall(r'ISIZE(\d+)OF(\w+)', content)
+                    for dim, array_name in isize_patterns:
+                        if array_name.lower().endswith('_initialized'):
+                            continue
+                        size_params.append(f"      integer ISIZE{dim}OF{array_name.lower()}")
+                        size_params.append(f"      parameter (ISIZE{dim}OF{array_name.lower()}={max_size})")
+                except Exception:
+                    pass
+        # Re-deduplicate
+        seen = set()
+        unique_size_params = []
+        for param in size_params:
+            if param not in seen:
+                unique_size_params.append(param)
+                seen.add(param)
+        size_params = unique_size_params
+
     # In cumulative mode, read existing parameters and merge
     existing_isize_vars = set()  # Track ISIZE variable names we've seen
     if cumulative:
@@ -7562,17 +7587,19 @@ def create_diffsizes_file(out_dir, nbdirsmax=4, src_file=None, func_name=None, m
                     if match.lower().endswith('_initialized'):
                         continue
                     existing_isize_vars.add(match.lower())
-        # In cumulative mode, also merge ISIZE vars from existing DIFFSIZES_access.f (F77 no longer has params in .inc)
+        # In cumulative mode, also merge ISIZE vars from existing DIFFSIZES_access (F77 no longer has params in .inc)
+        # When generator writes .f90 it deletes .f, so we must also read from .f90 and wrappers
         access_dir = access_file_dir if access_file_dir is not None else out_dir
-        access_path = Path(access_dir) / "DIFFSIZES_access.f"
-        if access_path.exists():
-            with open(access_path, 'r') as f:
-                content = f.read()
-                isize_matches = re.findall(r'set_ISIZE(\d+)OF(\w+)', content, re.IGNORECASE)
-                for dim, arr in isize_matches:
-                    if arr.lower().endswith('_initialized'):
-                        continue
-                    existing_isize_vars.add(f"isize{dim}of{arr.lower()}")
+        for fname in ("DIFFSIZES_access.f", "DIFFSIZES_access.f90", "DIFFSIZES_access_wrappers.f"):
+            access_path = Path(access_dir) / fname
+            if access_path.exists():
+                with open(access_path, 'r') as f:
+                    content = f.read()
+                    isize_matches = re.findall(r'set_ISIZE(\d+)OF(\w+)', content, re.IGNORECASE)
+                    for dim, arr in isize_matches:
+                        if arr.lower().endswith('_initialized'):
+                            continue
+                        existing_isize_vars.add(f"isize{dim}of{arr.lower()}")
     
     # Build a dict of ISIZE variables to their declarations
     isize_declarations = {}
@@ -7709,8 +7736,18 @@ def _wrap_f77_list(prefix, names, join_str=", ", max_line=72):
 
 
 def _block_data_common_lines(global_names, max_line=72):
-    """Emit multiple COMMON /DIFFSIZES_COMMON/ lines (no continuation) for BLOCK DATA.
-    gfortran does not reliably treat continued COMMON in BLOCK DATA as one block."""
+    """Emit a single COMMON line for BLOCK DATA.
+    Multiple COMMON lines or continuation in BLOCK DATA cause gfortran to emit
+    'shall be of the same size as elsewhere (8 vs 12 bytes)' and the BLOCK DATA
+    init is not applied correctly, leading to uninitialized values and segfaults.
+    Use short name /DIFFSZ/ when needed so the line fits.
+    Returns (lines, common_name) so callers use the same COMMON name."""
+    for common_name in ("/DIFFSZ/", "/DIFFSIZES_COMMON/"):
+        prefix = f"      COMMON {common_name} "
+        single_line = prefix + ",".join(global_names)
+        if len(single_line) <= max_line:
+            return [single_line], common_name
+    # Fallback: split only if single line would exceed limit (rare with ISIZE*)
     prefix = "      COMMON /DIFFSIZES_COMMON/ "
     prefix_len = len(prefix)
     avail = max_line - prefix_len
@@ -7721,7 +7758,7 @@ def _block_data_common_lines(global_names, max_line=72):
         line_len = 0
         while i < len(global_names):
             n = global_names[i]
-            add_len = len(n) + (2 if chunk else 0)  # ", " before if not first
+            add_len = len(n) + (2 if chunk else 0)
             if line_len + add_len <= avail and chunk:
                 chunk.append(n)
                 line_len += add_len
@@ -7733,7 +7770,7 @@ def _block_data_common_lines(global_names, max_line=72):
             else:
                 break
         out.append(prefix + ", ".join(chunk))
-    return out
+    return out, "/DIFFSIZES_COMMON/"
 
 
 def _wrap_f77_write_string(msg, indent="        ", max_line=72):
@@ -7756,9 +7793,135 @@ def _wrap_f77_write_string(msg, indent="        ", max_line=72):
     return out
 
 
+def _write_diffsizes_access_f90_module(out_dir, sorted_vars):
+    """Write DIFFSIZES_access.f90 with module variables (no COMMON).
+    Used when many ISIZE vars don't fit in a single COMMON line - avoids gfortran
+    'shall be of the same size (8 vs 12 bytes)' mismatch from multiple COMMON lines."""
+    f77_names = [_isize_var_to_f77_name(v) for v in sorted_vars]
+    global_names = [f"{n}_global" for n in f77_names]
+    # Split INTEGER and DATA across lines to stay under 132 cols (some builds use -ffixed-line-length)
+    # Use Fortran free-form continuation: "&" at end of line, "&" at start of continuation line
+    int_lines = []
+    cur = "  INTEGER, SAVE ::"
+    for g in global_names:
+        cand = cur + (" " if cur.endswith("::") else ", ") + g
+        if len(cand) > 120 and cur.strip() != "INTEGER, SAVE ::":
+            int_lines.append(cur.rstrip().rstrip(",") + ", &")
+            cur = "    " + g
+        else:
+            cur = cand
+    int_lines.append(cur)
+    data_str = ", ".join(f"{g} /-1/" for g in global_names)
+    data_lines = []
+    if len(data_str) <= 110:
+        data_lines.append("  DATA " + data_str)
+    else:
+        parts = [f"{g} /-1/" for g in global_names]
+        cur = "  DATA "
+        for i, p in enumerate(parts):
+            sep = ", " if i > 0 else " "
+            add = sep + p
+            if len(cur) + len(add) > 120 and cur.strip() != "DATA":
+                data_lines.append(cur.rstrip().rstrip(",") + ", &")
+                cur = "    " + p
+            else:
+                cur = cur + add
+        data_lines.append(cur)
+    lines = [
+        "! DIFFSIZES_access.f90 - Module storage for ISIZE parameters (no COMMON)",
+        "! Used when many ISIZE vars would exceed F77 line limit in COMMON.",
+        "MODULE diffsizes_access",
+        "  IMPLICIT NONE",
+    ] + int_lines + [
+        "  ! Initialize to invalid so we can detect \"not set\"",
+    ] + data_lines + [
+        "CONTAINS",
+        "",
+    ]
+    for v, f77 in zip(sorted_vars, f77_names):
+        g = f77 + "_global"
+        lines.extend([
+            f"  SUBROUTINE set_{f77}(val)",
+            "    INTEGER, INTENT(IN) :: val",
+            f"    {g} = val",
+            "  END SUBROUTINE",
+            "",
+            f"  INTEGER FUNCTION get_{f77}()",
+            f"    get_{f77} = {g}",
+            "  END FUNCTION",
+            "",
+            f"  SUBROUTINE check_{f77}_initialized()",
+            f"    IF ({g} < 0) THEN",
+            f"      WRITE(*,'(A)') 'Error: {g} not set. Call set_{f77} before differentiated routine.'",
+            "      STOP 1",
+            "    END IF",
+            "  END SUBROUTINE",
+            "",
+        ])
+    lines.extend(["END MODULE diffsizes_access", ""])
+    access_path = Path(out_dir) / "DIFFSIZES_access.f90"
+    with open(access_path, 'w') as f:
+        f.write("\n".join(lines) + "\n")
+    # Wrappers provide external symbols (set_isize*_, get_isize*_, etc.) that C and .f callers expect.
+    # Module procedures have __diffsizes_access_MOD_* names; wrappers provide the plain external interface.
+    _write_diffsizes_access_wrappers(out_dir, f77_names)
+
+
+def _write_diffsizes_access_wrappers(out_dir, f77_names):
+    """Write DIFFSIZES_access_wrappers.f - external subroutines that call into the F90 module.
+    C and Tapenade-generated .f code call set_ISIZE* / get_ISIZE* / check_* as external symbols."""
+    lines = [
+        "C DIFFSIZES_access_wrappers.f - External interface for DIFFSIZES_access module",
+        "C C and .f callers expect set_isize*_, get_isize*_, etc.; the F90 module exports",
+        "C __diffsizes_access_MOD_* names. These wrappers provide the expected external symbols.",
+        "C",
+    ]
+    for f77 in f77_names:
+        g = f77 + "_global"
+        lines.extend([
+            f"      SUBROUTINE set_{f77}(val)",
+            f"      USE diffsizes_access, ONLY: {g}",
+            "      INTEGER val",
+            f"      {g} = val",
+            "      RETURN",
+            "      END",
+            "",
+            f"      INTEGER FUNCTION get_{f77}()",
+            f"      USE diffsizes_access, ONLY: {g}",
+            f"      get_{f77} = {g}",
+            "      RETURN",
+            "      END",
+            "",
+            f"      SUBROUTINE check_{f77}_initialized()",
+            f"      USE diffsizes_access, ONLY: {g}",
+            f"      IF ({g} .LT. 0) THEN",
+            "        WRITE(6,*) 'Error: ISIZE not set before differentiated routine'",
+            "        STOP 1",
+            "      END IF",
+            "      RETURN",
+            "      END",
+            "",
+        ])
+    wrap_path = Path(out_dir) / "DIFFSIZES_access_wrappers.f"
+    with open(wrap_path, 'w') as f:
+        f.write("\n".join(lines) + "\n")
+
+
 def _write_diffsizes_access_f77(out_dir, sorted_vars):
     """Write DIFFSIZES_access.f with COMMON, BLOCK DATA, set/get/check for each ISIZE variable.
-    Uses F77 72-column limit and continuation so ifx and strict compilers accept it."""
+    Uses F77 72-column limit and continuation so ifx and strict compilers accept it.
+    When single-line COMMON doesn't fit (many vars), writes DIFFSIZES_access.f90 module instead."""
+    f77_names = [_isize_var_to_f77_name(v) for v in sorted_vars]
+    global_names = [f"{n}_global" for n in f77_names]
+    block_common_lines, common_name = _block_data_common_lines(global_names)
+    # If fallback (multiple COMMON lines) was used, COMMON is broken - use module instead
+    if len(block_common_lines) > 1:
+        # Remove .f if it exists (from previous run), write .f90
+        f_path = Path(out_dir) / "DIFFSIZES_access.f"
+        if f_path.exists():
+            f_path.unlink()
+        _write_diffsizes_access_f90_module(out_dir, sorted_vars)
+        return Path(out_dir) / "DIFFSIZES_access.f90"
     lines = [
         "C DIFFSIZES_access.f - Global storage and accessors for ISIZE parameters",
         "C used by differentiated BLAS code. Test code sets these before calling",
@@ -7766,15 +7929,16 @@ def _write_diffsizes_access_f77(out_dir, sorted_vars):
         "C",
         "      BLOCK DATA diffsizes_init",
     ]
-    f77_names = [_isize_var_to_f77_name(v) for v in sorted_vars]
-    global_names = [f"{n}_global" for n in f77_names]
     lines.extend(_wrap_f77_list("      INTEGER ", global_names))
-    lines.extend(_block_data_common_lines(global_names))
+    lines.extend(block_common_lines)
     lines.append("C     Initialize to invalid value so we can detect \"not set\"")
     for g in global_names:
         lines.append(f"      DATA {g} /-1/")
     lines.append("      END BLOCK DATA")
     lines.append("")
+    # Use single COMMON line for subroutines when it fits (avoids 8 vs 12 byte mismatch)
+    common_single = f"      COMMON {common_name} " + ",".join(global_names)
+    use_single_common = len(common_single) <= 72
     for v, f77 in zip(sorted_vars, f77_names):
         g = f77 + "_global"
         lines.extend([
@@ -7782,7 +7946,10 @@ def _write_diffsizes_access_f77(out_dir, sorted_vars):
             "      INTEGER val",
         ])
         lines.extend(_wrap_f77_list("      INTEGER ", global_names))
-        lines.extend(_wrap_f77_list("      COMMON /DIFFSIZES_COMMON/ ", global_names))
+        if use_single_common:
+            lines.append(common_single)
+        else:
+            lines.extend(_wrap_f77_list(f"      COMMON {common_name} ", global_names))
         lines.extend([
             f"      {g} = val",
             "      RETURN",
@@ -7795,7 +7962,10 @@ def _write_diffsizes_access_f77(out_dir, sorted_vars):
             f"      INTEGER FUNCTION get_{f77}()",
         ])
         lines.extend(_wrap_f77_list("      INTEGER ", global_names))
-        lines.extend(_wrap_f77_list("      COMMON /DIFFSIZES_COMMON/ ", global_names))
+        if use_single_common:
+            lines.append(common_single)
+        else:
+            lines.extend(_wrap_f77_list(f"      COMMON {common_name} ", global_names))
         lines.extend([
             f"      get_{f77} = {g}",
             "      RETURN",
@@ -7810,7 +7980,10 @@ def _write_diffsizes_access_f77(out_dir, sorted_vars):
             f"      SUBROUTINE check_{f77}_initialized()",
         ])
         lines.extend(_wrap_f77_list("      INTEGER ", global_names))
-        lines.extend(_wrap_f77_list("      COMMON /DIFFSIZES_COMMON/ ", global_names))
+        if use_single_common:
+            lines.append(common_single)
+        else:
+            lines.extend(_wrap_f77_list(f"      COMMON {common_name} ", global_names))
         lines.extend([
             f"      IF ({f77}_global .LT. 0) THEN",
         ])
@@ -7823,8 +7996,14 @@ def _write_diffsizes_access_f77(out_dir, sorted_vars):
             "",
         ])
     access_path = Path(out_dir) / "DIFFSIZES_access.f"
+    # Remove .f90 and wrappers when using .f (avoids Makefile picking wrong file)
+    for stale in ("DIFFSIZES_access.f90", "DIFFSIZES_access_wrappers.f"):
+        p = Path(out_dir) / stale
+        if p.exists():
+            p.unlink()
     with open(access_path, 'w') as f:
         f.write("\n".join(lines) + "\n")
+    return access_path
 
 def main():
     ap = argparse.ArgumentParser(description="Invoke Tapenade (-d/-r) on each Fortran file in the specified directory")
@@ -8666,9 +8845,13 @@ else
 BLAS_LIB ?= -lrefblas
 endif
 
-# Optional: DIFFSIZES_access.o when using F77 ISIZE globals (run_tapenade_blas.py writes DIFFSIZES_access.f)
+# Optional: DIFFSIZES_access when using ISIZE globals (run_tapenade_blas.py writes .f or .f90+wrappers)
+# When many ISIZE vars exceed F77 COMMON line limit, generator writes DIFFSIZES_access.f90 + wrappers instead of .f
+# Prefer .f90 when present (may have more vars than stale .f)
 # Must be defined before any rule that uses it as a prerequisite, so "make forward" (etc.) builds it first.
-ifneq ($(wildcard $(SRC_DIR)/DIFFSIZES_access.f),)
+ifneq ($(wildcard $(SRC_DIR)/DIFFSIZES_access.f90),)
+DIFFSIZES_ACCESS_OBJ := $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o
+else ifneq ($(wildcard $(SRC_DIR)/DIFFSIZES_access.f),)
 DIFFSIZES_ACCESS_OBJ := $(BUILD_DIR)/DIFFSIZES_access.o
 else
 DIFFSIZES_ACCESS_OBJ :=
@@ -8768,9 +8951,22 @@ $(BUILD_DIR)/%_dep1.o: $(SRC_DIR)/%_dep1.f
 $(BUILD_DIR)/%_dep2.o: $(SRC_DIR)/%_dep2.f
 	$(FC) $(FFLAGS_F77) -c $< -o $@
 
-# DIFFSIZES_access.f - global ISIZE storage and get/set/check (for _b, _bv when using F77 DIFFSIZES.inc)
+# DIFFSIZES_access - F77 .f or F90 .f90 (generator picks based on COMMON line length)
+# When .f90 exists: compile to produce .o and .mod; wrappers depend on .mod explicitly (avoids stale .o from .f)
+$(BUILD_DIR)/diffsizes_access.mod: $(SRC_DIR)/DIFFSIZES_access.f90
+	$(FC) $(FFLAGS) -J$(BUILD_DIR) -c $< -o $(BUILD_DIR)/DIFFSIZES_access.o
+
+# When .f90 exists: DIFFSIZES_access.o is produced as byproduct of diffsizes_access.mod (do not compile .f)
+ifeq ($(wildcard $(SRC_DIR)/DIFFSIZES_access.f90),)
 $(BUILD_DIR)/DIFFSIZES_access.o: $(SRC_DIR)/DIFFSIZES_access.f
 	$(FC) $(FFLAGS_F77) -c $< -o $@
+else
+$(BUILD_DIR)/DIFFSIZES_access.o: $(BUILD_DIR)/diffsizes_access.mod
+endif
+
+# DIFFSIZES_access_wrappers.f - external symbols for F90 module (set_*, get_*, check_*)
+$(BUILD_DIR)/DIFFSIZES_access_wrappers.o: $(SRC_DIR)/DIFFSIZES_access_wrappers.f $(BUILD_DIR)/diffsizes_access.mod
+	$(FC) $(FFLAGS) -J$(BUILD_DIR) -c $(SRC_DIR)/DIFFSIZES_access_wrappers.f -o $@
 
 # DIFFSIZES handling (supports both Fortran 90 module and Fortran 77 include)
 # For F90: DIFFSIZES.f90 is compiled to produce DIFFSIZES.o and DIFFSIZES.mod

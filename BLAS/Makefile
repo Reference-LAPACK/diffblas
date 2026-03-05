@@ -63,9 +63,12 @@ else
 BLAS_LIB ?= -lrefblas
 endif
 
-# Optional: DIFFSIZES_access.o when using F77 ISIZE globals (run_tapenade_blas.py writes DIFFSIZES_access.f)
+# Optional: DIFFSIZES_access when using ISIZE globals (.f or .f90+wrappers when many vars)
+# Prefer .f90 when present (may have more vars than stale .f)
 # Must be defined before any rule that uses it as a prerequisite, so "make forward" (etc.) builds it first.
-ifneq ($(wildcard $(SRC_DIR)/DIFFSIZES_access.f),)
+ifneq ($(wildcard $(SRC_DIR)/DIFFSIZES_access.f90),)
+DIFFSIZES_ACCESS_OBJ := $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o
+else ifneq ($(wildcard $(SRC_DIR)/DIFFSIZES_access.f),)
 DIFFSIZES_ACCESS_OBJ := $(BUILD_DIR)/DIFFSIZES_access.o
 else
 DIFFSIZES_ACCESS_OBJ :=
@@ -165,9 +168,18 @@ $(BUILD_DIR)/%_dep1.o: $(SRC_DIR)/%_dep1.f
 $(BUILD_DIR)/%_dep2.o: $(SRC_DIR)/%_dep2.f
 	$(FC) $(FFLAGS_F77) -c $< -o $@
 
-# DIFFSIZES_access.f - global ISIZE storage and get/set/check (for _b, _bv when using F77 DIFFSIZES.inc)
+# DIFFSIZES_access - F77 .f or F90 .f90 (generator picks based on COMMON line length)
+# When .f90 exists: compile to produce .o and .mod; wrappers need .mod (depend on it explicitly)
+$(BUILD_DIR)/diffsizes_access.mod: $(SRC_DIR)/DIFFSIZES_access.f90
+	$(FC) $(FFLAGS) -J$(BUILD_DIR) -c $< -o $(BUILD_DIR)/DIFFSIZES_access.o
+
 $(BUILD_DIR)/DIFFSIZES_access.o: $(SRC_DIR)/DIFFSIZES_access.f
 	$(FC) $(FFLAGS_F77) -c $< -o $@
+
+# DIFFSIZES_access_wrappers.f - external symbols for F90 module (set_*, get_*, check_*)
+# Depend on .mod so we always build from .f90 when using F90 path (avoids stale .o from .f)
+$(BUILD_DIR)/DIFFSIZES_access_wrappers.o: $(SRC_DIR)/DIFFSIZES_access_wrappers.f $(BUILD_DIR)/diffsizes_access.mod
+	$(FC) $(FFLAGS) -J$(BUILD_DIR) -c $(SRC_DIR)/DIFFSIZES_access_wrappers.f -o $@
 
 # DIFFSIZES handling (supports both Fortran 90 module and Fortran 77 include)
 # For F90: DIFFSIZES.f90 is compiled to produce DIFFSIZES.o and DIFFSIZES.mod

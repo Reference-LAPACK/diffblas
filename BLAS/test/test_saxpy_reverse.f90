@@ -78,8 +78,8 @@ program test_saxpy_reverse
   syb_orig = syb
 
   ! Initialize input adjoints to zero (they will be computed)
-  sab = 0.0
   sxb = 0.0
+  sab = 0.0
 
   ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
   ! Differentiated code checks they are set via check_ISIZE*_initialized.

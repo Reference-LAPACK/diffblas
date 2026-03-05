@@ -38,11 +38,11 @@ program test_sgbmv
   real(4), dimension(max_size) :: y_output
 
   ! Array restoration variables for numerical differentiation
-  real(4) :: alpha_orig
-  real(4) :: beta_orig
-  real(4), dimension(max_size,max_size) :: a_orig
   real(4), dimension(max_size) :: x_orig
+  real(4) :: beta_orig
+  real(4) :: alpha_orig
   real(4), dimension(max_size) :: y_orig
+  real(4), dimension(max_size,max_size) :: a_orig
 
   ! Variables for central difference computation
   real(4), dimension(max_size) :: y_forward, y_backward
@@ -51,11 +51,11 @@ program test_sgbmv
   logical :: has_large_errors
 
   ! Variables for storing original derivative values
-  real(4) :: alpha_d_orig
-  real(4) :: beta_d_orig
-  real(4), dimension(max_size,max_size) :: a_d_orig
   real(4), dimension(max_size) :: x_d_orig
+  real(4) :: beta_d_orig
+  real(4) :: alpha_d_orig
   real(4), dimension(max_size) :: y_d_orig
+  real(4), dimension(max_size,max_size) :: a_d_orig
 
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
@@ -87,30 +87,30 @@ program test_sgbmv
   incy_val = 1  ! INCY 1
 
   ! Initialize input derivatives to random values
-  call random_number(alpha_d)
-  alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-  call random_number(beta_d)
-  beta_d = beta_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-  call random_number(a_d)
-  a_d = a_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(x_d)
   x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+  call random_number(beta_d)
+  beta_d = beta_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+  call random_number(alpha_d)
+  alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(y_d)
   y_d = y_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+  call random_number(a_d)
+  a_d = a_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
   ! Store initial derivative values after random initialization
-  alpha_d_orig = alpha_d
-  beta_d_orig = beta_d
-  a_d_orig = a_d
   x_d_orig = x_d
+  beta_d_orig = beta_d
+  alpha_d_orig = alpha_d
   y_d_orig = y_d
+  a_d_orig = a_d
 
   ! Store original values for central difference computation
-  alpha_orig = alpha
-  beta_orig = beta
-  a_orig = a
   x_orig = x
+  beta_orig = beta
+  alpha_orig = alpha
   y_orig = y
+  a_orig = a
 
   write(*,*) 'Testing SGBMV'
   ! Store input values of inout parameters before first function call
@@ -167,21 +167,21 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    alpha = alpha_orig + h * alpha_d_orig
-    beta = beta_orig + h * beta_d_orig
-    a = a_orig + h * a_d_orig
     x = x_orig + h * x_d_orig
+    beta = beta_orig + h * beta_d_orig
+    alpha = alpha_orig + h * alpha_d_orig
     y = y_orig + h * y_d_orig
+    a = a_orig + h * a_d_orig
     call sgbmv(trans, msize, nsize, kl, ku, alpha, a, lda_val, x, incx_val, beta, y, incy_val)
     ! Store forward perturbation results
     y_forward = y
     
     ! Backward perturbation: f(x - h)
-    alpha = alpha_orig - h * alpha_d_orig
-    beta = beta_orig - h * beta_d_orig
-    a = a_orig - h * a_d_orig
     x = x_orig - h * x_d_orig
+    beta = beta_orig - h * beta_d_orig
+    alpha = alpha_orig - h * alpha_d_orig
     y = y_orig - h * y_d_orig
+    a = a_orig - h * a_d_orig
     call sgbmv(trans, msize, nsize, kl, ku, alpha, a, lda_val, x, incx_val, beta, y, incy_val)
     ! Store backward perturbation results
     y_backward = y

@@ -87,8 +87,8 @@ contains
     real(4) :: central_diff, ad_result
     integer :: i, j, idir
     logical :: has_large_errors
-    real(4), dimension(max_size) :: sy_forward, sy_backward
     real(4), dimension(max_size) :: sx_forward, sx_backward
+    real(4), dimension(max_size) :: sy_forward, sy_backward
     
     max_error = 0.0e0
     has_large_errors = .false.
@@ -104,40 +104,17 @@ contains
       sx = sx_orig + h * sx_dv_orig(idir,:)
       sy = sy_orig + h * sy_dv_orig(idir,:)
       call sswap(nsize, sx, incx_val, sy, incy_val)
-      sy_forward = sy
       sx_forward = sx
+      sy_forward = sy
       
       ! Backward perturbation: f(x - h * direction)
       sx = sx_orig - h * sx_dv_orig(idir,:)
       sy = sy_orig - h * sy_dv_orig(idir,:)
       call sswap(nsize, sx, incx_val, sy, incy_val)
-      sy_backward = sy
       sx_backward = sx
+      sy_backward = sy
       
       ! Compute central differences and compare with AD results
-      do i = 1, min(2, nsize)  ! Check only first few elements
-        ! Central difference: (f(x+h) - f(x-h)) / (2h)
-        central_diff = (sy_forward(i) - sy_backward(i)) / (2.0e0 * h)
-        ! AD result
-        ad_result = sy_dv(idir,i)
-        ! Error check: |a - b| > atol + rtol * |b|
-        abs_error = abs(central_diff - ad_result)
-        abs_reference = abs(ad_result)
-        error_bound = 2.0e-3 + 2.0e-3 * abs_reference
-        if (abs_error > error_bound) then
-          has_large_errors = .true.
-          relative_error = abs_error / max(abs_reference, 1.0e-10)
-          write(*,*) '  Large error in direction', idir, ' output SY(', i, '):'
-          write(*,*) '    Central diff: ', central_diff
-          write(*,*) '    AD result:   ', ad_result
-          write(*,*) '    Absolute error:', abs_error
-          write(*,*) '    Error bound:', error_bound
-          write(*,*) '    Relative error:', relative_error
-        end if
-        ! Track max error for reporting (normalized)
-        relative_error = abs_error / max(abs_reference, 1.0e-10)
-        max_error = max(max_error, relative_error)
-      end do
       do i = 1, min(2, nsize)  ! Check only first few elements
         ! Central difference: (f(x+h) - f(x-h)) / (2h)
         central_diff = (sx_forward(i) - sx_backward(i)) / (2.0e0 * h)
@@ -151,6 +128,29 @@ contains
           has_large_errors = .true.
           relative_error = abs_error / max(abs_reference, 1.0e-10)
           write(*,*) '  Large error in direction', idir, ' output SX(', i, '):'
+          write(*,*) '    Central diff: ', central_diff
+          write(*,*) '    AD result:   ', ad_result
+          write(*,*) '    Absolute error:', abs_error
+          write(*,*) '    Error bound:', error_bound
+          write(*,*) '    Relative error:', relative_error
+        end if
+        ! Track max error for reporting (normalized)
+        relative_error = abs_error / max(abs_reference, 1.0e-10)
+        max_error = max(max_error, relative_error)
+      end do
+      do i = 1, min(2, nsize)  ! Check only first few elements
+        ! Central difference: (f(x+h) - f(x-h)) / (2h)
+        central_diff = (sy_forward(i) - sy_backward(i)) / (2.0e0 * h)
+        ! AD result
+        ad_result = sy_dv(idir,i)
+        ! Error check: |a - b| > atol + rtol * |b|
+        abs_error = abs(central_diff - ad_result)
+        abs_reference = abs(ad_result)
+        error_bound = 2.0e-3 + 2.0e-3 * abs_reference
+        if (abs_error > error_bound) then
+          has_large_errors = .true.
+          relative_error = abs_error / max(abs_reference, 1.0e-10)
+          write(*,*) '  Large error in direction', idir, ' output SY(', i, '):'
           write(*,*) '    Central diff: ', central_diff
           write(*,*) '    AD result:   ', ad_result
           write(*,*) '    Absolute error:', abs_error

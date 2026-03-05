@@ -86,8 +86,8 @@ program test_sspr2_reverse
   apb_orig = apb
 
   ! Initialize input adjoints to zero (they will be computed)
-  alphab = 0.0
   xb = 0.0
+  alphab = 0.0
   yb = 0.0
 
   ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).

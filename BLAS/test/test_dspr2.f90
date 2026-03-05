@@ -32,9 +32,9 @@ program test_dspr2
   real(8), dimension((n*(n+1))/2) :: ap_output
 
   ! Array restoration variables for numerical differentiation
+  real(8), dimension(max_size) :: x_orig
   real(8) :: alpha_orig
   real(8), dimension((n*(n+1))/2) :: ap_orig
-  real(8), dimension(max_size) :: x_orig
   real(8), dimension(max_size) :: y_orig
 
   ! Variables for central difference computation
@@ -72,12 +72,12 @@ program test_dspr2
   ap = ap * 2.0d0 - 1.0d0  ! Scale to [-1,1]
 
   ! Initialize input derivatives to random values
+  call random_number(x_d)
+  x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(alpha_d)
   alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(ap_d)
   ap_d = ap_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-  call random_number(x_d)
-  x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(y_d)
   y_d = y_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
@@ -88,9 +88,9 @@ program test_dspr2
   y_d_orig = y_d
 
   ! Store original values for central difference computation
+  x_orig = x
   alpha_orig = alpha
   ap_orig = ap
-  x_orig = x
   y_orig = y
 
   write(*,*) 'Testing DSPR2'
@@ -143,17 +143,17 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
+    x = x_orig + h * x_d_orig
     alpha = alpha_orig + h * alpha_d_orig
     ap = ap_orig + h * ap_d_orig
-    x = x_orig + h * x_d_orig
     y = y_orig + h * y_d_orig
     call dspr2(uplo, nsize, alpha, x, incx_val, y, incy_val, ap)
     ! Store forward perturbation results
     
     ! Backward perturbation: f(x - h)
+    x = x_orig - h * x_d_orig
     alpha = alpha_orig - h * alpha_d_orig
     ap = ap_orig - h * ap_d_orig
-    x = x_orig - h * x_d_orig
     y = y_orig - h * y_d_orig
     call dspr2(uplo, nsize, alpha, x, incx_val, y, incy_val, ap)
     ! Store backward perturbation results

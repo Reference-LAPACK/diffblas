@@ -29,8 +29,8 @@ program test_sspr
   real(4), dimension((n*(n+1))/2) :: ap_output
 
   ! Array restoration variables for numerical differentiation
-  real(4) :: alpha_orig
   real(4), dimension((n*(n+1))/2) :: ap_orig
+  real(4) :: alpha_orig
   real(4), dimension(max_size) :: x_orig
 
   ! Variables for central difference computation
@@ -64,10 +64,10 @@ program test_sspr
   ap = ap * 2.0d0 - 1.0d0  ! Scale to [-1,1]
 
   ! Initialize input derivatives to random values
-  call random_number(alpha_d)
-  alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(ap_d)
   ap_d = ap_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+  call random_number(alpha_d)
+  alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(x_d)
   x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
@@ -77,8 +77,8 @@ program test_sspr
   x_d_orig = x_d
 
   ! Store original values for central difference computation
-  alpha_orig = alpha
   ap_orig = ap
+  alpha_orig = alpha
   x_orig = x
 
   write(*,*) 'Testing SSPR'
@@ -129,15 +129,15 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    alpha = alpha_orig + h * alpha_d_orig
     ap = ap_orig + h * ap_d_orig
+    alpha = alpha_orig + h * alpha_d_orig
     x = x_orig + h * x_d_orig
     call sspr(uplo, nsize, alpha, x, incx_val, ap)
     ! Store forward perturbation results
     
     ! Backward perturbation: f(x - h)
-    alpha = alpha_orig - h * alpha_d_orig
     ap = ap_orig - h * ap_d_orig
+    alpha = alpha_orig - h * alpha_d_orig
     x = x_orig - h * x_d_orig
     call sspr(uplo, nsize, alpha, x, incx_val, ap)
     ! Store backward perturbation results

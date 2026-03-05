@@ -26,8 +26,8 @@ program test_cdotu
   ! Storage variables for inout parameters
 
   ! Array restoration variables for numerical differentiation
-  complex(4), dimension(4) :: cx_orig
   complex(4), dimension(4) :: cy_orig
+  complex(4), dimension(4) :: cx_orig
   complex(4) :: cdotu_orig
 
   ! Variables for central difference computation
@@ -38,8 +38,8 @@ program test_cdotu
   complex(4) :: cdotu_forward, cdotu_backward
 
   ! Variables for storing original derivative values
-  complex(4), dimension(4) :: cx_d_orig
   complex(4), dimension(4) :: cy_d_orig
+  complex(4), dimension(4) :: cx_d_orig
 
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
@@ -69,21 +69,21 @@ program test_cdotu
   do i = 1, n
     call random_number(temp_real)
     call random_number(temp_imag)
-    cx_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    cy_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
   end do
   do i = 1, n
     call random_number(temp_real)
     call random_number(temp_imag)
-    cy_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    cx_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
   end do
 
   ! Store initial derivative values after random initialization
-  cx_d_orig = cx_d
   cy_d_orig = cy_d
+  cx_d_orig = cx_d
 
   ! Store original values for central difference computation
-  cx_orig = cx
   cy_orig = cy
+  cx_orig = cx
 
   write(*,*) 'Testing CDOTU'
   ! Store input values of inout parameters before first function call
@@ -136,15 +136,15 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    cx = cx_orig + cmplx(h, 0.0) * cx_d_orig
     cy = cy_orig + cmplx(h, 0.0) * cy_d_orig
+    cx = cx_orig + cmplx(h, 0.0) * cx_d_orig
     cdotu_forward = cdotu(nsize, cx, incx_val, cy, incy_val)
     ! Store forward perturbation results
     ! cdotu_forward already captured above
     
     ! Backward perturbation: f(x - h)
-    cx = cx_orig - cmplx(h, 0.0) * cx_d_orig
     cy = cy_orig - cmplx(h, 0.0) * cy_d_orig
+    cx = cx_orig - cmplx(h, 0.0) * cx_d_orig
     cdotu_backward = cdotu(nsize, cx, incx_val, cy, incy_val)
     ! Store backward perturbation results
     ! cdotu_backward already captured above

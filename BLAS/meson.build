@@ -2,8 +2,7 @@
 # Auto-generated - only includes files that exist in src/
 # Total: 406 files (101 per mode x 4 modes)
 
-libdiffblas_src += files('include/DIFFSIZES.f90')
-# libdiffblas_src += files('src/DIFFSIZES_access.f')
+libdiffblas_src += files('include/DIFFSIZES.f90', 'src/DIFFSIZES_access.f')
 
 # Forward mode (_d) sources - 101 files
 libdiffblas_src += files(

@@ -28,19 +28,19 @@ program test_sswap
   real(4), dimension(max_size) :: sy_output
 
   ! Array restoration variables for numerical differentiation
-  real(4), dimension(max_size) :: sy_orig
   real(4), dimension(max_size) :: sx_orig
+  real(4), dimension(max_size) :: sy_orig
 
   ! Variables for central difference computation
-  real(4), dimension(max_size) :: sy_forward, sy_backward
   real(4), dimension(max_size) :: sx_forward, sx_backward
+  real(4), dimension(max_size) :: sy_forward, sy_backward
   ! Scalar variables for central difference computation
   real(4) :: central_diff, ad_result
   logical :: has_large_errors
 
   ! Variables for storing original derivative values
-  real(4), dimension(max_size) :: sy_d_orig
   real(4), dimension(max_size) :: sx_d_orig
+  real(4), dimension(max_size) :: sy_d_orig
 
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
@@ -61,18 +61,18 @@ program test_sswap
   incy_val = 1
 
   ! Initialize input derivatives to random values
-  call random_number(sy_d)
-  sy_d = sy_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(sx_d)
   sx_d = sx_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+  call random_number(sy_d)
+  sy_d = sy_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
   ! Store initial derivative values after random initialization
-  sy_d_orig = sy_d
   sx_d_orig = sx_d
+  sy_d_orig = sy_d
 
   ! Store original values for central difference computation
-  sy_orig = sy
   sx_orig = sx
+  sy_orig = sy
 
   write(*,*) 'Testing SSWAP'
   ! Store input values of inout parameters before first function call
@@ -122,46 +122,22 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    sy = sy_orig + h * sy_d_orig
     sx = sx_orig + h * sx_d_orig
+    sy = sy_orig + h * sy_d_orig
     call sswap(nsize, sx, incx_val, sy, incy_val)
     ! Store forward perturbation results
-    sy_forward = sy
     sx_forward = sx
+    sy_forward = sy
     
     ! Backward perturbation: f(x - h)
-    sy = sy_orig - h * sy_d_orig
     sx = sx_orig - h * sx_d_orig
+    sy = sy_orig - h * sy_d_orig
     call sswap(nsize, sx, incx_val, sy, incy_val)
     ! Store backward perturbation results
-    sy_backward = sy
     sx_backward = sx
+    sy_backward = sy
     
     ! Compute central differences and compare with AD results
-    ! Check derivatives for output SY
-    do i = 1, min(2, n)  ! Check only first few elements
-      ! Central difference: (f(x+h) - f(x-h)) / (2h)
-      central_diff = (sy_forward(i) - sy_backward(i)) / (2.0e0 * h)
-      ! AD result
-      ad_result = sy_d(i)
-      ! Error check: |a - b| > atol + rtol * |b|
-      abs_error = abs(central_diff - ad_result)
-      abs_reference = abs(ad_result)
-      error_bound = 2.0e-3 + 2.0e-3 * abs_reference
-      if (abs_error > error_bound) then
-        has_large_errors = .true.
-        relative_error = abs_error / max(abs_reference, 1.0e-10)
-        write(*,*) 'Large error in output SY(', i, '):'
-        write(*,*) '  Central diff: ', central_diff
-        write(*,*) '  AD result:   ', ad_result
-        write(*,*) '  Absolute error:', abs_error
-        write(*,*) '  Error bound:', error_bound
-        write(*,*) '  Relative error:', relative_error
-      end if
-      ! Track max error for reporting (normalized)
-      relative_error = abs_error / max(abs_reference, 1.0e-10)
-      max_error = max(max_error, relative_error)
-    end do
     ! Check derivatives for output SX
     do i = 1, min(2, n)  ! Check only first few elements
       ! Central difference: (f(x+h) - f(x-h)) / (2h)
@@ -176,6 +152,30 @@ contains
         has_large_errors = .true.
         relative_error = abs_error / max(abs_reference, 1.0e-10)
         write(*,*) 'Large error in output SX(', i, '):'
+        write(*,*) '  Central diff: ', central_diff
+        write(*,*) '  AD result:   ', ad_result
+        write(*,*) '  Absolute error:', abs_error
+        write(*,*) '  Error bound:', error_bound
+        write(*,*) '  Relative error:', relative_error
+      end if
+      ! Track max error for reporting (normalized)
+      relative_error = abs_error / max(abs_reference, 1.0e-10)
+      max_error = max(max_error, relative_error)
+    end do
+    ! Check derivatives for output SY
+    do i = 1, min(2, n)  ! Check only first few elements
+      ! Central difference: (f(x+h) - f(x-h)) / (2h)
+      central_diff = (sy_forward(i) - sy_backward(i)) / (2.0e0 * h)
+      ! AD result
+      ad_result = sy_d(i)
+      ! Error check: |a - b| > atol + rtol * |b|
+      abs_error = abs(central_diff - ad_result)
+      abs_reference = abs(ad_result)
+      error_bound = 2.0e-3 + 2.0e-3 * abs_reference
+      if (abs_error > error_bound) then
+        has_large_errors = .true.
+        relative_error = abs_error / max(abs_reference, 1.0e-10)
+        write(*,*) 'Large error in output SY(', i, '):'
         write(*,*) '  Central diff: ', central_diff
         write(*,*) '  AD result:   ', ad_result
         write(*,*) '  Absolute error:', abs_error

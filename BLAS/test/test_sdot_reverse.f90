@@ -73,8 +73,8 @@ program test_sdot_reverse
   sdotb_orig = sdotb
 
   ! Initialize input adjoints to zero (they will be computed)
-  syb = 0.0
   sxb = 0.0
+  syb = 0.0
 
   ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
   ! Differentiated code checks they are set via check_ISIZE*_initialized.

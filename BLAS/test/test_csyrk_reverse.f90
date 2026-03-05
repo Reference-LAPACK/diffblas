@@ -110,8 +110,8 @@ program test_csyrk_reverse
   cb_orig = cb
 
   ! Initialize input adjoints to zero (they will be computed)
-  alphab = 0.0
   betab = 0.0
+  alphab = 0.0
   ab = 0.0
 
   ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).

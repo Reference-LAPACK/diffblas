@@ -31,8 +31,8 @@ program test_stbmv
   real(4), dimension(max_size) :: x_output
 
   ! Array restoration variables for numerical differentiation
-  real(4), dimension(max_size,n) :: a_orig  ! Band storage
   real(4), dimension(max_size) :: x_orig
+  real(4), dimension(max_size,n) :: a_orig  ! Band storage
 
   ! Variables for central difference computation
   real(4), dimension(max_size) :: x_forward, x_backward
@@ -73,6 +73,8 @@ program test_stbmv
   incx_val = 1  ! INCX 1
 
   ! Initialize input derivatives to random values
+  call random_number(x_d)
+  x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   ! Initialize a_d as triangular band matrix (upper band storage)
   ! A(band_row, j) = full(i,j) with band_row = ksize+1+i-j, i = max(1,j-ksize)..j
   do j = 1, n
@@ -81,16 +83,14 @@ program test_stbmv
       a_d(band_row, j) = temp_real * 2.0 - 1.0  ! Scale to [-1,1]
     end do
   end do
-  call random_number(x_d)
-  x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
   ! Store initial derivative values after random initialization
   a_d_orig = a_d
   x_d_orig = x_d
 
   ! Store original values for central difference computation
-  a_orig = a
   x_orig = x
+  a_orig = a
 
   write(*,*) 'Testing STBMV'
   ! Store input values of inout parameters before first function call
@@ -143,15 +143,15 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    a = a_orig + h * a_d_orig
     x = x_orig + h * x_d_orig
+    a = a_orig + h * a_d_orig
     call stbmv(uplo, trans, diag, nsize, ksize, a, lda_val, x, incx_val)
     ! Store forward perturbation results
     x_forward = x
     
     ! Backward perturbation: f(x - h)
-    a = a_orig - h * a_d_orig
     x = x_orig - h * x_d_orig
+    a = a_orig - h * a_d_orig
     call stbmv(uplo, trans, diag, nsize, ksize, a, lda_val, x, incx_val)
     ! Store backward perturbation results
     x_backward = x
