@@ -12,7 +12,7 @@
 #include "cblas_f77_bv.h"
 
 /* Declaration for differentiated Fortran routine */
-/* void F77_dgemm_bv_base(...); */
+/* void F77_dgemm_bv_base(..., (size_t)1, (size_t)1); */
 /* Note: This should match the signature of dgemm_bv in Fortran */
 
 /* F77_ macros for differentiated Fortran routines */
@@ -95,7 +95,7 @@ void cblas_dgemm_bv(const CBLAS_LAYOUT layout, const CBLAS_TRANSPOSE TransA,
         }
         F77_dgemm_bv(&TA, &TB, &F77_M, &F77_N, &F77_K, &alpha, &(*alphab), A, Ab,
                   &F77_lda, B, Bb, &F77_ldb, &beta, &(*betab), C, Cb, &F77_ldc
-                  , &nbdirs);
+                  , &nbdirs, (size_t)1, (size_t)1);
         popControl2b(&branch);
       label100:
         popControl2b(&branch);
@@ -142,7 +142,7 @@ void cblas_dgemm_bv(const CBLAS_LAYOUT layout, const CBLAS_TRANSPOSE TransA,
         }
         F77_dgemm_bv(&TA, &TB, &F77_N, &F77_M, &F77_K, &alpha, &(*alphab), B, Bb,
                   &F77_ldb, A, Ab, &F77_lda, &beta, &(*betab), C, Cb, &F77_ldc
-                  , &nbdirs);
+                  , &nbdirs, (size_t)1, (size_t)1);
         popControl2b(&branch);
       label110:
         popControl2b(&branch);

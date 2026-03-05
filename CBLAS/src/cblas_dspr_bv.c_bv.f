@@ -142,7 +142,7 @@ C
 C     .. Scalar Arguments ..
       DOUBLE PRECISION alpha
       DOUBLE PRECISION alphab(nbdirsmax)
-      INTEGER incx, n
+      INTEGER incx, n, nbdirs
       CHARACTER uplo
 C     ..
 C     .. Array Arguments ..
@@ -175,7 +175,6 @@ C     .. External Subroutines ..
       INTEGER ad_from0
       INTEGER ad_from1
       INTEGER ad_to1
-      INTEGER nbdirs
 C     ..
 C
 C     Test the input parameters.

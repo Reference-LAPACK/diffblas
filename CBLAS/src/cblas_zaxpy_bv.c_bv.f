@@ -103,7 +103,7 @@ C
 C     .. Scalar Arguments ..
       COMPLEX*16 za
       COMPLEX*16 zab(nbdirsmax)
-      INTEGER incx, incy, n
+      INTEGER incx, incy, n, nbdirs
 C     ..
 C     .. Array Arguments ..
       COMPLEX*16 zx(*), zy(*)
@@ -120,7 +120,6 @@ C     .. External Functions ..
       DOUBLE PRECISION DCABS1
       DOUBLE PRECISION result1
       INTEGER nd
-      INTEGER nbdirs
 C     ..
       IF (n .GT. 0) THEN
         result1 = DCABS1(za)

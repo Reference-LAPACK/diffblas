@@ -12,7 +12,7 @@
 #include "cblas_f77_b.h"
 
 /* Declaration for differentiated Fortran routine */
-/* void F77_dtrsm_b_base(...); */
+/* void F77_dtrsm_b_base(..., (size_t)1, (size_t)1, (size_t)1, (size_t)1); */
 /* Note: This should match the signature of dtrsm_b in Fortran */
 
 /* F77_ macros for differentiated Fortran routines */
@@ -98,7 +98,7 @@ void cblas_dtrsm_b(const CBLAS_LAYOUT layout, const CBLAS_SIDE Side, const
             goto label100;
         }
         F77_dtrsm_b(&SD, &UL, &TA, &DI, &F77_M, &F77_N, &alpha, &(*alphab), A, Ab
-                 , &F77_lda, B, Bb, &F77_ldb);
+                 , &F77_lda, B, Bb, &F77_ldb, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
         popControl1b(&branch);
       label100:
         popControl2b(&branch);
@@ -163,7 +163,7 @@ void cblas_dtrsm_b(const CBLAS_LAYOUT layout, const CBLAS_SIDE Side, const
             goto label130;
         }
         F77_dtrsm_b(&SD, &UL, &TA, &DI, &F77_N, &F77_M, &alpha, &(*alphab), A, Ab
-                 , &F77_lda, B, Bb, &F77_ldb);
+                 , &F77_lda, B, Bb, &F77_ldb, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
         popControl1b(&branch);
       label130:
         popControl2b(&branch);

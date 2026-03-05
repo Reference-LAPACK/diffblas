@@ -22,7 +22,6 @@ C
       REAL x(*)
       REAL xb(nbdirsmax, *)
 C
-      INTEGER nbdirs
       CALL SNRM2_BV(n, x, xb, incx, nrm2b, nbdirs)
       END
 

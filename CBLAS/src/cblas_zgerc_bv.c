@@ -15,19 +15,19 @@
 #include "cblas_f77_bv.h"
 
 /* Declaration for differentiated Fortran routine */
-/* void F77_zgerc_bv_base(...); */
-/* Note: This should match the signature of zgerc_bv in Fortran */
-
-/* Declaration for differentiated Fortran routine */
 /* void F77_zgeru_bv_base(...); */
 /* Note: This should match the signature of zgeru_bv in Fortran */
 
+/* Declaration for differentiated Fortran routine */
+/* void F77_zgerc_bv_base(...); */
+/* Note: This should match the signature of zgerc_bv in Fortran */
+
 /* F77_ macros for differentiated Fortran routines */
 /* These macros handle name mangling for differentiated Fortran functions */
-#define F77_zgerc_bv_base F77_GLOBAL_SUFFIX(zgerc_bv,ZGERC_BV)
-#define F77_zgerc_bv(...) F77_zgerc_bv_base(__VA_ARGS__)
 #define F77_zgeru_bv_base F77_GLOBAL_SUFFIX(zgeru_bv,ZGERU_BV)
 #define F77_zgeru_bv(...) F77_zgeru_bv_base(__VA_ARGS__)
+#define F77_zgerc_bv_base F77_GLOBAL_SUFFIX(zgerc_bv,ZGERC_BV)
+#define F77_zgerc_bv(...) F77_zgerc_bv_base(__VA_ARGS__)
 
 
 /*

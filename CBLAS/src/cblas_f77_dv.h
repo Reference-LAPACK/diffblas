@@ -403,4 +403,8 @@ void ztrmv_dv_();
 void ztrsm_dv_();
 #define F77_ztrsm_dv_base F77_GLOBAL_SUFFIX(ztrsm_dv,ZTRSM_DV)
 #define F77_ztrsm_dv(...) F77_ztrsm_dv_base(__VA_ARGS__)
+/* Forward declaration for differentiated Fortran routine */
+void ztrsv_dv_();
+#define F77_ztrsv_dv_base F77_GLOBAL_SUFFIX(ztrsv_dv,ZTRSV_DV)
+#define F77_ztrsv_dv(...) F77_ztrsv_dv_base(__VA_ARGS__)
 #endif

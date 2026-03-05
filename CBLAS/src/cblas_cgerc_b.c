@@ -15,19 +15,19 @@
 #include "cblas_f77_b.h"
 
 /* Declaration for differentiated Fortran routine */
-/* void F77_cgerc_b_base(...); */
-/* Note: This should match the signature of cgerc_b in Fortran */
-
-/* Declaration for differentiated Fortran routine */
 /* void F77_cgeru_b_base(...); */
 /* Note: This should match the signature of cgeru_b in Fortran */
 
+/* Declaration for differentiated Fortran routine */
+/* void F77_cgerc_b_base(...); */
+/* Note: This should match the signature of cgerc_b in Fortran */
+
 /* F77_ macros for differentiated Fortran routines */
 /* These macros handle name mangling for differentiated Fortran functions */
-#define F77_cgerc_b_base F77_GLOBAL_SUFFIX(cgerc_b,CGERC_B)
-#define F77_cgerc_b(...) F77_cgerc_b_base(__VA_ARGS__)
 #define F77_cgeru_b_base F77_GLOBAL_SUFFIX(cgeru_b,CGERU_B)
 #define F77_cgeru_b(...) F77_cgeru_b_base(__VA_ARGS__)
+#define F77_cgerc_b_base F77_GLOBAL_SUFFIX(cgerc_b,CGERC_B)
+#define F77_cgerc_b(...) F77_cgerc_b_base(__VA_ARGS__)
 
 
 /*

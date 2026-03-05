@@ -12,7 +12,7 @@
 #include "cblas_f77_bv.h"
 
 /* Declaration for differentiated Fortran routine */
-/* void F77_dsyr2k_bv_base(...); */
+/* void F77_dsyr2k_bv_base(..., (size_t)1, (size_t)1); */
 /* Note: This should match the signature of dsyr2k_bv in Fortran */
 
 /* F77_ macros for differentiated Fortran routines */
@@ -89,7 +89,7 @@ void cblas_dsyr2k_bv(const CBLAS_LAYOUT layout, const CBLAS_UPLO Uplo, const
         }
         F77_dsyr2k_bv(&UL, &TR, &F77_N, &F77_K, &alpha, &(*alphab), A, Ab, &
                    F77_lda, B, Bb, &F77_ldb, &beta, &(*betab), C, Cb, &F77_ldc
-                   , &nbdirs);
+                   , &nbdirs, (size_t)1, (size_t)1);
         popControl2b(&branch);
       label100:
         popControl1b(&branch);
@@ -133,7 +133,7 @@ void cblas_dsyr2k_bv(const CBLAS_LAYOUT layout, const CBLAS_UPLO Uplo, const
         }
         F77_dsyr2k_bv(&UL, &TR, &F77_N, &F77_K, &alpha, &(*alphab), A, Ab, &
                    F77_lda, B, Bb, &F77_ldb, &beta, &(*betab), C, Cb, &F77_ldc
-                   , &nbdirs);
+                   , &nbdirs, (size_t)1, (size_t)1);
         popControl2b(&branch);
       label110:
         popControl1b(&branch);

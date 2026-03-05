@@ -157,7 +157,7 @@ C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
 C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
-      INTEGER incx, lda, n
+      INTEGER incx, lda, n, nbdirs
       CHARACTER diag, trans, uplo
 C     ..
 C     .. Array Arguments ..
@@ -177,12 +177,15 @@ C     .. Local Scalars ..
       INTEGER i, info, ix, j, jx, kx
       LOGICAL nounit
       EXTERNAL LSAME
+      INTEGER ISIZE2OFA
 C     ..
 C     .. External Functions ..
+      INTEGER get_ISIZE2OFA
+      EXTERNAL get_ISIZE2OFA
       LOGICAL LSAME
 C     ..
 C     .. External Subroutines ..
-      EXTERNAL XERBLA
+      EXTERNAL XERBLA, check_ISIZE2OFA_initialized
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC MAX
@@ -200,11 +203,12 @@ C     .. Intrinsic Functions ..
       INTEGER ad_to2
       INTEGER ii2
       INTEGER ii1
-      INTEGER nbdirs
 C     ..
 C
 C     Test the input parameters.
 C
+      CALL check_ISIZE2OFA_initialized()
+      ISIZE2OFA = get_ISIZE2OFA()
       info = 0
       IF (.NOT.LSAME(uplo, 'U') .AND. (.NOT.LSAME(uplo, 'L'))) THEN
         CALL PUSHCONTROL3B(0)

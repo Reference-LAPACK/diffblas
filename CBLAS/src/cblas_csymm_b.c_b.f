@@ -217,10 +217,12 @@ C
 C  =====================================================================
 C
 C     .. External Functions ..
+      INTEGER get_ISIZE2OFA, get_ISIZE2OFB
+      EXTERNAL get_ISIZE2OFA, get_ISIZE2OFB
       LOGICAL LSAME
 C     ..
 C     .. External Subroutines ..
-      EXTERNAL XERBLA
+      EXTERNAL XERBLA, check_ISIZE2OFA_initialized, check_ISIZE2OFB_initialized
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC MAX
@@ -230,6 +232,7 @@ C     .. Local Scalars ..
       COMPLEX temp1b, temp2b
       INTEGER i, info, j, k, nrowa
       LOGICAL upper
+      INTEGER ISIZE2OFA, ISIZE2OFB
 C     ..
 C     .. Parameters ..
       COMPLEX one
@@ -250,6 +253,10 @@ C     ..
 C
 C     Set NROWA as the number of rows of A.
 C
+      CALL check_ISIZE2OFA_initialized()
+      CALL check_ISIZE2OFB_initialized()
+      ISIZE2OFA = get_ISIZE2OFA()
+      ISIZE2OFB = get_ISIZE2OFB()
       IF (LSAME(side, 'L')) THEN
         nrowa = m
       ELSE

@@ -11,6 +11,8 @@
 
 #define TEST_SIZE 4
 #define MAX_SIZE TEST_SIZE
+extern void set_isize2ofa_(int *val);
+extern void set_isize2ofb_(int *val);
 
 static int compare_abs_f(const void *a, const void *b) { float x = fabsf(*(const float*)a), y = fabsf(*(const float*)b); return (x > y) - (x < y); }
 
@@ -19,6 +21,11 @@ extern void cblas_csyr2k_b(const CBLAS_LAYOUT layout, const CBLAS_UPLO Uplo, con
 
 int main(void) {
     int i, j, idx, n_products;
+    {
+        int diffblas_isize = MAX_SIZE;
+        set_isize2ofa_(&diffblas_isize);
+        set_isize2ofb_(&diffblas_isize);
+    }
     float h = 1.0e-3f;
     float atol = 1.0e-2f, rtol = 1.0e-2f;
     float vjp_fd, vjp_ad;

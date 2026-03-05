@@ -207,7 +207,7 @@ C
 C     .. Scalar Arguments ..
       COMPLEX*16 alpha, beta
       COMPLEX*16 alphab(nbdirsmax), betab(nbdirsmax)
-      INTEGER incx, incy, kl, ku, lda, m, n
+      INTEGER incx, incy, kl, ku, lda, m, n, nbdirs
       CHARACTER trans
 C     ..
 C     .. Array Arguments ..
@@ -230,12 +230,15 @@ C     .. Local Scalars ..
       INTEGER i, info, ix, iy, j, jx, jy, k, kup1, kx, ky, lenx, leny
       LOGICAL noconj
       EXTERNAL LSAME
+      INTEGER ISIZE1OFX, ISIZE2OFA
 C     ..
 C     .. External Functions ..
+      INTEGER get_ISIZE1OFX, get_ISIZE2OFA
+      EXTERNAL get_ISIZE1OFX, get_ISIZE2OFA
       LOGICAL LSAME
 C     ..
 C     .. External Subroutines ..
-      EXTERNAL XERBLA
+      EXTERNAL XERBLA, check_ISIZE1OFX_initialized, check_ISIZE2OFA_initialized
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC DCONJG, MAX, MIN
@@ -267,11 +270,14 @@ C     .. Intrinsic Functions ..
       INTEGER ad_to4
       INTEGER ii2
       INTEGER ii1
-      INTEGER nbdirs
 C     ..
 C
 C     Test the input parameters.
 C
+      CALL check_ISIZE1OFX_initialized()
+      CALL check_ISIZE2OFA_initialized()
+      ISIZE1OFX = get_ISIZE1OFX()
+      ISIZE2OFA = get_ISIZE2OFA()
       info = 0
       IF (.NOT.LSAME(trans, 'N') .AND. (.NOT.LSAME(trans, 'T')) .AND. (
      +    .NOT.LSAME(trans, 'C'))) THEN

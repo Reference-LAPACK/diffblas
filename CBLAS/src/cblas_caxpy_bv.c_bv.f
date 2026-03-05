@@ -103,7 +103,7 @@ C
 C     .. Scalar Arguments ..
       COMPLEX ca
       COMPLEX cab(nbdirsmax)
-      INTEGER incx, incy, n
+      INTEGER incx, incy, n, nbdirs
 C     ..
 C     .. Array Arguments ..
       COMPLEX cx(*), cy(*)
@@ -120,7 +120,6 @@ C     .. External Functions ..
       REAL SCABS1
       REAL result1
       INTEGER nd
-      INTEGER nbdirs
 C     ..
       IF (n .GT. 0) THEN
         result1 = SCABS1(ca)

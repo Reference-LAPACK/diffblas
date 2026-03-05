@@ -93,7 +93,7 @@ C
 C     .. Scalar Arguments ..
       REAL sa
       REAL sab(nbdirsmax)
-      INTEGER incx, n
+      INTEGER incx, n, nbdirs
 C     ..
 C     .. Array Arguments ..
       REAL sx(*)
@@ -113,7 +113,6 @@ C     .. Intrinsic Functions ..
       INTRINSIC MOD
       INTEGER nd
       INTEGER*4 branch
-      INTEGER nbdirs
 C     ..
       IF (.NOT.((n .LE. 0 .OR. incx .LE. 0) .OR. sa .EQ. one)) THEN
         IF (incx .EQ. 1) THEN

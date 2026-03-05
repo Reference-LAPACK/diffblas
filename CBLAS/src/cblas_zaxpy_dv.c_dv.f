@@ -116,14 +116,19 @@ C
 C     .. Local Scalars ..
       INTEGER i, ix, iy
       EXTERNAL DCABS1
+      INTEGER ISIZE1OFZy
 C     ..
 C     .. External Functions ..
+      INTEGER get_ISIZE1OFZy
+      EXTERNAL get_ISIZE1OFZy
       DOUBLE PRECISION DCABS1
       DOUBLE PRECISION result1
       INTEGER nd
       INTEGER ii1
       INTEGER nbdirs
 C     ..
+      CALL check_ISIZE1OFZy_initialized()
+      ISIZE1OFZy = get_ISIZE1OFZy()
       IF (n .LE. 0) THEN
         DO ii1=1,ISIZE1OFzy
           DO nd=1,nbdirsmax

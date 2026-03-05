@@ -113,7 +113,14 @@ C     .. Local Scalars ..
       INTEGER*4 branch
       COMPLEX cdotub
       COMPLEX cdotu
+      INTEGER ISIZE1OFCx, ISIZE1OFCy
+      INTEGER get_ISIZE1OFCx, get_ISIZE1OFCy
+      EXTERNAL get_ISIZE1OFCx, get_ISIZE1OFCy
 C     ..
+      CALL check_ISIZE1OFCx_initialized()
+      CALL check_ISIZE1OFCy_initialized()
+      ISIZE1OFCx = get_ISIZE1OFCx()
+      ISIZE1OFCy = get_ISIZE1OFCy()
       IF (n .LE. 0) THEN
         DO ii1=1,ISIZE1OFcx
           cxb(ii1) = (0.0,0.0)

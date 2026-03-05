@@ -104,7 +104,7 @@ C
 C     .. Scalar Arguments ..
       DOUBLE PRECISION da
       DOUBLE PRECISION dab(nbdirsmax)
-      INTEGER incx, incy, n
+      INTEGER incx, incy, n, nbdirs
 C     ..
 C     .. Array Arguments ..
       DOUBLE PRECISION dx(*), dy(*)
@@ -120,7 +120,6 @@ C     .. Intrinsic Functions ..
       INTRINSIC MOD
       INTEGER nd
       INTEGER*4 branch
-      INTEGER nbdirs
 C     ..
       IF (n .GT. 0) THEN
         IF (da .NE. 0.0d0) THEN

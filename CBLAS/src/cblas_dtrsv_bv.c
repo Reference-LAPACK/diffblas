@@ -12,7 +12,7 @@
 #include "cblas_f77_bv.h"
 
 /* Declaration for differentiated Fortran routine */
-/* void F77_dtrsv_bv_base(...); */
+/* void F77_dtrsv_bv_base(..., (size_t)1, (size_t)1, (size_t)1); */
 /* Note: This should match the signature of dtrsv_bv in Fortran */
 
 /* F77_ macros for differentiated Fortran routines */
@@ -81,7 +81,7 @@ void cblas_dtrsv_bv(const CBLAS_LAYOUT layout, const CBLAS_UPLO Uplo, const
                 Ab[nd] = 0.0;
             goto label100;
         }
-        F77_dtrsv_bv(&UL, &TA, &DI, &F77_N, A, Ab, &F77_lda, X, Xb, &F77_incX, &nbdirs);
+        F77_dtrsv_bv(&UL, &TA, &DI, &F77_N, A, Ab, &F77_lda, X, Xb, &F77_incX, &nbdirs, (size_t)1, (size_t)1, (size_t)1);
         popControl1b(&branch);
       label100:
         popControl2b(&branch);
@@ -124,7 +124,7 @@ void cblas_dtrsv_bv(const CBLAS_LAYOUT layout, const CBLAS_UPLO Uplo, const
                 Ab[nd] = 0.0;
             goto label120;
         }
-        F77_dtrsv_bv(&UL, &TA, &DI, &F77_N, A, Ab, &F77_lda, X, Xb, &F77_incX, &nbdirs);
+        F77_dtrsv_bv(&UL, &TA, &DI, &F77_N, A, Ab, &F77_lda, X, Xb, &F77_incX, &nbdirs, (size_t)1, (size_t)1, (size_t)1);
         popControl1b(&branch);
       label120:
         popControl2b(&branch);

@@ -16,7 +16,7 @@
 #include "cblas_f77_bv.h"
 
 /* Declaration for differentiated Fortran routine */
-/* void F77_cgbmv_bv_base(...); */
+/* void F77_cgbmv_bv_base(..., (size_t)1); */
 /* Note: This should match the signature of cgbmv_bv in Fortran */
 
 /* F77_ macros for differentiated Fortran routines */
@@ -111,7 +111,7 @@ void cblas_cgbmv_bv(const CBLAS_LAYOUT layout, const CBLAS_TRANSPOSE TransA,
             goto label110;
         }
         F77_cgbmv_bv(&TA, &F77_M, &F77_N, &F77_KL, &F77_KU, alpha, alphab, A, Ab,
-                  &F77_lda, X, Xb, &F77_incX, beta, betab, Y, Yb, &F77_incY, &nbdirs);
+                  &F77_lda, X, Xb, &F77_incX, beta, betab, Y, Yb, &F77_incY, &nbdirs, (size_t)1);
         popControl2b(&branch);
     } else if (layout == CblasRowMajor) {
         if (TransA == CblasNoTrans) {
@@ -231,7 +231,7 @@ void cblas_cgbmv_bv(const CBLAS_LAYOUT layout, const CBLAS_TRANSPOSE TransA,
         if (branch == 0) {
             F77_cgbmv_bv(&TA, &F77_N, &F77_M, &F77_KU, &F77_KL, ALPHA, ALPHAb, A,
                       Ab, &F77_lda, x, xb, &F77_incX, BETA, BETAb, Y, Yb, &
-                      F77_incY, &nbdirs);
+                      F77_incY, &nbdirs, (size_t)1);
             for (nd = 0; nd < NBDirsMax; ++nd)
                 ((float *)(alphab))[(0)*NBDirsMax+(nd)] = 0.0;
             for (nd = 0; nd < NBDirsMax; ++nd)
@@ -239,7 +239,7 @@ void cblas_cgbmv_bv(const CBLAS_LAYOUT layout, const CBLAS_TRANSPOSE TransA,
         } else {
             F77_cgbmv_bv(&TA, &F77_N, &F77_M, &F77_KU, &F77_KL, alpha, alphab, A,
                       Ab, &F77_lda, x, xb, &F77_incX, beta, betab, Y, Yb, &
-                      F77_incY, &nbdirs);
+                      F77_incY, &nbdirs, (size_t)1);
             for (ii1 = 0; ii1 < 2; ++ii1)
                 for (nd = 0; nd < NBDirsMax; ++nd)
                     ALPHAb[ii1][nd] = 0.0;

@@ -13,7 +13,7 @@
 #include "cblas_f77_bv.h"
 
 /* Declaration for differentiated Fortran routine */
-/* void F77_zsymm_bv_base(...); */
+/* void F77_zsymm_bv_base(..., (size_t)1, (size_t)1); */
 /* Note: This should match the signature of zsymm_bv in Fortran */
 
 /* F77_ macros for differentiated Fortran routines */
@@ -86,7 +86,7 @@ void cblas_zsymm_bv(const CBLAS_LAYOUT layout, const CBLAS_SIDE Side, const
             goto label100;
         }
         F77_zsymm_bv(&SD, &UL, &F77_M, &F77_N, alpha, alphab, A, Ab, &F77_lda, B,
-                  Bb, &F77_ldb, beta, betab, C, Cb, &F77_ldc, &nbdirs);
+                  Bb, &F77_ldb, beta, betab, C, Cb, &F77_ldc, &nbdirs, (size_t)1, (size_t)1);
         popControl1b(&branch);
       label100:
         popControl1b(&branch);
@@ -126,7 +126,7 @@ void cblas_zsymm_bv(const CBLAS_LAYOUT layout, const CBLAS_SIDE Side, const
             goto label110;
         }
         F77_zsymm_bv(&SD, &UL, &F77_N, &F77_M, alpha, alphab, A, Ab, &F77_lda, B,
-                  Bb, &F77_ldb, beta, betab, C, Cb, &F77_ldc, &nbdirs);
+                  Bb, &F77_ldb, beta, betab, C, Cb, &F77_ldc, &nbdirs, (size_t)1, (size_t)1);
         popControl1b(&branch);
       label110:
         popControl1b(&branch);

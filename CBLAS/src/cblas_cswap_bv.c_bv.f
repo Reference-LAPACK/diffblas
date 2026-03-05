@@ -93,7 +93,7 @@ C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
 C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
-      INTEGER incx, incy, n
+      INTEGER incx, incy, n, nbdirs
 C     ..
 C     .. Array Arguments ..
       COMPLEX cx(*), cy(*)
@@ -107,7 +107,6 @@ C     .. Local Scalars ..
       COMPLEX ctempb(nbdirsmax)
       INTEGER i, ix, iy
       INTEGER nd
-      INTEGER nbdirs
 C     ..
       IF (n .GT. 0) THEN
         IF (incx .EQ. 1 .AND. incy .EQ. 1) THEN

@@ -113,7 +113,14 @@ C     .. Local Scalars ..
       INTEGER*4 branch
       COMPLEX*16 zdotub
       COMPLEX*16 zdotu
+      INTEGER ISIZE1OFZx, ISIZE1OFZy
+      INTEGER get_ISIZE1OFZx, get_ISIZE1OFZy
+      EXTERNAL get_ISIZE1OFZx, get_ISIZE1OFZy
 C     ..
+      CALL check_ISIZE1OFZx_initialized()
+      CALL check_ISIZE1OFZy_initialized()
+      ISIZE1OFZx = get_ISIZE1OFZx()
+      ISIZE1OFZy = get_ISIZE1OFZy()
       IF (n .LE. 0) THEN
         DO ii1=1,ISIZE1OFzx
           zxb(ii1) = (0.0,0.0)

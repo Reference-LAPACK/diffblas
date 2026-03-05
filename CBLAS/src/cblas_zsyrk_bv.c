@@ -13,7 +13,7 @@
 #include "cblas_f77_bv.h"
 
 /* Declaration for differentiated Fortran routine */
-/* void F77_zsyrk_bv_base(...); */
+/* void F77_zsyrk_bv_base(..., (size_t)1, (size_t)1); */
 /* Note: This should match the signature of zsyrk_bv in Fortran */
 
 /* F77_ macros for differentiated Fortran routines */
@@ -82,7 +82,7 @@ void cblas_zsyrk_bv(const CBLAS_LAYOUT layout, const CBLAS_UPLO Uplo, const
             goto label100;
         }
         F77_zsyrk_bv(&UL, &TR, &F77_N, &F77_K, alpha, alphab, A, Ab, &F77_lda, 
-                  beta, betab, C, Cb, &F77_ldc, &nbdirs);
+                  beta, betab, C, Cb, &F77_ldc, &nbdirs, (size_t)1, (size_t)1);
         popControl2b(&branch);
       label100:
         popControl1b(&branch);
@@ -121,7 +121,7 @@ void cblas_zsyrk_bv(const CBLAS_LAYOUT layout, const CBLAS_UPLO Uplo, const
             goto label110;
         }
         F77_zsyrk_bv(&UL, &TR, &F77_N, &F77_K, alpha, alphab, A, Ab, &F77_lda, 
-                  beta, betab, C, Cb, &F77_ldc, &nbdirs);
+                  beta, betab, C, Cb, &F77_ldc, &nbdirs, (size_t)1, (size_t)1);
         popControl2b(&branch);
       label110:
         popControl1b(&branch);

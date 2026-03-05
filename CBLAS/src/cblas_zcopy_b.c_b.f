@@ -105,7 +105,12 @@ C
 C     .. Local Scalars ..
       INTEGER i, ix, iy
       INTEGER ii1
+      INTEGER ISIZE1OFZx
+      INTEGER get_ISIZE1OFZx
+      EXTERNAL get_ISIZE1OFZx
 C     ..
+      CALL check_ISIZE1OFZx_initialized()
+      ISIZE1OFZx = get_ISIZE1OFZx()
       IF (n .LE. 0) THEN
         DO ii1=1,ISIZE1OFzx
           zxb(ii1) = (0.0,0.0)

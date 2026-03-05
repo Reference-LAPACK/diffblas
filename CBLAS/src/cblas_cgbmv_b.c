@@ -15,7 +15,7 @@
 #include "cblas_f77_b.h"
 
 /* Declaration for differentiated Fortran routine */
-/* void F77_cgbmv_b_base(...); */
+/* void F77_cgbmv_b_base(..., (size_t)1); */
 /* Note: This should match the signature of cgbmv_b in Fortran */
 
 /* F77_ macros for differentiated Fortran routines */
@@ -97,7 +97,7 @@ void cblas_cgbmv_b(const CBLAS_LAYOUT layout, const CBLAS_TRANSPOSE TransA,
             goto label110;
         }
         F77_cgbmv_b(&TA, &F77_M, &F77_N, &F77_KL, &F77_KU, alpha, alphab, A, Ab, 
-                 &F77_lda, X, Xb, &F77_incX, beta, betab, Y, Yb, &F77_incY);
+                 &F77_lda, X, Xb, &F77_incX, beta, betab, Y, Yb, &F77_incY, (size_t)1);
         popControl2b(&branch);
     } else if (layout == CblasRowMajor) {
         if (TransA == CblasNoTrans) {
@@ -215,7 +215,7 @@ void cblas_cgbmv_b(const CBLAS_LAYOUT layout, const CBLAS_TRANSPOSE TransA,
         if (branch == 0) {
             F77_cgbmv_b(&TA, &F77_N, &F77_M, &F77_KU, &F77_KL, ALPHA, ALPHAb, A, 
                      Ab, &F77_lda, x, xb, &F77_incX, BETA, BETAb, Y, Yb, &
-                     F77_incY);
+                     F77_incY, (size_t)1);
             if (alphab)
                 *((float complex *)alphab) = 0;
             if (betab)
@@ -223,7 +223,7 @@ void cblas_cgbmv_b(const CBLAS_LAYOUT layout, const CBLAS_TRANSPOSE TransA,
         } else {
             F77_cgbmv_b(&TA, &F77_N, &F77_M, &F77_KU, &F77_KL, alpha, alphab, A, 
                      Ab, &F77_lda, x, xb, &F77_incX, beta, betab, Y, Yb, &
-                     F77_incY);
+                     F77_incY, (size_t)1);
             for (ii1 = 0; ii1 < 2; ++ii1)
                 ALPHAb[ii1] = 0.0;
             for (ii1 = 0; ii1 < 2; ++ii1)

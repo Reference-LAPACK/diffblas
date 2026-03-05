@@ -193,7 +193,7 @@ C
 C     .. Scalar Arguments ..
       DOUBLE PRECISION alpha
       DOUBLE PRECISION alphab(nbdirsmax)
-      INTEGER lda, ldb, m, n
+      INTEGER lda, ldb, m, n, nbdirs
       CHARACTER diag, side, transa, uplo
 C     ..
 C     .. Array Arguments ..
@@ -205,10 +205,12 @@ C
 C  =====================================================================
 C
 C     .. External Functions ..
+      INTEGER get_ISIZE2OFA
+      EXTERNAL get_ISIZE2OFA
       LOGICAL LSAME
 C     ..
 C     .. External Subroutines ..
-      EXTERNAL XERBLA
+      EXTERNAL XERBLA, check_ISIZE2OFA_initialized
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC MAX
@@ -218,6 +220,7 @@ C     .. Local Scalars ..
       DOUBLE PRECISION tempb(nbdirsmax)
       INTEGER i, info, j, k, nrowa
       LOGICAL lside, nounit, upper
+      INTEGER ISIZE2OFA
 C     ..
 C     .. Parameters ..
       DOUBLE PRECISION one, zero
@@ -244,11 +247,12 @@ C     .. Parameters ..
       INTEGER ad_from2
       INTEGER ii2
       INTEGER ii1
-      INTEGER nbdirs
 C     ..
 C
 C     Test the input parameters.
 C
+      CALL check_ISIZE2OFA_initialized()
+      ISIZE2OFA = get_ISIZE2OFA()
       lside = LSAME(side, 'L')
       IF (lside) THEN
         nrowa = m

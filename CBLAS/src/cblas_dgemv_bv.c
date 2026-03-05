@@ -12,7 +12,7 @@
 #include "cblas_f77_bv.h"
 
 /* Declaration for differentiated Fortran routine */
-/* void F77_dgemv_bv_base(...); */
+/* void F77_dgemv_bv_base(..., (size_t)1); */
 /* Note: This should match the signature of dgemv_bv in Fortran */
 
 /* F77_ macros for differentiated Fortran routines */
@@ -71,7 +71,7 @@ void cblas_dgemv_bv(const CBLAS_LAYOUT layout, const CBLAS_TRANSPOSE TransA,
             goto label100;
         }
         F77_dgemv_bv(&TA, &F77_M, &F77_N, &alpha, &(*alphab), A, Ab, &F77_lda, X,
-                  Xb, &F77_incX, &beta, &(*betab), Y, Yb, &F77_incY, &nbdirs);
+                  Xb, &F77_incX, &beta, &(*betab), Y, Yb, &F77_incY, &nbdirs, (size_t)1);
         popControl2b(&branch);
     } else if (layout == CblasRowMajor) {
         if (TransA == CblasNoTrans) {
@@ -95,7 +95,7 @@ void cblas_dgemv_bv(const CBLAS_LAYOUT layout, const CBLAS_TRANSPOSE TransA,
             goto label100;
         }
         F77_dgemv_bv(&TA, &F77_N, &F77_M, &alpha, &(*alphab), A, Ab, &F77_lda, X,
-                  Xb, &F77_incX, &beta, &(*betab), Y, Yb, &F77_incY, &nbdirs);
+                  Xb, &F77_incX, &beta, &(*betab), Y, Yb, &F77_incY, &nbdirs, (size_t)1);
         popControl2b(&branch);
     } else {
         for (nd = 0; nd < NBDirsMax; ++nd)

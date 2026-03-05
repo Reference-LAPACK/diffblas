@@ -25,7 +25,7 @@ LIBS = -lcblas -lrefblas -lgfortran -lm
 ADSTACK_DIR ?= /gpfs/fs1/home/snarayan/tapenade_src/tapenade/ADFirstAidKit
 CFLAGS_B = $(CFLAGS) -I$(ADSTACK_DIR)
 
-all: $(BUILD_DIR) $(INC_DIR)/DIFFSIZESC.inc $(INC_DIR)/DIFFSIZESF.inc $(BUILD_DIR)/cblas_caxpy_d.o $(BUILD_DIR)/cblas_ccopy_d.o $(BUILD_DIR)/cblas_cdotc_sub_d.o $(BUILD_DIR)/cblas_cdotu_sub_d.o $(BUILD_DIR)/cblas_cgbmv_d.o $(BUILD_DIR)/cblas_cgemm_d.o $(BUILD_DIR)/cblas_cgemv_d.o $(BUILD_DIR)/cblas_cgerc_d.o $(BUILD_DIR)/cblas_cgeru_d.o $(BUILD_DIR)/cblas_chbmv_d.o $(BUILD_DIR)/cblas_chemm_d.o $(BUILD_DIR)/cblas_chemv_d.o $(BUILD_DIR)/cblas_cscal_d.o $(BUILD_DIR)/cblas_cswap_d.o $(BUILD_DIR)/cblas_csymm_d.o $(BUILD_DIR)/cblas_csyr2k_d.o $(BUILD_DIR)/cblas_csyrk_d.o $(BUILD_DIR)/cblas_ctbmv_d.o $(BUILD_DIR)/cblas_ctpmv_d.o $(BUILD_DIR)/cblas_ctrmm_d.o $(BUILD_DIR)/cblas_ctrmv_d.o $(BUILD_DIR)/cblas_ctrsm_d.o $(BUILD_DIR)/cblas_ctrsv_d.o $(BUILD_DIR)/cblas_dasum_d.o $(BUILD_DIR)/cblas_daxpy_d.o $(BUILD_DIR)/cblas_dcopy_d.o $(BUILD_DIR)/cblas_ddot_d.o $(BUILD_DIR)/cblas_dgbmv_d.o $(BUILD_DIR)/cblas_dgemm_d.o $(BUILD_DIR)/cblas_dgemv_d.o $(BUILD_DIR)/cblas_dger_d.o $(BUILD_DIR)/cblas_dnrm2_d.o $(BUILD_DIR)/cblas_dsbmv_d.o $(BUILD_DIR)/cblas_dscal_d.o $(BUILD_DIR)/cblas_dspmv_d.o $(BUILD_DIR)/cblas_dspr2_d.o $(BUILD_DIR)/cblas_dspr_d.o $(BUILD_DIR)/cblas_dswap_d.o $(BUILD_DIR)/cblas_dsymm_d.o $(BUILD_DIR)/cblas_dsymv_d.o $(BUILD_DIR)/cblas_dsyr2_d.o $(BUILD_DIR)/cblas_dsyr2k_d.o $(BUILD_DIR)/cblas_dsyr_d.o $(BUILD_DIR)/cblas_dsyrk_d.o $(BUILD_DIR)/cblas_dtbmv_d.o $(BUILD_DIR)/cblas_dtpmv_d.o $(BUILD_DIR)/cblas_dtrmm_d.o $(BUILD_DIR)/cblas_dtrmv_d.o $(BUILD_DIR)/cblas_dtrsm_d.o $(BUILD_DIR)/cblas_dtrsv_d.o $(BUILD_DIR)/cblas_sasum_d.o $(BUILD_DIR)/cblas_saxpy_d.o $(BUILD_DIR)/cblas_scopy_d.o $(BUILD_DIR)/cblas_sdot_d.o $(BUILD_DIR)/cblas_sgbmv_d.o $(BUILD_DIR)/cblas_sgemm_d.o $(BUILD_DIR)/cblas_sgemv_d.o $(BUILD_DIR)/cblas_sger_d.o $(BUILD_DIR)/cblas_snrm2_d.o $(BUILD_DIR)/cblas_ssbmv_d.o $(BUILD_DIR)/cblas_sscal_d.o $(BUILD_DIR)/cblas_sspmv_d.o $(BUILD_DIR)/cblas_sspr2_d.o $(BUILD_DIR)/cblas_sspr_d.o $(BUILD_DIR)/cblas_sswap_d.o $(BUILD_DIR)/cblas_ssymm_d.o $(BUILD_DIR)/cblas_ssymv_d.o $(BUILD_DIR)/cblas_ssyr2_d.o $(BUILD_DIR)/cblas_ssyr2k_d.o $(BUILD_DIR)/cblas_ssyr_d.o $(BUILD_DIR)/cblas_ssyrk_d.o $(BUILD_DIR)/cblas_stbmv_d.o $(BUILD_DIR)/cblas_stpmv_d.o $(BUILD_DIR)/cblas_strmm_d.o $(BUILD_DIR)/cblas_strmv_d.o $(BUILD_DIR)/cblas_strsm_d.o $(BUILD_DIR)/cblas_strsv_d.o $(BUILD_DIR)/cblas_zaxpy_d.o $(BUILD_DIR)/cblas_zcopy_d.o $(BUILD_DIR)/cblas_zdotc_sub_d.o $(BUILD_DIR)/cblas_zdotu_sub_d.o $(BUILD_DIR)/cblas_zdscal_d.o $(BUILD_DIR)/cblas_zgbmv_d.o $(BUILD_DIR)/cblas_zgemm_d.o $(BUILD_DIR)/cblas_zgemv_d.o $(BUILD_DIR)/cblas_zgerc_d.o $(BUILD_DIR)/cblas_zgeru_d.o $(BUILD_DIR)/cblas_zhbmv_d.o $(BUILD_DIR)/cblas_zhemm_d.o $(BUILD_DIR)/cblas_zhemv_d.o $(BUILD_DIR)/cblas_zscal_d.o $(BUILD_DIR)/cblas_zswap_d.o $(BUILD_DIR)/cblas_zsymm_d.o $(BUILD_DIR)/cblas_zsyr2k_d.o $(BUILD_DIR)/cblas_zsyrk_d.o $(BUILD_DIR)/cblas_ztbmv_d.o $(BUILD_DIR)/cblas_ztpmv_d.o $(BUILD_DIR)/cblas_ztrmm_d.o $(BUILD_DIR)/cblas_ztrmv_d.o $(BUILD_DIR)/cblas_ztrsm_d.o $(BUILD_DIR)/cblas_ztrsv_d.o $(BUILD_DIR)/cblas_caxpy_b.o $(BUILD_DIR)/cblas_ccopy_b.o $(BUILD_DIR)/cblas_cdotc_sub_b.o $(BUILD_DIR)/cblas_cdotu_sub_b.o $(BUILD_DIR)/cblas_cgbmv_b.o $(BUILD_DIR)/cblas_cgemm_b.o $(BUILD_DIR)/cblas_cgemv_b.o $(BUILD_DIR)/cblas_cgerc_b.o $(BUILD_DIR)/cblas_cgeru_b.o $(BUILD_DIR)/cblas_chbmv_b.o $(BUILD_DIR)/cblas_chemm_b.o $(BUILD_DIR)/cblas_chemv_b.o $(BUILD_DIR)/cblas_cscal_b.o $(BUILD_DIR)/cblas_cswap_b.o $(BUILD_DIR)/cblas_csymm_b.o $(BUILD_DIR)/cblas_csyr2k_b.o $(BUILD_DIR)/cblas_csyrk_b.o $(BUILD_DIR)/cblas_ctbmv_b.o $(BUILD_DIR)/cblas_ctpmv_b.o $(BUILD_DIR)/cblas_ctrmm_b.o $(BUILD_DIR)/cblas_ctrmv_b.o $(BUILD_DIR)/cblas_ctrsm_b.o $(BUILD_DIR)/cblas_ctrsv_b.o $(BUILD_DIR)/cblas_dasum_b.o $(BUILD_DIR)/cblas_daxpy_b.o $(BUILD_DIR)/cblas_dcopy_b.o $(BUILD_DIR)/cblas_ddot_b.o $(BUILD_DIR)/cblas_dgbmv_b.o $(BUILD_DIR)/cblas_dgemm_b.o $(BUILD_DIR)/cblas_dgemv_b.o $(BUILD_DIR)/cblas_dger_b.o $(BUILD_DIR)/cblas_dnrm2_b.o $(BUILD_DIR)/cblas_dsbmv_b.o $(BUILD_DIR)/cblas_dscal_b.o $(BUILD_DIR)/cblas_dspmv_b.o $(BUILD_DIR)/cblas_dspr2_b.o $(BUILD_DIR)/cblas_dspr_b.o $(BUILD_DIR)/cblas_dswap_b.o $(BUILD_DIR)/cblas_dsymm_b.o $(BUILD_DIR)/cblas_dsymv_b.o $(BUILD_DIR)/cblas_dsyr2_b.o $(BUILD_DIR)/cblas_dsyr2k_b.o $(BUILD_DIR)/cblas_dsyr_b.o $(BUILD_DIR)/cblas_dsyrk_b.o $(BUILD_DIR)/cblas_dtbmv_b.o $(BUILD_DIR)/cblas_dtpmv_b.o $(BUILD_DIR)/cblas_dtrmm_b.o $(BUILD_DIR)/cblas_dtrmv_b.o $(BUILD_DIR)/cblas_dtrsm_b.o $(BUILD_DIR)/cblas_dtrsv_b.o $(BUILD_DIR)/cblas_sasum_b.o $(BUILD_DIR)/cblas_saxpy_b.o $(BUILD_DIR)/cblas_scopy_b.o $(BUILD_DIR)/cblas_sdot_b.o $(BUILD_DIR)/cblas_sgbmv_b.o $(BUILD_DIR)/cblas_sgemm_b.o $(BUILD_DIR)/cblas_sgemv_b.o $(BUILD_DIR)/cblas_sger_b.o $(BUILD_DIR)/cblas_snrm2_b.o $(BUILD_DIR)/cblas_ssbmv_b.o $(BUILD_DIR)/cblas_sscal_b.o $(BUILD_DIR)/cblas_sspmv_b.o $(BUILD_DIR)/cblas_sspr2_b.o $(BUILD_DIR)/cblas_sspr_b.o $(BUILD_DIR)/cblas_sswap_b.o $(BUILD_DIR)/cblas_ssymm_b.o $(BUILD_DIR)/cblas_ssymv_b.o $(BUILD_DIR)/cblas_ssyr2_b.o $(BUILD_DIR)/cblas_ssyr2k_b.o $(BUILD_DIR)/cblas_ssyr_b.o $(BUILD_DIR)/cblas_ssyrk_b.o $(BUILD_DIR)/cblas_stbmv_b.o $(BUILD_DIR)/cblas_stpmv_b.o $(BUILD_DIR)/cblas_strmm_b.o $(BUILD_DIR)/cblas_strmv_b.o $(BUILD_DIR)/cblas_strsm_b.o $(BUILD_DIR)/cblas_strsv_b.o $(BUILD_DIR)/cblas_zaxpy_b.o $(BUILD_DIR)/cblas_zcopy_b.o $(BUILD_DIR)/cblas_zdotc_sub_b.o $(BUILD_DIR)/cblas_zdotu_sub_b.o $(BUILD_DIR)/cblas_zdscal_b.o $(BUILD_DIR)/cblas_zgbmv_b.o $(BUILD_DIR)/cblas_zgemm_b.o $(BUILD_DIR)/cblas_zgemv_b.o $(BUILD_DIR)/cblas_zgerc_b.o $(BUILD_DIR)/cblas_zgeru_b.o $(BUILD_DIR)/cblas_zhbmv_b.o $(BUILD_DIR)/cblas_zhemm_b.o $(BUILD_DIR)/cblas_zhemv_b.o $(BUILD_DIR)/cblas_zscal_b.o $(BUILD_DIR)/cblas_zswap_b.o $(BUILD_DIR)/cblas_zsymm_b.o $(BUILD_DIR)/cblas_zsyr2k_b.o $(BUILD_DIR)/cblas_zsyrk_b.o $(BUILD_DIR)/cblas_ztbmv_b.o $(BUILD_DIR)/cblas_ztpmv_b.o $(BUILD_DIR)/cblas_ztrmm_b.o $(BUILD_DIR)/cblas_ztrmv_b.o $(BUILD_DIR)/cblas_ztrsm_b.o $(BUILD_DIR)/cblas_ztrsv_b.o $(BUILD_DIR)/cblas_caxpy_dv.o $(BUILD_DIR)/cblas_ccopy_dv.o $(BUILD_DIR)/cblas_cdotc_sub_dv.o $(BUILD_DIR)/cblas_cdotu_sub_dv.o $(BUILD_DIR)/cblas_cgbmv_dv.o $(BUILD_DIR)/cblas_cgemm_dv.o $(BUILD_DIR)/cblas_cgemv_dv.o $(BUILD_DIR)/cblas_cgerc_dv.o $(BUILD_DIR)/cblas_cgeru_dv.o $(BUILD_DIR)/cblas_chbmv_dv.o $(BUILD_DIR)/cblas_chemm_dv.o $(BUILD_DIR)/cblas_chemv_dv.o $(BUILD_DIR)/cblas_cscal_dv.o $(BUILD_DIR)/cblas_cswap_dv.o $(BUILD_DIR)/cblas_csymm_dv.o $(BUILD_DIR)/cblas_csyr2k_dv.o $(BUILD_DIR)/cblas_csyrk_dv.o $(BUILD_DIR)/cblas_ctbmv_dv.o $(BUILD_DIR)/cblas_ctpmv_dv.o $(BUILD_DIR)/cblas_ctrmm_dv.o $(BUILD_DIR)/cblas_ctrmv_dv.o $(BUILD_DIR)/cblas_ctrsm_dv.o $(BUILD_DIR)/cblas_ctrsv_dv.o $(BUILD_DIR)/cblas_dasum_dv.o $(BUILD_DIR)/cblas_daxpy_dv.o $(BUILD_DIR)/cblas_dcopy_dv.o $(BUILD_DIR)/cblas_ddot_dv.o $(BUILD_DIR)/cblas_dgbmv_dv.o $(BUILD_DIR)/cblas_dgemm_dv.o $(BUILD_DIR)/cblas_dgemv_dv.o $(BUILD_DIR)/cblas_dger_dv.o $(BUILD_DIR)/cblas_dnrm2_dv.o $(BUILD_DIR)/cblas_dsbmv_dv.o $(BUILD_DIR)/cblas_dscal_dv.o $(BUILD_DIR)/cblas_dspmv_dv.o $(BUILD_DIR)/cblas_dspr2_dv.o $(BUILD_DIR)/cblas_dspr_dv.o $(BUILD_DIR)/cblas_dswap_dv.o $(BUILD_DIR)/cblas_dsymm_dv.o $(BUILD_DIR)/cblas_dsymv_dv.o $(BUILD_DIR)/cblas_dsyr2_dv.o $(BUILD_DIR)/cblas_dsyr2k_dv.o $(BUILD_DIR)/cblas_dsyr_dv.o $(BUILD_DIR)/cblas_dsyrk_dv.o $(BUILD_DIR)/cblas_dtbmv_dv.o $(BUILD_DIR)/cblas_dtpmv_dv.o $(BUILD_DIR)/cblas_dtrmm_dv.o $(BUILD_DIR)/cblas_dtrmv_dv.o $(BUILD_DIR)/cblas_dtrsm_dv.o $(BUILD_DIR)/cblas_dtrsv_dv.o $(BUILD_DIR)/cblas_sasum_dv.o $(BUILD_DIR)/cblas_saxpy_dv.o $(BUILD_DIR)/cblas_scopy_dv.o $(BUILD_DIR)/cblas_sdot_dv.o $(BUILD_DIR)/cblas_sgbmv_dv.o $(BUILD_DIR)/cblas_sgemm_dv.o $(BUILD_DIR)/cblas_sgemv_dv.o $(BUILD_DIR)/cblas_sger_dv.o $(BUILD_DIR)/cblas_snrm2_dv.o $(BUILD_DIR)/cblas_ssbmv_dv.o $(BUILD_DIR)/cblas_sscal_dv.o $(BUILD_DIR)/cblas_sspmv_dv.o $(BUILD_DIR)/cblas_sspr2_dv.o $(BUILD_DIR)/cblas_sspr_dv.o $(BUILD_DIR)/cblas_sswap_dv.o $(BUILD_DIR)/cblas_ssymm_dv.o $(BUILD_DIR)/cblas_ssymv_dv.o $(BUILD_DIR)/cblas_ssyr2_dv.o $(BUILD_DIR)/cblas_ssyr2k_dv.o $(BUILD_DIR)/cblas_ssyr_dv.o $(BUILD_DIR)/cblas_ssyrk_dv.o $(BUILD_DIR)/cblas_stbmv_dv.o $(BUILD_DIR)/cblas_stpmv_dv.o $(BUILD_DIR)/cblas_strmm_dv.o $(BUILD_DIR)/cblas_strmv_dv.o $(BUILD_DIR)/cblas_strsm_dv.o $(BUILD_DIR)/cblas_strsv_dv.o $(BUILD_DIR)/cblas_zaxpy_dv.o $(BUILD_DIR)/cblas_zcopy_dv.o $(BUILD_DIR)/cblas_zdotc_sub_dv.o $(BUILD_DIR)/cblas_zdotu_sub_dv.o $(BUILD_DIR)/cblas_zdscal_dv.o $(BUILD_DIR)/cblas_zgbmv_dv.o $(BUILD_DIR)/cblas_zgemm_dv.o $(BUILD_DIR)/cblas_zgemv_dv.o $(BUILD_DIR)/cblas_zgerc_dv.o $(BUILD_DIR)/cblas_zgeru_dv.o $(BUILD_DIR)/cblas_zhbmv_dv.o $(BUILD_DIR)/cblas_zhemm_dv.o $(BUILD_DIR)/cblas_zhemv_dv.o $(BUILD_DIR)/cblas_zscal_dv.o $(BUILD_DIR)/cblas_zswap_dv.o $(BUILD_DIR)/cblas_zsymm_dv.o $(BUILD_DIR)/cblas_zsyr2k_dv.o $(BUILD_DIR)/cblas_zsyrk_dv.o $(BUILD_DIR)/cblas_ztbmv_dv.o $(BUILD_DIR)/cblas_ztpmv_dv.o $(BUILD_DIR)/cblas_ztrmm_dv.o $(BUILD_DIR)/cblas_ztrmv_dv.o $(BUILD_DIR)/cblas_ztrsm_dv.o $(BUILD_DIR)/cblas_ztrsv_dv.o $(BUILD_DIR)/cblas_caxpy_bv.o $(BUILD_DIR)/cblas_ccopy_bv.o $(BUILD_DIR)/cblas_cdotc_sub_bv.o $(BUILD_DIR)/cblas_cdotu_sub_bv.o $(BUILD_DIR)/cblas_cgbmv_bv.o $(BUILD_DIR)/cblas_cgemm_bv.o $(BUILD_DIR)/cblas_cgemv_bv.o $(BUILD_DIR)/cblas_cgerc_bv.o $(BUILD_DIR)/cblas_cgeru_bv.o $(BUILD_DIR)/cblas_chbmv_bv.o $(BUILD_DIR)/cblas_chemm_bv.o $(BUILD_DIR)/cblas_chemv_bv.o $(BUILD_DIR)/cblas_cscal_bv.o $(BUILD_DIR)/cblas_cswap_bv.o $(BUILD_DIR)/cblas_csymm_bv.o $(BUILD_DIR)/cblas_csyr2k_bv.o $(BUILD_DIR)/cblas_csyrk_bv.o $(BUILD_DIR)/cblas_ctbmv_bv.o $(BUILD_DIR)/cblas_ctpmv_bv.o $(BUILD_DIR)/cblas_ctrmm_bv.o $(BUILD_DIR)/cblas_ctrmv_bv.o $(BUILD_DIR)/cblas_ctrsm_bv.o $(BUILD_DIR)/cblas_ctrsv_bv.o $(BUILD_DIR)/cblas_dasum_bv.o $(BUILD_DIR)/cblas_daxpy_bv.o $(BUILD_DIR)/cblas_dcopy_bv.o $(BUILD_DIR)/cblas_ddot_bv.o $(BUILD_DIR)/cblas_dgbmv_bv.o $(BUILD_DIR)/cblas_dgemm_bv.o $(BUILD_DIR)/cblas_dgemv_bv.o $(BUILD_DIR)/cblas_dger_bv.o $(BUILD_DIR)/cblas_dnrm2_bv.o $(BUILD_DIR)/cblas_dsbmv_bv.o $(BUILD_DIR)/cblas_dscal_bv.o $(BUILD_DIR)/cblas_dspmv_bv.o $(BUILD_DIR)/cblas_dspr2_bv.o $(BUILD_DIR)/cblas_dspr_bv.o $(BUILD_DIR)/cblas_dswap_bv.o $(BUILD_DIR)/cblas_dsymm_bv.o $(BUILD_DIR)/cblas_dsymv_bv.o $(BUILD_DIR)/cblas_dsyr2_bv.o $(BUILD_DIR)/cblas_dsyr2k_bv.o $(BUILD_DIR)/cblas_dsyr_bv.o $(BUILD_DIR)/cblas_dsyrk_bv.o $(BUILD_DIR)/cblas_dtbmv_bv.o $(BUILD_DIR)/cblas_dtpmv_bv.o $(BUILD_DIR)/cblas_dtrmm_bv.o $(BUILD_DIR)/cblas_dtrmv_bv.o $(BUILD_DIR)/cblas_dtrsm_bv.o $(BUILD_DIR)/cblas_dtrsv_bv.o $(BUILD_DIR)/cblas_sasum_bv.o $(BUILD_DIR)/cblas_saxpy_bv.o $(BUILD_DIR)/cblas_scopy_bv.o $(BUILD_DIR)/cblas_sdot_bv.o $(BUILD_DIR)/cblas_sgbmv_bv.o $(BUILD_DIR)/cblas_sgemm_bv.o $(BUILD_DIR)/cblas_sgemv_bv.o $(BUILD_DIR)/cblas_sger_bv.o $(BUILD_DIR)/cblas_snrm2_bv.o $(BUILD_DIR)/cblas_ssbmv_bv.o $(BUILD_DIR)/cblas_sscal_bv.o $(BUILD_DIR)/cblas_sspmv_bv.o $(BUILD_DIR)/cblas_sspr2_bv.o $(BUILD_DIR)/cblas_sspr_bv.o $(BUILD_DIR)/cblas_sswap_bv.o $(BUILD_DIR)/cblas_ssymm_bv.o $(BUILD_DIR)/cblas_ssymv_bv.o $(BUILD_DIR)/cblas_ssyr2_bv.o $(BUILD_DIR)/cblas_ssyr2k_bv.o $(BUILD_DIR)/cblas_ssyr_bv.o $(BUILD_DIR)/cblas_ssyrk_bv.o $(BUILD_DIR)/cblas_stbmv_bv.o $(BUILD_DIR)/cblas_stpmv_bv.o $(BUILD_DIR)/cblas_strmm_bv.o $(BUILD_DIR)/cblas_strmv_bv.o $(BUILD_DIR)/cblas_strsm_bv.o $(BUILD_DIR)/cblas_strsv_bv.o $(BUILD_DIR)/cblas_zaxpy_bv.o $(BUILD_DIR)/cblas_zcopy_bv.o $(BUILD_DIR)/cblas_zdotc_sub_bv.o $(BUILD_DIR)/cblas_zdotu_sub_bv.o $(BUILD_DIR)/cblas_zdscal_bv.o $(BUILD_DIR)/cblas_zgbmv_bv.o $(BUILD_DIR)/cblas_zgemm_bv.o $(BUILD_DIR)/cblas_zgemv_bv.o $(BUILD_DIR)/cblas_zgerc_bv.o $(BUILD_DIR)/cblas_zgeru_bv.o $(BUILD_DIR)/cblas_zhbmv_bv.o $(BUILD_DIR)/cblas_zhemm_bv.o $(BUILD_DIR)/cblas_zhemv_bv.o $(BUILD_DIR)/cblas_zscal_bv.o $(BUILD_DIR)/cblas_zswap_bv.o $(BUILD_DIR)/cblas_zsymm_bv.o $(BUILD_DIR)/cblas_zsyr2k_bv.o $(BUILD_DIR)/cblas_zsyrk_bv.o $(BUILD_DIR)/cblas_ztbmv_bv.o $(BUILD_DIR)/cblas_ztpmv_bv.o $(BUILD_DIR)/cblas_ztrmm_bv.o $(BUILD_DIR)/cblas_ztrmv_bv.o $(BUILD_DIR)/cblas_ztrsm_bv.o $(BUILD_DIR)/cblas_ztrsv_bv.o $(BUILD_DIR)/DIFFSIZES.o $(BUILD_DIR)/cblas_caxpy_b_fortran.o $(BUILD_DIR)/cblas_caxpy_bv_fortran.o $(BUILD_DIR)/cblas_caxpy_d_fortran.o $(BUILD_DIR)/cblas_caxpy_dv_fortran.o $(BUILD_DIR)/cblas_ccopy_b_fortran.o $(BUILD_DIR)/cblas_ccopy_bv_fortran.o $(BUILD_DIR)/cblas_ccopy_d_fortran.o $(BUILD_DIR)/cblas_ccopy_dv_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_b_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_bv_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_d_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_dv_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_b_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_bv_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_d_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_dv_fortran.o $(BUILD_DIR)/cblas_cgbmv_b_fortran.o $(BUILD_DIR)/cblas_cgbmv_bv_fortran.o $(BUILD_DIR)/cblas_cgbmv_d_fortran.o $(BUILD_DIR)/cblas_cgbmv_dv_fortran.o $(BUILD_DIR)/cblas_cgemm_b_fortran.o $(BUILD_DIR)/cblas_cgemm_bv_fortran.o $(BUILD_DIR)/cblas_cgemm_d_fortran.o $(BUILD_DIR)/cblas_cgemm_dv_fortran.o $(BUILD_DIR)/cblas_cgemv_b_fortran.o $(BUILD_DIR)/cblas_cgemv_bv_fortran.o $(BUILD_DIR)/cblas_cgemv_d_fortran.o $(BUILD_DIR)/cblas_cgemv_dv_fortran.o $(BUILD_DIR)/cblas_cgerc_b_fortran.o $(BUILD_DIR)/cblas_cgerc_bv_fortran.o $(BUILD_DIR)/cblas_cgerc_d_fortran.o $(BUILD_DIR)/cblas_cgerc_dv_fortran.o $(BUILD_DIR)/cblas_cgeru_b_fortran.o $(BUILD_DIR)/cblas_cgeru_bv_fortran.o $(BUILD_DIR)/cblas_cgeru_d_fortran.o $(BUILD_DIR)/cblas_cgeru_dv_fortran.o $(BUILD_DIR)/cblas_chbmv_b_fortran.o $(BUILD_DIR)/cblas_chbmv_bv_fortran.o $(BUILD_DIR)/cblas_chbmv_d_fortran.o $(BUILD_DIR)/cblas_chbmv_dv_fortran.o $(BUILD_DIR)/cblas_chemm_b_fortran.o $(BUILD_DIR)/cblas_chemm_bv_fortran.o $(BUILD_DIR)/cblas_chemm_d_fortran.o $(BUILD_DIR)/cblas_chemm_dv_fortran.o $(BUILD_DIR)/cblas_chemv_b_fortran.o $(BUILD_DIR)/cblas_chemv_bv_fortran.o $(BUILD_DIR)/cblas_chemv_d_fortran.o $(BUILD_DIR)/cblas_chemv_dv_fortran.o $(BUILD_DIR)/cblas_cscal_b_fortran.o $(BUILD_DIR)/cblas_cscal_bv_fortran.o $(BUILD_DIR)/cblas_cscal_d_fortran.o $(BUILD_DIR)/cblas_cscal_dv_fortran.o $(BUILD_DIR)/cblas_cswap_b_fortran.o $(BUILD_DIR)/cblas_cswap_bv_fortran.o $(BUILD_DIR)/cblas_cswap_d_fortran.o $(BUILD_DIR)/cblas_cswap_dv_fortran.o $(BUILD_DIR)/cblas_csymm_b_fortran.o $(BUILD_DIR)/cblas_csymm_bv_fortran.o $(BUILD_DIR)/cblas_csymm_d_fortran.o $(BUILD_DIR)/cblas_csymm_dv_fortran.o $(BUILD_DIR)/cblas_csyr2k_b_fortran.o $(BUILD_DIR)/cblas_csyr2k_bv_fortran.o $(BUILD_DIR)/cblas_csyr2k_d_fortran.o $(BUILD_DIR)/cblas_csyr2k_dv_fortran.o $(BUILD_DIR)/cblas_csyrk_b_fortran.o $(BUILD_DIR)/cblas_csyrk_bv_fortran.o $(BUILD_DIR)/cblas_csyrk_d_fortran.o $(BUILD_DIR)/cblas_csyrk_dv_fortran.o $(BUILD_DIR)/cblas_ctbmv_b_fortran.o $(BUILD_DIR)/cblas_ctbmv_bv_fortran.o $(BUILD_DIR)/cblas_ctbmv_d_fortran.o $(BUILD_DIR)/cblas_ctbmv_dv_fortran.o $(BUILD_DIR)/cblas_ctpmv_b_fortran.o $(BUILD_DIR)/cblas_ctpmv_bv_fortran.o $(BUILD_DIR)/cblas_ctpmv_d_fortran.o $(BUILD_DIR)/cblas_ctpmv_dv_fortran.o $(BUILD_DIR)/cblas_ctrmm_b_fortran.o $(BUILD_DIR)/cblas_ctrmm_bv_fortran.o $(BUILD_DIR)/cblas_ctrmm_d_fortran.o $(BUILD_DIR)/cblas_ctrmm_dv_fortran.o $(BUILD_DIR)/cblas_ctrmv_b_fortran.o $(BUILD_DIR)/cblas_ctrmv_bv_fortran.o $(BUILD_DIR)/cblas_ctrmv_d_fortran.o $(BUILD_DIR)/cblas_ctrmv_dv_fortran.o $(BUILD_DIR)/cblas_ctrsm_b_fortran.o $(BUILD_DIR)/cblas_ctrsm_bv_fortran.o $(BUILD_DIR)/cblas_ctrsm_d_fortran.o $(BUILD_DIR)/cblas_ctrsm_dv_fortran.o $(BUILD_DIR)/cblas_ctrsv_b_fortran.o $(BUILD_DIR)/cblas_ctrsv_bv_fortran.o $(BUILD_DIR)/cblas_ctrsv_d_fortran.o $(BUILD_DIR)/cblas_ctrsv_dv_fortran.o $(BUILD_DIR)/cblas_dasum_b_fortran.o $(BUILD_DIR)/cblas_dasum_bv_fortran.o $(BUILD_DIR)/cblas_dasum_d_fortran.o $(BUILD_DIR)/cblas_dasum_dv_fortran.o $(BUILD_DIR)/cblas_daxpy_b_fortran.o $(BUILD_DIR)/cblas_daxpy_bv_fortran.o $(BUILD_DIR)/cblas_daxpy_d_fortran.o $(BUILD_DIR)/cblas_daxpy_dv_fortran.o $(BUILD_DIR)/cblas_dcopy_b_fortran.o $(BUILD_DIR)/cblas_dcopy_bv_fortran.o $(BUILD_DIR)/cblas_dcopy_d_fortran.o $(BUILD_DIR)/cblas_dcopy_dv_fortran.o $(BUILD_DIR)/cblas_ddot_b_fortran.o $(BUILD_DIR)/cblas_ddot_bv_fortran.o $(BUILD_DIR)/cblas_ddot_d_fortran.o $(BUILD_DIR)/cblas_ddot_dv_fortran.o $(BUILD_DIR)/cblas_dgbmv_b_fortran.o $(BUILD_DIR)/cblas_dgbmv_bv_fortran.o $(BUILD_DIR)/cblas_dgbmv_d_fortran.o $(BUILD_DIR)/cblas_dgbmv_dv_fortran.o $(BUILD_DIR)/cblas_dgemm_b_fortran.o $(BUILD_DIR)/cblas_dgemm_bv_fortran.o $(BUILD_DIR)/cblas_dgemm_d_fortran.o $(BUILD_DIR)/cblas_dgemm_dv_fortran.o $(BUILD_DIR)/cblas_dgemv_b_fortran.o $(BUILD_DIR)/cblas_dgemv_bv_fortran.o $(BUILD_DIR)/cblas_dgemv_d_fortran.o $(BUILD_DIR)/cblas_dgemv_dv_fortran.o $(BUILD_DIR)/cblas_dger_b_fortran.o $(BUILD_DIR)/cblas_dger_bv_fortran.o $(BUILD_DIR)/cblas_dger_d_fortran.o $(BUILD_DIR)/cblas_dger_dv_fortran.o $(BUILD_DIR)/cblas_dnrm2_b_fortran.o $(BUILD_DIR)/cblas_dnrm2_bv_fortran.o $(BUILD_DIR)/cblas_dnrm2_d_fortran.o $(BUILD_DIR)/cblas_dnrm2_dv_fortran.o $(BUILD_DIR)/cblas_dsbmv_b_fortran.o $(BUILD_DIR)/cblas_dsbmv_bv_fortran.o $(BUILD_DIR)/cblas_dsbmv_d_fortran.o $(BUILD_DIR)/cblas_dsbmv_dv_fortran.o $(BUILD_DIR)/cblas_dscal_b_fortran.o $(BUILD_DIR)/cblas_dscal_bv_fortran.o $(BUILD_DIR)/cblas_dscal_d_fortran.o $(BUILD_DIR)/cblas_dscal_dv_fortran.o $(BUILD_DIR)/cblas_dspmv_b_fortran.o $(BUILD_DIR)/cblas_dspmv_bv_fortran.o $(BUILD_DIR)/cblas_dspmv_d_fortran.o $(BUILD_DIR)/cblas_dspmv_dv_fortran.o $(BUILD_DIR)/cblas_dspr2_b_fortran.o $(BUILD_DIR)/cblas_dspr2_bv_fortran.o $(BUILD_DIR)/cblas_dspr2_d_fortran.o $(BUILD_DIR)/cblas_dspr2_dv_fortran.o $(BUILD_DIR)/cblas_dspr_b_fortran.o $(BUILD_DIR)/cblas_dspr_bv_fortran.o $(BUILD_DIR)/cblas_dspr_d_fortran.o $(BUILD_DIR)/cblas_dspr_dv_fortran.o $(BUILD_DIR)/cblas_dswap_b_fortran.o $(BUILD_DIR)/cblas_dswap_bv_fortran.o $(BUILD_DIR)/cblas_dswap_d_fortran.o $(BUILD_DIR)/cblas_dswap_dv_fortran.o $(BUILD_DIR)/cblas_dsymm_b_fortran.o $(BUILD_DIR)/cblas_dsymm_bv_fortran.o $(BUILD_DIR)/cblas_dsymm_d_fortran.o $(BUILD_DIR)/cblas_dsymm_dv_fortran.o $(BUILD_DIR)/cblas_dsymv_b_fortran.o $(BUILD_DIR)/cblas_dsymv_bv_fortran.o $(BUILD_DIR)/cblas_dsymv_d_fortran.o $(BUILD_DIR)/cblas_dsymv_dv_fortran.o $(BUILD_DIR)/cblas_dsyr2_b_fortran.o $(BUILD_DIR)/cblas_dsyr2_bv_fortran.o $(BUILD_DIR)/cblas_dsyr2_d_fortran.o $(BUILD_DIR)/cblas_dsyr2_dv_fortran.o $(BUILD_DIR)/cblas_dsyr2k_b_fortran.o $(BUILD_DIR)/cblas_dsyr2k_bv_fortran.o $(BUILD_DIR)/cblas_dsyr2k_d_fortran.o $(BUILD_DIR)/cblas_dsyr2k_dv_fortran.o $(BUILD_DIR)/cblas_dsyr_b_fortran.o $(BUILD_DIR)/cblas_dsyr_bv_fortran.o $(BUILD_DIR)/cblas_dsyr_d_fortran.o $(BUILD_DIR)/cblas_dsyr_dv_fortran.o $(BUILD_DIR)/cblas_dsyrk_b_fortran.o $(BUILD_DIR)/cblas_dsyrk_bv_fortran.o $(BUILD_DIR)/cblas_dsyrk_d_fortran.o $(BUILD_DIR)/cblas_dsyrk_dv_fortran.o $(BUILD_DIR)/cblas_dtbmv_b_fortran.o $(BUILD_DIR)/cblas_dtbmv_bv_fortran.o $(BUILD_DIR)/cblas_dtbmv_d_fortran.o $(BUILD_DIR)/cblas_dtbmv_dv_fortran.o $(BUILD_DIR)/cblas_dtpmv_b_fortran.o $(BUILD_DIR)/cblas_dtpmv_bv_fortran.o $(BUILD_DIR)/cblas_dtpmv_d_fortran.o $(BUILD_DIR)/cblas_dtpmv_dv_fortran.o $(BUILD_DIR)/cblas_dtrmm_b_fortran.o $(BUILD_DIR)/cblas_dtrmm_bv_fortran.o $(BUILD_DIR)/cblas_dtrmm_d_fortran.o $(BUILD_DIR)/cblas_dtrmm_dv_fortran.o $(BUILD_DIR)/cblas_dtrmv_b_fortran.o $(BUILD_DIR)/cblas_dtrmv_bv_fortran.o $(BUILD_DIR)/cblas_dtrmv_d_fortran.o $(BUILD_DIR)/cblas_dtrmv_dv_fortran.o $(BUILD_DIR)/cblas_dtrsm_b_fortran.o $(BUILD_DIR)/cblas_dtrsm_bv_fortran.o $(BUILD_DIR)/cblas_dtrsm_d_fortran.o $(BUILD_DIR)/cblas_dtrsm_dv_fortran.o $(BUILD_DIR)/cblas_dtrsv_b_fortran.o $(BUILD_DIR)/cblas_dtrsv_bv_fortran.o $(BUILD_DIR)/cblas_dtrsv_d_fortran.o $(BUILD_DIR)/cblas_dtrsv_dv_fortran.o $(BUILD_DIR)/cblas_sasum_b_fortran.o $(BUILD_DIR)/cblas_sasum_bv_fortran.o $(BUILD_DIR)/cblas_sasum_d_fortran.o $(BUILD_DIR)/cblas_sasum_dv_fortran.o $(BUILD_DIR)/cblas_saxpy_b_fortran.o $(BUILD_DIR)/cblas_saxpy_bv_fortran.o $(BUILD_DIR)/cblas_saxpy_d_fortran.o $(BUILD_DIR)/cblas_saxpy_dv_fortran.o $(BUILD_DIR)/cblas_scopy_b_fortran.o $(BUILD_DIR)/cblas_scopy_bv_fortran.o $(BUILD_DIR)/cblas_scopy_d_fortran.o $(BUILD_DIR)/cblas_scopy_dv_fortran.o $(BUILD_DIR)/cblas_sdot_b_fortran.o $(BUILD_DIR)/cblas_sdot_bv_fortran.o $(BUILD_DIR)/cblas_sdot_d_fortran.o $(BUILD_DIR)/cblas_sdot_dv_fortran.o $(BUILD_DIR)/cblas_sgbmv_b_fortran.o $(BUILD_DIR)/cblas_sgbmv_bv_fortran.o $(BUILD_DIR)/cblas_sgbmv_d_fortran.o $(BUILD_DIR)/cblas_sgbmv_dv_fortran.o $(BUILD_DIR)/cblas_sgemm_b_fortran.o $(BUILD_DIR)/cblas_sgemm_bv_fortran.o $(BUILD_DIR)/cblas_sgemm_d_fortran.o $(BUILD_DIR)/cblas_sgemm_dv_fortran.o $(BUILD_DIR)/cblas_sgemv_b_fortran.o $(BUILD_DIR)/cblas_sgemv_bv_fortran.o $(BUILD_DIR)/cblas_sgemv_d_fortran.o $(BUILD_DIR)/cblas_sgemv_dv_fortran.o $(BUILD_DIR)/cblas_sger_b_fortran.o $(BUILD_DIR)/cblas_sger_bv_fortran.o $(BUILD_DIR)/cblas_sger_d_fortran.o $(BUILD_DIR)/cblas_sger_dv_fortran.o $(BUILD_DIR)/cblas_snrm2_b_fortran.o $(BUILD_DIR)/cblas_snrm2_bv_fortran.o $(BUILD_DIR)/cblas_snrm2_d_fortran.o $(BUILD_DIR)/cblas_snrm2_dv_fortran.o $(BUILD_DIR)/cblas_ssbmv_b_fortran.o $(BUILD_DIR)/cblas_ssbmv_bv_fortran.o $(BUILD_DIR)/cblas_ssbmv_d_fortran.o $(BUILD_DIR)/cblas_ssbmv_dv_fortran.o $(BUILD_DIR)/cblas_sscal_b_fortran.o $(BUILD_DIR)/cblas_sscal_bv_fortran.o $(BUILD_DIR)/cblas_sscal_d_fortran.o $(BUILD_DIR)/cblas_sscal_dv_fortran.o $(BUILD_DIR)/cblas_sspmv_b_fortran.o $(BUILD_DIR)/cblas_sspmv_bv_fortran.o $(BUILD_DIR)/cblas_sspmv_d_fortran.o $(BUILD_DIR)/cblas_sspmv_dv_fortran.o $(BUILD_DIR)/cblas_sspr2_b_fortran.o $(BUILD_DIR)/cblas_sspr2_bv_fortran.o $(BUILD_DIR)/cblas_sspr2_d_fortran.o $(BUILD_DIR)/cblas_sspr2_dv_fortran.o $(BUILD_DIR)/cblas_sspr_b_fortran.o $(BUILD_DIR)/cblas_sspr_bv_fortran.o $(BUILD_DIR)/cblas_sspr_d_fortran.o $(BUILD_DIR)/cblas_sspr_dv_fortran.o $(BUILD_DIR)/cblas_sswap_b_fortran.o $(BUILD_DIR)/cblas_sswap_bv_fortran.o $(BUILD_DIR)/cblas_sswap_d_fortran.o $(BUILD_DIR)/cblas_sswap_dv_fortran.o $(BUILD_DIR)/cblas_ssymm_b_fortran.o $(BUILD_DIR)/cblas_ssymm_bv_fortran.o $(BUILD_DIR)/cblas_ssymm_d_fortran.o $(BUILD_DIR)/cblas_ssymm_dv_fortran.o $(BUILD_DIR)/cblas_ssymv_b_fortran.o $(BUILD_DIR)/cblas_ssymv_bv_fortran.o $(BUILD_DIR)/cblas_ssymv_d_fortran.o $(BUILD_DIR)/cblas_ssymv_dv_fortran.o $(BUILD_DIR)/cblas_ssyr2_b_fortran.o $(BUILD_DIR)/cblas_ssyr2_bv_fortran.o $(BUILD_DIR)/cblas_ssyr2_d_fortran.o $(BUILD_DIR)/cblas_ssyr2_dv_fortran.o $(BUILD_DIR)/cblas_ssyr2k_b_fortran.o $(BUILD_DIR)/cblas_ssyr2k_bv_fortran.o $(BUILD_DIR)/cblas_ssyr2k_d_fortran.o $(BUILD_DIR)/cblas_ssyr2k_dv_fortran.o $(BUILD_DIR)/cblas_ssyr_b_fortran.o $(BUILD_DIR)/cblas_ssyr_bv_fortran.o $(BUILD_DIR)/cblas_ssyr_d_fortran.o $(BUILD_DIR)/cblas_ssyr_dv_fortran.o $(BUILD_DIR)/cblas_ssyrk_b_fortran.o $(BUILD_DIR)/cblas_ssyrk_bv_fortran.o $(BUILD_DIR)/cblas_ssyrk_d_fortran.o $(BUILD_DIR)/cblas_ssyrk_dv_fortran.o $(BUILD_DIR)/cblas_stbmv_b_fortran.o $(BUILD_DIR)/cblas_stbmv_bv_fortran.o $(BUILD_DIR)/cblas_stbmv_d_fortran.o $(BUILD_DIR)/cblas_stbmv_dv_fortran.o $(BUILD_DIR)/cblas_stpmv_b_fortran.o $(BUILD_DIR)/cblas_stpmv_bv_fortran.o $(BUILD_DIR)/cblas_stpmv_d_fortran.o $(BUILD_DIR)/cblas_stpmv_dv_fortran.o $(BUILD_DIR)/cblas_strmm_b_fortran.o $(BUILD_DIR)/cblas_strmm_bv_fortran.o $(BUILD_DIR)/cblas_strmm_d_fortran.o $(BUILD_DIR)/cblas_strmm_dv_fortran.o $(BUILD_DIR)/cblas_strmv_b_fortran.o $(BUILD_DIR)/cblas_strmv_bv_fortran.o $(BUILD_DIR)/cblas_strmv_d_fortran.o $(BUILD_DIR)/cblas_strmv_dv_fortran.o $(BUILD_DIR)/cblas_strsm_b_fortran.o $(BUILD_DIR)/cblas_strsm_bv_fortran.o $(BUILD_DIR)/cblas_strsm_d_fortran.o $(BUILD_DIR)/cblas_strsm_dv_fortran.o $(BUILD_DIR)/cblas_strsv_b_fortran.o $(BUILD_DIR)/cblas_strsv_bv_fortran.o $(BUILD_DIR)/cblas_strsv_d_fortran.o $(BUILD_DIR)/cblas_strsv_dv_fortran.o $(BUILD_DIR)/cblas_zaxpy_b_fortran.o $(BUILD_DIR)/cblas_zaxpy_bv_fortran.o $(BUILD_DIR)/cblas_zaxpy_d_fortran.o $(BUILD_DIR)/cblas_zaxpy_dv_fortran.o $(BUILD_DIR)/cblas_zcopy_b_fortran.o $(BUILD_DIR)/cblas_zcopy_bv_fortran.o $(BUILD_DIR)/cblas_zcopy_d_fortran.o $(BUILD_DIR)/cblas_zcopy_dv_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_b_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_bv_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_d_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_dv_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_b_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_bv_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_d_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_dv_fortran.o $(BUILD_DIR)/cblas_zdscal_b_fortran.o $(BUILD_DIR)/cblas_zdscal_bv_fortran.o $(BUILD_DIR)/cblas_zdscal_d_fortran.o $(BUILD_DIR)/cblas_zdscal_dv_fortran.o $(BUILD_DIR)/cblas_zgbmv_b_fortran.o $(BUILD_DIR)/cblas_zgbmv_bv_fortran.o $(BUILD_DIR)/cblas_zgbmv_d_fortran.o $(BUILD_DIR)/cblas_zgbmv_dv_fortran.o $(BUILD_DIR)/cblas_zgemm_b_fortran.o $(BUILD_DIR)/cblas_zgemm_bv_fortran.o $(BUILD_DIR)/cblas_zgemm_d_fortran.o $(BUILD_DIR)/cblas_zgemm_dv_fortran.o $(BUILD_DIR)/cblas_zgemv_b_fortran.o $(BUILD_DIR)/cblas_zgemv_bv_fortran.o $(BUILD_DIR)/cblas_zgemv_d_fortran.o $(BUILD_DIR)/cblas_zgemv_dv_fortran.o $(BUILD_DIR)/cblas_zgerc_b_fortran.o $(BUILD_DIR)/cblas_zgerc_bv_fortran.o $(BUILD_DIR)/cblas_zgerc_d_fortran.o $(BUILD_DIR)/cblas_zgerc_dv_fortran.o $(BUILD_DIR)/cblas_zgeru_b_fortran.o $(BUILD_DIR)/cblas_zgeru_bv_fortran.o $(BUILD_DIR)/cblas_zgeru_d_fortran.o $(BUILD_DIR)/cblas_zgeru_dv_fortran.o $(BUILD_DIR)/cblas_zhbmv_b_fortran.o $(BUILD_DIR)/cblas_zhbmv_bv_fortran.o $(BUILD_DIR)/cblas_zhbmv_d_fortran.o $(BUILD_DIR)/cblas_zhbmv_dv_fortran.o $(BUILD_DIR)/cblas_zhemm_b_fortran.o $(BUILD_DIR)/cblas_zhemm_bv_fortran.o $(BUILD_DIR)/cblas_zhemm_d_fortran.o $(BUILD_DIR)/cblas_zhemm_dv_fortran.o $(BUILD_DIR)/cblas_zhemv_b_fortran.o $(BUILD_DIR)/cblas_zhemv_bv_fortran.o $(BUILD_DIR)/cblas_zhemv_d_fortran.o $(BUILD_DIR)/cblas_zhemv_dv_fortran.o $(BUILD_DIR)/cblas_zscal_b_fortran.o $(BUILD_DIR)/cblas_zscal_bv_fortran.o $(BUILD_DIR)/cblas_zscal_d_fortran.o $(BUILD_DIR)/cblas_zscal_dv_fortran.o $(BUILD_DIR)/cblas_zswap_b_fortran.o $(BUILD_DIR)/cblas_zswap_bv_fortran.o $(BUILD_DIR)/cblas_zswap_d_fortran.o $(BUILD_DIR)/cblas_zswap_dv_fortran.o $(BUILD_DIR)/cblas_zsymm_b_fortran.o $(BUILD_DIR)/cblas_zsymm_bv_fortran.o $(BUILD_DIR)/cblas_zsymm_d_fortran.o $(BUILD_DIR)/cblas_zsymm_dv_fortran.o $(BUILD_DIR)/cblas_zsyr2k_b_fortran.o $(BUILD_DIR)/cblas_zsyr2k_bv_fortran.o $(BUILD_DIR)/cblas_zsyr2k_d_fortran.o $(BUILD_DIR)/cblas_zsyr2k_dv_fortran.o $(BUILD_DIR)/cblas_zsyrk_b_fortran.o $(BUILD_DIR)/cblas_zsyrk_bv_fortran.o $(BUILD_DIR)/cblas_zsyrk_d_fortran.o $(BUILD_DIR)/cblas_zsyrk_dv_fortran.o $(BUILD_DIR)/cblas_ztbmv_b_fortran.o $(BUILD_DIR)/cblas_ztbmv_bv_fortran.o $(BUILD_DIR)/cblas_ztbmv_d_fortran.o $(BUILD_DIR)/cblas_ztbmv_dv_fortran.o $(BUILD_DIR)/cblas_ztpmv_b_fortran.o $(BUILD_DIR)/cblas_ztpmv_bv_fortran.o $(BUILD_DIR)/cblas_ztpmv_d_fortran.o $(BUILD_DIR)/cblas_ztpmv_dv_fortran.o $(BUILD_DIR)/cblas_ztrmm_b_fortran.o $(BUILD_DIR)/cblas_ztrmm_bv_fortran.o $(BUILD_DIR)/cblas_ztrmm_d_fortran.o $(BUILD_DIR)/cblas_ztrmm_dv_fortran.o $(BUILD_DIR)/cblas_ztrmv_b_fortran.o $(BUILD_DIR)/cblas_ztrmv_bv_fortran.o $(BUILD_DIR)/cblas_ztrmv_d_fortran.o $(BUILD_DIR)/cblas_ztrmv_dv_fortran.o $(BUILD_DIR)/cblas_ztrsm_b_fortran.o $(BUILD_DIR)/cblas_ztrsm_bv_fortran.o $(BUILD_DIR)/cblas_ztrsm_d_fortran.o $(BUILD_DIR)/cblas_ztrsm_dv_fortran.o $(BUILD_DIR)/cblas_ztrsv_b_fortran.o $(BUILD_DIR)/cblas_ztrsv_bv_fortran.o $(BUILD_DIR)/cblas_ztrsv_d_fortran.o $(BUILD_DIR)/cblas_ztrsv_dv_fortran.o $(BUILD_DIR)/test_cblas_caxpy_d $(BUILD_DIR)/test_cblas_ccopy_d $(BUILD_DIR)/test_cblas_cdotc_sub_d $(BUILD_DIR)/test_cblas_cdotu_sub_d $(BUILD_DIR)/test_cblas_cgbmv_d $(BUILD_DIR)/test_cblas_cgemm_d $(BUILD_DIR)/test_cblas_cgemv_d $(BUILD_DIR)/test_cblas_cgerc_d $(BUILD_DIR)/test_cblas_cgeru_d $(BUILD_DIR)/test_cblas_chbmv_d $(BUILD_DIR)/test_cblas_chemm_d $(BUILD_DIR)/test_cblas_chemv_d $(BUILD_DIR)/test_cblas_cscal_d $(BUILD_DIR)/test_cblas_cswap_d $(BUILD_DIR)/test_cblas_csymm_d $(BUILD_DIR)/test_cblas_csyr2k_d $(BUILD_DIR)/test_cblas_csyrk_d $(BUILD_DIR)/test_cblas_ctbmv_d $(BUILD_DIR)/test_cblas_ctpmv_d $(BUILD_DIR)/test_cblas_ctrmm_d $(BUILD_DIR)/test_cblas_ctrmv_d $(BUILD_DIR)/test_cblas_ctrsm_d $(BUILD_DIR)/test_cblas_ctrsv_d $(BUILD_DIR)/test_cblas_dasum_d $(BUILD_DIR)/test_cblas_daxpy_d $(BUILD_DIR)/test_cblas_dcopy_d $(BUILD_DIR)/test_cblas_ddot_d $(BUILD_DIR)/test_cblas_dgbmv_d $(BUILD_DIR)/test_cblas_dgemm_d $(BUILD_DIR)/test_cblas_dgemv_d $(BUILD_DIR)/test_cblas_dger_d $(BUILD_DIR)/test_cblas_dnrm2_d $(BUILD_DIR)/test_cblas_dsbmv_d $(BUILD_DIR)/test_cblas_dscal_d $(BUILD_DIR)/test_cblas_dspmv_d $(BUILD_DIR)/test_cblas_dspr2_d $(BUILD_DIR)/test_cblas_dspr_d $(BUILD_DIR)/test_cblas_dswap_d $(BUILD_DIR)/test_cblas_dsymm_d $(BUILD_DIR)/test_cblas_dsymv_d $(BUILD_DIR)/test_cblas_dsyr2_d $(BUILD_DIR)/test_cblas_dsyr2k_d $(BUILD_DIR)/test_cblas_dsyr_d $(BUILD_DIR)/test_cblas_dsyrk_d $(BUILD_DIR)/test_cblas_dtbmv_d $(BUILD_DIR)/test_cblas_dtpmv_d $(BUILD_DIR)/test_cblas_dtrmm_d $(BUILD_DIR)/test_cblas_dtrmv_d $(BUILD_DIR)/test_cblas_dtrsm_d $(BUILD_DIR)/test_cblas_dtrsv_d $(BUILD_DIR)/test_cblas_sasum_d $(BUILD_DIR)/test_cblas_saxpy_d $(BUILD_DIR)/test_cblas_scopy_d $(BUILD_DIR)/test_cblas_sdot_d $(BUILD_DIR)/test_cblas_sgbmv_d $(BUILD_DIR)/test_cblas_sgemm_d $(BUILD_DIR)/test_cblas_sgemv_d $(BUILD_DIR)/test_cblas_sger_d $(BUILD_DIR)/test_cblas_snrm2_d $(BUILD_DIR)/test_cblas_ssbmv_d $(BUILD_DIR)/test_cblas_sscal_d $(BUILD_DIR)/test_cblas_sspmv_d $(BUILD_DIR)/test_cblas_sspr2_d $(BUILD_DIR)/test_cblas_sspr_d $(BUILD_DIR)/test_cblas_sswap_d $(BUILD_DIR)/test_cblas_ssymm_d $(BUILD_DIR)/test_cblas_ssymv_d $(BUILD_DIR)/test_cblas_ssyr2_d $(BUILD_DIR)/test_cblas_ssyr2k_d $(BUILD_DIR)/test_cblas_ssyr_d $(BUILD_DIR)/test_cblas_ssyrk_d $(BUILD_DIR)/test_cblas_stbmv_d $(BUILD_DIR)/test_cblas_stpmv_d $(BUILD_DIR)/test_cblas_strmm_d $(BUILD_DIR)/test_cblas_strmv_d $(BUILD_DIR)/test_cblas_strsm_d $(BUILD_DIR)/test_cblas_strsv_d $(BUILD_DIR)/test_cblas_zaxpy_d $(BUILD_DIR)/test_cblas_zcopy_d $(BUILD_DIR)/test_cblas_zdotc_sub_d $(BUILD_DIR)/test_cblas_zdotu_sub_d $(BUILD_DIR)/test_cblas_zdscal_d $(BUILD_DIR)/test_cblas_zgbmv_d $(BUILD_DIR)/test_cblas_zgemm_d $(BUILD_DIR)/test_cblas_zgemv_d $(BUILD_DIR)/test_cblas_zgerc_d $(BUILD_DIR)/test_cblas_zgeru_d $(BUILD_DIR)/test_cblas_zhbmv_d $(BUILD_DIR)/test_cblas_zhemm_d $(BUILD_DIR)/test_cblas_zhemv_d $(BUILD_DIR)/test_cblas_zscal_d $(BUILD_DIR)/test_cblas_zswap_d $(BUILD_DIR)/test_cblas_zsymm_d $(BUILD_DIR)/test_cblas_zsyr2k_d $(BUILD_DIR)/test_cblas_zsyrk_d $(BUILD_DIR)/test_cblas_ztbmv_d $(BUILD_DIR)/test_cblas_ztpmv_d $(BUILD_DIR)/test_cblas_ztrmm_d $(BUILD_DIR)/test_cblas_ztrmv_d $(BUILD_DIR)/test_cblas_ztrsm_d $(BUILD_DIR)/test_cblas_ztrsv_d $(BUILD_DIR)/test_cblas_caxpy_b $(BUILD_DIR)/test_cblas_ccopy_b $(BUILD_DIR)/test_cblas_cdotc_sub_b $(BUILD_DIR)/test_cblas_cdotu_sub_b $(BUILD_DIR)/test_cblas_cgbmv_b $(BUILD_DIR)/test_cblas_cgemm_b $(BUILD_DIR)/test_cblas_cgemv_b $(BUILD_DIR)/test_cblas_cgerc_b $(BUILD_DIR)/test_cblas_cgeru_b $(BUILD_DIR)/test_cblas_chbmv_b $(BUILD_DIR)/test_cblas_chemm_b $(BUILD_DIR)/test_cblas_chemv_b $(BUILD_DIR)/test_cblas_cscal_b $(BUILD_DIR)/test_cblas_cswap_b $(BUILD_DIR)/test_cblas_csymm_b $(BUILD_DIR)/test_cblas_csyr2k_b $(BUILD_DIR)/test_cblas_csyrk_b $(BUILD_DIR)/test_cblas_ctbmv_b $(BUILD_DIR)/test_cblas_ctpmv_b $(BUILD_DIR)/test_cblas_ctrmm_b $(BUILD_DIR)/test_cblas_ctrmv_b $(BUILD_DIR)/test_cblas_ctrsm_b $(BUILD_DIR)/test_cblas_ctrsv_b $(BUILD_DIR)/test_cblas_dasum_b $(BUILD_DIR)/test_cblas_daxpy_b $(BUILD_DIR)/test_cblas_dcopy_b $(BUILD_DIR)/test_cblas_ddot_b $(BUILD_DIR)/test_cblas_dgbmv_b $(BUILD_DIR)/test_cblas_dgemm_b $(BUILD_DIR)/test_cblas_dgemv_b $(BUILD_DIR)/test_cblas_dger_b $(BUILD_DIR)/test_cblas_dnrm2_b $(BUILD_DIR)/test_cblas_dsbmv_b $(BUILD_DIR)/test_cblas_dscal_b $(BUILD_DIR)/test_cblas_dspmv_b $(BUILD_DIR)/test_cblas_dspr2_b $(BUILD_DIR)/test_cblas_dspr_b $(BUILD_DIR)/test_cblas_dswap_b $(BUILD_DIR)/test_cblas_dsymm_b $(BUILD_DIR)/test_cblas_dsymv_b $(BUILD_DIR)/test_cblas_dsyr2_b $(BUILD_DIR)/test_cblas_dsyr2k_b $(BUILD_DIR)/test_cblas_dsyr_b $(BUILD_DIR)/test_cblas_dsyrk_b $(BUILD_DIR)/test_cblas_dtbmv_b $(BUILD_DIR)/test_cblas_dtpmv_b $(BUILD_DIR)/test_cblas_dtrmm_b $(BUILD_DIR)/test_cblas_dtrmv_b $(BUILD_DIR)/test_cblas_dtrsm_b $(BUILD_DIR)/test_cblas_dtrsv_b $(BUILD_DIR)/test_cblas_sasum_b $(BUILD_DIR)/test_cblas_saxpy_b $(BUILD_DIR)/test_cblas_scopy_b $(BUILD_DIR)/test_cblas_sdot_b $(BUILD_DIR)/test_cblas_sgbmv_b $(BUILD_DIR)/test_cblas_sgemm_b $(BUILD_DIR)/test_cblas_sgemv_b $(BUILD_DIR)/test_cblas_sger_b $(BUILD_DIR)/test_cblas_snrm2_b $(BUILD_DIR)/test_cblas_ssbmv_b $(BUILD_DIR)/test_cblas_sscal_b $(BUILD_DIR)/test_cblas_sspmv_b $(BUILD_DIR)/test_cblas_sspr2_b $(BUILD_DIR)/test_cblas_sspr_b $(BUILD_DIR)/test_cblas_sswap_b $(BUILD_DIR)/test_cblas_ssymm_b $(BUILD_DIR)/test_cblas_ssymv_b $(BUILD_DIR)/test_cblas_ssyr2_b $(BUILD_DIR)/test_cblas_ssyr2k_b $(BUILD_DIR)/test_cblas_ssyr_b $(BUILD_DIR)/test_cblas_ssyrk_b $(BUILD_DIR)/test_cblas_stbmv_b $(BUILD_DIR)/test_cblas_stpmv_b $(BUILD_DIR)/test_cblas_strmm_b $(BUILD_DIR)/test_cblas_strmv_b $(BUILD_DIR)/test_cblas_strsm_b $(BUILD_DIR)/test_cblas_strsv_b $(BUILD_DIR)/test_cblas_zaxpy_b $(BUILD_DIR)/test_cblas_zcopy_b $(BUILD_DIR)/test_cblas_zdotc_sub_b $(BUILD_DIR)/test_cblas_zdotu_sub_b $(BUILD_DIR)/test_cblas_zdscal_b $(BUILD_DIR)/test_cblas_zgbmv_b $(BUILD_DIR)/test_cblas_zgemm_b $(BUILD_DIR)/test_cblas_zgemv_b $(BUILD_DIR)/test_cblas_zgerc_b $(BUILD_DIR)/test_cblas_zgeru_b $(BUILD_DIR)/test_cblas_zhbmv_b $(BUILD_DIR)/test_cblas_zhemm_b $(BUILD_DIR)/test_cblas_zhemv_b $(BUILD_DIR)/test_cblas_zscal_b $(BUILD_DIR)/test_cblas_zswap_b $(BUILD_DIR)/test_cblas_zsymm_b $(BUILD_DIR)/test_cblas_zsyr2k_b $(BUILD_DIR)/test_cblas_zsyrk_b $(BUILD_DIR)/test_cblas_ztbmv_b $(BUILD_DIR)/test_cblas_ztpmv_b $(BUILD_DIR)/test_cblas_ztrmm_b $(BUILD_DIR)/test_cblas_ztrmv_b $(BUILD_DIR)/test_cblas_ztrsm_b $(BUILD_DIR)/test_cblas_ztrsv_b $(BUILD_DIR)/test_cblas_caxpy_dv $(BUILD_DIR)/test_cblas_ccopy_dv $(BUILD_DIR)/test_cblas_cdotc_sub_dv $(BUILD_DIR)/test_cblas_cdotu_sub_dv $(BUILD_DIR)/test_cblas_cgbmv_dv $(BUILD_DIR)/test_cblas_cgemm_dv $(BUILD_DIR)/test_cblas_cgemv_dv $(BUILD_DIR)/test_cblas_cgerc_dv $(BUILD_DIR)/test_cblas_cgeru_dv $(BUILD_DIR)/test_cblas_chbmv_dv $(BUILD_DIR)/test_cblas_chemm_dv $(BUILD_DIR)/test_cblas_chemv_dv $(BUILD_DIR)/test_cblas_cscal_dv $(BUILD_DIR)/test_cblas_cswap_dv $(BUILD_DIR)/test_cblas_csymm_dv $(BUILD_DIR)/test_cblas_csyr2k_dv $(BUILD_DIR)/test_cblas_csyrk_dv $(BUILD_DIR)/test_cblas_ctbmv_dv $(BUILD_DIR)/test_cblas_ctpmv_dv $(BUILD_DIR)/test_cblas_ctrmm_dv $(BUILD_DIR)/test_cblas_ctrmv_dv $(BUILD_DIR)/test_cblas_ctrsm_dv $(BUILD_DIR)/test_cblas_ctrsv_dv $(BUILD_DIR)/test_cblas_dasum_dv $(BUILD_DIR)/test_cblas_daxpy_dv $(BUILD_DIR)/test_cblas_dcopy_dv $(BUILD_DIR)/test_cblas_ddot_dv $(BUILD_DIR)/test_cblas_dgbmv_dv $(BUILD_DIR)/test_cblas_dgemm_dv $(BUILD_DIR)/test_cblas_dgemv_dv $(BUILD_DIR)/test_cblas_dger_dv $(BUILD_DIR)/test_cblas_dnrm2_dv $(BUILD_DIR)/test_cblas_dsbmv_dv $(BUILD_DIR)/test_cblas_dscal_dv $(BUILD_DIR)/test_cblas_dspmv_dv $(BUILD_DIR)/test_cblas_dspr2_dv $(BUILD_DIR)/test_cblas_dspr_dv $(BUILD_DIR)/test_cblas_dswap_dv $(BUILD_DIR)/test_cblas_dsymm_dv $(BUILD_DIR)/test_cblas_dsymv_dv $(BUILD_DIR)/test_cblas_dsyr2_dv $(BUILD_DIR)/test_cblas_dsyr2k_dv $(BUILD_DIR)/test_cblas_dsyr_dv $(BUILD_DIR)/test_cblas_dsyrk_dv $(BUILD_DIR)/test_cblas_dtbmv_dv $(BUILD_DIR)/test_cblas_dtpmv_dv $(BUILD_DIR)/test_cblas_dtrmm_dv $(BUILD_DIR)/test_cblas_dtrmv_dv $(BUILD_DIR)/test_cblas_dtrsm_dv $(BUILD_DIR)/test_cblas_dtrsv_dv $(BUILD_DIR)/test_cblas_sasum_dv $(BUILD_DIR)/test_cblas_saxpy_dv $(BUILD_DIR)/test_cblas_scopy_dv $(BUILD_DIR)/test_cblas_sdot_dv $(BUILD_DIR)/test_cblas_sgbmv_dv $(BUILD_DIR)/test_cblas_sgemm_dv $(BUILD_DIR)/test_cblas_sgemv_dv $(BUILD_DIR)/test_cblas_sger_dv $(BUILD_DIR)/test_cblas_snrm2_dv $(BUILD_DIR)/test_cblas_ssbmv_dv $(BUILD_DIR)/test_cblas_sscal_dv $(BUILD_DIR)/test_cblas_sspmv_dv $(BUILD_DIR)/test_cblas_sspr2_dv $(BUILD_DIR)/test_cblas_sspr_dv $(BUILD_DIR)/test_cblas_sswap_dv $(BUILD_DIR)/test_cblas_ssymm_dv $(BUILD_DIR)/test_cblas_ssymv_dv $(BUILD_DIR)/test_cblas_ssyr2_dv $(BUILD_DIR)/test_cblas_ssyr2k_dv $(BUILD_DIR)/test_cblas_ssyr_dv $(BUILD_DIR)/test_cblas_ssyrk_dv $(BUILD_DIR)/test_cblas_stbmv_dv $(BUILD_DIR)/test_cblas_stpmv_dv $(BUILD_DIR)/test_cblas_strmm_dv $(BUILD_DIR)/test_cblas_strmv_dv $(BUILD_DIR)/test_cblas_strsm_dv $(BUILD_DIR)/test_cblas_strsv_dv $(BUILD_DIR)/test_cblas_zaxpy_dv $(BUILD_DIR)/test_cblas_zcopy_dv $(BUILD_DIR)/test_cblas_zdotc_sub_dv $(BUILD_DIR)/test_cblas_zdotu_sub_dv $(BUILD_DIR)/test_cblas_zdscal_dv $(BUILD_DIR)/test_cblas_zgbmv_dv $(BUILD_DIR)/test_cblas_zgemm_dv $(BUILD_DIR)/test_cblas_zgemv_dv $(BUILD_DIR)/test_cblas_zgerc_dv $(BUILD_DIR)/test_cblas_zgeru_dv $(BUILD_DIR)/test_cblas_zhbmv_dv $(BUILD_DIR)/test_cblas_zhemm_dv $(BUILD_DIR)/test_cblas_zhemv_dv $(BUILD_DIR)/test_cblas_zscal_dv $(BUILD_DIR)/test_cblas_zswap_dv $(BUILD_DIR)/test_cblas_zsymm_dv $(BUILD_DIR)/test_cblas_zsyr2k_dv $(BUILD_DIR)/test_cblas_zsyrk_dv $(BUILD_DIR)/test_cblas_ztbmv_dv $(BUILD_DIR)/test_cblas_ztpmv_dv $(BUILD_DIR)/test_cblas_ztrmm_dv $(BUILD_DIR)/test_cblas_ztrmv_dv $(BUILD_DIR)/test_cblas_ztrsm_dv $(BUILD_DIR)/test_cblas_ztrsv_dv $(BUILD_DIR)/test_cblas_caxpy_bv $(BUILD_DIR)/test_cblas_ccopy_bv $(BUILD_DIR)/test_cblas_cdotc_sub_bv $(BUILD_DIR)/test_cblas_cdotu_sub_bv $(BUILD_DIR)/test_cblas_cgbmv_bv $(BUILD_DIR)/test_cblas_cgemm_bv $(BUILD_DIR)/test_cblas_cgemv_bv $(BUILD_DIR)/test_cblas_cgerc_bv $(BUILD_DIR)/test_cblas_cgeru_bv $(BUILD_DIR)/test_cblas_chbmv_bv $(BUILD_DIR)/test_cblas_chemm_bv $(BUILD_DIR)/test_cblas_chemv_bv $(BUILD_DIR)/test_cblas_cscal_bv $(BUILD_DIR)/test_cblas_cswap_bv $(BUILD_DIR)/test_cblas_csymm_bv $(BUILD_DIR)/test_cblas_csyr2k_bv $(BUILD_DIR)/test_cblas_csyrk_bv $(BUILD_DIR)/test_cblas_ctbmv_bv $(BUILD_DIR)/test_cblas_ctpmv_bv $(BUILD_DIR)/test_cblas_ctrmm_bv $(BUILD_DIR)/test_cblas_ctrmv_bv $(BUILD_DIR)/test_cblas_ctrsm_bv $(BUILD_DIR)/test_cblas_ctrsv_bv $(BUILD_DIR)/test_cblas_dasum_bv $(BUILD_DIR)/test_cblas_daxpy_bv $(BUILD_DIR)/test_cblas_dcopy_bv $(BUILD_DIR)/test_cblas_ddot_bv $(BUILD_DIR)/test_cblas_dgbmv_bv $(BUILD_DIR)/test_cblas_dgemm_bv $(BUILD_DIR)/test_cblas_dgemv_bv $(BUILD_DIR)/test_cblas_dger_bv $(BUILD_DIR)/test_cblas_dnrm2_bv $(BUILD_DIR)/test_cblas_dsbmv_bv $(BUILD_DIR)/test_cblas_dscal_bv $(BUILD_DIR)/test_cblas_dspmv_bv $(BUILD_DIR)/test_cblas_dspr2_bv $(BUILD_DIR)/test_cblas_dspr_bv $(BUILD_DIR)/test_cblas_dswap_bv $(BUILD_DIR)/test_cblas_dsymm_bv $(BUILD_DIR)/test_cblas_dsymv_bv $(BUILD_DIR)/test_cblas_dsyr2_bv $(BUILD_DIR)/test_cblas_dsyr2k_bv $(BUILD_DIR)/test_cblas_dsyr_bv $(BUILD_DIR)/test_cblas_dsyrk_bv $(BUILD_DIR)/test_cblas_dtbmv_bv $(BUILD_DIR)/test_cblas_dtpmv_bv $(BUILD_DIR)/test_cblas_dtrmm_bv $(BUILD_DIR)/test_cblas_dtrmv_bv $(BUILD_DIR)/test_cblas_dtrsm_bv $(BUILD_DIR)/test_cblas_dtrsv_bv $(BUILD_DIR)/test_cblas_sasum_bv $(BUILD_DIR)/test_cblas_saxpy_bv $(BUILD_DIR)/test_cblas_scopy_bv $(BUILD_DIR)/test_cblas_sdot_bv $(BUILD_DIR)/test_cblas_sgbmv_bv $(BUILD_DIR)/test_cblas_sgemm_bv $(BUILD_DIR)/test_cblas_sgemv_bv $(BUILD_DIR)/test_cblas_sger_bv $(BUILD_DIR)/test_cblas_snrm2_bv $(BUILD_DIR)/test_cblas_ssbmv_bv $(BUILD_DIR)/test_cblas_sscal_bv $(BUILD_DIR)/test_cblas_sspmv_bv $(BUILD_DIR)/test_cblas_sspr2_bv $(BUILD_DIR)/test_cblas_sspr_bv $(BUILD_DIR)/test_cblas_sswap_bv $(BUILD_DIR)/test_cblas_ssymm_bv $(BUILD_DIR)/test_cblas_ssymv_bv $(BUILD_DIR)/test_cblas_ssyr2_bv $(BUILD_DIR)/test_cblas_ssyr2k_bv $(BUILD_DIR)/test_cblas_ssyr_bv $(BUILD_DIR)/test_cblas_ssyrk_bv $(BUILD_DIR)/test_cblas_stbmv_bv $(BUILD_DIR)/test_cblas_stpmv_bv $(BUILD_DIR)/test_cblas_strmm_bv $(BUILD_DIR)/test_cblas_strmv_bv $(BUILD_DIR)/test_cblas_strsm_bv $(BUILD_DIR)/test_cblas_strsv_bv $(BUILD_DIR)/test_cblas_zaxpy_bv $(BUILD_DIR)/test_cblas_zcopy_bv $(BUILD_DIR)/test_cblas_zdotc_sub_bv $(BUILD_DIR)/test_cblas_zdotu_sub_bv $(BUILD_DIR)/test_cblas_zdscal_bv $(BUILD_DIR)/test_cblas_zgbmv_bv $(BUILD_DIR)/test_cblas_zgemm_bv $(BUILD_DIR)/test_cblas_zgemv_bv $(BUILD_DIR)/test_cblas_zgerc_bv $(BUILD_DIR)/test_cblas_zgeru_bv $(BUILD_DIR)/test_cblas_zhbmv_bv $(BUILD_DIR)/test_cblas_zhemm_bv $(BUILD_DIR)/test_cblas_zhemv_bv $(BUILD_DIR)/test_cblas_zscal_bv $(BUILD_DIR)/test_cblas_zswap_bv $(BUILD_DIR)/test_cblas_zsymm_bv $(BUILD_DIR)/test_cblas_zsyr2k_bv $(BUILD_DIR)/test_cblas_zsyrk_bv $(BUILD_DIR)/test_cblas_ztbmv_bv $(BUILD_DIR)/test_cblas_ztpmv_bv $(BUILD_DIR)/test_cblas_ztrmm_bv $(BUILD_DIR)/test_cblas_ztrmv_bv $(BUILD_DIR)/test_cblas_ztrsm_bv $(BUILD_DIR)/test_cblas_ztrsv_bv $(BUILD_DIR)/libcblas_diff.a
+all: $(BUILD_DIR) $(INC_DIR)/DIFFSIZESC.inc $(INC_DIR)/DIFFSIZESF.inc $(BUILD_DIR)/cblas_caxpy_d.o $(BUILD_DIR)/cblas_ccopy_d.o $(BUILD_DIR)/cblas_cdotc_sub_d.o $(BUILD_DIR)/cblas_cdotu_sub_d.o $(BUILD_DIR)/cblas_cgbmv_d.o $(BUILD_DIR)/cblas_cgemm_d.o $(BUILD_DIR)/cblas_cgemv_d.o $(BUILD_DIR)/cblas_cgerc_d.o $(BUILD_DIR)/cblas_cgeru_d.o $(BUILD_DIR)/cblas_chbmv_d.o $(BUILD_DIR)/cblas_chemm_d.o $(BUILD_DIR)/cblas_chemv_d.o $(BUILD_DIR)/cblas_cscal_d.o $(BUILD_DIR)/cblas_cswap_d.o $(BUILD_DIR)/cblas_csymm_d.o $(BUILD_DIR)/cblas_csyr2k_d.o $(BUILD_DIR)/cblas_csyrk_d.o $(BUILD_DIR)/cblas_ctbmv_d.o $(BUILD_DIR)/cblas_ctpmv_d.o $(BUILD_DIR)/cblas_ctrmm_d.o $(BUILD_DIR)/cblas_ctrmv_d.o $(BUILD_DIR)/cblas_ctrsm_d.o $(BUILD_DIR)/cblas_ctrsv_d.o $(BUILD_DIR)/cblas_dasum_d.o $(BUILD_DIR)/cblas_daxpy_d.o $(BUILD_DIR)/cblas_dcopy_d.o $(BUILD_DIR)/cblas_ddot_d.o $(BUILD_DIR)/cblas_dgbmv_d.o $(BUILD_DIR)/cblas_dgemm_d.o $(BUILD_DIR)/cblas_dgemv_d.o $(BUILD_DIR)/cblas_dger_d.o $(BUILD_DIR)/cblas_dnrm2_d.o $(BUILD_DIR)/cblas_dsbmv_d.o $(BUILD_DIR)/cblas_dscal_d.o $(BUILD_DIR)/cblas_dspmv_d.o $(BUILD_DIR)/cblas_dspr2_d.o $(BUILD_DIR)/cblas_dspr_d.o $(BUILD_DIR)/cblas_dswap_d.o $(BUILD_DIR)/cblas_dsymm_d.o $(BUILD_DIR)/cblas_dsymv_d.o $(BUILD_DIR)/cblas_dsyr2_d.o $(BUILD_DIR)/cblas_dsyr2k_d.o $(BUILD_DIR)/cblas_dsyr_d.o $(BUILD_DIR)/cblas_dsyrk_d.o $(BUILD_DIR)/cblas_dtbmv_d.o $(BUILD_DIR)/cblas_dtpmv_d.o $(BUILD_DIR)/cblas_dtrmm_d.o $(BUILD_DIR)/cblas_dtrmv_d.o $(BUILD_DIR)/cblas_dtrsm_d.o $(BUILD_DIR)/cblas_dtrsv_d.o $(BUILD_DIR)/cblas_sasum_d.o $(BUILD_DIR)/cblas_saxpy_d.o $(BUILD_DIR)/cblas_scopy_d.o $(BUILD_DIR)/cblas_sdot_d.o $(BUILD_DIR)/cblas_sgbmv_d.o $(BUILD_DIR)/cblas_sgemm_d.o $(BUILD_DIR)/cblas_sgemv_d.o $(BUILD_DIR)/cblas_sger_d.o $(BUILD_DIR)/cblas_snrm2_d.o $(BUILD_DIR)/cblas_ssbmv_d.o $(BUILD_DIR)/cblas_sscal_d.o $(BUILD_DIR)/cblas_sspmv_d.o $(BUILD_DIR)/cblas_sspr2_d.o $(BUILD_DIR)/cblas_sspr_d.o $(BUILD_DIR)/cblas_sswap_d.o $(BUILD_DIR)/cblas_ssymm_d.o $(BUILD_DIR)/cblas_ssymv_d.o $(BUILD_DIR)/cblas_ssyr2_d.o $(BUILD_DIR)/cblas_ssyr2k_d.o $(BUILD_DIR)/cblas_ssyr_d.o $(BUILD_DIR)/cblas_ssyrk_d.o $(BUILD_DIR)/cblas_stbmv_d.o $(BUILD_DIR)/cblas_stpmv_d.o $(BUILD_DIR)/cblas_strmm_d.o $(BUILD_DIR)/cblas_strmv_d.o $(BUILD_DIR)/cblas_strsm_d.o $(BUILD_DIR)/cblas_strsv_d.o $(BUILD_DIR)/cblas_zaxpy_d.o $(BUILD_DIR)/cblas_zcopy_d.o $(BUILD_DIR)/cblas_zdotc_sub_d.o $(BUILD_DIR)/cblas_zdotu_sub_d.o $(BUILD_DIR)/cblas_zdscal_d.o $(BUILD_DIR)/cblas_zgbmv_d.o $(BUILD_DIR)/cblas_zgemm_d.o $(BUILD_DIR)/cblas_zgemv_d.o $(BUILD_DIR)/cblas_zgerc_d.o $(BUILD_DIR)/cblas_zgeru_d.o $(BUILD_DIR)/cblas_zhbmv_d.o $(BUILD_DIR)/cblas_zhemm_d.o $(BUILD_DIR)/cblas_zhemv_d.o $(BUILD_DIR)/cblas_zscal_d.o $(BUILD_DIR)/cblas_zswap_d.o $(BUILD_DIR)/cblas_zsymm_d.o $(BUILD_DIR)/cblas_zsyr2k_d.o $(BUILD_DIR)/cblas_zsyrk_d.o $(BUILD_DIR)/cblas_ztbmv_d.o $(BUILD_DIR)/cblas_ztpmv_d.o $(BUILD_DIR)/cblas_ztrmm_d.o $(BUILD_DIR)/cblas_ztrmv_d.o $(BUILD_DIR)/cblas_ztrsm_d.o $(BUILD_DIR)/cblas_ztrsv_d.o $(BUILD_DIR)/cblas_caxpy_b.o $(BUILD_DIR)/cblas_ccopy_b.o $(BUILD_DIR)/cblas_cdotc_sub_b.o $(BUILD_DIR)/cblas_cdotu_sub_b.o $(BUILD_DIR)/cblas_cgbmv_b.o $(BUILD_DIR)/cblas_cgemm_b.o $(BUILD_DIR)/cblas_cgemv_b.o $(BUILD_DIR)/cblas_cgerc_b.o $(BUILD_DIR)/cblas_cgeru_b.o $(BUILD_DIR)/cblas_chbmv_b.o $(BUILD_DIR)/cblas_chemm_b.o $(BUILD_DIR)/cblas_chemv_b.o $(BUILD_DIR)/cblas_cscal_b.o $(BUILD_DIR)/cblas_cswap_b.o $(BUILD_DIR)/cblas_csymm_b.o $(BUILD_DIR)/cblas_csyr2k_b.o $(BUILD_DIR)/cblas_csyrk_b.o $(BUILD_DIR)/cblas_ctbmv_b.o $(BUILD_DIR)/cblas_ctpmv_b.o $(BUILD_DIR)/cblas_ctrmm_b.o $(BUILD_DIR)/cblas_ctrmv_b.o $(BUILD_DIR)/cblas_ctrsm_b.o $(BUILD_DIR)/cblas_ctrsv_b.o $(BUILD_DIR)/cblas_dasum_b.o $(BUILD_DIR)/cblas_daxpy_b.o $(BUILD_DIR)/cblas_dcopy_b.o $(BUILD_DIR)/cblas_ddot_b.o $(BUILD_DIR)/cblas_dgbmv_b.o $(BUILD_DIR)/cblas_dgemm_b.o $(BUILD_DIR)/cblas_dgemv_b.o $(BUILD_DIR)/cblas_dger_b.o $(BUILD_DIR)/cblas_dnrm2_b.o $(BUILD_DIR)/cblas_dsbmv_b.o $(BUILD_DIR)/cblas_dscal_b.o $(BUILD_DIR)/cblas_dspmv_b.o $(BUILD_DIR)/cblas_dspr2_b.o $(BUILD_DIR)/cblas_dspr_b.o $(BUILD_DIR)/cblas_dswap_b.o $(BUILD_DIR)/cblas_dsymm_b.o $(BUILD_DIR)/cblas_dsymv_b.o $(BUILD_DIR)/cblas_dsyr2_b.o $(BUILD_DIR)/cblas_dsyr2k_b.o $(BUILD_DIR)/cblas_dsyr_b.o $(BUILD_DIR)/cblas_dsyrk_b.o $(BUILD_DIR)/cblas_dtbmv_b.o $(BUILD_DIR)/cblas_dtpmv_b.o $(BUILD_DIR)/cblas_dtrmm_b.o $(BUILD_DIR)/cblas_dtrmv_b.o $(BUILD_DIR)/cblas_dtrsm_b.o $(BUILD_DIR)/cblas_dtrsv_b.o $(BUILD_DIR)/cblas_sasum_b.o $(BUILD_DIR)/cblas_saxpy_b.o $(BUILD_DIR)/cblas_scopy_b.o $(BUILD_DIR)/cblas_sdot_b.o $(BUILD_DIR)/cblas_sgbmv_b.o $(BUILD_DIR)/cblas_sgemm_b.o $(BUILD_DIR)/cblas_sgemv_b.o $(BUILD_DIR)/cblas_sger_b.o $(BUILD_DIR)/cblas_snrm2_b.o $(BUILD_DIR)/cblas_ssbmv_b.o $(BUILD_DIR)/cblas_sscal_b.o $(BUILD_DIR)/cblas_sspmv_b.o $(BUILD_DIR)/cblas_sspr2_b.o $(BUILD_DIR)/cblas_sspr_b.o $(BUILD_DIR)/cblas_sswap_b.o $(BUILD_DIR)/cblas_ssymm_b.o $(BUILD_DIR)/cblas_ssymv_b.o $(BUILD_DIR)/cblas_ssyr2_b.o $(BUILD_DIR)/cblas_ssyr2k_b.o $(BUILD_DIR)/cblas_ssyr_b.o $(BUILD_DIR)/cblas_ssyrk_b.o $(BUILD_DIR)/cblas_stbmv_b.o $(BUILD_DIR)/cblas_stpmv_b.o $(BUILD_DIR)/cblas_strmm_b.o $(BUILD_DIR)/cblas_strmv_b.o $(BUILD_DIR)/cblas_strsm_b.o $(BUILD_DIR)/cblas_strsv_b.o $(BUILD_DIR)/cblas_zaxpy_b.o $(BUILD_DIR)/cblas_zcopy_b.o $(BUILD_DIR)/cblas_zdotc_sub_b.o $(BUILD_DIR)/cblas_zdotu_sub_b.o $(BUILD_DIR)/cblas_zdscal_b.o $(BUILD_DIR)/cblas_zgbmv_b.o $(BUILD_DIR)/cblas_zgemm_b.o $(BUILD_DIR)/cblas_zgemv_b.o $(BUILD_DIR)/cblas_zgerc_b.o $(BUILD_DIR)/cblas_zgeru_b.o $(BUILD_DIR)/cblas_zhbmv_b.o $(BUILD_DIR)/cblas_zhemm_b.o $(BUILD_DIR)/cblas_zhemv_b.o $(BUILD_DIR)/cblas_zscal_b.o $(BUILD_DIR)/cblas_zswap_b.o $(BUILD_DIR)/cblas_zsymm_b.o $(BUILD_DIR)/cblas_zsyr2k_b.o $(BUILD_DIR)/cblas_zsyrk_b.o $(BUILD_DIR)/cblas_ztbmv_b.o $(BUILD_DIR)/cblas_ztpmv_b.o $(BUILD_DIR)/cblas_ztrmm_b.o $(BUILD_DIR)/cblas_ztrmv_b.o $(BUILD_DIR)/cblas_ztrsm_b.o $(BUILD_DIR)/cblas_ztrsv_b.o $(BUILD_DIR)/cblas_caxpy_dv.o $(BUILD_DIR)/cblas_ccopy_dv.o $(BUILD_DIR)/cblas_cdotc_sub_dv.o $(BUILD_DIR)/cblas_cdotu_sub_dv.o $(BUILD_DIR)/cblas_cgbmv_dv.o $(BUILD_DIR)/cblas_cgemm_dv.o $(BUILD_DIR)/cblas_cgemv_dv.o $(BUILD_DIR)/cblas_cgerc_dv.o $(BUILD_DIR)/cblas_cgeru_dv.o $(BUILD_DIR)/cblas_chbmv_dv.o $(BUILD_DIR)/cblas_chemm_dv.o $(BUILD_DIR)/cblas_chemv_dv.o $(BUILD_DIR)/cblas_cscal_dv.o $(BUILD_DIR)/cblas_cswap_dv.o $(BUILD_DIR)/cblas_csymm_dv.o $(BUILD_DIR)/cblas_csyr2k_dv.o $(BUILD_DIR)/cblas_csyrk_dv.o $(BUILD_DIR)/cblas_ctbmv_dv.o $(BUILD_DIR)/cblas_ctpmv_dv.o $(BUILD_DIR)/cblas_ctrmm_dv.o $(BUILD_DIR)/cblas_ctrmv_dv.o $(BUILD_DIR)/cblas_ctrsm_dv.o $(BUILD_DIR)/cblas_ctrsv_dv.o $(BUILD_DIR)/cblas_dasum_dv.o $(BUILD_DIR)/cblas_daxpy_dv.o $(BUILD_DIR)/cblas_dcopy_dv.o $(BUILD_DIR)/cblas_ddot_dv.o $(BUILD_DIR)/cblas_dgbmv_dv.o $(BUILD_DIR)/cblas_dgemm_dv.o $(BUILD_DIR)/cblas_dgemv_dv.o $(BUILD_DIR)/cblas_dger_dv.o $(BUILD_DIR)/cblas_dnrm2_dv.o $(BUILD_DIR)/cblas_dsbmv_dv.o $(BUILD_DIR)/cblas_dscal_dv.o $(BUILD_DIR)/cblas_dspmv_dv.o $(BUILD_DIR)/cblas_dspr2_dv.o $(BUILD_DIR)/cblas_dspr_dv.o $(BUILD_DIR)/cblas_dswap_dv.o $(BUILD_DIR)/cblas_dsymm_dv.o $(BUILD_DIR)/cblas_dsymv_dv.o $(BUILD_DIR)/cblas_dsyr2_dv.o $(BUILD_DIR)/cblas_dsyr2k_dv.o $(BUILD_DIR)/cblas_dsyr_dv.o $(BUILD_DIR)/cblas_dsyrk_dv.o $(BUILD_DIR)/cblas_dtbmv_dv.o $(BUILD_DIR)/cblas_dtpmv_dv.o $(BUILD_DIR)/cblas_dtrmm_dv.o $(BUILD_DIR)/cblas_dtrmv_dv.o $(BUILD_DIR)/cblas_dtrsm_dv.o $(BUILD_DIR)/cblas_dtrsv_dv.o $(BUILD_DIR)/cblas_sasum_dv.o $(BUILD_DIR)/cblas_saxpy_dv.o $(BUILD_DIR)/cblas_scopy_dv.o $(BUILD_DIR)/cblas_sdot_dv.o $(BUILD_DIR)/cblas_sgbmv_dv.o $(BUILD_DIR)/cblas_sgemm_dv.o $(BUILD_DIR)/cblas_sgemv_dv.o $(BUILD_DIR)/cblas_sger_dv.o $(BUILD_DIR)/cblas_snrm2_dv.o $(BUILD_DIR)/cblas_ssbmv_dv.o $(BUILD_DIR)/cblas_sscal_dv.o $(BUILD_DIR)/cblas_sspmv_dv.o $(BUILD_DIR)/cblas_sspr2_dv.o $(BUILD_DIR)/cblas_sspr_dv.o $(BUILD_DIR)/cblas_sswap_dv.o $(BUILD_DIR)/cblas_ssymm_dv.o $(BUILD_DIR)/cblas_ssymv_dv.o $(BUILD_DIR)/cblas_ssyr2_dv.o $(BUILD_DIR)/cblas_ssyr2k_dv.o $(BUILD_DIR)/cblas_ssyr_dv.o $(BUILD_DIR)/cblas_ssyrk_dv.o $(BUILD_DIR)/cblas_stbmv_dv.o $(BUILD_DIR)/cblas_stpmv_dv.o $(BUILD_DIR)/cblas_strmm_dv.o $(BUILD_DIR)/cblas_strmv_dv.o $(BUILD_DIR)/cblas_strsm_dv.o $(BUILD_DIR)/cblas_strsv_dv.o $(BUILD_DIR)/cblas_zaxpy_dv.o $(BUILD_DIR)/cblas_zcopy_dv.o $(BUILD_DIR)/cblas_zdotc_sub_dv.o $(BUILD_DIR)/cblas_zdotu_sub_dv.o $(BUILD_DIR)/cblas_zdscal_dv.o $(BUILD_DIR)/cblas_zgbmv_dv.o $(BUILD_DIR)/cblas_zgemm_dv.o $(BUILD_DIR)/cblas_zgemv_dv.o $(BUILD_DIR)/cblas_zgerc_dv.o $(BUILD_DIR)/cblas_zgeru_dv.o $(BUILD_DIR)/cblas_zhbmv_dv.o $(BUILD_DIR)/cblas_zhemm_dv.o $(BUILD_DIR)/cblas_zhemv_dv.o $(BUILD_DIR)/cblas_zscal_dv.o $(BUILD_DIR)/cblas_zswap_dv.o $(BUILD_DIR)/cblas_zsymm_dv.o $(BUILD_DIR)/cblas_zsyr2k_dv.o $(BUILD_DIR)/cblas_zsyrk_dv.o $(BUILD_DIR)/cblas_ztbmv_dv.o $(BUILD_DIR)/cblas_ztpmv_dv.o $(BUILD_DIR)/cblas_ztrmm_dv.o $(BUILD_DIR)/cblas_ztrmv_dv.o $(BUILD_DIR)/cblas_ztrsm_dv.o $(BUILD_DIR)/cblas_ztrsv_dv.o $(BUILD_DIR)/cblas_caxpy_bv.o $(BUILD_DIR)/cblas_ccopy_bv.o $(BUILD_DIR)/cblas_cdotc_sub_bv.o $(BUILD_DIR)/cblas_cdotu_sub_bv.o $(BUILD_DIR)/cblas_cgbmv_bv.o $(BUILD_DIR)/cblas_cgemm_bv.o $(BUILD_DIR)/cblas_cgemv_bv.o $(BUILD_DIR)/cblas_cgerc_bv.o $(BUILD_DIR)/cblas_cgeru_bv.o $(BUILD_DIR)/cblas_chbmv_bv.o $(BUILD_DIR)/cblas_chemm_bv.o $(BUILD_DIR)/cblas_chemv_bv.o $(BUILD_DIR)/cblas_cscal_bv.o $(BUILD_DIR)/cblas_cswap_bv.o $(BUILD_DIR)/cblas_csymm_bv.o $(BUILD_DIR)/cblas_csyr2k_bv.o $(BUILD_DIR)/cblas_csyrk_bv.o $(BUILD_DIR)/cblas_ctbmv_bv.o $(BUILD_DIR)/cblas_ctpmv_bv.o $(BUILD_DIR)/cblas_ctrmm_bv.o $(BUILD_DIR)/cblas_ctrmv_bv.o $(BUILD_DIR)/cblas_ctrsm_bv.o $(BUILD_DIR)/cblas_ctrsv_bv.o $(BUILD_DIR)/cblas_dasum_bv.o $(BUILD_DIR)/cblas_daxpy_bv.o $(BUILD_DIR)/cblas_dcopy_bv.o $(BUILD_DIR)/cblas_ddot_bv.o $(BUILD_DIR)/cblas_dgbmv_bv.o $(BUILD_DIR)/cblas_dgemm_bv.o $(BUILD_DIR)/cblas_dgemv_bv.o $(BUILD_DIR)/cblas_dger_bv.o $(BUILD_DIR)/cblas_dnrm2_bv.o $(BUILD_DIR)/cblas_dsbmv_bv.o $(BUILD_DIR)/cblas_dscal_bv.o $(BUILD_DIR)/cblas_dspmv_bv.o $(BUILD_DIR)/cblas_dspr2_bv.o $(BUILD_DIR)/cblas_dspr_bv.o $(BUILD_DIR)/cblas_dswap_bv.o $(BUILD_DIR)/cblas_dsymm_bv.o $(BUILD_DIR)/cblas_dsymv_bv.o $(BUILD_DIR)/cblas_dsyr2_bv.o $(BUILD_DIR)/cblas_dsyr2k_bv.o $(BUILD_DIR)/cblas_dsyr_bv.o $(BUILD_DIR)/cblas_dsyrk_bv.o $(BUILD_DIR)/cblas_dtbmv_bv.o $(BUILD_DIR)/cblas_dtpmv_bv.o $(BUILD_DIR)/cblas_dtrmm_bv.o $(BUILD_DIR)/cblas_dtrmv_bv.o $(BUILD_DIR)/cblas_dtrsm_bv.o $(BUILD_DIR)/cblas_dtrsv_bv.o $(BUILD_DIR)/cblas_sasum_bv.o $(BUILD_DIR)/cblas_saxpy_bv.o $(BUILD_DIR)/cblas_scopy_bv.o $(BUILD_DIR)/cblas_sdot_bv.o $(BUILD_DIR)/cblas_sgbmv_bv.o $(BUILD_DIR)/cblas_sgemm_bv.o $(BUILD_DIR)/cblas_sgemv_bv.o $(BUILD_DIR)/cblas_sger_bv.o $(BUILD_DIR)/cblas_snrm2_bv.o $(BUILD_DIR)/cblas_ssbmv_bv.o $(BUILD_DIR)/cblas_sscal_bv.o $(BUILD_DIR)/cblas_sspmv_bv.o $(BUILD_DIR)/cblas_sspr2_bv.o $(BUILD_DIR)/cblas_sspr_bv.o $(BUILD_DIR)/cblas_sswap_bv.o $(BUILD_DIR)/cblas_ssymm_bv.o $(BUILD_DIR)/cblas_ssymv_bv.o $(BUILD_DIR)/cblas_ssyr2_bv.o $(BUILD_DIR)/cblas_ssyr2k_bv.o $(BUILD_DIR)/cblas_ssyr_bv.o $(BUILD_DIR)/cblas_ssyrk_bv.o $(BUILD_DIR)/cblas_stbmv_bv.o $(BUILD_DIR)/cblas_stpmv_bv.o $(BUILD_DIR)/cblas_strmm_bv.o $(BUILD_DIR)/cblas_strmv_bv.o $(BUILD_DIR)/cblas_strsm_bv.o $(BUILD_DIR)/cblas_strsv_bv.o $(BUILD_DIR)/cblas_zaxpy_bv.o $(BUILD_DIR)/cblas_zcopy_bv.o $(BUILD_DIR)/cblas_zdotc_sub_bv.o $(BUILD_DIR)/cblas_zdotu_sub_bv.o $(BUILD_DIR)/cblas_zdscal_bv.o $(BUILD_DIR)/cblas_zgbmv_bv.o $(BUILD_DIR)/cblas_zgemm_bv.o $(BUILD_DIR)/cblas_zgemv_bv.o $(BUILD_DIR)/cblas_zgerc_bv.o $(BUILD_DIR)/cblas_zgeru_bv.o $(BUILD_DIR)/cblas_zhbmv_bv.o $(BUILD_DIR)/cblas_zhemm_bv.o $(BUILD_DIR)/cblas_zhemv_bv.o $(BUILD_DIR)/cblas_zscal_bv.o $(BUILD_DIR)/cblas_zswap_bv.o $(BUILD_DIR)/cblas_zsymm_bv.o $(BUILD_DIR)/cblas_zsyr2k_bv.o $(BUILD_DIR)/cblas_zsyrk_bv.o $(BUILD_DIR)/cblas_ztbmv_bv.o $(BUILD_DIR)/cblas_ztpmv_bv.o $(BUILD_DIR)/cblas_ztrmm_bv.o $(BUILD_DIR)/cblas_ztrmv_bv.o $(BUILD_DIR)/cblas_ztrsm_bv.o $(BUILD_DIR)/cblas_ztrsv_bv.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES.o $(BUILD_DIR)/cblas_caxpy_b_fortran.o $(BUILD_DIR)/cblas_caxpy_bv_fortran.o $(BUILD_DIR)/cblas_caxpy_d_fortran.o $(BUILD_DIR)/cblas_caxpy_dv_fortran.o $(BUILD_DIR)/cblas_ccopy_b_fortran.o $(BUILD_DIR)/cblas_ccopy_bv_fortran.o $(BUILD_DIR)/cblas_ccopy_d_fortran.o $(BUILD_DIR)/cblas_ccopy_dv_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_b_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_bv_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_d_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_dv_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_b_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_bv_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_d_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_dv_fortran.o $(BUILD_DIR)/cblas_cgbmv_b_fortran.o $(BUILD_DIR)/cblas_cgbmv_bv_fortran.o $(BUILD_DIR)/cblas_cgbmv_d_fortran.o $(BUILD_DIR)/cblas_cgbmv_dv_fortran.o $(BUILD_DIR)/cblas_cgemm_b_fortran.o $(BUILD_DIR)/cblas_cgemm_bv_fortran.o $(BUILD_DIR)/cblas_cgemm_d_fortran.o $(BUILD_DIR)/cblas_cgemm_dv_fortran.o $(BUILD_DIR)/cblas_cgemv_b_fortran.o $(BUILD_DIR)/cblas_cgemv_bv_fortran.o $(BUILD_DIR)/cblas_cgemv_d_fortran.o $(BUILD_DIR)/cblas_cgemv_dv_fortran.o $(BUILD_DIR)/cblas_cgerc_b_fortran.o $(BUILD_DIR)/cblas_cgerc_bv_fortran.o $(BUILD_DIR)/cblas_cgerc_d_fortran.o $(BUILD_DIR)/cblas_cgerc_dv_fortran.o $(BUILD_DIR)/cblas_cgeru_b_fortran.o $(BUILD_DIR)/cblas_cgeru_bv_fortran.o $(BUILD_DIR)/cblas_cgeru_d_fortran.o $(BUILD_DIR)/cblas_cgeru_dv_fortran.o $(BUILD_DIR)/cblas_chbmv_b_fortran.o $(BUILD_DIR)/cblas_chbmv_bv_fortran.o $(BUILD_DIR)/cblas_chbmv_d_fortran.o $(BUILD_DIR)/cblas_chbmv_dv_fortran.o $(BUILD_DIR)/cblas_chemm_b_fortran.o $(BUILD_DIR)/cblas_chemm_bv_fortran.o $(BUILD_DIR)/cblas_chemm_d_fortran.o $(BUILD_DIR)/cblas_chemm_dv_fortran.o $(BUILD_DIR)/cblas_chemv_b_fortran.o $(BUILD_DIR)/cblas_chemv_bv_fortran.o $(BUILD_DIR)/cblas_chemv_d_fortran.o $(BUILD_DIR)/cblas_chemv_dv_fortran.o $(BUILD_DIR)/cblas_cscal_b_fortran.o $(BUILD_DIR)/cblas_cscal_bv_fortran.o $(BUILD_DIR)/cblas_cscal_d_fortran.o $(BUILD_DIR)/cblas_cscal_dv_fortran.o $(BUILD_DIR)/cblas_cswap_b_fortran.o $(BUILD_DIR)/cblas_cswap_bv_fortran.o $(BUILD_DIR)/cblas_cswap_d_fortran.o $(BUILD_DIR)/cblas_cswap_dv_fortran.o $(BUILD_DIR)/cblas_csymm_b_fortran.o $(BUILD_DIR)/cblas_csymm_bv_fortran.o $(BUILD_DIR)/cblas_csymm_d_fortran.o $(BUILD_DIR)/cblas_csymm_dv_fortran.o $(BUILD_DIR)/cblas_csyr2k_b_fortran.o $(BUILD_DIR)/cblas_csyr2k_bv_fortran.o $(BUILD_DIR)/cblas_csyr2k_d_fortran.o $(BUILD_DIR)/cblas_csyr2k_dv_fortran.o $(BUILD_DIR)/cblas_csyrk_b_fortran.o $(BUILD_DIR)/cblas_csyrk_bv_fortran.o $(BUILD_DIR)/cblas_csyrk_d_fortran.o $(BUILD_DIR)/cblas_csyrk_dv_fortran.o $(BUILD_DIR)/cblas_ctbmv_b_fortran.o $(BUILD_DIR)/cblas_ctbmv_bv_fortran.o $(BUILD_DIR)/cblas_ctbmv_d_fortran.o $(BUILD_DIR)/cblas_ctbmv_dv_fortran.o $(BUILD_DIR)/cblas_ctpmv_b_fortran.o $(BUILD_DIR)/cblas_ctpmv_bv_fortran.o $(BUILD_DIR)/cblas_ctpmv_d_fortran.o $(BUILD_DIR)/cblas_ctpmv_dv_fortran.o $(BUILD_DIR)/cblas_ctrmm_b_fortran.o $(BUILD_DIR)/cblas_ctrmm_bv_fortran.o $(BUILD_DIR)/cblas_ctrmm_d_fortran.o $(BUILD_DIR)/cblas_ctrmm_dv_fortran.o $(BUILD_DIR)/cblas_ctrmv_b_fortran.o $(BUILD_DIR)/cblas_ctrmv_bv_fortran.o $(BUILD_DIR)/cblas_ctrmv_d_fortran.o $(BUILD_DIR)/cblas_ctrmv_dv_fortran.o $(BUILD_DIR)/cblas_ctrsm_b_fortran.o $(BUILD_DIR)/cblas_ctrsm_bv_fortran.o $(BUILD_DIR)/cblas_ctrsm_d_fortran.o $(BUILD_DIR)/cblas_ctrsm_dv_fortran.o $(BUILD_DIR)/cblas_ctrsv_b_fortran.o $(BUILD_DIR)/cblas_ctrsv_bv_fortran.o $(BUILD_DIR)/cblas_ctrsv_d_fortran.o $(BUILD_DIR)/cblas_ctrsv_dv_fortran.o $(BUILD_DIR)/cblas_dasum_b_fortran.o $(BUILD_DIR)/cblas_dasum_bv_fortran.o $(BUILD_DIR)/cblas_dasum_d_fortran.o $(BUILD_DIR)/cblas_dasum_dv_fortran.o $(BUILD_DIR)/cblas_daxpy_b_fortran.o $(BUILD_DIR)/cblas_daxpy_bv_fortran.o $(BUILD_DIR)/cblas_daxpy_d_fortran.o $(BUILD_DIR)/cblas_daxpy_dv_fortran.o $(BUILD_DIR)/cblas_dcopy_b_fortran.o $(BUILD_DIR)/cblas_dcopy_bv_fortran.o $(BUILD_DIR)/cblas_dcopy_d_fortran.o $(BUILD_DIR)/cblas_dcopy_dv_fortran.o $(BUILD_DIR)/cblas_ddot_b_fortran.o $(BUILD_DIR)/cblas_ddot_bv_fortran.o $(BUILD_DIR)/cblas_ddot_d_fortran.o $(BUILD_DIR)/cblas_ddot_dv_fortran.o $(BUILD_DIR)/cblas_dgbmv_b_fortran.o $(BUILD_DIR)/cblas_dgbmv_bv_fortran.o $(BUILD_DIR)/cblas_dgbmv_d_fortran.o $(BUILD_DIR)/cblas_dgbmv_dv_fortran.o $(BUILD_DIR)/cblas_dgemm_b_fortran.o $(BUILD_DIR)/cblas_dgemm_bv_fortran.o $(BUILD_DIR)/cblas_dgemm_d_fortran.o $(BUILD_DIR)/cblas_dgemm_dv_fortran.o $(BUILD_DIR)/cblas_dgemv_b_fortran.o $(BUILD_DIR)/cblas_dgemv_bv_fortran.o $(BUILD_DIR)/cblas_dgemv_d_fortran.o $(BUILD_DIR)/cblas_dgemv_dv_fortran.o $(BUILD_DIR)/cblas_dger_b_fortran.o $(BUILD_DIR)/cblas_dger_bv_fortran.o $(BUILD_DIR)/cblas_dger_d_fortran.o $(BUILD_DIR)/cblas_dger_dv_fortran.o $(BUILD_DIR)/cblas_dnrm2_b_fortran.o $(BUILD_DIR)/cblas_dnrm2_bv_fortran.o $(BUILD_DIR)/cblas_dnrm2_d_fortran.o $(BUILD_DIR)/cblas_dnrm2_dv_fortran.o $(BUILD_DIR)/cblas_dsbmv_b_fortran.o $(BUILD_DIR)/cblas_dsbmv_bv_fortran.o $(BUILD_DIR)/cblas_dsbmv_d_fortran.o $(BUILD_DIR)/cblas_dsbmv_dv_fortran.o $(BUILD_DIR)/cblas_dscal_b_fortran.o $(BUILD_DIR)/cblas_dscal_bv_fortran.o $(BUILD_DIR)/cblas_dscal_d_fortran.o $(BUILD_DIR)/cblas_dscal_dv_fortran.o $(BUILD_DIR)/cblas_dspmv_b_fortran.o $(BUILD_DIR)/cblas_dspmv_bv_fortran.o $(BUILD_DIR)/cblas_dspmv_d_fortran.o $(BUILD_DIR)/cblas_dspmv_dv_fortran.o $(BUILD_DIR)/cblas_dspr2_b_fortran.o $(BUILD_DIR)/cblas_dspr2_bv_fortran.o $(BUILD_DIR)/cblas_dspr2_d_fortran.o $(BUILD_DIR)/cblas_dspr2_dv_fortran.o $(BUILD_DIR)/cblas_dspr_b_fortran.o $(BUILD_DIR)/cblas_dspr_bv_fortran.o $(BUILD_DIR)/cblas_dspr_d_fortran.o $(BUILD_DIR)/cblas_dspr_dv_fortran.o $(BUILD_DIR)/cblas_dswap_b_fortran.o $(BUILD_DIR)/cblas_dswap_bv_fortran.o $(BUILD_DIR)/cblas_dswap_d_fortran.o $(BUILD_DIR)/cblas_dswap_dv_fortran.o $(BUILD_DIR)/cblas_dsymm_b_fortran.o $(BUILD_DIR)/cblas_dsymm_bv_fortran.o $(BUILD_DIR)/cblas_dsymm_d_fortran.o $(BUILD_DIR)/cblas_dsymm_dv_fortran.o $(BUILD_DIR)/cblas_dsymv_b_fortran.o $(BUILD_DIR)/cblas_dsymv_bv_fortran.o $(BUILD_DIR)/cblas_dsymv_d_fortran.o $(BUILD_DIR)/cblas_dsymv_dv_fortran.o $(BUILD_DIR)/cblas_dsyr2_b_fortran.o $(BUILD_DIR)/cblas_dsyr2_bv_fortran.o $(BUILD_DIR)/cblas_dsyr2_d_fortran.o $(BUILD_DIR)/cblas_dsyr2_dv_fortran.o $(BUILD_DIR)/cblas_dsyr2k_b_fortran.o $(BUILD_DIR)/cblas_dsyr2k_bv_fortran.o $(BUILD_DIR)/cblas_dsyr2k_d_fortran.o $(BUILD_DIR)/cblas_dsyr2k_dv_fortran.o $(BUILD_DIR)/cblas_dsyr_b_fortran.o $(BUILD_DIR)/cblas_dsyr_bv_fortran.o $(BUILD_DIR)/cblas_dsyr_d_fortran.o $(BUILD_DIR)/cblas_dsyr_dv_fortran.o $(BUILD_DIR)/cblas_dsyrk_b_fortran.o $(BUILD_DIR)/cblas_dsyrk_bv_fortran.o $(BUILD_DIR)/cblas_dsyrk_d_fortran.o $(BUILD_DIR)/cblas_dsyrk_dv_fortran.o $(BUILD_DIR)/cblas_dtbmv_b_fortran.o $(BUILD_DIR)/cblas_dtbmv_bv_fortran.o $(BUILD_DIR)/cblas_dtbmv_d_fortran.o $(BUILD_DIR)/cblas_dtbmv_dv_fortran.o $(BUILD_DIR)/cblas_dtpmv_b_fortran.o $(BUILD_DIR)/cblas_dtpmv_bv_fortran.o $(BUILD_DIR)/cblas_dtpmv_d_fortran.o $(BUILD_DIR)/cblas_dtpmv_dv_fortran.o $(BUILD_DIR)/cblas_dtrmm_b_fortran.o $(BUILD_DIR)/cblas_dtrmm_bv_fortran.o $(BUILD_DIR)/cblas_dtrmm_d_fortran.o $(BUILD_DIR)/cblas_dtrmm_dv_fortran.o $(BUILD_DIR)/cblas_dtrmv_b_fortran.o $(BUILD_DIR)/cblas_dtrmv_bv_fortran.o $(BUILD_DIR)/cblas_dtrmv_d_fortran.o $(BUILD_DIR)/cblas_dtrmv_dv_fortran.o $(BUILD_DIR)/cblas_dtrsm_b_fortran.o $(BUILD_DIR)/cblas_dtrsm_bv_fortran.o $(BUILD_DIR)/cblas_dtrsm_d_fortran.o $(BUILD_DIR)/cblas_dtrsm_dv_fortran.o $(BUILD_DIR)/cblas_dtrsv_b_fortran.o $(BUILD_DIR)/cblas_dtrsv_bv_fortran.o $(BUILD_DIR)/cblas_dtrsv_d_fortran.o $(BUILD_DIR)/cblas_dtrsv_dv_fortran.o $(BUILD_DIR)/cblas_sasum_b_fortran.o $(BUILD_DIR)/cblas_sasum_bv_fortran.o $(BUILD_DIR)/cblas_sasum_d_fortran.o $(BUILD_DIR)/cblas_sasum_dv_fortran.o $(BUILD_DIR)/cblas_saxpy_b_fortran.o $(BUILD_DIR)/cblas_saxpy_bv_fortran.o $(BUILD_DIR)/cblas_saxpy_d_fortran.o $(BUILD_DIR)/cblas_saxpy_dv_fortran.o $(BUILD_DIR)/cblas_scopy_b_fortran.o $(BUILD_DIR)/cblas_scopy_bv_fortran.o $(BUILD_DIR)/cblas_scopy_d_fortran.o $(BUILD_DIR)/cblas_scopy_dv_fortran.o $(BUILD_DIR)/cblas_sdot_b_fortran.o $(BUILD_DIR)/cblas_sdot_bv_fortran.o $(BUILD_DIR)/cblas_sdot_d_fortran.o $(BUILD_DIR)/cblas_sdot_dv_fortran.o $(BUILD_DIR)/cblas_sgbmv_b_fortran.o $(BUILD_DIR)/cblas_sgbmv_bv_fortran.o $(BUILD_DIR)/cblas_sgbmv_d_fortran.o $(BUILD_DIR)/cblas_sgbmv_dv_fortran.o $(BUILD_DIR)/cblas_sgemm_b_fortran.o $(BUILD_DIR)/cblas_sgemm_bv_fortran.o $(BUILD_DIR)/cblas_sgemm_d_fortran.o $(BUILD_DIR)/cblas_sgemm_dv_fortran.o $(BUILD_DIR)/cblas_sgemv_b_fortran.o $(BUILD_DIR)/cblas_sgemv_bv_fortran.o $(BUILD_DIR)/cblas_sgemv_d_fortran.o $(BUILD_DIR)/cblas_sgemv_dv_fortran.o $(BUILD_DIR)/cblas_sger_b_fortran.o $(BUILD_DIR)/cblas_sger_bv_fortran.o $(BUILD_DIR)/cblas_sger_d_fortran.o $(BUILD_DIR)/cblas_sger_dv_fortran.o $(BUILD_DIR)/cblas_snrm2_b_fortran.o $(BUILD_DIR)/cblas_snrm2_bv_fortran.o $(BUILD_DIR)/cblas_snrm2_d_fortran.o $(BUILD_DIR)/cblas_snrm2_dv_fortran.o $(BUILD_DIR)/cblas_ssbmv_b_fortran.o $(BUILD_DIR)/cblas_ssbmv_bv_fortran.o $(BUILD_DIR)/cblas_ssbmv_d_fortran.o $(BUILD_DIR)/cblas_ssbmv_dv_fortran.o $(BUILD_DIR)/cblas_sscal_b_fortran.o $(BUILD_DIR)/cblas_sscal_bv_fortran.o $(BUILD_DIR)/cblas_sscal_d_fortran.o $(BUILD_DIR)/cblas_sscal_dv_fortran.o $(BUILD_DIR)/cblas_sspmv_b_fortran.o $(BUILD_DIR)/cblas_sspmv_bv_fortran.o $(BUILD_DIR)/cblas_sspmv_d_fortran.o $(BUILD_DIR)/cblas_sspmv_dv_fortran.o $(BUILD_DIR)/cblas_sspr2_b_fortran.o $(BUILD_DIR)/cblas_sspr2_bv_fortran.o $(BUILD_DIR)/cblas_sspr2_d_fortran.o $(BUILD_DIR)/cblas_sspr2_dv_fortran.o $(BUILD_DIR)/cblas_sspr_b_fortran.o $(BUILD_DIR)/cblas_sspr_bv_fortran.o $(BUILD_DIR)/cblas_sspr_d_fortran.o $(BUILD_DIR)/cblas_sspr_dv_fortran.o $(BUILD_DIR)/cblas_sswap_b_fortran.o $(BUILD_DIR)/cblas_sswap_bv_fortran.o $(BUILD_DIR)/cblas_sswap_d_fortran.o $(BUILD_DIR)/cblas_sswap_dv_fortran.o $(BUILD_DIR)/cblas_ssymm_b_fortran.o $(BUILD_DIR)/cblas_ssymm_bv_fortran.o $(BUILD_DIR)/cblas_ssymm_d_fortran.o $(BUILD_DIR)/cblas_ssymm_dv_fortran.o $(BUILD_DIR)/cblas_ssymv_b_fortran.o $(BUILD_DIR)/cblas_ssymv_bv_fortran.o $(BUILD_DIR)/cblas_ssymv_d_fortran.o $(BUILD_DIR)/cblas_ssymv_dv_fortran.o $(BUILD_DIR)/cblas_ssyr2_b_fortran.o $(BUILD_DIR)/cblas_ssyr2_bv_fortran.o $(BUILD_DIR)/cblas_ssyr2_d_fortran.o $(BUILD_DIR)/cblas_ssyr2_dv_fortran.o $(BUILD_DIR)/cblas_ssyr2k_b_fortran.o $(BUILD_DIR)/cblas_ssyr2k_bv_fortran.o $(BUILD_DIR)/cblas_ssyr2k_d_fortran.o $(BUILD_DIR)/cblas_ssyr2k_dv_fortran.o $(BUILD_DIR)/cblas_ssyr_b_fortran.o $(BUILD_DIR)/cblas_ssyr_bv_fortran.o $(BUILD_DIR)/cblas_ssyr_d_fortran.o $(BUILD_DIR)/cblas_ssyr_dv_fortran.o $(BUILD_DIR)/cblas_ssyrk_b_fortran.o $(BUILD_DIR)/cblas_ssyrk_bv_fortran.o $(BUILD_DIR)/cblas_ssyrk_d_fortran.o $(BUILD_DIR)/cblas_ssyrk_dv_fortran.o $(BUILD_DIR)/cblas_stbmv_b_fortran.o $(BUILD_DIR)/cblas_stbmv_bv_fortran.o $(BUILD_DIR)/cblas_stbmv_d_fortran.o $(BUILD_DIR)/cblas_stbmv_dv_fortran.o $(BUILD_DIR)/cblas_stpmv_b_fortran.o $(BUILD_DIR)/cblas_stpmv_bv_fortran.o $(BUILD_DIR)/cblas_stpmv_d_fortran.o $(BUILD_DIR)/cblas_stpmv_dv_fortran.o $(BUILD_DIR)/cblas_strmm_b_fortran.o $(BUILD_DIR)/cblas_strmm_bv_fortran.o $(BUILD_DIR)/cblas_strmm_d_fortran.o $(BUILD_DIR)/cblas_strmm_dv_fortran.o $(BUILD_DIR)/cblas_strmv_b_fortran.o $(BUILD_DIR)/cblas_strmv_bv_fortran.o $(BUILD_DIR)/cblas_strmv_d_fortran.o $(BUILD_DIR)/cblas_strmv_dv_fortran.o $(BUILD_DIR)/cblas_strsm_b_fortran.o $(BUILD_DIR)/cblas_strsm_bv_fortran.o $(BUILD_DIR)/cblas_strsm_d_fortran.o $(BUILD_DIR)/cblas_strsm_dv_fortran.o $(BUILD_DIR)/cblas_strsv_b_fortran.o $(BUILD_DIR)/cblas_strsv_bv_fortran.o $(BUILD_DIR)/cblas_strsv_d_fortran.o $(BUILD_DIR)/cblas_strsv_dv_fortran.o $(BUILD_DIR)/cblas_zaxpy_b_fortran.o $(BUILD_DIR)/cblas_zaxpy_bv_fortran.o $(BUILD_DIR)/cblas_zaxpy_d_fortran.o $(BUILD_DIR)/cblas_zaxpy_dv_fortran.o $(BUILD_DIR)/cblas_zcopy_b_fortran.o $(BUILD_DIR)/cblas_zcopy_bv_fortran.o $(BUILD_DIR)/cblas_zcopy_d_fortran.o $(BUILD_DIR)/cblas_zcopy_dv_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_b_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_bv_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_d_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_dv_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_b_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_bv_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_d_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_dv_fortran.o $(BUILD_DIR)/cblas_zdscal_b_fortran.o $(BUILD_DIR)/cblas_zdscal_bv_fortran.o $(BUILD_DIR)/cblas_zdscal_d_fortran.o $(BUILD_DIR)/cblas_zdscal_dv_fortran.o $(BUILD_DIR)/cblas_zgbmv_b_fortran.o $(BUILD_DIR)/cblas_zgbmv_bv_fortran.o $(BUILD_DIR)/cblas_zgbmv_d_fortran.o $(BUILD_DIR)/cblas_zgbmv_dv_fortran.o $(BUILD_DIR)/cblas_zgemm_b_fortran.o $(BUILD_DIR)/cblas_zgemm_bv_fortran.o $(BUILD_DIR)/cblas_zgemm_d_fortran.o $(BUILD_DIR)/cblas_zgemm_dv_fortran.o $(BUILD_DIR)/cblas_zgemv_b_fortran.o $(BUILD_DIR)/cblas_zgemv_bv_fortran.o $(BUILD_DIR)/cblas_zgemv_d_fortran.o $(BUILD_DIR)/cblas_zgemv_dv_fortran.o $(BUILD_DIR)/cblas_zgerc_b_fortran.o $(BUILD_DIR)/cblas_zgerc_bv_fortran.o $(BUILD_DIR)/cblas_zgerc_d_fortran.o $(BUILD_DIR)/cblas_zgerc_dv_fortran.o $(BUILD_DIR)/cblas_zgeru_b_fortran.o $(BUILD_DIR)/cblas_zgeru_bv_fortran.o $(BUILD_DIR)/cblas_zgeru_d_fortran.o $(BUILD_DIR)/cblas_zgeru_dv_fortran.o $(BUILD_DIR)/cblas_zhbmv_b_fortran.o $(BUILD_DIR)/cblas_zhbmv_bv_fortran.o $(BUILD_DIR)/cblas_zhbmv_d_fortran.o $(BUILD_DIR)/cblas_zhbmv_dv_fortran.o $(BUILD_DIR)/cblas_zhemm_b_fortran.o $(BUILD_DIR)/cblas_zhemm_bv_fortran.o $(BUILD_DIR)/cblas_zhemm_d_fortran.o $(BUILD_DIR)/cblas_zhemm_dv_fortran.o $(BUILD_DIR)/cblas_zhemv_b_fortran.o $(BUILD_DIR)/cblas_zhemv_bv_fortran.o $(BUILD_DIR)/cblas_zhemv_d_fortran.o $(BUILD_DIR)/cblas_zhemv_dv_fortran.o $(BUILD_DIR)/cblas_zscal_b_fortran.o $(BUILD_DIR)/cblas_zscal_bv_fortran.o $(BUILD_DIR)/cblas_zscal_d_fortran.o $(BUILD_DIR)/cblas_zscal_dv_fortran.o $(BUILD_DIR)/cblas_zswap_b_fortran.o $(BUILD_DIR)/cblas_zswap_bv_fortran.o $(BUILD_DIR)/cblas_zswap_d_fortran.o $(BUILD_DIR)/cblas_zswap_dv_fortran.o $(BUILD_DIR)/cblas_zsymm_b_fortran.o $(BUILD_DIR)/cblas_zsymm_bv_fortran.o $(BUILD_DIR)/cblas_zsymm_d_fortran.o $(BUILD_DIR)/cblas_zsymm_dv_fortran.o $(BUILD_DIR)/cblas_zsyr2k_b_fortran.o $(BUILD_DIR)/cblas_zsyr2k_bv_fortran.o $(BUILD_DIR)/cblas_zsyr2k_d_fortran.o $(BUILD_DIR)/cblas_zsyr2k_dv_fortran.o $(BUILD_DIR)/cblas_zsyrk_b_fortran.o $(BUILD_DIR)/cblas_zsyrk_bv_fortran.o $(BUILD_DIR)/cblas_zsyrk_d_fortran.o $(BUILD_DIR)/cblas_zsyrk_dv_fortran.o $(BUILD_DIR)/cblas_ztbmv_b_fortran.o $(BUILD_DIR)/cblas_ztbmv_bv_fortran.o $(BUILD_DIR)/cblas_ztbmv_d_fortran.o $(BUILD_DIR)/cblas_ztbmv_dv_fortran.o $(BUILD_DIR)/cblas_ztpmv_b_fortran.o $(BUILD_DIR)/cblas_ztpmv_bv_fortran.o $(BUILD_DIR)/cblas_ztpmv_d_fortran.o $(BUILD_DIR)/cblas_ztpmv_dv_fortran.o $(BUILD_DIR)/cblas_ztrmm_b_fortran.o $(BUILD_DIR)/cblas_ztrmm_bv_fortran.o $(BUILD_DIR)/cblas_ztrmm_d_fortran.o $(BUILD_DIR)/cblas_ztrmm_dv_fortran.o $(BUILD_DIR)/cblas_ztrmv_b_fortran.o $(BUILD_DIR)/cblas_ztrmv_bv_fortran.o $(BUILD_DIR)/cblas_ztrmv_d_fortran.o $(BUILD_DIR)/cblas_ztrmv_dv_fortran.o $(BUILD_DIR)/cblas_ztrsm_b_fortran.o $(BUILD_DIR)/cblas_ztrsm_bv_fortran.o $(BUILD_DIR)/cblas_ztrsm_d_fortran.o $(BUILD_DIR)/cblas_ztrsm_dv_fortran.o $(BUILD_DIR)/cblas_ztrsv_b_fortran.o $(BUILD_DIR)/cblas_ztrsv_bv_fortran.o $(BUILD_DIR)/cblas_ztrsv_d_fortran.o $(BUILD_DIR)/cblas_ztrsv_dv_fortran.o $(BUILD_DIR)/test_cblas_caxpy_d $(BUILD_DIR)/test_cblas_ccopy_d $(BUILD_DIR)/test_cblas_cdotc_sub_d $(BUILD_DIR)/test_cblas_cdotu_sub_d $(BUILD_DIR)/test_cblas_cgbmv_d $(BUILD_DIR)/test_cblas_cgemm_d $(BUILD_DIR)/test_cblas_cgemv_d $(BUILD_DIR)/test_cblas_cgerc_d $(BUILD_DIR)/test_cblas_cgeru_d $(BUILD_DIR)/test_cblas_chbmv_d $(BUILD_DIR)/test_cblas_chemm_d $(BUILD_DIR)/test_cblas_chemv_d $(BUILD_DIR)/test_cblas_cscal_d $(BUILD_DIR)/test_cblas_cswap_d $(BUILD_DIR)/test_cblas_csymm_d $(BUILD_DIR)/test_cblas_csyr2k_d $(BUILD_DIR)/test_cblas_csyrk_d $(BUILD_DIR)/test_cblas_ctbmv_d $(BUILD_DIR)/test_cblas_ctpmv_d $(BUILD_DIR)/test_cblas_ctrmm_d $(BUILD_DIR)/test_cblas_ctrmv_d $(BUILD_DIR)/test_cblas_ctrsm_d $(BUILD_DIR)/test_cblas_ctrsv_d $(BUILD_DIR)/test_cblas_dasum_d $(BUILD_DIR)/test_cblas_daxpy_d $(BUILD_DIR)/test_cblas_dcopy_d $(BUILD_DIR)/test_cblas_ddot_d $(BUILD_DIR)/test_cblas_dgbmv_d $(BUILD_DIR)/test_cblas_dgemm_d $(BUILD_DIR)/test_cblas_dgemv_d $(BUILD_DIR)/test_cblas_dger_d $(BUILD_DIR)/test_cblas_dnrm2_d $(BUILD_DIR)/test_cblas_dsbmv_d $(BUILD_DIR)/test_cblas_dscal_d $(BUILD_DIR)/test_cblas_dspmv_d $(BUILD_DIR)/test_cblas_dspr2_d $(BUILD_DIR)/test_cblas_dspr_d $(BUILD_DIR)/test_cblas_dswap_d $(BUILD_DIR)/test_cblas_dsymm_d $(BUILD_DIR)/test_cblas_dsymv_d $(BUILD_DIR)/test_cblas_dsyr2_d $(BUILD_DIR)/test_cblas_dsyr2k_d $(BUILD_DIR)/test_cblas_dsyr_d $(BUILD_DIR)/test_cblas_dsyrk_d $(BUILD_DIR)/test_cblas_dtbmv_d $(BUILD_DIR)/test_cblas_dtpmv_d $(BUILD_DIR)/test_cblas_dtrmm_d $(BUILD_DIR)/test_cblas_dtrmv_d $(BUILD_DIR)/test_cblas_dtrsm_d $(BUILD_DIR)/test_cblas_dtrsv_d $(BUILD_DIR)/test_cblas_sasum_d $(BUILD_DIR)/test_cblas_saxpy_d $(BUILD_DIR)/test_cblas_scopy_d $(BUILD_DIR)/test_cblas_sdot_d $(BUILD_DIR)/test_cblas_sgbmv_d $(BUILD_DIR)/test_cblas_sgemm_d $(BUILD_DIR)/test_cblas_sgemv_d $(BUILD_DIR)/test_cblas_sger_d $(BUILD_DIR)/test_cblas_snrm2_d $(BUILD_DIR)/test_cblas_ssbmv_d $(BUILD_DIR)/test_cblas_sscal_d $(BUILD_DIR)/test_cblas_sspmv_d $(BUILD_DIR)/test_cblas_sspr2_d $(BUILD_DIR)/test_cblas_sspr_d $(BUILD_DIR)/test_cblas_sswap_d $(BUILD_DIR)/test_cblas_ssymm_d $(BUILD_DIR)/test_cblas_ssymv_d $(BUILD_DIR)/test_cblas_ssyr2_d $(BUILD_DIR)/test_cblas_ssyr2k_d $(BUILD_DIR)/test_cblas_ssyr_d $(BUILD_DIR)/test_cblas_ssyrk_d $(BUILD_DIR)/test_cblas_stbmv_d $(BUILD_DIR)/test_cblas_stpmv_d $(BUILD_DIR)/test_cblas_strmm_d $(BUILD_DIR)/test_cblas_strmv_d $(BUILD_DIR)/test_cblas_strsm_d $(BUILD_DIR)/test_cblas_strsv_d $(BUILD_DIR)/test_cblas_zaxpy_d $(BUILD_DIR)/test_cblas_zcopy_d $(BUILD_DIR)/test_cblas_zdotc_sub_d $(BUILD_DIR)/test_cblas_zdotu_sub_d $(BUILD_DIR)/test_cblas_zdscal_d $(BUILD_DIR)/test_cblas_zgbmv_d $(BUILD_DIR)/test_cblas_zgemm_d $(BUILD_DIR)/test_cblas_zgemv_d $(BUILD_DIR)/test_cblas_zgerc_d $(BUILD_DIR)/test_cblas_zgeru_d $(BUILD_DIR)/test_cblas_zhbmv_d $(BUILD_DIR)/test_cblas_zhemm_d $(BUILD_DIR)/test_cblas_zhemv_d $(BUILD_DIR)/test_cblas_zscal_d $(BUILD_DIR)/test_cblas_zswap_d $(BUILD_DIR)/test_cblas_zsymm_d $(BUILD_DIR)/test_cblas_zsyr2k_d $(BUILD_DIR)/test_cblas_zsyrk_d $(BUILD_DIR)/test_cblas_ztbmv_d $(BUILD_DIR)/test_cblas_ztpmv_d $(BUILD_DIR)/test_cblas_ztrmm_d $(BUILD_DIR)/test_cblas_ztrmv_d $(BUILD_DIR)/test_cblas_ztrsm_d $(BUILD_DIR)/test_cblas_ztrsv_d $(BUILD_DIR)/test_cblas_caxpy_b $(BUILD_DIR)/test_cblas_ccopy_b $(BUILD_DIR)/test_cblas_cdotc_sub_b $(BUILD_DIR)/test_cblas_cdotu_sub_b $(BUILD_DIR)/test_cblas_cgbmv_b $(BUILD_DIR)/test_cblas_cgemm_b $(BUILD_DIR)/test_cblas_cgemv_b $(BUILD_DIR)/test_cblas_cgerc_b $(BUILD_DIR)/test_cblas_cgeru_b $(BUILD_DIR)/test_cblas_chbmv_b $(BUILD_DIR)/test_cblas_chemm_b $(BUILD_DIR)/test_cblas_chemv_b $(BUILD_DIR)/test_cblas_cscal_b $(BUILD_DIR)/test_cblas_cswap_b $(BUILD_DIR)/test_cblas_csymm_b $(BUILD_DIR)/test_cblas_csyr2k_b $(BUILD_DIR)/test_cblas_csyrk_b $(BUILD_DIR)/test_cblas_ctbmv_b $(BUILD_DIR)/test_cblas_ctpmv_b $(BUILD_DIR)/test_cblas_ctrmm_b $(BUILD_DIR)/test_cblas_ctrmv_b $(BUILD_DIR)/test_cblas_ctrsm_b $(BUILD_DIR)/test_cblas_ctrsv_b $(BUILD_DIR)/test_cblas_dasum_b $(BUILD_DIR)/test_cblas_daxpy_b $(BUILD_DIR)/test_cblas_dcopy_b $(BUILD_DIR)/test_cblas_ddot_b $(BUILD_DIR)/test_cblas_dgbmv_b $(BUILD_DIR)/test_cblas_dgemm_b $(BUILD_DIR)/test_cblas_dgemv_b $(BUILD_DIR)/test_cblas_dger_b $(BUILD_DIR)/test_cblas_dnrm2_b $(BUILD_DIR)/test_cblas_dsbmv_b $(BUILD_DIR)/test_cblas_dscal_b $(BUILD_DIR)/test_cblas_dspmv_b $(BUILD_DIR)/test_cblas_dspr2_b $(BUILD_DIR)/test_cblas_dspr_b $(BUILD_DIR)/test_cblas_dswap_b $(BUILD_DIR)/test_cblas_dsymm_b $(BUILD_DIR)/test_cblas_dsymv_b $(BUILD_DIR)/test_cblas_dsyr2_b $(BUILD_DIR)/test_cblas_dsyr2k_b $(BUILD_DIR)/test_cblas_dsyr_b $(BUILD_DIR)/test_cblas_dsyrk_b $(BUILD_DIR)/test_cblas_dtbmv_b $(BUILD_DIR)/test_cblas_dtpmv_b $(BUILD_DIR)/test_cblas_dtrmm_b $(BUILD_DIR)/test_cblas_dtrmv_b $(BUILD_DIR)/test_cblas_dtrsm_b $(BUILD_DIR)/test_cblas_dtrsv_b $(BUILD_DIR)/test_cblas_sasum_b $(BUILD_DIR)/test_cblas_saxpy_b $(BUILD_DIR)/test_cblas_scopy_b $(BUILD_DIR)/test_cblas_sdot_b $(BUILD_DIR)/test_cblas_sgbmv_b $(BUILD_DIR)/test_cblas_sgemm_b $(BUILD_DIR)/test_cblas_sgemv_b $(BUILD_DIR)/test_cblas_sger_b $(BUILD_DIR)/test_cblas_snrm2_b $(BUILD_DIR)/test_cblas_ssbmv_b $(BUILD_DIR)/test_cblas_sscal_b $(BUILD_DIR)/test_cblas_sspmv_b $(BUILD_DIR)/test_cblas_sspr2_b $(BUILD_DIR)/test_cblas_sspr_b $(BUILD_DIR)/test_cblas_sswap_b $(BUILD_DIR)/test_cblas_ssymm_b $(BUILD_DIR)/test_cblas_ssymv_b $(BUILD_DIR)/test_cblas_ssyr2_b $(BUILD_DIR)/test_cblas_ssyr2k_b $(BUILD_DIR)/test_cblas_ssyr_b $(BUILD_DIR)/test_cblas_ssyrk_b $(BUILD_DIR)/test_cblas_stbmv_b $(BUILD_DIR)/test_cblas_stpmv_b $(BUILD_DIR)/test_cblas_strmm_b $(BUILD_DIR)/test_cblas_strmv_b $(BUILD_DIR)/test_cblas_strsm_b $(BUILD_DIR)/test_cblas_strsv_b $(BUILD_DIR)/test_cblas_zaxpy_b $(BUILD_DIR)/test_cblas_zcopy_b $(BUILD_DIR)/test_cblas_zdotc_sub_b $(BUILD_DIR)/test_cblas_zdotu_sub_b $(BUILD_DIR)/test_cblas_zdscal_b $(BUILD_DIR)/test_cblas_zgbmv_b $(BUILD_DIR)/test_cblas_zgemm_b $(BUILD_DIR)/test_cblas_zgemv_b $(BUILD_DIR)/test_cblas_zgerc_b $(BUILD_DIR)/test_cblas_zgeru_b $(BUILD_DIR)/test_cblas_zhbmv_b $(BUILD_DIR)/test_cblas_zhemm_b $(BUILD_DIR)/test_cblas_zhemv_b $(BUILD_DIR)/test_cblas_zscal_b $(BUILD_DIR)/test_cblas_zswap_b $(BUILD_DIR)/test_cblas_zsymm_b $(BUILD_DIR)/test_cblas_zsyr2k_b $(BUILD_DIR)/test_cblas_zsyrk_b $(BUILD_DIR)/test_cblas_ztbmv_b $(BUILD_DIR)/test_cblas_ztpmv_b $(BUILD_DIR)/test_cblas_ztrmm_b $(BUILD_DIR)/test_cblas_ztrmv_b $(BUILD_DIR)/test_cblas_ztrsm_b $(BUILD_DIR)/test_cblas_ztrsv_b $(BUILD_DIR)/test_cblas_caxpy_dv $(BUILD_DIR)/test_cblas_ccopy_dv $(BUILD_DIR)/test_cblas_cdotc_sub_dv $(BUILD_DIR)/test_cblas_cdotu_sub_dv $(BUILD_DIR)/test_cblas_cgbmv_dv $(BUILD_DIR)/test_cblas_cgemm_dv $(BUILD_DIR)/test_cblas_cgemv_dv $(BUILD_DIR)/test_cblas_cgerc_dv $(BUILD_DIR)/test_cblas_cgeru_dv $(BUILD_DIR)/test_cblas_chbmv_dv $(BUILD_DIR)/test_cblas_chemm_dv $(BUILD_DIR)/test_cblas_chemv_dv $(BUILD_DIR)/test_cblas_cscal_dv $(BUILD_DIR)/test_cblas_cswap_dv $(BUILD_DIR)/test_cblas_csymm_dv $(BUILD_DIR)/test_cblas_csyr2k_dv $(BUILD_DIR)/test_cblas_csyrk_dv $(BUILD_DIR)/test_cblas_ctbmv_dv $(BUILD_DIR)/test_cblas_ctpmv_dv $(BUILD_DIR)/test_cblas_ctrmm_dv $(BUILD_DIR)/test_cblas_ctrmv_dv $(BUILD_DIR)/test_cblas_ctrsm_dv $(BUILD_DIR)/test_cblas_ctrsv_dv $(BUILD_DIR)/test_cblas_dasum_dv $(BUILD_DIR)/test_cblas_daxpy_dv $(BUILD_DIR)/test_cblas_dcopy_dv $(BUILD_DIR)/test_cblas_ddot_dv $(BUILD_DIR)/test_cblas_dgbmv_dv $(BUILD_DIR)/test_cblas_dgemm_dv $(BUILD_DIR)/test_cblas_dgemv_dv $(BUILD_DIR)/test_cblas_dger_dv $(BUILD_DIR)/test_cblas_dnrm2_dv $(BUILD_DIR)/test_cblas_dsbmv_dv $(BUILD_DIR)/test_cblas_dscal_dv $(BUILD_DIR)/test_cblas_dspmv_dv $(BUILD_DIR)/test_cblas_dspr2_dv $(BUILD_DIR)/test_cblas_dspr_dv $(BUILD_DIR)/test_cblas_dswap_dv $(BUILD_DIR)/test_cblas_dsymm_dv $(BUILD_DIR)/test_cblas_dsymv_dv $(BUILD_DIR)/test_cblas_dsyr2_dv $(BUILD_DIR)/test_cblas_dsyr2k_dv $(BUILD_DIR)/test_cblas_dsyr_dv $(BUILD_DIR)/test_cblas_dsyrk_dv $(BUILD_DIR)/test_cblas_dtbmv_dv $(BUILD_DIR)/test_cblas_dtpmv_dv $(BUILD_DIR)/test_cblas_dtrmm_dv $(BUILD_DIR)/test_cblas_dtrmv_dv $(BUILD_DIR)/test_cblas_dtrsm_dv $(BUILD_DIR)/test_cblas_dtrsv_dv $(BUILD_DIR)/test_cblas_sasum_dv $(BUILD_DIR)/test_cblas_saxpy_dv $(BUILD_DIR)/test_cblas_scopy_dv $(BUILD_DIR)/test_cblas_sdot_dv $(BUILD_DIR)/test_cblas_sgbmv_dv $(BUILD_DIR)/test_cblas_sgemm_dv $(BUILD_DIR)/test_cblas_sgemv_dv $(BUILD_DIR)/test_cblas_sger_dv $(BUILD_DIR)/test_cblas_snrm2_dv $(BUILD_DIR)/test_cblas_ssbmv_dv $(BUILD_DIR)/test_cblas_sscal_dv $(BUILD_DIR)/test_cblas_sspmv_dv $(BUILD_DIR)/test_cblas_sspr2_dv $(BUILD_DIR)/test_cblas_sspr_dv $(BUILD_DIR)/test_cblas_sswap_dv $(BUILD_DIR)/test_cblas_ssymm_dv $(BUILD_DIR)/test_cblas_ssymv_dv $(BUILD_DIR)/test_cblas_ssyr2_dv $(BUILD_DIR)/test_cblas_ssyr2k_dv $(BUILD_DIR)/test_cblas_ssyr_dv $(BUILD_DIR)/test_cblas_ssyrk_dv $(BUILD_DIR)/test_cblas_stbmv_dv $(BUILD_DIR)/test_cblas_stpmv_dv $(BUILD_DIR)/test_cblas_strmm_dv $(BUILD_DIR)/test_cblas_strmv_dv $(BUILD_DIR)/test_cblas_strsm_dv $(BUILD_DIR)/test_cblas_strsv_dv $(BUILD_DIR)/test_cblas_zaxpy_dv $(BUILD_DIR)/test_cblas_zcopy_dv $(BUILD_DIR)/test_cblas_zdotc_sub_dv $(BUILD_DIR)/test_cblas_zdotu_sub_dv $(BUILD_DIR)/test_cblas_zdscal_dv $(BUILD_DIR)/test_cblas_zgbmv_dv $(BUILD_DIR)/test_cblas_zgemm_dv $(BUILD_DIR)/test_cblas_zgemv_dv $(BUILD_DIR)/test_cblas_zgerc_dv $(BUILD_DIR)/test_cblas_zgeru_dv $(BUILD_DIR)/test_cblas_zhbmv_dv $(BUILD_DIR)/test_cblas_zhemm_dv $(BUILD_DIR)/test_cblas_zhemv_dv $(BUILD_DIR)/test_cblas_zscal_dv $(BUILD_DIR)/test_cblas_zswap_dv $(BUILD_DIR)/test_cblas_zsymm_dv $(BUILD_DIR)/test_cblas_zsyr2k_dv $(BUILD_DIR)/test_cblas_zsyrk_dv $(BUILD_DIR)/test_cblas_ztbmv_dv $(BUILD_DIR)/test_cblas_ztpmv_dv $(BUILD_DIR)/test_cblas_ztrmm_dv $(BUILD_DIR)/test_cblas_ztrmv_dv $(BUILD_DIR)/test_cblas_ztrsm_dv $(BUILD_DIR)/test_cblas_ztrsv_dv $(BUILD_DIR)/test_cblas_caxpy_bv $(BUILD_DIR)/test_cblas_ccopy_bv $(BUILD_DIR)/test_cblas_cdotc_sub_bv $(BUILD_DIR)/test_cblas_cdotu_sub_bv $(BUILD_DIR)/test_cblas_cgbmv_bv $(BUILD_DIR)/test_cblas_cgemm_bv $(BUILD_DIR)/test_cblas_cgemv_bv $(BUILD_DIR)/test_cblas_cgerc_bv $(BUILD_DIR)/test_cblas_cgeru_bv $(BUILD_DIR)/test_cblas_chbmv_bv $(BUILD_DIR)/test_cblas_chemm_bv $(BUILD_DIR)/test_cblas_chemv_bv $(BUILD_DIR)/test_cblas_cscal_bv $(BUILD_DIR)/test_cblas_cswap_bv $(BUILD_DIR)/test_cblas_csymm_bv $(BUILD_DIR)/test_cblas_csyr2k_bv $(BUILD_DIR)/test_cblas_csyrk_bv $(BUILD_DIR)/test_cblas_ctbmv_bv $(BUILD_DIR)/test_cblas_ctpmv_bv $(BUILD_DIR)/test_cblas_ctrmm_bv $(BUILD_DIR)/test_cblas_ctrmv_bv $(BUILD_DIR)/test_cblas_ctrsm_bv $(BUILD_DIR)/test_cblas_ctrsv_bv $(BUILD_DIR)/test_cblas_dasum_bv $(BUILD_DIR)/test_cblas_daxpy_bv $(BUILD_DIR)/test_cblas_dcopy_bv $(BUILD_DIR)/test_cblas_ddot_bv $(BUILD_DIR)/test_cblas_dgbmv_bv $(BUILD_DIR)/test_cblas_dgemm_bv $(BUILD_DIR)/test_cblas_dgemv_bv $(BUILD_DIR)/test_cblas_dger_bv $(BUILD_DIR)/test_cblas_dnrm2_bv $(BUILD_DIR)/test_cblas_dsbmv_bv $(BUILD_DIR)/test_cblas_dscal_bv $(BUILD_DIR)/test_cblas_dspmv_bv $(BUILD_DIR)/test_cblas_dspr2_bv $(BUILD_DIR)/test_cblas_dspr_bv $(BUILD_DIR)/test_cblas_dswap_bv $(BUILD_DIR)/test_cblas_dsymm_bv $(BUILD_DIR)/test_cblas_dsymv_bv $(BUILD_DIR)/test_cblas_dsyr2_bv $(BUILD_DIR)/test_cblas_dsyr2k_bv $(BUILD_DIR)/test_cblas_dsyr_bv $(BUILD_DIR)/test_cblas_dsyrk_bv $(BUILD_DIR)/test_cblas_dtbmv_bv $(BUILD_DIR)/test_cblas_dtpmv_bv $(BUILD_DIR)/test_cblas_dtrmm_bv $(BUILD_DIR)/test_cblas_dtrmv_bv $(BUILD_DIR)/test_cblas_dtrsm_bv $(BUILD_DIR)/test_cblas_dtrsv_bv $(BUILD_DIR)/test_cblas_sasum_bv $(BUILD_DIR)/test_cblas_saxpy_bv $(BUILD_DIR)/test_cblas_scopy_bv $(BUILD_DIR)/test_cblas_sdot_bv $(BUILD_DIR)/test_cblas_sgbmv_bv $(BUILD_DIR)/test_cblas_sgemm_bv $(BUILD_DIR)/test_cblas_sgemv_bv $(BUILD_DIR)/test_cblas_sger_bv $(BUILD_DIR)/test_cblas_snrm2_bv $(BUILD_DIR)/test_cblas_ssbmv_bv $(BUILD_DIR)/test_cblas_sscal_bv $(BUILD_DIR)/test_cblas_sspmv_bv $(BUILD_DIR)/test_cblas_sspr2_bv $(BUILD_DIR)/test_cblas_sspr_bv $(BUILD_DIR)/test_cblas_sswap_bv $(BUILD_DIR)/test_cblas_ssymm_bv $(BUILD_DIR)/test_cblas_ssymv_bv $(BUILD_DIR)/test_cblas_ssyr2_bv $(BUILD_DIR)/test_cblas_ssyr2k_bv $(BUILD_DIR)/test_cblas_ssyr_bv $(BUILD_DIR)/test_cblas_ssyrk_bv $(BUILD_DIR)/test_cblas_stbmv_bv $(BUILD_DIR)/test_cblas_stpmv_bv $(BUILD_DIR)/test_cblas_strmm_bv $(BUILD_DIR)/test_cblas_strmv_bv $(BUILD_DIR)/test_cblas_strsm_bv $(BUILD_DIR)/test_cblas_strsv_bv $(BUILD_DIR)/test_cblas_zaxpy_bv $(BUILD_DIR)/test_cblas_zcopy_bv $(BUILD_DIR)/test_cblas_zdotc_sub_bv $(BUILD_DIR)/test_cblas_zdotu_sub_bv $(BUILD_DIR)/test_cblas_zdscal_bv $(BUILD_DIR)/test_cblas_zgbmv_bv $(BUILD_DIR)/test_cblas_zgemm_bv $(BUILD_DIR)/test_cblas_zgemv_bv $(BUILD_DIR)/test_cblas_zgerc_bv $(BUILD_DIR)/test_cblas_zgeru_bv $(BUILD_DIR)/test_cblas_zhbmv_bv $(BUILD_DIR)/test_cblas_zhemm_bv $(BUILD_DIR)/test_cblas_zhemv_bv $(BUILD_DIR)/test_cblas_zscal_bv $(BUILD_DIR)/test_cblas_zswap_bv $(BUILD_DIR)/test_cblas_zsymm_bv $(BUILD_DIR)/test_cblas_zsyr2k_bv $(BUILD_DIR)/test_cblas_zsyrk_bv $(BUILD_DIR)/test_cblas_ztbmv_bv $(BUILD_DIR)/test_cblas_ztpmv_bv $(BUILD_DIR)/test_cblas_ztrmm_bv $(BUILD_DIR)/test_cblas_ztrmv_bv $(BUILD_DIR)/test_cblas_ztrsm_bv $(BUILD_DIR)/test_cblas_ztrsv_bv $(BUILD_DIR)/libcblas_diff.a
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -50,6 +50,13 @@ $(INC_DIR)/DIFFSIZESF.inc:
 # Fortran 90 sources USE DIFFSIZES; compile module first so diffsizes.mod is in $(BUILD_DIR)
 $(BUILD_DIR)/DIFFSIZES.o: $(INC_DIR)/DIFFSIZES.f90 | $(BUILD_DIR)
 	$(FC) $(FFLAGS) -c $(INC_DIR)/DIFFSIZES.f90 -o $(BUILD_DIR)/DIFFSIZES.o
+
+# DIFFSIZES_access.f90 - module storage for ISIZE (many vars, no COMMON)
+$(BUILD_DIR)/DIFFSIZES_access.o: $(SRC_DIR)/DIFFSIZES_access.f90 | $(BUILD_DIR)
+	$(FC) $(FFLAGS) -c $(SRC_DIR)/DIFFSIZES_access.f90 -o $(BUILD_DIR)/DIFFSIZES_access.o
+# DIFFSIZES_access_wrappers.f - external symbols for C/F77 callers (set_isize*_, etc.)
+$(BUILD_DIR)/DIFFSIZES_access_wrappers.o: $(SRC_DIR)/DIFFSIZES_access_wrappers.f $(BUILD_DIR)/DIFFSIZES_access.o | $(BUILD_DIR)
+	$(FC) $(FFLAGS) -c $(SRC_DIR)/DIFFSIZES_access_wrappers.f -o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o
 
 $(BUILD_DIR)/cblas_caxpy_d.o: $(SRC_DIR)/cblas_caxpy_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/cblas_caxpy_d.c -o $(BUILD_DIR)/cblas_caxpy_d.o
@@ -2492,2428 +2499,2428 @@ $(BUILD_DIR)/test_cblas_caxpy_d.o: $(TEST_DIR)/test_cblas_caxpy_d.c | $(BUILD_DI
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_caxpy_d.c -o $(BUILD_DIR)/test_cblas_caxpy_d.o
 
 $(BUILD_DIR)/test_cblas_caxpy_d: $(BUILD_DIR)/test_cblas_caxpy_d.o $(BUILD_DIR)/cblas_caxpy_d.o $(BUILD_DIR)/cblas_caxpy_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_caxpy_d.o $(BUILD_DIR)/cblas_caxpy_d.o $(BUILD_DIR)/cblas_caxpy_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_caxpy_d
+	$(CC) $(BUILD_DIR)/test_cblas_caxpy_d.o $(BUILD_DIR)/cblas_caxpy_d.o $(BUILD_DIR)/cblas_caxpy_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_caxpy_d
 
 $(BUILD_DIR)/test_cblas_ccopy_d.o: $(TEST_DIR)/test_cblas_ccopy_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ccopy_d.c -o $(BUILD_DIR)/test_cblas_ccopy_d.o
 
 $(BUILD_DIR)/test_cblas_ccopy_d: $(BUILD_DIR)/test_cblas_ccopy_d.o $(BUILD_DIR)/cblas_ccopy_d.o $(BUILD_DIR)/cblas_ccopy_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ccopy_d.o $(BUILD_DIR)/cblas_ccopy_d.o $(BUILD_DIR)/cblas_ccopy_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ccopy_d
+	$(CC) $(BUILD_DIR)/test_cblas_ccopy_d.o $(BUILD_DIR)/cblas_ccopy_d.o $(BUILD_DIR)/cblas_ccopy_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ccopy_d
 
 $(BUILD_DIR)/test_cblas_cdotc_sub_d.o: $(TEST_DIR)/test_cblas_cdotc_sub_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cdotc_sub_d.c -o $(BUILD_DIR)/test_cblas_cdotc_sub_d.o
 
 $(BUILD_DIR)/test_cblas_cdotc_sub_d: $(BUILD_DIR)/test_cblas_cdotc_sub_d.o $(BUILD_DIR)/cblas_cdotc_sub_d.o $(BUILD_DIR)/cblas_cdotc_sub_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_cdotc_sub_d.o $(BUILD_DIR)/cblas_cdotc_sub_d.o $(BUILD_DIR)/cblas_cdotc_sub_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cdotc_sub_d
+	$(CC) $(BUILD_DIR)/test_cblas_cdotc_sub_d.o $(BUILD_DIR)/cblas_cdotc_sub_d.o $(BUILD_DIR)/cblas_cdotc_sub_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cdotc_sub_d
 
 $(BUILD_DIR)/test_cblas_cdotu_sub_d.o: $(TEST_DIR)/test_cblas_cdotu_sub_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cdotu_sub_d.c -o $(BUILD_DIR)/test_cblas_cdotu_sub_d.o
 
 $(BUILD_DIR)/test_cblas_cdotu_sub_d: $(BUILD_DIR)/test_cblas_cdotu_sub_d.o $(BUILD_DIR)/cblas_cdotu_sub_d.o $(BUILD_DIR)/cblas_cdotu_sub_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_cdotu_sub_d.o $(BUILD_DIR)/cblas_cdotu_sub_d.o $(BUILD_DIR)/cblas_cdotu_sub_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cdotu_sub_d
+	$(CC) $(BUILD_DIR)/test_cblas_cdotu_sub_d.o $(BUILD_DIR)/cblas_cdotu_sub_d.o $(BUILD_DIR)/cblas_cdotu_sub_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cdotu_sub_d
 
 $(BUILD_DIR)/test_cblas_cgbmv_d.o: $(TEST_DIR)/test_cblas_cgbmv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cgbmv_d.c -o $(BUILD_DIR)/test_cblas_cgbmv_d.o
 
 $(BUILD_DIR)/test_cblas_cgbmv_d: $(BUILD_DIR)/test_cblas_cgbmv_d.o $(BUILD_DIR)/cblas_cgbmv_d.o $(BUILD_DIR)/cblas_cgbmv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_cgbmv_d.o $(BUILD_DIR)/cblas_cgbmv_d.o $(BUILD_DIR)/cblas_cgbmv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgbmv_d
+	$(CC) $(BUILD_DIR)/test_cblas_cgbmv_d.o $(BUILD_DIR)/cblas_cgbmv_d.o $(BUILD_DIR)/cblas_cgbmv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgbmv_d
 
 $(BUILD_DIR)/test_cblas_cgemm_d.o: $(TEST_DIR)/test_cblas_cgemm_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cgemm_d.c -o $(BUILD_DIR)/test_cblas_cgemm_d.o
 
 $(BUILD_DIR)/test_cblas_cgemm_d: $(BUILD_DIR)/test_cblas_cgemm_d.o $(BUILD_DIR)/cblas_cgemm_d.o $(BUILD_DIR)/cblas_cgemm_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_cgemm_d.o $(BUILD_DIR)/cblas_cgemm_d.o $(BUILD_DIR)/cblas_cgemm_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgemm_d
+	$(CC) $(BUILD_DIR)/test_cblas_cgemm_d.o $(BUILD_DIR)/cblas_cgemm_d.o $(BUILD_DIR)/cblas_cgemm_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgemm_d
 
 $(BUILD_DIR)/test_cblas_cgemv_d.o: $(TEST_DIR)/test_cblas_cgemv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cgemv_d.c -o $(BUILD_DIR)/test_cblas_cgemv_d.o
 
 $(BUILD_DIR)/test_cblas_cgemv_d: $(BUILD_DIR)/test_cblas_cgemv_d.o $(BUILD_DIR)/cblas_cgemv_d.o $(BUILD_DIR)/cblas_cgemv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_cgemv_d.o $(BUILD_DIR)/cblas_cgemv_d.o $(BUILD_DIR)/cblas_cgemv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgemv_d
+	$(CC) $(BUILD_DIR)/test_cblas_cgemv_d.o $(BUILD_DIR)/cblas_cgemv_d.o $(BUILD_DIR)/cblas_cgemv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgemv_d
 
 $(BUILD_DIR)/test_cblas_cgerc_d.o: $(TEST_DIR)/test_cblas_cgerc_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cgerc_d.c -o $(BUILD_DIR)/test_cblas_cgerc_d.o
 
 $(BUILD_DIR)/test_cblas_cgerc_d: $(BUILD_DIR)/test_cblas_cgerc_d.o $(BUILD_DIR)/cblas_cgerc_d.o $(BUILD_DIR)/cblas_cgerc_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_cgerc_d.o $(BUILD_DIR)/cblas_cgerc_d.o $(BUILD_DIR)/cblas_cgerc_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgerc_d
+	$(CC) $(BUILD_DIR)/test_cblas_cgerc_d.o $(BUILD_DIR)/cblas_cgerc_d.o $(BUILD_DIR)/cblas_cgerc_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgerc_d
 
 $(BUILD_DIR)/test_cblas_cgeru_d.o: $(TEST_DIR)/test_cblas_cgeru_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cgeru_d.c -o $(BUILD_DIR)/test_cblas_cgeru_d.o
 
 $(BUILD_DIR)/test_cblas_cgeru_d: $(BUILD_DIR)/test_cblas_cgeru_d.o $(BUILD_DIR)/cblas_cgeru_d.o $(BUILD_DIR)/cblas_cgeru_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_cgeru_d.o $(BUILD_DIR)/cblas_cgeru_d.o $(BUILD_DIR)/cblas_cgeru_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgeru_d
+	$(CC) $(BUILD_DIR)/test_cblas_cgeru_d.o $(BUILD_DIR)/cblas_cgeru_d.o $(BUILD_DIR)/cblas_cgeru_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgeru_d
 
 $(BUILD_DIR)/test_cblas_chbmv_d.o: $(TEST_DIR)/test_cblas_chbmv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_chbmv_d.c -o $(BUILD_DIR)/test_cblas_chbmv_d.o
 
 $(BUILD_DIR)/test_cblas_chbmv_d: $(BUILD_DIR)/test_cblas_chbmv_d.o $(BUILD_DIR)/cblas_chbmv_d.o $(BUILD_DIR)/cblas_chbmv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_chbmv_d.o $(BUILD_DIR)/cblas_chbmv_d.o $(BUILD_DIR)/cblas_chbmv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chbmv_d
+	$(CC) $(BUILD_DIR)/test_cblas_chbmv_d.o $(BUILD_DIR)/cblas_chbmv_d.o $(BUILD_DIR)/cblas_chbmv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chbmv_d
 
 $(BUILD_DIR)/test_cblas_chemm_d.o: $(TEST_DIR)/test_cblas_chemm_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_chemm_d.c -o $(BUILD_DIR)/test_cblas_chemm_d.o
 
 $(BUILD_DIR)/test_cblas_chemm_d: $(BUILD_DIR)/test_cblas_chemm_d.o $(BUILD_DIR)/cblas_chemm_d.o $(BUILD_DIR)/cblas_chemm_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_chemm_d.o $(BUILD_DIR)/cblas_chemm_d.o $(BUILD_DIR)/cblas_chemm_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chemm_d
+	$(CC) $(BUILD_DIR)/test_cblas_chemm_d.o $(BUILD_DIR)/cblas_chemm_d.o $(BUILD_DIR)/cblas_chemm_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chemm_d
 
 $(BUILD_DIR)/test_cblas_chemv_d.o: $(TEST_DIR)/test_cblas_chemv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_chemv_d.c -o $(BUILD_DIR)/test_cblas_chemv_d.o
 
 $(BUILD_DIR)/test_cblas_chemv_d: $(BUILD_DIR)/test_cblas_chemv_d.o $(BUILD_DIR)/cblas_chemv_d.o $(BUILD_DIR)/cblas_chemv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_chemv_d.o $(BUILD_DIR)/cblas_chemv_d.o $(BUILD_DIR)/cblas_chemv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chemv_d
+	$(CC) $(BUILD_DIR)/test_cblas_chemv_d.o $(BUILD_DIR)/cblas_chemv_d.o $(BUILD_DIR)/cblas_chemv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chemv_d
 
 $(BUILD_DIR)/test_cblas_cscal_d.o: $(TEST_DIR)/test_cblas_cscal_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cscal_d.c -o $(BUILD_DIR)/test_cblas_cscal_d.o
 
 $(BUILD_DIR)/test_cblas_cscal_d: $(BUILD_DIR)/test_cblas_cscal_d.o $(BUILD_DIR)/cblas_cscal_d.o $(BUILD_DIR)/cblas_cscal_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_cscal_d.o $(BUILD_DIR)/cblas_cscal_d.o $(BUILD_DIR)/cblas_cscal_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cscal_d
+	$(CC) $(BUILD_DIR)/test_cblas_cscal_d.o $(BUILD_DIR)/cblas_cscal_d.o $(BUILD_DIR)/cblas_cscal_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cscal_d
 
 $(BUILD_DIR)/test_cblas_cswap_d.o: $(TEST_DIR)/test_cblas_cswap_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cswap_d.c -o $(BUILD_DIR)/test_cblas_cswap_d.o
 
 $(BUILD_DIR)/test_cblas_cswap_d: $(BUILD_DIR)/test_cblas_cswap_d.o $(BUILD_DIR)/cblas_cswap_d.o $(BUILD_DIR)/cblas_cswap_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_cswap_d.o $(BUILD_DIR)/cblas_cswap_d.o $(BUILD_DIR)/cblas_cswap_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cswap_d
+	$(CC) $(BUILD_DIR)/test_cblas_cswap_d.o $(BUILD_DIR)/cblas_cswap_d.o $(BUILD_DIR)/cblas_cswap_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cswap_d
 
 $(BUILD_DIR)/test_cblas_csymm_d.o: $(TEST_DIR)/test_cblas_csymm_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_csymm_d.c -o $(BUILD_DIR)/test_cblas_csymm_d.o
 
 $(BUILD_DIR)/test_cblas_csymm_d: $(BUILD_DIR)/test_cblas_csymm_d.o $(BUILD_DIR)/cblas_csymm_d.o $(BUILD_DIR)/cblas_csymm_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_csymm_d.o $(BUILD_DIR)/cblas_csymm_d.o $(BUILD_DIR)/cblas_csymm_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csymm_d
+	$(CC) $(BUILD_DIR)/test_cblas_csymm_d.o $(BUILD_DIR)/cblas_csymm_d.o $(BUILD_DIR)/cblas_csymm_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csymm_d
 
 $(BUILD_DIR)/test_cblas_csyr2k_d.o: $(TEST_DIR)/test_cblas_csyr2k_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_csyr2k_d.c -o $(BUILD_DIR)/test_cblas_csyr2k_d.o
 
 $(BUILD_DIR)/test_cblas_csyr2k_d: $(BUILD_DIR)/test_cblas_csyr2k_d.o $(BUILD_DIR)/cblas_csyr2k_d.o $(BUILD_DIR)/cblas_csyr2k_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_csyr2k_d.o $(BUILD_DIR)/cblas_csyr2k_d.o $(BUILD_DIR)/cblas_csyr2k_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csyr2k_d
+	$(CC) $(BUILD_DIR)/test_cblas_csyr2k_d.o $(BUILD_DIR)/cblas_csyr2k_d.o $(BUILD_DIR)/cblas_csyr2k_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csyr2k_d
 
 $(BUILD_DIR)/test_cblas_csyrk_d.o: $(TEST_DIR)/test_cblas_csyrk_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_csyrk_d.c -o $(BUILD_DIR)/test_cblas_csyrk_d.o
 
 $(BUILD_DIR)/test_cblas_csyrk_d: $(BUILD_DIR)/test_cblas_csyrk_d.o $(BUILD_DIR)/cblas_csyrk_d.o $(BUILD_DIR)/cblas_csyrk_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_csyrk_d.o $(BUILD_DIR)/cblas_csyrk_d.o $(BUILD_DIR)/cblas_csyrk_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csyrk_d
+	$(CC) $(BUILD_DIR)/test_cblas_csyrk_d.o $(BUILD_DIR)/cblas_csyrk_d.o $(BUILD_DIR)/cblas_csyrk_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csyrk_d
 
 $(BUILD_DIR)/test_cblas_ctbmv_d.o: $(TEST_DIR)/test_cblas_ctbmv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctbmv_d.c -o $(BUILD_DIR)/test_cblas_ctbmv_d.o
 
 $(BUILD_DIR)/test_cblas_ctbmv_d: $(BUILD_DIR)/test_cblas_ctbmv_d.o $(BUILD_DIR)/cblas_ctbmv_d.o $(BUILD_DIR)/cblas_ctbmv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctbmv_d.o $(BUILD_DIR)/cblas_ctbmv_d.o $(BUILD_DIR)/cblas_ctbmv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctbmv_d
+	$(CC) $(BUILD_DIR)/test_cblas_ctbmv_d.o $(BUILD_DIR)/cblas_ctbmv_d.o $(BUILD_DIR)/cblas_ctbmv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctbmv_d
 
 $(BUILD_DIR)/test_cblas_ctpmv_d.o: $(TEST_DIR)/test_cblas_ctpmv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctpmv_d.c -o $(BUILD_DIR)/test_cblas_ctpmv_d.o
 
 $(BUILD_DIR)/test_cblas_ctpmv_d: $(BUILD_DIR)/test_cblas_ctpmv_d.o $(BUILD_DIR)/cblas_ctpmv_d.o $(BUILD_DIR)/cblas_ctpmv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctpmv_d.o $(BUILD_DIR)/cblas_ctpmv_d.o $(BUILD_DIR)/cblas_ctpmv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctpmv_d
+	$(CC) $(BUILD_DIR)/test_cblas_ctpmv_d.o $(BUILD_DIR)/cblas_ctpmv_d.o $(BUILD_DIR)/cblas_ctpmv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctpmv_d
 
 $(BUILD_DIR)/test_cblas_ctrmm_d.o: $(TEST_DIR)/test_cblas_ctrmm_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctrmm_d.c -o $(BUILD_DIR)/test_cblas_ctrmm_d.o
 
 $(BUILD_DIR)/test_cblas_ctrmm_d: $(BUILD_DIR)/test_cblas_ctrmm_d.o $(BUILD_DIR)/cblas_ctrmm_d.o $(BUILD_DIR)/cblas_ctrmm_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctrmm_d.o $(BUILD_DIR)/cblas_ctrmm_d.o $(BUILD_DIR)/cblas_ctrmm_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrmm_d
+	$(CC) $(BUILD_DIR)/test_cblas_ctrmm_d.o $(BUILD_DIR)/cblas_ctrmm_d.o $(BUILD_DIR)/cblas_ctrmm_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrmm_d
 
 $(BUILD_DIR)/test_cblas_ctrmv_d.o: $(TEST_DIR)/test_cblas_ctrmv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctrmv_d.c -o $(BUILD_DIR)/test_cblas_ctrmv_d.o
 
 $(BUILD_DIR)/test_cblas_ctrmv_d: $(BUILD_DIR)/test_cblas_ctrmv_d.o $(BUILD_DIR)/cblas_ctrmv_d.o $(BUILD_DIR)/cblas_ctrmv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctrmv_d.o $(BUILD_DIR)/cblas_ctrmv_d.o $(BUILD_DIR)/cblas_ctrmv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrmv_d
+	$(CC) $(BUILD_DIR)/test_cblas_ctrmv_d.o $(BUILD_DIR)/cblas_ctrmv_d.o $(BUILD_DIR)/cblas_ctrmv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrmv_d
 
 $(BUILD_DIR)/test_cblas_ctrsm_d.o: $(TEST_DIR)/test_cblas_ctrsm_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctrsm_d.c -o $(BUILD_DIR)/test_cblas_ctrsm_d.o
 
 $(BUILD_DIR)/test_cblas_ctrsm_d: $(BUILD_DIR)/test_cblas_ctrsm_d.o $(BUILD_DIR)/cblas_ctrsm_d.o $(BUILD_DIR)/cblas_ctrsm_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctrsm_d.o $(BUILD_DIR)/cblas_ctrsm_d.o $(BUILD_DIR)/cblas_ctrsm_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrsm_d
+	$(CC) $(BUILD_DIR)/test_cblas_ctrsm_d.o $(BUILD_DIR)/cblas_ctrsm_d.o $(BUILD_DIR)/cblas_ctrsm_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrsm_d
 
 $(BUILD_DIR)/test_cblas_ctrsv_d.o: $(TEST_DIR)/test_cblas_ctrsv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctrsv_d.c -o $(BUILD_DIR)/test_cblas_ctrsv_d.o
 
 $(BUILD_DIR)/test_cblas_ctrsv_d: $(BUILD_DIR)/test_cblas_ctrsv_d.o $(BUILD_DIR)/cblas_ctrsv_d.o $(BUILD_DIR)/cblas_ctrsv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctrsv_d.o $(BUILD_DIR)/cblas_ctrsv_d.o $(BUILD_DIR)/cblas_ctrsv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrsv_d
+	$(CC) $(BUILD_DIR)/test_cblas_ctrsv_d.o $(BUILD_DIR)/cblas_ctrsv_d.o $(BUILD_DIR)/cblas_ctrsv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrsv_d
 
 $(BUILD_DIR)/test_cblas_dasum_d.o: $(TEST_DIR)/test_cblas_dasum_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dasum_d.c -o $(BUILD_DIR)/test_cblas_dasum_d.o
 
 $(BUILD_DIR)/test_cblas_dasum_d: $(BUILD_DIR)/test_cblas_dasum_d.o $(BUILD_DIR)/cblas_dasum_d.o $(BUILD_DIR)/cblas_dasum_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dasum_d.o $(BUILD_DIR)/cblas_dasum_d.o $(BUILD_DIR)/cblas_dasum_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dasum_d
+	$(CC) $(BUILD_DIR)/test_cblas_dasum_d.o $(BUILD_DIR)/cblas_dasum_d.o $(BUILD_DIR)/cblas_dasum_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dasum_d
 
 $(BUILD_DIR)/test_cblas_daxpy_d.o: $(TEST_DIR)/test_cblas_daxpy_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_daxpy_d.c -o $(BUILD_DIR)/test_cblas_daxpy_d.o
 
 $(BUILD_DIR)/test_cblas_daxpy_d: $(BUILD_DIR)/test_cblas_daxpy_d.o $(BUILD_DIR)/cblas_daxpy_d.o $(BUILD_DIR)/cblas_daxpy_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_daxpy_d.o $(BUILD_DIR)/cblas_daxpy_d.o $(BUILD_DIR)/cblas_daxpy_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_daxpy_d
+	$(CC) $(BUILD_DIR)/test_cblas_daxpy_d.o $(BUILD_DIR)/cblas_daxpy_d.o $(BUILD_DIR)/cblas_daxpy_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_daxpy_d
 
 $(BUILD_DIR)/test_cblas_dcopy_d.o: $(TEST_DIR)/test_cblas_dcopy_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dcopy_d.c -o $(BUILD_DIR)/test_cblas_dcopy_d.o
 
 $(BUILD_DIR)/test_cblas_dcopy_d: $(BUILD_DIR)/test_cblas_dcopy_d.o $(BUILD_DIR)/cblas_dcopy_d.o $(BUILD_DIR)/cblas_dcopy_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dcopy_d.o $(BUILD_DIR)/cblas_dcopy_d.o $(BUILD_DIR)/cblas_dcopy_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dcopy_d
+	$(CC) $(BUILD_DIR)/test_cblas_dcopy_d.o $(BUILD_DIR)/cblas_dcopy_d.o $(BUILD_DIR)/cblas_dcopy_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dcopy_d
 
 $(BUILD_DIR)/test_cblas_ddot_d.o: $(TEST_DIR)/test_cblas_ddot_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ddot_d.c -o $(BUILD_DIR)/test_cblas_ddot_d.o
 
 $(BUILD_DIR)/test_cblas_ddot_d: $(BUILD_DIR)/test_cblas_ddot_d.o $(BUILD_DIR)/cblas_ddot_d.o $(BUILD_DIR)/cblas_ddot_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ddot_d.o $(BUILD_DIR)/cblas_ddot_d.o $(BUILD_DIR)/cblas_ddot_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ddot_d
+	$(CC) $(BUILD_DIR)/test_cblas_ddot_d.o $(BUILD_DIR)/cblas_ddot_d.o $(BUILD_DIR)/cblas_ddot_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ddot_d
 
 $(BUILD_DIR)/test_cblas_dgbmv_d.o: $(TEST_DIR)/test_cblas_dgbmv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dgbmv_d.c -o $(BUILD_DIR)/test_cblas_dgbmv_d.o
 
 $(BUILD_DIR)/test_cblas_dgbmv_d: $(BUILD_DIR)/test_cblas_dgbmv_d.o $(BUILD_DIR)/cblas_dgbmv_d.o $(BUILD_DIR)/cblas_dgbmv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dgbmv_d.o $(BUILD_DIR)/cblas_dgbmv_d.o $(BUILD_DIR)/cblas_dgbmv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgbmv_d
+	$(CC) $(BUILD_DIR)/test_cblas_dgbmv_d.o $(BUILD_DIR)/cblas_dgbmv_d.o $(BUILD_DIR)/cblas_dgbmv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgbmv_d
 
 $(BUILD_DIR)/test_cblas_dgemm_d.o: $(TEST_DIR)/test_cblas_dgemm_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dgemm_d.c -o $(BUILD_DIR)/test_cblas_dgemm_d.o
 
 $(BUILD_DIR)/test_cblas_dgemm_d: $(BUILD_DIR)/test_cblas_dgemm_d.o $(BUILD_DIR)/cblas_dgemm_d.o $(BUILD_DIR)/cblas_dgemm_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dgemm_d.o $(BUILD_DIR)/cblas_dgemm_d.o $(BUILD_DIR)/cblas_dgemm_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgemm_d
+	$(CC) $(BUILD_DIR)/test_cblas_dgemm_d.o $(BUILD_DIR)/cblas_dgemm_d.o $(BUILD_DIR)/cblas_dgemm_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgemm_d
 
 $(BUILD_DIR)/test_cblas_dgemv_d.o: $(TEST_DIR)/test_cblas_dgemv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dgemv_d.c -o $(BUILD_DIR)/test_cblas_dgemv_d.o
 
 $(BUILD_DIR)/test_cblas_dgemv_d: $(BUILD_DIR)/test_cblas_dgemv_d.o $(BUILD_DIR)/cblas_dgemv_d.o $(BUILD_DIR)/cblas_dgemv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dgemv_d.o $(BUILD_DIR)/cblas_dgemv_d.o $(BUILD_DIR)/cblas_dgemv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgemv_d
+	$(CC) $(BUILD_DIR)/test_cblas_dgemv_d.o $(BUILD_DIR)/cblas_dgemv_d.o $(BUILD_DIR)/cblas_dgemv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgemv_d
 
 $(BUILD_DIR)/test_cblas_dger_d.o: $(TEST_DIR)/test_cblas_dger_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dger_d.c -o $(BUILD_DIR)/test_cblas_dger_d.o
 
 $(BUILD_DIR)/test_cblas_dger_d: $(BUILD_DIR)/test_cblas_dger_d.o $(BUILD_DIR)/cblas_dger_d.o $(BUILD_DIR)/cblas_dger_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dger_d.o $(BUILD_DIR)/cblas_dger_d.o $(BUILD_DIR)/cblas_dger_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dger_d
+	$(CC) $(BUILD_DIR)/test_cblas_dger_d.o $(BUILD_DIR)/cblas_dger_d.o $(BUILD_DIR)/cblas_dger_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dger_d
 
 $(BUILD_DIR)/test_cblas_dnrm2_d.o: $(TEST_DIR)/test_cblas_dnrm2_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dnrm2_d.c -o $(BUILD_DIR)/test_cblas_dnrm2_d.o
 
 $(BUILD_DIR)/test_cblas_dnrm2_d: $(BUILD_DIR)/test_cblas_dnrm2_d.o $(BUILD_DIR)/cblas_dnrm2_d.o $(BUILD_DIR)/cblas_dnrm2_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dnrm2_d.o $(BUILD_DIR)/cblas_dnrm2_d.o $(BUILD_DIR)/cblas_dnrm2_d_fortran.o $(BUILD_DIR)/DIFFSIZES.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dnrm2_d
+	$(CC) $(BUILD_DIR)/test_cblas_dnrm2_d.o $(BUILD_DIR)/cblas_dnrm2_d.o $(BUILD_DIR)/cblas_dnrm2_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/DIFFSIZES.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dnrm2_d
 
 $(BUILD_DIR)/test_cblas_dsbmv_d.o: $(TEST_DIR)/test_cblas_dsbmv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsbmv_d.c -o $(BUILD_DIR)/test_cblas_dsbmv_d.o
 
 $(BUILD_DIR)/test_cblas_dsbmv_d: $(BUILD_DIR)/test_cblas_dsbmv_d.o $(BUILD_DIR)/cblas_dsbmv_d.o $(BUILD_DIR)/cblas_dsbmv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsbmv_d.o $(BUILD_DIR)/cblas_dsbmv_d.o $(BUILD_DIR)/cblas_dsbmv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsbmv_d
+	$(CC) $(BUILD_DIR)/test_cblas_dsbmv_d.o $(BUILD_DIR)/cblas_dsbmv_d.o $(BUILD_DIR)/cblas_dsbmv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsbmv_d
 
 $(BUILD_DIR)/test_cblas_dscal_d.o: $(TEST_DIR)/test_cblas_dscal_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dscal_d.c -o $(BUILD_DIR)/test_cblas_dscal_d.o
 
 $(BUILD_DIR)/test_cblas_dscal_d: $(BUILD_DIR)/test_cblas_dscal_d.o $(BUILD_DIR)/cblas_dscal_d.o $(BUILD_DIR)/cblas_dscal_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dscal_d.o $(BUILD_DIR)/cblas_dscal_d.o $(BUILD_DIR)/cblas_dscal_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dscal_d
+	$(CC) $(BUILD_DIR)/test_cblas_dscal_d.o $(BUILD_DIR)/cblas_dscal_d.o $(BUILD_DIR)/cblas_dscal_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dscal_d
 
 $(BUILD_DIR)/test_cblas_dspmv_d.o: $(TEST_DIR)/test_cblas_dspmv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dspmv_d.c -o $(BUILD_DIR)/test_cblas_dspmv_d.o
 
 $(BUILD_DIR)/test_cblas_dspmv_d: $(BUILD_DIR)/test_cblas_dspmv_d.o $(BUILD_DIR)/cblas_dspmv_d.o $(BUILD_DIR)/cblas_dspmv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dspmv_d.o $(BUILD_DIR)/cblas_dspmv_d.o $(BUILD_DIR)/cblas_dspmv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspmv_d
+	$(CC) $(BUILD_DIR)/test_cblas_dspmv_d.o $(BUILD_DIR)/cblas_dspmv_d.o $(BUILD_DIR)/cblas_dspmv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspmv_d
 
 $(BUILD_DIR)/test_cblas_dspr2_d.o: $(TEST_DIR)/test_cblas_dspr2_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dspr2_d.c -o $(BUILD_DIR)/test_cblas_dspr2_d.o
 
 $(BUILD_DIR)/test_cblas_dspr2_d: $(BUILD_DIR)/test_cblas_dspr2_d.o $(BUILD_DIR)/cblas_dspr2_d.o $(BUILD_DIR)/cblas_dspr2_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dspr2_d.o $(BUILD_DIR)/cblas_dspr2_d.o $(BUILD_DIR)/cblas_dspr2_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspr2_d
+	$(CC) $(BUILD_DIR)/test_cblas_dspr2_d.o $(BUILD_DIR)/cblas_dspr2_d.o $(BUILD_DIR)/cblas_dspr2_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspr2_d
 
 $(BUILD_DIR)/test_cblas_dspr_d.o: $(TEST_DIR)/test_cblas_dspr_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dspr_d.c -o $(BUILD_DIR)/test_cblas_dspr_d.o
 
 $(BUILD_DIR)/test_cblas_dspr_d: $(BUILD_DIR)/test_cblas_dspr_d.o $(BUILD_DIR)/cblas_dspr_d.o $(BUILD_DIR)/cblas_dspr_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dspr_d.o $(BUILD_DIR)/cblas_dspr_d.o $(BUILD_DIR)/cblas_dspr_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspr_d
+	$(CC) $(BUILD_DIR)/test_cblas_dspr_d.o $(BUILD_DIR)/cblas_dspr_d.o $(BUILD_DIR)/cblas_dspr_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspr_d
 
 $(BUILD_DIR)/test_cblas_dswap_d.o: $(TEST_DIR)/test_cblas_dswap_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dswap_d.c -o $(BUILD_DIR)/test_cblas_dswap_d.o
 
 $(BUILD_DIR)/test_cblas_dswap_d: $(BUILD_DIR)/test_cblas_dswap_d.o $(BUILD_DIR)/cblas_dswap_d.o $(BUILD_DIR)/cblas_dswap_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dswap_d.o $(BUILD_DIR)/cblas_dswap_d.o $(BUILD_DIR)/cblas_dswap_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dswap_d
+	$(CC) $(BUILD_DIR)/test_cblas_dswap_d.o $(BUILD_DIR)/cblas_dswap_d.o $(BUILD_DIR)/cblas_dswap_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dswap_d
 
 $(BUILD_DIR)/test_cblas_dsymm_d.o: $(TEST_DIR)/test_cblas_dsymm_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsymm_d.c -o $(BUILD_DIR)/test_cblas_dsymm_d.o
 
 $(BUILD_DIR)/test_cblas_dsymm_d: $(BUILD_DIR)/test_cblas_dsymm_d.o $(BUILD_DIR)/cblas_dsymm_d.o $(BUILD_DIR)/cblas_dsymm_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsymm_d.o $(BUILD_DIR)/cblas_dsymm_d.o $(BUILD_DIR)/cblas_dsymm_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsymm_d
+	$(CC) $(BUILD_DIR)/test_cblas_dsymm_d.o $(BUILD_DIR)/cblas_dsymm_d.o $(BUILD_DIR)/cblas_dsymm_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsymm_d
 
 $(BUILD_DIR)/test_cblas_dsymv_d.o: $(TEST_DIR)/test_cblas_dsymv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsymv_d.c -o $(BUILD_DIR)/test_cblas_dsymv_d.o
 
 $(BUILD_DIR)/test_cblas_dsymv_d: $(BUILD_DIR)/test_cblas_dsymv_d.o $(BUILD_DIR)/cblas_dsymv_d.o $(BUILD_DIR)/cblas_dsymv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsymv_d.o $(BUILD_DIR)/cblas_dsymv_d.o $(BUILD_DIR)/cblas_dsymv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsymv_d
+	$(CC) $(BUILD_DIR)/test_cblas_dsymv_d.o $(BUILD_DIR)/cblas_dsymv_d.o $(BUILD_DIR)/cblas_dsymv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsymv_d
 
 $(BUILD_DIR)/test_cblas_dsyr2_d.o: $(TEST_DIR)/test_cblas_dsyr2_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsyr2_d.c -o $(BUILD_DIR)/test_cblas_dsyr2_d.o
 
 $(BUILD_DIR)/test_cblas_dsyr2_d: $(BUILD_DIR)/test_cblas_dsyr2_d.o $(BUILD_DIR)/cblas_dsyr2_d.o $(BUILD_DIR)/cblas_dsyr2_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsyr2_d.o $(BUILD_DIR)/cblas_dsyr2_d.o $(BUILD_DIR)/cblas_dsyr2_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr2_d
+	$(CC) $(BUILD_DIR)/test_cblas_dsyr2_d.o $(BUILD_DIR)/cblas_dsyr2_d.o $(BUILD_DIR)/cblas_dsyr2_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr2_d
 
 $(BUILD_DIR)/test_cblas_dsyr2k_d.o: $(TEST_DIR)/test_cblas_dsyr2k_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsyr2k_d.c -o $(BUILD_DIR)/test_cblas_dsyr2k_d.o
 
 $(BUILD_DIR)/test_cblas_dsyr2k_d: $(BUILD_DIR)/test_cblas_dsyr2k_d.o $(BUILD_DIR)/cblas_dsyr2k_d.o $(BUILD_DIR)/cblas_dsyr2k_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsyr2k_d.o $(BUILD_DIR)/cblas_dsyr2k_d.o $(BUILD_DIR)/cblas_dsyr2k_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr2k_d
+	$(CC) $(BUILD_DIR)/test_cblas_dsyr2k_d.o $(BUILD_DIR)/cblas_dsyr2k_d.o $(BUILD_DIR)/cblas_dsyr2k_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr2k_d
 
 $(BUILD_DIR)/test_cblas_dsyr_d.o: $(TEST_DIR)/test_cblas_dsyr_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsyr_d.c -o $(BUILD_DIR)/test_cblas_dsyr_d.o
 
 $(BUILD_DIR)/test_cblas_dsyr_d: $(BUILD_DIR)/test_cblas_dsyr_d.o $(BUILD_DIR)/cblas_dsyr_d.o $(BUILD_DIR)/cblas_dsyr_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsyr_d.o $(BUILD_DIR)/cblas_dsyr_d.o $(BUILD_DIR)/cblas_dsyr_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr_d
+	$(CC) $(BUILD_DIR)/test_cblas_dsyr_d.o $(BUILD_DIR)/cblas_dsyr_d.o $(BUILD_DIR)/cblas_dsyr_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr_d
 
 $(BUILD_DIR)/test_cblas_dsyrk_d.o: $(TEST_DIR)/test_cblas_dsyrk_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsyrk_d.c -o $(BUILD_DIR)/test_cblas_dsyrk_d.o
 
 $(BUILD_DIR)/test_cblas_dsyrk_d: $(BUILD_DIR)/test_cblas_dsyrk_d.o $(BUILD_DIR)/cblas_dsyrk_d.o $(BUILD_DIR)/cblas_dsyrk_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsyrk_d.o $(BUILD_DIR)/cblas_dsyrk_d.o $(BUILD_DIR)/cblas_dsyrk_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyrk_d
+	$(CC) $(BUILD_DIR)/test_cblas_dsyrk_d.o $(BUILD_DIR)/cblas_dsyrk_d.o $(BUILD_DIR)/cblas_dsyrk_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyrk_d
 
 $(BUILD_DIR)/test_cblas_dtbmv_d.o: $(TEST_DIR)/test_cblas_dtbmv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtbmv_d.c -o $(BUILD_DIR)/test_cblas_dtbmv_d.o
 
 $(BUILD_DIR)/test_cblas_dtbmv_d: $(BUILD_DIR)/test_cblas_dtbmv_d.o $(BUILD_DIR)/cblas_dtbmv_d.o $(BUILD_DIR)/cblas_dtbmv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtbmv_d.o $(BUILD_DIR)/cblas_dtbmv_d.o $(BUILD_DIR)/cblas_dtbmv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtbmv_d
+	$(CC) $(BUILD_DIR)/test_cblas_dtbmv_d.o $(BUILD_DIR)/cblas_dtbmv_d.o $(BUILD_DIR)/cblas_dtbmv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtbmv_d
 
 $(BUILD_DIR)/test_cblas_dtpmv_d.o: $(TEST_DIR)/test_cblas_dtpmv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtpmv_d.c -o $(BUILD_DIR)/test_cblas_dtpmv_d.o
 
 $(BUILD_DIR)/test_cblas_dtpmv_d: $(BUILD_DIR)/test_cblas_dtpmv_d.o $(BUILD_DIR)/cblas_dtpmv_d.o $(BUILD_DIR)/cblas_dtpmv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtpmv_d.o $(BUILD_DIR)/cblas_dtpmv_d.o $(BUILD_DIR)/cblas_dtpmv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtpmv_d
+	$(CC) $(BUILD_DIR)/test_cblas_dtpmv_d.o $(BUILD_DIR)/cblas_dtpmv_d.o $(BUILD_DIR)/cblas_dtpmv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtpmv_d
 
 $(BUILD_DIR)/test_cblas_dtrmm_d.o: $(TEST_DIR)/test_cblas_dtrmm_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtrmm_d.c -o $(BUILD_DIR)/test_cblas_dtrmm_d.o
 
 $(BUILD_DIR)/test_cblas_dtrmm_d: $(BUILD_DIR)/test_cblas_dtrmm_d.o $(BUILD_DIR)/cblas_dtrmm_d.o $(BUILD_DIR)/cblas_dtrmm_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtrmm_d.o $(BUILD_DIR)/cblas_dtrmm_d.o $(BUILD_DIR)/cblas_dtrmm_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrmm_d
+	$(CC) $(BUILD_DIR)/test_cblas_dtrmm_d.o $(BUILD_DIR)/cblas_dtrmm_d.o $(BUILD_DIR)/cblas_dtrmm_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrmm_d
 
 $(BUILD_DIR)/test_cblas_dtrmv_d.o: $(TEST_DIR)/test_cblas_dtrmv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtrmv_d.c -o $(BUILD_DIR)/test_cblas_dtrmv_d.o
 
 $(BUILD_DIR)/test_cblas_dtrmv_d: $(BUILD_DIR)/test_cblas_dtrmv_d.o $(BUILD_DIR)/cblas_dtrmv_d.o $(BUILD_DIR)/cblas_dtrmv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtrmv_d.o $(BUILD_DIR)/cblas_dtrmv_d.o $(BUILD_DIR)/cblas_dtrmv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrmv_d
+	$(CC) $(BUILD_DIR)/test_cblas_dtrmv_d.o $(BUILD_DIR)/cblas_dtrmv_d.o $(BUILD_DIR)/cblas_dtrmv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrmv_d
 
 $(BUILD_DIR)/test_cblas_dtrsm_d.o: $(TEST_DIR)/test_cblas_dtrsm_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtrsm_d.c -o $(BUILD_DIR)/test_cblas_dtrsm_d.o
 
 $(BUILD_DIR)/test_cblas_dtrsm_d: $(BUILD_DIR)/test_cblas_dtrsm_d.o $(BUILD_DIR)/cblas_dtrsm_d.o $(BUILD_DIR)/cblas_dtrsm_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtrsm_d.o $(BUILD_DIR)/cblas_dtrsm_d.o $(BUILD_DIR)/cblas_dtrsm_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrsm_d
+	$(CC) $(BUILD_DIR)/test_cblas_dtrsm_d.o $(BUILD_DIR)/cblas_dtrsm_d.o $(BUILD_DIR)/cblas_dtrsm_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrsm_d
 
 $(BUILD_DIR)/test_cblas_dtrsv_d.o: $(TEST_DIR)/test_cblas_dtrsv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtrsv_d.c -o $(BUILD_DIR)/test_cblas_dtrsv_d.o
 
 $(BUILD_DIR)/test_cblas_dtrsv_d: $(BUILD_DIR)/test_cblas_dtrsv_d.o $(BUILD_DIR)/cblas_dtrsv_d.o $(BUILD_DIR)/cblas_dtrsv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtrsv_d.o $(BUILD_DIR)/cblas_dtrsv_d.o $(BUILD_DIR)/cblas_dtrsv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrsv_d
+	$(CC) $(BUILD_DIR)/test_cblas_dtrsv_d.o $(BUILD_DIR)/cblas_dtrsv_d.o $(BUILD_DIR)/cblas_dtrsv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrsv_d
 
 $(BUILD_DIR)/test_cblas_sasum_d.o: $(TEST_DIR)/test_cblas_sasum_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sasum_d.c -o $(BUILD_DIR)/test_cblas_sasum_d.o
 
 $(BUILD_DIR)/test_cblas_sasum_d: $(BUILD_DIR)/test_cblas_sasum_d.o $(BUILD_DIR)/cblas_sasum_d.o $(BUILD_DIR)/cblas_sasum_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_sasum_d.o $(BUILD_DIR)/cblas_sasum_d.o $(BUILD_DIR)/cblas_sasum_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sasum_d
+	$(CC) $(BUILD_DIR)/test_cblas_sasum_d.o $(BUILD_DIR)/cblas_sasum_d.o $(BUILD_DIR)/cblas_sasum_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sasum_d
 
 $(BUILD_DIR)/test_cblas_saxpy_d.o: $(TEST_DIR)/test_cblas_saxpy_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_saxpy_d.c -o $(BUILD_DIR)/test_cblas_saxpy_d.o
 
 $(BUILD_DIR)/test_cblas_saxpy_d: $(BUILD_DIR)/test_cblas_saxpy_d.o $(BUILD_DIR)/cblas_saxpy_d.o $(BUILD_DIR)/cblas_saxpy_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_saxpy_d.o $(BUILD_DIR)/cblas_saxpy_d.o $(BUILD_DIR)/cblas_saxpy_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_saxpy_d
+	$(CC) $(BUILD_DIR)/test_cblas_saxpy_d.o $(BUILD_DIR)/cblas_saxpy_d.o $(BUILD_DIR)/cblas_saxpy_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_saxpy_d
 
 $(BUILD_DIR)/test_cblas_scopy_d.o: $(TEST_DIR)/test_cblas_scopy_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_scopy_d.c -o $(BUILD_DIR)/test_cblas_scopy_d.o
 
 $(BUILD_DIR)/test_cblas_scopy_d: $(BUILD_DIR)/test_cblas_scopy_d.o $(BUILD_DIR)/cblas_scopy_d.o $(BUILD_DIR)/cblas_scopy_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_scopy_d.o $(BUILD_DIR)/cblas_scopy_d.o $(BUILD_DIR)/cblas_scopy_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_scopy_d
+	$(CC) $(BUILD_DIR)/test_cblas_scopy_d.o $(BUILD_DIR)/cblas_scopy_d.o $(BUILD_DIR)/cblas_scopy_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_scopy_d
 
 $(BUILD_DIR)/test_cblas_sdot_d.o: $(TEST_DIR)/test_cblas_sdot_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sdot_d.c -o $(BUILD_DIR)/test_cblas_sdot_d.o
 
 $(BUILD_DIR)/test_cblas_sdot_d: $(BUILD_DIR)/test_cblas_sdot_d.o $(BUILD_DIR)/cblas_sdot_d.o $(BUILD_DIR)/cblas_sdot_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_sdot_d.o $(BUILD_DIR)/cblas_sdot_d.o $(BUILD_DIR)/cblas_sdot_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sdot_d
+	$(CC) $(BUILD_DIR)/test_cblas_sdot_d.o $(BUILD_DIR)/cblas_sdot_d.o $(BUILD_DIR)/cblas_sdot_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sdot_d
 
 $(BUILD_DIR)/test_cblas_sgbmv_d.o: $(TEST_DIR)/test_cblas_sgbmv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sgbmv_d.c -o $(BUILD_DIR)/test_cblas_sgbmv_d.o
 
 $(BUILD_DIR)/test_cblas_sgbmv_d: $(BUILD_DIR)/test_cblas_sgbmv_d.o $(BUILD_DIR)/cblas_sgbmv_d.o $(BUILD_DIR)/cblas_sgbmv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_sgbmv_d.o $(BUILD_DIR)/cblas_sgbmv_d.o $(BUILD_DIR)/cblas_sgbmv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgbmv_d
+	$(CC) $(BUILD_DIR)/test_cblas_sgbmv_d.o $(BUILD_DIR)/cblas_sgbmv_d.o $(BUILD_DIR)/cblas_sgbmv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgbmv_d
 
 $(BUILD_DIR)/test_cblas_sgemm_d.o: $(TEST_DIR)/test_cblas_sgemm_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sgemm_d.c -o $(BUILD_DIR)/test_cblas_sgemm_d.o
 
 $(BUILD_DIR)/test_cblas_sgemm_d: $(BUILD_DIR)/test_cblas_sgemm_d.o $(BUILD_DIR)/cblas_sgemm_d.o $(BUILD_DIR)/cblas_sgemm_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_sgemm_d.o $(BUILD_DIR)/cblas_sgemm_d.o $(BUILD_DIR)/cblas_sgemm_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgemm_d
+	$(CC) $(BUILD_DIR)/test_cblas_sgemm_d.o $(BUILD_DIR)/cblas_sgemm_d.o $(BUILD_DIR)/cblas_sgemm_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgemm_d
 
 $(BUILD_DIR)/test_cblas_sgemv_d.o: $(TEST_DIR)/test_cblas_sgemv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sgemv_d.c -o $(BUILD_DIR)/test_cblas_sgemv_d.o
 
 $(BUILD_DIR)/test_cblas_sgemv_d: $(BUILD_DIR)/test_cblas_sgemv_d.o $(BUILD_DIR)/cblas_sgemv_d.o $(BUILD_DIR)/cblas_sgemv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_sgemv_d.o $(BUILD_DIR)/cblas_sgemv_d.o $(BUILD_DIR)/cblas_sgemv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgemv_d
+	$(CC) $(BUILD_DIR)/test_cblas_sgemv_d.o $(BUILD_DIR)/cblas_sgemv_d.o $(BUILD_DIR)/cblas_sgemv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgemv_d
 
 $(BUILD_DIR)/test_cblas_sger_d.o: $(TEST_DIR)/test_cblas_sger_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sger_d.c -o $(BUILD_DIR)/test_cblas_sger_d.o
 
 $(BUILD_DIR)/test_cblas_sger_d: $(BUILD_DIR)/test_cblas_sger_d.o $(BUILD_DIR)/cblas_sger_d.o $(BUILD_DIR)/cblas_sger_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_sger_d.o $(BUILD_DIR)/cblas_sger_d.o $(BUILD_DIR)/cblas_sger_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sger_d
+	$(CC) $(BUILD_DIR)/test_cblas_sger_d.o $(BUILD_DIR)/cblas_sger_d.o $(BUILD_DIR)/cblas_sger_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sger_d
 
 $(BUILD_DIR)/test_cblas_snrm2_d.o: $(TEST_DIR)/test_cblas_snrm2_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_snrm2_d.c -o $(BUILD_DIR)/test_cblas_snrm2_d.o
 
 $(BUILD_DIR)/test_cblas_snrm2_d: $(BUILD_DIR)/test_cblas_snrm2_d.o $(BUILD_DIR)/cblas_snrm2_d.o $(BUILD_DIR)/cblas_snrm2_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_snrm2_d.o $(BUILD_DIR)/cblas_snrm2_d.o $(BUILD_DIR)/cblas_snrm2_d_fortran.o $(BUILD_DIR)/DIFFSIZES.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_snrm2_d
+	$(CC) $(BUILD_DIR)/test_cblas_snrm2_d.o $(BUILD_DIR)/cblas_snrm2_d.o $(BUILD_DIR)/cblas_snrm2_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/DIFFSIZES.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_snrm2_d
 
 $(BUILD_DIR)/test_cblas_ssbmv_d.o: $(TEST_DIR)/test_cblas_ssbmv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssbmv_d.c -o $(BUILD_DIR)/test_cblas_ssbmv_d.o
 
 $(BUILD_DIR)/test_cblas_ssbmv_d: $(BUILD_DIR)/test_cblas_ssbmv_d.o $(BUILD_DIR)/cblas_ssbmv_d.o $(BUILD_DIR)/cblas_ssbmv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssbmv_d.o $(BUILD_DIR)/cblas_ssbmv_d.o $(BUILD_DIR)/cblas_ssbmv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssbmv_d
+	$(CC) $(BUILD_DIR)/test_cblas_ssbmv_d.o $(BUILD_DIR)/cblas_ssbmv_d.o $(BUILD_DIR)/cblas_ssbmv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssbmv_d
 
 $(BUILD_DIR)/test_cblas_sscal_d.o: $(TEST_DIR)/test_cblas_sscal_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sscal_d.c -o $(BUILD_DIR)/test_cblas_sscal_d.o
 
 $(BUILD_DIR)/test_cblas_sscal_d: $(BUILD_DIR)/test_cblas_sscal_d.o $(BUILD_DIR)/cblas_sscal_d.o $(BUILD_DIR)/cblas_sscal_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_sscal_d.o $(BUILD_DIR)/cblas_sscal_d.o $(BUILD_DIR)/cblas_sscal_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sscal_d
+	$(CC) $(BUILD_DIR)/test_cblas_sscal_d.o $(BUILD_DIR)/cblas_sscal_d.o $(BUILD_DIR)/cblas_sscal_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sscal_d
 
 $(BUILD_DIR)/test_cblas_sspmv_d.o: $(TEST_DIR)/test_cblas_sspmv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sspmv_d.c -o $(BUILD_DIR)/test_cblas_sspmv_d.o
 
 $(BUILD_DIR)/test_cblas_sspmv_d: $(BUILD_DIR)/test_cblas_sspmv_d.o $(BUILD_DIR)/cblas_sspmv_d.o $(BUILD_DIR)/cblas_sspmv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_sspmv_d.o $(BUILD_DIR)/cblas_sspmv_d.o $(BUILD_DIR)/cblas_sspmv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspmv_d
+	$(CC) $(BUILD_DIR)/test_cblas_sspmv_d.o $(BUILD_DIR)/cblas_sspmv_d.o $(BUILD_DIR)/cblas_sspmv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspmv_d
 
 $(BUILD_DIR)/test_cblas_sspr2_d.o: $(TEST_DIR)/test_cblas_sspr2_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sspr2_d.c -o $(BUILD_DIR)/test_cblas_sspr2_d.o
 
 $(BUILD_DIR)/test_cblas_sspr2_d: $(BUILD_DIR)/test_cblas_sspr2_d.o $(BUILD_DIR)/cblas_sspr2_d.o $(BUILD_DIR)/cblas_sspr2_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_sspr2_d.o $(BUILD_DIR)/cblas_sspr2_d.o $(BUILD_DIR)/cblas_sspr2_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspr2_d
+	$(CC) $(BUILD_DIR)/test_cblas_sspr2_d.o $(BUILD_DIR)/cblas_sspr2_d.o $(BUILD_DIR)/cblas_sspr2_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspr2_d
 
 $(BUILD_DIR)/test_cblas_sspr_d.o: $(TEST_DIR)/test_cblas_sspr_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sspr_d.c -o $(BUILD_DIR)/test_cblas_sspr_d.o
 
 $(BUILD_DIR)/test_cblas_sspr_d: $(BUILD_DIR)/test_cblas_sspr_d.o $(BUILD_DIR)/cblas_sspr_d.o $(BUILD_DIR)/cblas_sspr_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_sspr_d.o $(BUILD_DIR)/cblas_sspr_d.o $(BUILD_DIR)/cblas_sspr_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspr_d
+	$(CC) $(BUILD_DIR)/test_cblas_sspr_d.o $(BUILD_DIR)/cblas_sspr_d.o $(BUILD_DIR)/cblas_sspr_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspr_d
 
 $(BUILD_DIR)/test_cblas_sswap_d.o: $(TEST_DIR)/test_cblas_sswap_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sswap_d.c -o $(BUILD_DIR)/test_cblas_sswap_d.o
 
 $(BUILD_DIR)/test_cblas_sswap_d: $(BUILD_DIR)/test_cblas_sswap_d.o $(BUILD_DIR)/cblas_sswap_d.o $(BUILD_DIR)/cblas_sswap_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_sswap_d.o $(BUILD_DIR)/cblas_sswap_d.o $(BUILD_DIR)/cblas_sswap_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sswap_d
+	$(CC) $(BUILD_DIR)/test_cblas_sswap_d.o $(BUILD_DIR)/cblas_sswap_d.o $(BUILD_DIR)/cblas_sswap_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sswap_d
 
 $(BUILD_DIR)/test_cblas_ssymm_d.o: $(TEST_DIR)/test_cblas_ssymm_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssymm_d.c -o $(BUILD_DIR)/test_cblas_ssymm_d.o
 
 $(BUILD_DIR)/test_cblas_ssymm_d: $(BUILD_DIR)/test_cblas_ssymm_d.o $(BUILD_DIR)/cblas_ssymm_d.o $(BUILD_DIR)/cblas_ssymm_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssymm_d.o $(BUILD_DIR)/cblas_ssymm_d.o $(BUILD_DIR)/cblas_ssymm_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssymm_d
+	$(CC) $(BUILD_DIR)/test_cblas_ssymm_d.o $(BUILD_DIR)/cblas_ssymm_d.o $(BUILD_DIR)/cblas_ssymm_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssymm_d
 
 $(BUILD_DIR)/test_cblas_ssymv_d.o: $(TEST_DIR)/test_cblas_ssymv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssymv_d.c -o $(BUILD_DIR)/test_cblas_ssymv_d.o
 
 $(BUILD_DIR)/test_cblas_ssymv_d: $(BUILD_DIR)/test_cblas_ssymv_d.o $(BUILD_DIR)/cblas_ssymv_d.o $(BUILD_DIR)/cblas_ssymv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssymv_d.o $(BUILD_DIR)/cblas_ssymv_d.o $(BUILD_DIR)/cblas_ssymv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssymv_d
+	$(CC) $(BUILD_DIR)/test_cblas_ssymv_d.o $(BUILD_DIR)/cblas_ssymv_d.o $(BUILD_DIR)/cblas_ssymv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssymv_d
 
 $(BUILD_DIR)/test_cblas_ssyr2_d.o: $(TEST_DIR)/test_cblas_ssyr2_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssyr2_d.c -o $(BUILD_DIR)/test_cblas_ssyr2_d.o
 
 $(BUILD_DIR)/test_cblas_ssyr2_d: $(BUILD_DIR)/test_cblas_ssyr2_d.o $(BUILD_DIR)/cblas_ssyr2_d.o $(BUILD_DIR)/cblas_ssyr2_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssyr2_d.o $(BUILD_DIR)/cblas_ssyr2_d.o $(BUILD_DIR)/cblas_ssyr2_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr2_d
+	$(CC) $(BUILD_DIR)/test_cblas_ssyr2_d.o $(BUILD_DIR)/cblas_ssyr2_d.o $(BUILD_DIR)/cblas_ssyr2_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr2_d
 
 $(BUILD_DIR)/test_cblas_ssyr2k_d.o: $(TEST_DIR)/test_cblas_ssyr2k_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssyr2k_d.c -o $(BUILD_DIR)/test_cblas_ssyr2k_d.o
 
 $(BUILD_DIR)/test_cblas_ssyr2k_d: $(BUILD_DIR)/test_cblas_ssyr2k_d.o $(BUILD_DIR)/cblas_ssyr2k_d.o $(BUILD_DIR)/cblas_ssyr2k_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssyr2k_d.o $(BUILD_DIR)/cblas_ssyr2k_d.o $(BUILD_DIR)/cblas_ssyr2k_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr2k_d
+	$(CC) $(BUILD_DIR)/test_cblas_ssyr2k_d.o $(BUILD_DIR)/cblas_ssyr2k_d.o $(BUILD_DIR)/cblas_ssyr2k_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr2k_d
 
 $(BUILD_DIR)/test_cblas_ssyr_d.o: $(TEST_DIR)/test_cblas_ssyr_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssyr_d.c -o $(BUILD_DIR)/test_cblas_ssyr_d.o
 
 $(BUILD_DIR)/test_cblas_ssyr_d: $(BUILD_DIR)/test_cblas_ssyr_d.o $(BUILD_DIR)/cblas_ssyr_d.o $(BUILD_DIR)/cblas_ssyr_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssyr_d.o $(BUILD_DIR)/cblas_ssyr_d.o $(BUILD_DIR)/cblas_ssyr_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr_d
+	$(CC) $(BUILD_DIR)/test_cblas_ssyr_d.o $(BUILD_DIR)/cblas_ssyr_d.o $(BUILD_DIR)/cblas_ssyr_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr_d
 
 $(BUILD_DIR)/test_cblas_ssyrk_d.o: $(TEST_DIR)/test_cblas_ssyrk_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssyrk_d.c -o $(BUILD_DIR)/test_cblas_ssyrk_d.o
 
 $(BUILD_DIR)/test_cblas_ssyrk_d: $(BUILD_DIR)/test_cblas_ssyrk_d.o $(BUILD_DIR)/cblas_ssyrk_d.o $(BUILD_DIR)/cblas_ssyrk_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssyrk_d.o $(BUILD_DIR)/cblas_ssyrk_d.o $(BUILD_DIR)/cblas_ssyrk_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyrk_d
+	$(CC) $(BUILD_DIR)/test_cblas_ssyrk_d.o $(BUILD_DIR)/cblas_ssyrk_d.o $(BUILD_DIR)/cblas_ssyrk_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyrk_d
 
 $(BUILD_DIR)/test_cblas_stbmv_d.o: $(TEST_DIR)/test_cblas_stbmv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_stbmv_d.c -o $(BUILD_DIR)/test_cblas_stbmv_d.o
 
 $(BUILD_DIR)/test_cblas_stbmv_d: $(BUILD_DIR)/test_cblas_stbmv_d.o $(BUILD_DIR)/cblas_stbmv_d.o $(BUILD_DIR)/cblas_stbmv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_stbmv_d.o $(BUILD_DIR)/cblas_stbmv_d.o $(BUILD_DIR)/cblas_stbmv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_stbmv_d
+	$(CC) $(BUILD_DIR)/test_cblas_stbmv_d.o $(BUILD_DIR)/cblas_stbmv_d.o $(BUILD_DIR)/cblas_stbmv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_stbmv_d
 
 $(BUILD_DIR)/test_cblas_stpmv_d.o: $(TEST_DIR)/test_cblas_stpmv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_stpmv_d.c -o $(BUILD_DIR)/test_cblas_stpmv_d.o
 
 $(BUILD_DIR)/test_cblas_stpmv_d: $(BUILD_DIR)/test_cblas_stpmv_d.o $(BUILD_DIR)/cblas_stpmv_d.o $(BUILD_DIR)/cblas_stpmv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_stpmv_d.o $(BUILD_DIR)/cblas_stpmv_d.o $(BUILD_DIR)/cblas_stpmv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_stpmv_d
+	$(CC) $(BUILD_DIR)/test_cblas_stpmv_d.o $(BUILD_DIR)/cblas_stpmv_d.o $(BUILD_DIR)/cblas_stpmv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_stpmv_d
 
 $(BUILD_DIR)/test_cblas_strmm_d.o: $(TEST_DIR)/test_cblas_strmm_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_strmm_d.c -o $(BUILD_DIR)/test_cblas_strmm_d.o
 
 $(BUILD_DIR)/test_cblas_strmm_d: $(BUILD_DIR)/test_cblas_strmm_d.o $(BUILD_DIR)/cblas_strmm_d.o $(BUILD_DIR)/cblas_strmm_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_strmm_d.o $(BUILD_DIR)/cblas_strmm_d.o $(BUILD_DIR)/cblas_strmm_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strmm_d
+	$(CC) $(BUILD_DIR)/test_cblas_strmm_d.o $(BUILD_DIR)/cblas_strmm_d.o $(BUILD_DIR)/cblas_strmm_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strmm_d
 
 $(BUILD_DIR)/test_cblas_strmv_d.o: $(TEST_DIR)/test_cblas_strmv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_strmv_d.c -o $(BUILD_DIR)/test_cblas_strmv_d.o
 
 $(BUILD_DIR)/test_cblas_strmv_d: $(BUILD_DIR)/test_cblas_strmv_d.o $(BUILD_DIR)/cblas_strmv_d.o $(BUILD_DIR)/cblas_strmv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_strmv_d.o $(BUILD_DIR)/cblas_strmv_d.o $(BUILD_DIR)/cblas_strmv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strmv_d
+	$(CC) $(BUILD_DIR)/test_cblas_strmv_d.o $(BUILD_DIR)/cblas_strmv_d.o $(BUILD_DIR)/cblas_strmv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strmv_d
 
 $(BUILD_DIR)/test_cblas_strsm_d.o: $(TEST_DIR)/test_cblas_strsm_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_strsm_d.c -o $(BUILD_DIR)/test_cblas_strsm_d.o
 
 $(BUILD_DIR)/test_cblas_strsm_d: $(BUILD_DIR)/test_cblas_strsm_d.o $(BUILD_DIR)/cblas_strsm_d.o $(BUILD_DIR)/cblas_strsm_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_strsm_d.o $(BUILD_DIR)/cblas_strsm_d.o $(BUILD_DIR)/cblas_strsm_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strsm_d
+	$(CC) $(BUILD_DIR)/test_cblas_strsm_d.o $(BUILD_DIR)/cblas_strsm_d.o $(BUILD_DIR)/cblas_strsm_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strsm_d
 
 $(BUILD_DIR)/test_cblas_strsv_d.o: $(TEST_DIR)/test_cblas_strsv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_strsv_d.c -o $(BUILD_DIR)/test_cblas_strsv_d.o
 
 $(BUILD_DIR)/test_cblas_strsv_d: $(BUILD_DIR)/test_cblas_strsv_d.o $(BUILD_DIR)/cblas_strsv_d.o $(BUILD_DIR)/cblas_strsv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_strsv_d.o $(BUILD_DIR)/cblas_strsv_d.o $(BUILD_DIR)/cblas_strsv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strsv_d
+	$(CC) $(BUILD_DIR)/test_cblas_strsv_d.o $(BUILD_DIR)/cblas_strsv_d.o $(BUILD_DIR)/cblas_strsv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strsv_d
 
 $(BUILD_DIR)/test_cblas_zaxpy_d.o: $(TEST_DIR)/test_cblas_zaxpy_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zaxpy_d.c -o $(BUILD_DIR)/test_cblas_zaxpy_d.o
 
 $(BUILD_DIR)/test_cblas_zaxpy_d: $(BUILD_DIR)/test_cblas_zaxpy_d.o $(BUILD_DIR)/cblas_zaxpy_d.o $(BUILD_DIR)/cblas_zaxpy_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zaxpy_d.o $(BUILD_DIR)/cblas_zaxpy_d.o $(BUILD_DIR)/cblas_zaxpy_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zaxpy_d
+	$(CC) $(BUILD_DIR)/test_cblas_zaxpy_d.o $(BUILD_DIR)/cblas_zaxpy_d.o $(BUILD_DIR)/cblas_zaxpy_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zaxpy_d
 
 $(BUILD_DIR)/test_cblas_zcopy_d.o: $(TEST_DIR)/test_cblas_zcopy_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zcopy_d.c -o $(BUILD_DIR)/test_cblas_zcopy_d.o
 
 $(BUILD_DIR)/test_cblas_zcopy_d: $(BUILD_DIR)/test_cblas_zcopy_d.o $(BUILD_DIR)/cblas_zcopy_d.o $(BUILD_DIR)/cblas_zcopy_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zcopy_d.o $(BUILD_DIR)/cblas_zcopy_d.o $(BUILD_DIR)/cblas_zcopy_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zcopy_d
+	$(CC) $(BUILD_DIR)/test_cblas_zcopy_d.o $(BUILD_DIR)/cblas_zcopy_d.o $(BUILD_DIR)/cblas_zcopy_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zcopy_d
 
 $(BUILD_DIR)/test_cblas_zdotc_sub_d.o: $(TEST_DIR)/test_cblas_zdotc_sub_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zdotc_sub_d.c -o $(BUILD_DIR)/test_cblas_zdotc_sub_d.o
 
 $(BUILD_DIR)/test_cblas_zdotc_sub_d: $(BUILD_DIR)/test_cblas_zdotc_sub_d.o $(BUILD_DIR)/cblas_zdotc_sub_d.o $(BUILD_DIR)/cblas_zdotc_sub_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zdotc_sub_d.o $(BUILD_DIR)/cblas_zdotc_sub_d.o $(BUILD_DIR)/cblas_zdotc_sub_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdotc_sub_d
+	$(CC) $(BUILD_DIR)/test_cblas_zdotc_sub_d.o $(BUILD_DIR)/cblas_zdotc_sub_d.o $(BUILD_DIR)/cblas_zdotc_sub_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdotc_sub_d
 
 $(BUILD_DIR)/test_cblas_zdotu_sub_d.o: $(TEST_DIR)/test_cblas_zdotu_sub_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zdotu_sub_d.c -o $(BUILD_DIR)/test_cblas_zdotu_sub_d.o
 
 $(BUILD_DIR)/test_cblas_zdotu_sub_d: $(BUILD_DIR)/test_cblas_zdotu_sub_d.o $(BUILD_DIR)/cblas_zdotu_sub_d.o $(BUILD_DIR)/cblas_zdotu_sub_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zdotu_sub_d.o $(BUILD_DIR)/cblas_zdotu_sub_d.o $(BUILD_DIR)/cblas_zdotu_sub_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdotu_sub_d
+	$(CC) $(BUILD_DIR)/test_cblas_zdotu_sub_d.o $(BUILD_DIR)/cblas_zdotu_sub_d.o $(BUILD_DIR)/cblas_zdotu_sub_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdotu_sub_d
 
 $(BUILD_DIR)/test_cblas_zdscal_d.o: $(TEST_DIR)/test_cblas_zdscal_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zdscal_d.c -o $(BUILD_DIR)/test_cblas_zdscal_d.o
 
 $(BUILD_DIR)/test_cblas_zdscal_d: $(BUILD_DIR)/test_cblas_zdscal_d.o $(BUILD_DIR)/cblas_zdscal_d.o $(BUILD_DIR)/cblas_zdscal_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zdscal_d.o $(BUILD_DIR)/cblas_zdscal_d.o $(BUILD_DIR)/cblas_zdscal_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdscal_d
+	$(CC) $(BUILD_DIR)/test_cblas_zdscal_d.o $(BUILD_DIR)/cblas_zdscal_d.o $(BUILD_DIR)/cblas_zdscal_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdscal_d
 
 $(BUILD_DIR)/test_cblas_zgbmv_d.o: $(TEST_DIR)/test_cblas_zgbmv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zgbmv_d.c -o $(BUILD_DIR)/test_cblas_zgbmv_d.o
 
 $(BUILD_DIR)/test_cblas_zgbmv_d: $(BUILD_DIR)/test_cblas_zgbmv_d.o $(BUILD_DIR)/cblas_zgbmv_d.o $(BUILD_DIR)/cblas_zgbmv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zgbmv_d.o $(BUILD_DIR)/cblas_zgbmv_d.o $(BUILD_DIR)/cblas_zgbmv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgbmv_d
+	$(CC) $(BUILD_DIR)/test_cblas_zgbmv_d.o $(BUILD_DIR)/cblas_zgbmv_d.o $(BUILD_DIR)/cblas_zgbmv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgbmv_d
 
 $(BUILD_DIR)/test_cblas_zgemm_d.o: $(TEST_DIR)/test_cblas_zgemm_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zgemm_d.c -o $(BUILD_DIR)/test_cblas_zgemm_d.o
 
 $(BUILD_DIR)/test_cblas_zgemm_d: $(BUILD_DIR)/test_cblas_zgemm_d.o $(BUILD_DIR)/cblas_zgemm_d.o $(BUILD_DIR)/cblas_zgemm_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zgemm_d.o $(BUILD_DIR)/cblas_zgemm_d.o $(BUILD_DIR)/cblas_zgemm_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgemm_d
+	$(CC) $(BUILD_DIR)/test_cblas_zgemm_d.o $(BUILD_DIR)/cblas_zgemm_d.o $(BUILD_DIR)/cblas_zgemm_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgemm_d
 
 $(BUILD_DIR)/test_cblas_zgemv_d.o: $(TEST_DIR)/test_cblas_zgemv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zgemv_d.c -o $(BUILD_DIR)/test_cblas_zgemv_d.o
 
 $(BUILD_DIR)/test_cblas_zgemv_d: $(BUILD_DIR)/test_cblas_zgemv_d.o $(BUILD_DIR)/cblas_zgemv_d.o $(BUILD_DIR)/cblas_zgemv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zgemv_d.o $(BUILD_DIR)/cblas_zgemv_d.o $(BUILD_DIR)/cblas_zgemv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgemv_d
+	$(CC) $(BUILD_DIR)/test_cblas_zgemv_d.o $(BUILD_DIR)/cblas_zgemv_d.o $(BUILD_DIR)/cblas_zgemv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgemv_d
 
 $(BUILD_DIR)/test_cblas_zgerc_d.o: $(TEST_DIR)/test_cblas_zgerc_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zgerc_d.c -o $(BUILD_DIR)/test_cblas_zgerc_d.o
 
 $(BUILD_DIR)/test_cblas_zgerc_d: $(BUILD_DIR)/test_cblas_zgerc_d.o $(BUILD_DIR)/cblas_zgerc_d.o $(BUILD_DIR)/cblas_zgerc_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zgerc_d.o $(BUILD_DIR)/cblas_zgerc_d.o $(BUILD_DIR)/cblas_zgerc_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgerc_d
+	$(CC) $(BUILD_DIR)/test_cblas_zgerc_d.o $(BUILD_DIR)/cblas_zgerc_d.o $(BUILD_DIR)/cblas_zgerc_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgerc_d
 
 $(BUILD_DIR)/test_cblas_zgeru_d.o: $(TEST_DIR)/test_cblas_zgeru_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zgeru_d.c -o $(BUILD_DIR)/test_cblas_zgeru_d.o
 
 $(BUILD_DIR)/test_cblas_zgeru_d: $(BUILD_DIR)/test_cblas_zgeru_d.o $(BUILD_DIR)/cblas_zgeru_d.o $(BUILD_DIR)/cblas_zgeru_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zgeru_d.o $(BUILD_DIR)/cblas_zgeru_d.o $(BUILD_DIR)/cblas_zgeru_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgeru_d
+	$(CC) $(BUILD_DIR)/test_cblas_zgeru_d.o $(BUILD_DIR)/cblas_zgeru_d.o $(BUILD_DIR)/cblas_zgeru_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgeru_d
 
 $(BUILD_DIR)/test_cblas_zhbmv_d.o: $(TEST_DIR)/test_cblas_zhbmv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zhbmv_d.c -o $(BUILD_DIR)/test_cblas_zhbmv_d.o
 
 $(BUILD_DIR)/test_cblas_zhbmv_d: $(BUILD_DIR)/test_cblas_zhbmv_d.o $(BUILD_DIR)/cblas_zhbmv_d.o $(BUILD_DIR)/cblas_zhbmv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zhbmv_d.o $(BUILD_DIR)/cblas_zhbmv_d.o $(BUILD_DIR)/cblas_zhbmv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhbmv_d
+	$(CC) $(BUILD_DIR)/test_cblas_zhbmv_d.o $(BUILD_DIR)/cblas_zhbmv_d.o $(BUILD_DIR)/cblas_zhbmv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhbmv_d
 
 $(BUILD_DIR)/test_cblas_zhemm_d.o: $(TEST_DIR)/test_cblas_zhemm_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zhemm_d.c -o $(BUILD_DIR)/test_cblas_zhemm_d.o
 
 $(BUILD_DIR)/test_cblas_zhemm_d: $(BUILD_DIR)/test_cblas_zhemm_d.o $(BUILD_DIR)/cblas_zhemm_d.o $(BUILD_DIR)/cblas_zhemm_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zhemm_d.o $(BUILD_DIR)/cblas_zhemm_d.o $(BUILD_DIR)/cblas_zhemm_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhemm_d
+	$(CC) $(BUILD_DIR)/test_cblas_zhemm_d.o $(BUILD_DIR)/cblas_zhemm_d.o $(BUILD_DIR)/cblas_zhemm_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhemm_d
 
 $(BUILD_DIR)/test_cblas_zhemv_d.o: $(TEST_DIR)/test_cblas_zhemv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zhemv_d.c -o $(BUILD_DIR)/test_cblas_zhemv_d.o
 
 $(BUILD_DIR)/test_cblas_zhemv_d: $(BUILD_DIR)/test_cblas_zhemv_d.o $(BUILD_DIR)/cblas_zhemv_d.o $(BUILD_DIR)/cblas_zhemv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zhemv_d.o $(BUILD_DIR)/cblas_zhemv_d.o $(BUILD_DIR)/cblas_zhemv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhemv_d
+	$(CC) $(BUILD_DIR)/test_cblas_zhemv_d.o $(BUILD_DIR)/cblas_zhemv_d.o $(BUILD_DIR)/cblas_zhemv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhemv_d
 
 $(BUILD_DIR)/test_cblas_zscal_d.o: $(TEST_DIR)/test_cblas_zscal_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zscal_d.c -o $(BUILD_DIR)/test_cblas_zscal_d.o
 
 $(BUILD_DIR)/test_cblas_zscal_d: $(BUILD_DIR)/test_cblas_zscal_d.o $(BUILD_DIR)/cblas_zscal_d.o $(BUILD_DIR)/cblas_zscal_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zscal_d.o $(BUILD_DIR)/cblas_zscal_d.o $(BUILD_DIR)/cblas_zscal_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zscal_d
+	$(CC) $(BUILD_DIR)/test_cblas_zscal_d.o $(BUILD_DIR)/cblas_zscal_d.o $(BUILD_DIR)/cblas_zscal_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zscal_d
 
 $(BUILD_DIR)/test_cblas_zswap_d.o: $(TEST_DIR)/test_cblas_zswap_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zswap_d.c -o $(BUILD_DIR)/test_cblas_zswap_d.o
 
 $(BUILD_DIR)/test_cblas_zswap_d: $(BUILD_DIR)/test_cblas_zswap_d.o $(BUILD_DIR)/cblas_zswap_d.o $(BUILD_DIR)/cblas_zswap_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zswap_d.o $(BUILD_DIR)/cblas_zswap_d.o $(BUILD_DIR)/cblas_zswap_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zswap_d
+	$(CC) $(BUILD_DIR)/test_cblas_zswap_d.o $(BUILD_DIR)/cblas_zswap_d.o $(BUILD_DIR)/cblas_zswap_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zswap_d
 
 $(BUILD_DIR)/test_cblas_zsymm_d.o: $(TEST_DIR)/test_cblas_zsymm_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zsymm_d.c -o $(BUILD_DIR)/test_cblas_zsymm_d.o
 
 $(BUILD_DIR)/test_cblas_zsymm_d: $(BUILD_DIR)/test_cblas_zsymm_d.o $(BUILD_DIR)/cblas_zsymm_d.o $(BUILD_DIR)/cblas_zsymm_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zsymm_d.o $(BUILD_DIR)/cblas_zsymm_d.o $(BUILD_DIR)/cblas_zsymm_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsymm_d
+	$(CC) $(BUILD_DIR)/test_cblas_zsymm_d.o $(BUILD_DIR)/cblas_zsymm_d.o $(BUILD_DIR)/cblas_zsymm_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsymm_d
 
 $(BUILD_DIR)/test_cblas_zsyr2k_d.o: $(TEST_DIR)/test_cblas_zsyr2k_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zsyr2k_d.c -o $(BUILD_DIR)/test_cblas_zsyr2k_d.o
 
 $(BUILD_DIR)/test_cblas_zsyr2k_d: $(BUILD_DIR)/test_cblas_zsyr2k_d.o $(BUILD_DIR)/cblas_zsyr2k_d.o $(BUILD_DIR)/cblas_zsyr2k_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zsyr2k_d.o $(BUILD_DIR)/cblas_zsyr2k_d.o $(BUILD_DIR)/cblas_zsyr2k_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsyr2k_d
+	$(CC) $(BUILD_DIR)/test_cblas_zsyr2k_d.o $(BUILD_DIR)/cblas_zsyr2k_d.o $(BUILD_DIR)/cblas_zsyr2k_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsyr2k_d
 
 $(BUILD_DIR)/test_cblas_zsyrk_d.o: $(TEST_DIR)/test_cblas_zsyrk_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zsyrk_d.c -o $(BUILD_DIR)/test_cblas_zsyrk_d.o
 
 $(BUILD_DIR)/test_cblas_zsyrk_d: $(BUILD_DIR)/test_cblas_zsyrk_d.o $(BUILD_DIR)/cblas_zsyrk_d.o $(BUILD_DIR)/cblas_zsyrk_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zsyrk_d.o $(BUILD_DIR)/cblas_zsyrk_d.o $(BUILD_DIR)/cblas_zsyrk_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsyrk_d
+	$(CC) $(BUILD_DIR)/test_cblas_zsyrk_d.o $(BUILD_DIR)/cblas_zsyrk_d.o $(BUILD_DIR)/cblas_zsyrk_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsyrk_d
 
 $(BUILD_DIR)/test_cblas_ztbmv_d.o: $(TEST_DIR)/test_cblas_ztbmv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztbmv_d.c -o $(BUILD_DIR)/test_cblas_ztbmv_d.o
 
 $(BUILD_DIR)/test_cblas_ztbmv_d: $(BUILD_DIR)/test_cblas_ztbmv_d.o $(BUILD_DIR)/cblas_ztbmv_d.o $(BUILD_DIR)/cblas_ztbmv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztbmv_d.o $(BUILD_DIR)/cblas_ztbmv_d.o $(BUILD_DIR)/cblas_ztbmv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztbmv_d
+	$(CC) $(BUILD_DIR)/test_cblas_ztbmv_d.o $(BUILD_DIR)/cblas_ztbmv_d.o $(BUILD_DIR)/cblas_ztbmv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztbmv_d
 
 $(BUILD_DIR)/test_cblas_ztpmv_d.o: $(TEST_DIR)/test_cblas_ztpmv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztpmv_d.c -o $(BUILD_DIR)/test_cblas_ztpmv_d.o
 
 $(BUILD_DIR)/test_cblas_ztpmv_d: $(BUILD_DIR)/test_cblas_ztpmv_d.o $(BUILD_DIR)/cblas_ztpmv_d.o $(BUILD_DIR)/cblas_ztpmv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztpmv_d.o $(BUILD_DIR)/cblas_ztpmv_d.o $(BUILD_DIR)/cblas_ztpmv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztpmv_d
+	$(CC) $(BUILD_DIR)/test_cblas_ztpmv_d.o $(BUILD_DIR)/cblas_ztpmv_d.o $(BUILD_DIR)/cblas_ztpmv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztpmv_d
 
 $(BUILD_DIR)/test_cblas_ztrmm_d.o: $(TEST_DIR)/test_cblas_ztrmm_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztrmm_d.c -o $(BUILD_DIR)/test_cblas_ztrmm_d.o
 
 $(BUILD_DIR)/test_cblas_ztrmm_d: $(BUILD_DIR)/test_cblas_ztrmm_d.o $(BUILD_DIR)/cblas_ztrmm_d.o $(BUILD_DIR)/cblas_ztrmm_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztrmm_d.o $(BUILD_DIR)/cblas_ztrmm_d.o $(BUILD_DIR)/cblas_ztrmm_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrmm_d
+	$(CC) $(BUILD_DIR)/test_cblas_ztrmm_d.o $(BUILD_DIR)/cblas_ztrmm_d.o $(BUILD_DIR)/cblas_ztrmm_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrmm_d
 
 $(BUILD_DIR)/test_cblas_ztrmv_d.o: $(TEST_DIR)/test_cblas_ztrmv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztrmv_d.c -o $(BUILD_DIR)/test_cblas_ztrmv_d.o
 
 $(BUILD_DIR)/test_cblas_ztrmv_d: $(BUILD_DIR)/test_cblas_ztrmv_d.o $(BUILD_DIR)/cblas_ztrmv_d.o $(BUILD_DIR)/cblas_ztrmv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztrmv_d.o $(BUILD_DIR)/cblas_ztrmv_d.o $(BUILD_DIR)/cblas_ztrmv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrmv_d
+	$(CC) $(BUILD_DIR)/test_cblas_ztrmv_d.o $(BUILD_DIR)/cblas_ztrmv_d.o $(BUILD_DIR)/cblas_ztrmv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrmv_d
 
 $(BUILD_DIR)/test_cblas_ztrsm_d.o: $(TEST_DIR)/test_cblas_ztrsm_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztrsm_d.c -o $(BUILD_DIR)/test_cblas_ztrsm_d.o
 
 $(BUILD_DIR)/test_cblas_ztrsm_d: $(BUILD_DIR)/test_cblas_ztrsm_d.o $(BUILD_DIR)/cblas_ztrsm_d.o $(BUILD_DIR)/cblas_ztrsm_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztrsm_d.o $(BUILD_DIR)/cblas_ztrsm_d.o $(BUILD_DIR)/cblas_ztrsm_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrsm_d
+	$(CC) $(BUILD_DIR)/test_cblas_ztrsm_d.o $(BUILD_DIR)/cblas_ztrsm_d.o $(BUILD_DIR)/cblas_ztrsm_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrsm_d
 
 $(BUILD_DIR)/test_cblas_ztrsv_d.o: $(TEST_DIR)/test_cblas_ztrsv_d.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztrsv_d.c -o $(BUILD_DIR)/test_cblas_ztrsv_d.o
 
 $(BUILD_DIR)/test_cblas_ztrsv_d: $(BUILD_DIR)/test_cblas_ztrsv_d.o $(BUILD_DIR)/cblas_ztrsv_d.o $(BUILD_DIR)/cblas_ztrsv_d_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztrsv_d.o $(BUILD_DIR)/cblas_ztrsv_d.o $(BUILD_DIR)/cblas_ztrsv_d_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrsv_d
+	$(CC) $(BUILD_DIR)/test_cblas_ztrsv_d.o $(BUILD_DIR)/cblas_ztrsv_d.o $(BUILD_DIR)/cblas_ztrsv_d_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrsv_d
 
 $(BUILD_DIR)/test_cblas_caxpy_b.o: $(TEST_DIR)/test_cblas_caxpy_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_caxpy_b.c -o $(BUILD_DIR)/test_cblas_caxpy_b.o
 
 $(BUILD_DIR)/test_cblas_caxpy_b: $(BUILD_DIR)/test_cblas_caxpy_b.o $(BUILD_DIR)/cblas_caxpy_b.o $(BUILD_DIR)/cblas_caxpy_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_caxpy_b.o $(BUILD_DIR)/cblas_caxpy_b.o $(BUILD_DIR)/cblas_caxpy_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_caxpy_b
+	$(CC) $(BUILD_DIR)/test_cblas_caxpy_b.o $(BUILD_DIR)/cblas_caxpy_b.o $(BUILD_DIR)/cblas_caxpy_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_caxpy_b
 
 $(BUILD_DIR)/test_cblas_ccopy_b.o: $(TEST_DIR)/test_cblas_ccopy_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ccopy_b.c -o $(BUILD_DIR)/test_cblas_ccopy_b.o
 
 $(BUILD_DIR)/test_cblas_ccopy_b: $(BUILD_DIR)/test_cblas_ccopy_b.o $(BUILD_DIR)/cblas_ccopy_b.o $(BUILD_DIR)/cblas_ccopy_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ccopy_b.o $(BUILD_DIR)/cblas_ccopy_b.o $(BUILD_DIR)/cblas_ccopy_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ccopy_b
+	$(CC) $(BUILD_DIR)/test_cblas_ccopy_b.o $(BUILD_DIR)/cblas_ccopy_b.o $(BUILD_DIR)/cblas_ccopy_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ccopy_b
 
 $(BUILD_DIR)/test_cblas_cdotc_sub_b.o: $(TEST_DIR)/test_cblas_cdotc_sub_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cdotc_sub_b.c -o $(BUILD_DIR)/test_cblas_cdotc_sub_b.o
 
 $(BUILD_DIR)/test_cblas_cdotc_sub_b: $(BUILD_DIR)/test_cblas_cdotc_sub_b.o $(BUILD_DIR)/cblas_cdotc_sub_b.o $(BUILD_DIR)/cblas_cdotc_sub_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_cdotc_sub_b.o $(BUILD_DIR)/cblas_cdotc_sub_b.o $(BUILD_DIR)/cblas_cdotc_sub_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cdotc_sub_b
+	$(CC) $(BUILD_DIR)/test_cblas_cdotc_sub_b.o $(BUILD_DIR)/cblas_cdotc_sub_b.o $(BUILD_DIR)/cblas_cdotc_sub_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cdotc_sub_b
 
 $(BUILD_DIR)/test_cblas_cdotu_sub_b.o: $(TEST_DIR)/test_cblas_cdotu_sub_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cdotu_sub_b.c -o $(BUILD_DIR)/test_cblas_cdotu_sub_b.o
 
 $(BUILD_DIR)/test_cblas_cdotu_sub_b: $(BUILD_DIR)/test_cblas_cdotu_sub_b.o $(BUILD_DIR)/cblas_cdotu_sub_b.o $(BUILD_DIR)/cblas_cdotu_sub_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_cdotu_sub_b.o $(BUILD_DIR)/cblas_cdotu_sub_b.o $(BUILD_DIR)/cblas_cdotu_sub_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cdotu_sub_b
+	$(CC) $(BUILD_DIR)/test_cblas_cdotu_sub_b.o $(BUILD_DIR)/cblas_cdotu_sub_b.o $(BUILD_DIR)/cblas_cdotu_sub_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cdotu_sub_b
 
 $(BUILD_DIR)/test_cblas_cgbmv_b.o: $(TEST_DIR)/test_cblas_cgbmv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cgbmv_b.c -o $(BUILD_DIR)/test_cblas_cgbmv_b.o
 
 $(BUILD_DIR)/test_cblas_cgbmv_b: $(BUILD_DIR)/test_cblas_cgbmv_b.o $(BUILD_DIR)/cblas_cgbmv_b.o $(BUILD_DIR)/cblas_cgbmv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_cgbmv_b.o $(BUILD_DIR)/cblas_cgbmv_b.o $(BUILD_DIR)/cblas_cgbmv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgbmv_b
+	$(CC) $(BUILD_DIR)/test_cblas_cgbmv_b.o $(BUILD_DIR)/cblas_cgbmv_b.o $(BUILD_DIR)/cblas_cgbmv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgbmv_b
 
 $(BUILD_DIR)/test_cblas_cgemm_b.o: $(TEST_DIR)/test_cblas_cgemm_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cgemm_b.c -o $(BUILD_DIR)/test_cblas_cgemm_b.o
 
 $(BUILD_DIR)/test_cblas_cgemm_b: $(BUILD_DIR)/test_cblas_cgemm_b.o $(BUILD_DIR)/cblas_cgemm_b.o $(BUILD_DIR)/cblas_cgemm_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_cgemm_b.o $(BUILD_DIR)/cblas_cgemm_b.o $(BUILD_DIR)/cblas_cgemm_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgemm_b
+	$(CC) $(BUILD_DIR)/test_cblas_cgemm_b.o $(BUILD_DIR)/cblas_cgemm_b.o $(BUILD_DIR)/cblas_cgemm_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgemm_b
 
 $(BUILD_DIR)/test_cblas_cgemv_b.o: $(TEST_DIR)/test_cblas_cgemv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cgemv_b.c -o $(BUILD_DIR)/test_cblas_cgemv_b.o
 
 $(BUILD_DIR)/test_cblas_cgemv_b: $(BUILD_DIR)/test_cblas_cgemv_b.o $(BUILD_DIR)/cblas_cgemv_b.o $(BUILD_DIR)/cblas_cgemv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_cgemv_b.o $(BUILD_DIR)/cblas_cgemv_b.o $(BUILD_DIR)/cblas_cgemv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgemv_b
+	$(CC) $(BUILD_DIR)/test_cblas_cgemv_b.o $(BUILD_DIR)/cblas_cgemv_b.o $(BUILD_DIR)/cblas_cgemv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgemv_b
 
 $(BUILD_DIR)/test_cblas_cgerc_b.o: $(TEST_DIR)/test_cblas_cgerc_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cgerc_b.c -o $(BUILD_DIR)/test_cblas_cgerc_b.o
 
 $(BUILD_DIR)/test_cblas_cgerc_b: $(BUILD_DIR)/test_cblas_cgerc_b.o $(BUILD_DIR)/cblas_cgerc_b.o $(BUILD_DIR)/cblas_cgerc_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_cgerc_b.o $(BUILD_DIR)/cblas_cgerc_b.o $(BUILD_DIR)/cblas_cgerc_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgerc_b
+	$(CC) $(BUILD_DIR)/test_cblas_cgerc_b.o $(BUILD_DIR)/cblas_cgerc_b.o $(BUILD_DIR)/cblas_cgerc_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgerc_b
 
 $(BUILD_DIR)/test_cblas_cgeru_b.o: $(TEST_DIR)/test_cblas_cgeru_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cgeru_b.c -o $(BUILD_DIR)/test_cblas_cgeru_b.o
 
 $(BUILD_DIR)/test_cblas_cgeru_b: $(BUILD_DIR)/test_cblas_cgeru_b.o $(BUILD_DIR)/cblas_cgeru_b.o $(BUILD_DIR)/cblas_cgeru_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_cgeru_b.o $(BUILD_DIR)/cblas_cgeru_b.o $(BUILD_DIR)/cblas_cgeru_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgeru_b
+	$(CC) $(BUILD_DIR)/test_cblas_cgeru_b.o $(BUILD_DIR)/cblas_cgeru_b.o $(BUILD_DIR)/cblas_cgeru_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgeru_b
 
 $(BUILD_DIR)/test_cblas_chbmv_b.o: $(TEST_DIR)/test_cblas_chbmv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_chbmv_b.c -o $(BUILD_DIR)/test_cblas_chbmv_b.o
 
 $(BUILD_DIR)/test_cblas_chbmv_b: $(BUILD_DIR)/test_cblas_chbmv_b.o $(BUILD_DIR)/cblas_chbmv_b.o $(BUILD_DIR)/cblas_chbmv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_chbmv_b.o $(BUILD_DIR)/cblas_chbmv_b.o $(BUILD_DIR)/cblas_chbmv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chbmv_b
+	$(CC) $(BUILD_DIR)/test_cblas_chbmv_b.o $(BUILD_DIR)/cblas_chbmv_b.o $(BUILD_DIR)/cblas_chbmv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chbmv_b
 
 $(BUILD_DIR)/test_cblas_chemm_b.o: $(TEST_DIR)/test_cblas_chemm_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_chemm_b.c -o $(BUILD_DIR)/test_cblas_chemm_b.o
 
 $(BUILD_DIR)/test_cblas_chemm_b: $(BUILD_DIR)/test_cblas_chemm_b.o $(BUILD_DIR)/cblas_chemm_b.o $(BUILD_DIR)/cblas_chemm_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_chemm_b.o $(BUILD_DIR)/cblas_chemm_b.o $(BUILD_DIR)/cblas_chemm_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chemm_b
+	$(CC) $(BUILD_DIR)/test_cblas_chemm_b.o $(BUILD_DIR)/cblas_chemm_b.o $(BUILD_DIR)/cblas_chemm_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chemm_b
 
 $(BUILD_DIR)/test_cblas_chemv_b.o: $(TEST_DIR)/test_cblas_chemv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_chemv_b.c -o $(BUILD_DIR)/test_cblas_chemv_b.o
 
 $(BUILD_DIR)/test_cblas_chemv_b: $(BUILD_DIR)/test_cblas_chemv_b.o $(BUILD_DIR)/cblas_chemv_b.o $(BUILD_DIR)/cblas_chemv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_chemv_b.o $(BUILD_DIR)/cblas_chemv_b.o $(BUILD_DIR)/cblas_chemv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chemv_b
+	$(CC) $(BUILD_DIR)/test_cblas_chemv_b.o $(BUILD_DIR)/cblas_chemv_b.o $(BUILD_DIR)/cblas_chemv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chemv_b
 
 $(BUILD_DIR)/test_cblas_cscal_b.o: $(TEST_DIR)/test_cblas_cscal_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cscal_b.c -o $(BUILD_DIR)/test_cblas_cscal_b.o
 
 $(BUILD_DIR)/test_cblas_cscal_b: $(BUILD_DIR)/test_cblas_cscal_b.o $(BUILD_DIR)/cblas_cscal_b.o $(BUILD_DIR)/cblas_cscal_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_cscal_b.o $(BUILD_DIR)/cblas_cscal_b.o $(BUILD_DIR)/cblas_cscal_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cscal_b
+	$(CC) $(BUILD_DIR)/test_cblas_cscal_b.o $(BUILD_DIR)/cblas_cscal_b.o $(BUILD_DIR)/cblas_cscal_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cscal_b
 
 $(BUILD_DIR)/test_cblas_cswap_b.o: $(TEST_DIR)/test_cblas_cswap_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cswap_b.c -o $(BUILD_DIR)/test_cblas_cswap_b.o
 
 $(BUILD_DIR)/test_cblas_cswap_b: $(BUILD_DIR)/test_cblas_cswap_b.o $(BUILD_DIR)/cblas_cswap_b.o $(BUILD_DIR)/cblas_cswap_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_cswap_b.o $(BUILD_DIR)/cblas_cswap_b.o $(BUILD_DIR)/cblas_cswap_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cswap_b
+	$(CC) $(BUILD_DIR)/test_cblas_cswap_b.o $(BUILD_DIR)/cblas_cswap_b.o $(BUILD_DIR)/cblas_cswap_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cswap_b
 
 $(BUILD_DIR)/test_cblas_csymm_b.o: $(TEST_DIR)/test_cblas_csymm_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_csymm_b.c -o $(BUILD_DIR)/test_cblas_csymm_b.o
 
 $(BUILD_DIR)/test_cblas_csymm_b: $(BUILD_DIR)/test_cblas_csymm_b.o $(BUILD_DIR)/cblas_csymm_b.o $(BUILD_DIR)/cblas_csymm_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_csymm_b.o $(BUILD_DIR)/cblas_csymm_b.o $(BUILD_DIR)/cblas_csymm_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csymm_b
+	$(CC) $(BUILD_DIR)/test_cblas_csymm_b.o $(BUILD_DIR)/cblas_csymm_b.o $(BUILD_DIR)/cblas_csymm_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csymm_b
 
 $(BUILD_DIR)/test_cblas_csyr2k_b.o: $(TEST_DIR)/test_cblas_csyr2k_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_csyr2k_b.c -o $(BUILD_DIR)/test_cblas_csyr2k_b.o
 
 $(BUILD_DIR)/test_cblas_csyr2k_b: $(BUILD_DIR)/test_cblas_csyr2k_b.o $(BUILD_DIR)/cblas_csyr2k_b.o $(BUILD_DIR)/cblas_csyr2k_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_csyr2k_b.o $(BUILD_DIR)/cblas_csyr2k_b.o $(BUILD_DIR)/cblas_csyr2k_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csyr2k_b
+	$(CC) $(BUILD_DIR)/test_cblas_csyr2k_b.o $(BUILD_DIR)/cblas_csyr2k_b.o $(BUILD_DIR)/cblas_csyr2k_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csyr2k_b
 
 $(BUILD_DIR)/test_cblas_csyrk_b.o: $(TEST_DIR)/test_cblas_csyrk_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_csyrk_b.c -o $(BUILD_DIR)/test_cblas_csyrk_b.o
 
 $(BUILD_DIR)/test_cblas_csyrk_b: $(BUILD_DIR)/test_cblas_csyrk_b.o $(BUILD_DIR)/cblas_csyrk_b.o $(BUILD_DIR)/cblas_csyrk_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_csyrk_b.o $(BUILD_DIR)/cblas_csyrk_b.o $(BUILD_DIR)/cblas_csyrk_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csyrk_b
+	$(CC) $(BUILD_DIR)/test_cblas_csyrk_b.o $(BUILD_DIR)/cblas_csyrk_b.o $(BUILD_DIR)/cblas_csyrk_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csyrk_b
 
 $(BUILD_DIR)/test_cblas_ctbmv_b.o: $(TEST_DIR)/test_cblas_ctbmv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctbmv_b.c -o $(BUILD_DIR)/test_cblas_ctbmv_b.o
 
 $(BUILD_DIR)/test_cblas_ctbmv_b: $(BUILD_DIR)/test_cblas_ctbmv_b.o $(BUILD_DIR)/cblas_ctbmv_b.o $(BUILD_DIR)/cblas_ctbmv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctbmv_b.o $(BUILD_DIR)/cblas_ctbmv_b.o $(BUILD_DIR)/cblas_ctbmv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctbmv_b
+	$(CC) $(BUILD_DIR)/test_cblas_ctbmv_b.o $(BUILD_DIR)/cblas_ctbmv_b.o $(BUILD_DIR)/cblas_ctbmv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctbmv_b
 
 $(BUILD_DIR)/test_cblas_ctpmv_b.o: $(TEST_DIR)/test_cblas_ctpmv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctpmv_b.c -o $(BUILD_DIR)/test_cblas_ctpmv_b.o
 
 $(BUILD_DIR)/test_cblas_ctpmv_b: $(BUILD_DIR)/test_cblas_ctpmv_b.o $(BUILD_DIR)/cblas_ctpmv_b.o $(BUILD_DIR)/cblas_ctpmv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctpmv_b.o $(BUILD_DIR)/cblas_ctpmv_b.o $(BUILD_DIR)/cblas_ctpmv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctpmv_b
+	$(CC) $(BUILD_DIR)/test_cblas_ctpmv_b.o $(BUILD_DIR)/cblas_ctpmv_b.o $(BUILD_DIR)/cblas_ctpmv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctpmv_b
 
 $(BUILD_DIR)/test_cblas_ctrmm_b.o: $(TEST_DIR)/test_cblas_ctrmm_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctrmm_b.c -o $(BUILD_DIR)/test_cblas_ctrmm_b.o
 
 $(BUILD_DIR)/test_cblas_ctrmm_b: $(BUILD_DIR)/test_cblas_ctrmm_b.o $(BUILD_DIR)/cblas_ctrmm_b.o $(BUILD_DIR)/cblas_ctrmm_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctrmm_b.o $(BUILD_DIR)/cblas_ctrmm_b.o $(BUILD_DIR)/cblas_ctrmm_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrmm_b
+	$(CC) $(BUILD_DIR)/test_cblas_ctrmm_b.o $(BUILD_DIR)/cblas_ctrmm_b.o $(BUILD_DIR)/cblas_ctrmm_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrmm_b
 
 $(BUILD_DIR)/test_cblas_ctrmv_b.o: $(TEST_DIR)/test_cblas_ctrmv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctrmv_b.c -o $(BUILD_DIR)/test_cblas_ctrmv_b.o
 
 $(BUILD_DIR)/test_cblas_ctrmv_b: $(BUILD_DIR)/test_cblas_ctrmv_b.o $(BUILD_DIR)/cblas_ctrmv_b.o $(BUILD_DIR)/cblas_ctrmv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctrmv_b.o $(BUILD_DIR)/cblas_ctrmv_b.o $(BUILD_DIR)/cblas_ctrmv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrmv_b
+	$(CC) $(BUILD_DIR)/test_cblas_ctrmv_b.o $(BUILD_DIR)/cblas_ctrmv_b.o $(BUILD_DIR)/cblas_ctrmv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrmv_b
 
 $(BUILD_DIR)/test_cblas_ctrsm_b.o: $(TEST_DIR)/test_cblas_ctrsm_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctrsm_b.c -o $(BUILD_DIR)/test_cblas_ctrsm_b.o
 
 $(BUILD_DIR)/test_cblas_ctrsm_b: $(BUILD_DIR)/test_cblas_ctrsm_b.o $(BUILD_DIR)/cblas_ctrsm_b.o $(BUILD_DIR)/cblas_ctrsm_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctrsm_b.o $(BUILD_DIR)/cblas_ctrsm_b.o $(BUILD_DIR)/cblas_ctrsm_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrsm_b
+	$(CC) $(BUILD_DIR)/test_cblas_ctrsm_b.o $(BUILD_DIR)/cblas_ctrsm_b.o $(BUILD_DIR)/cblas_ctrsm_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrsm_b
 
 $(BUILD_DIR)/test_cblas_ctrsv_b.o: $(TEST_DIR)/test_cblas_ctrsv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctrsv_b.c -o $(BUILD_DIR)/test_cblas_ctrsv_b.o
 
 $(BUILD_DIR)/test_cblas_ctrsv_b: $(BUILD_DIR)/test_cblas_ctrsv_b.o $(BUILD_DIR)/cblas_ctrsv_b.o $(BUILD_DIR)/cblas_ctrsv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctrsv_b.o $(BUILD_DIR)/cblas_ctrsv_b.o $(BUILD_DIR)/cblas_ctrsv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrsv_b
+	$(CC) $(BUILD_DIR)/test_cblas_ctrsv_b.o $(BUILD_DIR)/cblas_ctrsv_b.o $(BUILD_DIR)/cblas_ctrsv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrsv_b
 
 $(BUILD_DIR)/test_cblas_dasum_b.o: $(TEST_DIR)/test_cblas_dasum_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dasum_b.c -o $(BUILD_DIR)/test_cblas_dasum_b.o
 
 $(BUILD_DIR)/test_cblas_dasum_b: $(BUILD_DIR)/test_cblas_dasum_b.o $(BUILD_DIR)/cblas_dasum_b.o $(BUILD_DIR)/cblas_dasum_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dasum_b.o $(BUILD_DIR)/cblas_dasum_b.o $(BUILD_DIR)/cblas_dasum_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dasum_b
+	$(CC) $(BUILD_DIR)/test_cblas_dasum_b.o $(BUILD_DIR)/cblas_dasum_b.o $(BUILD_DIR)/cblas_dasum_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dasum_b
 
 $(BUILD_DIR)/test_cblas_daxpy_b.o: $(TEST_DIR)/test_cblas_daxpy_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_daxpy_b.c -o $(BUILD_DIR)/test_cblas_daxpy_b.o
 
 $(BUILD_DIR)/test_cblas_daxpy_b: $(BUILD_DIR)/test_cblas_daxpy_b.o $(BUILD_DIR)/cblas_daxpy_b.o $(BUILD_DIR)/cblas_daxpy_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_daxpy_b.o $(BUILD_DIR)/cblas_daxpy_b.o $(BUILD_DIR)/cblas_daxpy_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_daxpy_b
+	$(CC) $(BUILD_DIR)/test_cblas_daxpy_b.o $(BUILD_DIR)/cblas_daxpy_b.o $(BUILD_DIR)/cblas_daxpy_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_daxpy_b
 
 $(BUILD_DIR)/test_cblas_dcopy_b.o: $(TEST_DIR)/test_cblas_dcopy_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dcopy_b.c -o $(BUILD_DIR)/test_cblas_dcopy_b.o
 
 $(BUILD_DIR)/test_cblas_dcopy_b: $(BUILD_DIR)/test_cblas_dcopy_b.o $(BUILD_DIR)/cblas_dcopy_b.o $(BUILD_DIR)/cblas_dcopy_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dcopy_b.o $(BUILD_DIR)/cblas_dcopy_b.o $(BUILD_DIR)/cblas_dcopy_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dcopy_b
+	$(CC) $(BUILD_DIR)/test_cblas_dcopy_b.o $(BUILD_DIR)/cblas_dcopy_b.o $(BUILD_DIR)/cblas_dcopy_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dcopy_b
 
 $(BUILD_DIR)/test_cblas_ddot_b.o: $(TEST_DIR)/test_cblas_ddot_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ddot_b.c -o $(BUILD_DIR)/test_cblas_ddot_b.o
 
 $(BUILD_DIR)/test_cblas_ddot_b: $(BUILD_DIR)/test_cblas_ddot_b.o $(BUILD_DIR)/cblas_ddot_b.o $(BUILD_DIR)/cblas_ddot_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ddot_b.o $(BUILD_DIR)/cblas_ddot_b.o $(BUILD_DIR)/cblas_ddot_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ddot_b
+	$(CC) $(BUILD_DIR)/test_cblas_ddot_b.o $(BUILD_DIR)/cblas_ddot_b.o $(BUILD_DIR)/cblas_ddot_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ddot_b
 
 $(BUILD_DIR)/test_cblas_dgbmv_b.o: $(TEST_DIR)/test_cblas_dgbmv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dgbmv_b.c -o $(BUILD_DIR)/test_cblas_dgbmv_b.o
 
 $(BUILD_DIR)/test_cblas_dgbmv_b: $(BUILD_DIR)/test_cblas_dgbmv_b.o $(BUILD_DIR)/cblas_dgbmv_b.o $(BUILD_DIR)/cblas_dgbmv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dgbmv_b.o $(BUILD_DIR)/cblas_dgbmv_b.o $(BUILD_DIR)/cblas_dgbmv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgbmv_b
+	$(CC) $(BUILD_DIR)/test_cblas_dgbmv_b.o $(BUILD_DIR)/cblas_dgbmv_b.o $(BUILD_DIR)/cblas_dgbmv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgbmv_b
 
 $(BUILD_DIR)/test_cblas_dgemm_b.o: $(TEST_DIR)/test_cblas_dgemm_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dgemm_b.c -o $(BUILD_DIR)/test_cblas_dgemm_b.o
 
 $(BUILD_DIR)/test_cblas_dgemm_b: $(BUILD_DIR)/test_cblas_dgemm_b.o $(BUILD_DIR)/cblas_dgemm_b.o $(BUILD_DIR)/cblas_dgemm_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dgemm_b.o $(BUILD_DIR)/cblas_dgemm_b.o $(BUILD_DIR)/cblas_dgemm_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgemm_b
+	$(CC) $(BUILD_DIR)/test_cblas_dgemm_b.o $(BUILD_DIR)/cblas_dgemm_b.o $(BUILD_DIR)/cblas_dgemm_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgemm_b
 
 $(BUILD_DIR)/test_cblas_dgemv_b.o: $(TEST_DIR)/test_cblas_dgemv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dgemv_b.c -o $(BUILD_DIR)/test_cblas_dgemv_b.o
 
 $(BUILD_DIR)/test_cblas_dgemv_b: $(BUILD_DIR)/test_cblas_dgemv_b.o $(BUILD_DIR)/cblas_dgemv_b.o $(BUILD_DIR)/cblas_dgemv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dgemv_b.o $(BUILD_DIR)/cblas_dgemv_b.o $(BUILD_DIR)/cblas_dgemv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgemv_b
+	$(CC) $(BUILD_DIR)/test_cblas_dgemv_b.o $(BUILD_DIR)/cblas_dgemv_b.o $(BUILD_DIR)/cblas_dgemv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgemv_b
 
 $(BUILD_DIR)/test_cblas_dger_b.o: $(TEST_DIR)/test_cblas_dger_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dger_b.c -o $(BUILD_DIR)/test_cblas_dger_b.o
 
 $(BUILD_DIR)/test_cblas_dger_b: $(BUILD_DIR)/test_cblas_dger_b.o $(BUILD_DIR)/cblas_dger_b.o $(BUILD_DIR)/cblas_dger_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dger_b.o $(BUILD_DIR)/cblas_dger_b.o $(BUILD_DIR)/cblas_dger_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dger_b
+	$(CC) $(BUILD_DIR)/test_cblas_dger_b.o $(BUILD_DIR)/cblas_dger_b.o $(BUILD_DIR)/cblas_dger_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dger_b
 
 $(BUILD_DIR)/test_cblas_dnrm2_b.o: $(TEST_DIR)/test_cblas_dnrm2_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dnrm2_b.c -o $(BUILD_DIR)/test_cblas_dnrm2_b.o
 
 $(BUILD_DIR)/test_cblas_dnrm2_b: $(BUILD_DIR)/test_cblas_dnrm2_b.o $(BUILD_DIR)/cblas_dnrm2_b.o $(BUILD_DIR)/cblas_dnrm2_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dnrm2_b.o $(BUILD_DIR)/cblas_dnrm2_b.o $(BUILD_DIR)/cblas_dnrm2_b_fortran.o $(BUILD_DIR)/DIFFSIZES.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dnrm2_b
+	$(CC) $(BUILD_DIR)/test_cblas_dnrm2_b.o $(BUILD_DIR)/cblas_dnrm2_b.o $(BUILD_DIR)/cblas_dnrm2_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/DIFFSIZES.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dnrm2_b
 
 $(BUILD_DIR)/test_cblas_dsbmv_b.o: $(TEST_DIR)/test_cblas_dsbmv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsbmv_b.c -o $(BUILD_DIR)/test_cblas_dsbmv_b.o
 
 $(BUILD_DIR)/test_cblas_dsbmv_b: $(BUILD_DIR)/test_cblas_dsbmv_b.o $(BUILD_DIR)/cblas_dsbmv_b.o $(BUILD_DIR)/cblas_dsbmv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsbmv_b.o $(BUILD_DIR)/cblas_dsbmv_b.o $(BUILD_DIR)/cblas_dsbmv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsbmv_b
+	$(CC) $(BUILD_DIR)/test_cblas_dsbmv_b.o $(BUILD_DIR)/cblas_dsbmv_b.o $(BUILD_DIR)/cblas_dsbmv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsbmv_b
 
 $(BUILD_DIR)/test_cblas_dscal_b.o: $(TEST_DIR)/test_cblas_dscal_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dscal_b.c -o $(BUILD_DIR)/test_cblas_dscal_b.o
 
 $(BUILD_DIR)/test_cblas_dscal_b: $(BUILD_DIR)/test_cblas_dscal_b.o $(BUILD_DIR)/cblas_dscal_b.o $(BUILD_DIR)/cblas_dscal_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dscal_b.o $(BUILD_DIR)/cblas_dscal_b.o $(BUILD_DIR)/cblas_dscal_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dscal_b
+	$(CC) $(BUILD_DIR)/test_cblas_dscal_b.o $(BUILD_DIR)/cblas_dscal_b.o $(BUILD_DIR)/cblas_dscal_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dscal_b
 
 $(BUILD_DIR)/test_cblas_dspmv_b.o: $(TEST_DIR)/test_cblas_dspmv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dspmv_b.c -o $(BUILD_DIR)/test_cblas_dspmv_b.o
 
 $(BUILD_DIR)/test_cblas_dspmv_b: $(BUILD_DIR)/test_cblas_dspmv_b.o $(BUILD_DIR)/cblas_dspmv_b.o $(BUILD_DIR)/cblas_dspmv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dspmv_b.o $(BUILD_DIR)/cblas_dspmv_b.o $(BUILD_DIR)/cblas_dspmv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspmv_b
+	$(CC) $(BUILD_DIR)/test_cblas_dspmv_b.o $(BUILD_DIR)/cblas_dspmv_b.o $(BUILD_DIR)/cblas_dspmv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspmv_b
 
 $(BUILD_DIR)/test_cblas_dspr2_b.o: $(TEST_DIR)/test_cblas_dspr2_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dspr2_b.c -o $(BUILD_DIR)/test_cblas_dspr2_b.o
 
 $(BUILD_DIR)/test_cblas_dspr2_b: $(BUILD_DIR)/test_cblas_dspr2_b.o $(BUILD_DIR)/cblas_dspr2_b.o $(BUILD_DIR)/cblas_dspr2_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dspr2_b.o $(BUILD_DIR)/cblas_dspr2_b.o $(BUILD_DIR)/cblas_dspr2_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspr2_b
+	$(CC) $(BUILD_DIR)/test_cblas_dspr2_b.o $(BUILD_DIR)/cblas_dspr2_b.o $(BUILD_DIR)/cblas_dspr2_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspr2_b
 
 $(BUILD_DIR)/test_cblas_dspr_b.o: $(TEST_DIR)/test_cblas_dspr_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dspr_b.c -o $(BUILD_DIR)/test_cblas_dspr_b.o
 
 $(BUILD_DIR)/test_cblas_dspr_b: $(BUILD_DIR)/test_cblas_dspr_b.o $(BUILD_DIR)/cblas_dspr_b.o $(BUILD_DIR)/cblas_dspr_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dspr_b.o $(BUILD_DIR)/cblas_dspr_b.o $(BUILD_DIR)/cblas_dspr_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspr_b
+	$(CC) $(BUILD_DIR)/test_cblas_dspr_b.o $(BUILD_DIR)/cblas_dspr_b.o $(BUILD_DIR)/cblas_dspr_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspr_b
 
 $(BUILD_DIR)/test_cblas_dswap_b.o: $(TEST_DIR)/test_cblas_dswap_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dswap_b.c -o $(BUILD_DIR)/test_cblas_dswap_b.o
 
 $(BUILD_DIR)/test_cblas_dswap_b: $(BUILD_DIR)/test_cblas_dswap_b.o $(BUILD_DIR)/cblas_dswap_b.o $(BUILD_DIR)/cblas_dswap_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dswap_b.o $(BUILD_DIR)/cblas_dswap_b.o $(BUILD_DIR)/cblas_dswap_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dswap_b
+	$(CC) $(BUILD_DIR)/test_cblas_dswap_b.o $(BUILD_DIR)/cblas_dswap_b.o $(BUILD_DIR)/cblas_dswap_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dswap_b
 
 $(BUILD_DIR)/test_cblas_dsymm_b.o: $(TEST_DIR)/test_cblas_dsymm_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsymm_b.c -o $(BUILD_DIR)/test_cblas_dsymm_b.o
 
 $(BUILD_DIR)/test_cblas_dsymm_b: $(BUILD_DIR)/test_cblas_dsymm_b.o $(BUILD_DIR)/cblas_dsymm_b.o $(BUILD_DIR)/cblas_dsymm_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsymm_b.o $(BUILD_DIR)/cblas_dsymm_b.o $(BUILD_DIR)/cblas_dsymm_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsymm_b
+	$(CC) $(BUILD_DIR)/test_cblas_dsymm_b.o $(BUILD_DIR)/cblas_dsymm_b.o $(BUILD_DIR)/cblas_dsymm_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsymm_b
 
 $(BUILD_DIR)/test_cblas_dsymv_b.o: $(TEST_DIR)/test_cblas_dsymv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsymv_b.c -o $(BUILD_DIR)/test_cblas_dsymv_b.o
 
 $(BUILD_DIR)/test_cblas_dsymv_b: $(BUILD_DIR)/test_cblas_dsymv_b.o $(BUILD_DIR)/cblas_dsymv_b.o $(BUILD_DIR)/cblas_dsymv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsymv_b.o $(BUILD_DIR)/cblas_dsymv_b.o $(BUILD_DIR)/cblas_dsymv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsymv_b
+	$(CC) $(BUILD_DIR)/test_cblas_dsymv_b.o $(BUILD_DIR)/cblas_dsymv_b.o $(BUILD_DIR)/cblas_dsymv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsymv_b
 
 $(BUILD_DIR)/test_cblas_dsyr2_b.o: $(TEST_DIR)/test_cblas_dsyr2_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsyr2_b.c -o $(BUILD_DIR)/test_cblas_dsyr2_b.o
 
 $(BUILD_DIR)/test_cblas_dsyr2_b: $(BUILD_DIR)/test_cblas_dsyr2_b.o $(BUILD_DIR)/cblas_dsyr2_b.o $(BUILD_DIR)/cblas_dsyr2_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsyr2_b.o $(BUILD_DIR)/cblas_dsyr2_b.o $(BUILD_DIR)/cblas_dsyr2_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr2_b
+	$(CC) $(BUILD_DIR)/test_cblas_dsyr2_b.o $(BUILD_DIR)/cblas_dsyr2_b.o $(BUILD_DIR)/cblas_dsyr2_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr2_b
 
 $(BUILD_DIR)/test_cblas_dsyr2k_b.o: $(TEST_DIR)/test_cblas_dsyr2k_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsyr2k_b.c -o $(BUILD_DIR)/test_cblas_dsyr2k_b.o
 
 $(BUILD_DIR)/test_cblas_dsyr2k_b: $(BUILD_DIR)/test_cblas_dsyr2k_b.o $(BUILD_DIR)/cblas_dsyr2k_b.o $(BUILD_DIR)/cblas_dsyr2k_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsyr2k_b.o $(BUILD_DIR)/cblas_dsyr2k_b.o $(BUILD_DIR)/cblas_dsyr2k_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr2k_b
+	$(CC) $(BUILD_DIR)/test_cblas_dsyr2k_b.o $(BUILD_DIR)/cblas_dsyr2k_b.o $(BUILD_DIR)/cblas_dsyr2k_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr2k_b
 
 $(BUILD_DIR)/test_cblas_dsyr_b.o: $(TEST_DIR)/test_cblas_dsyr_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsyr_b.c -o $(BUILD_DIR)/test_cblas_dsyr_b.o
 
 $(BUILD_DIR)/test_cblas_dsyr_b: $(BUILD_DIR)/test_cblas_dsyr_b.o $(BUILD_DIR)/cblas_dsyr_b.o $(BUILD_DIR)/cblas_dsyr_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsyr_b.o $(BUILD_DIR)/cblas_dsyr_b.o $(BUILD_DIR)/cblas_dsyr_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr_b
+	$(CC) $(BUILD_DIR)/test_cblas_dsyr_b.o $(BUILD_DIR)/cblas_dsyr_b.o $(BUILD_DIR)/cblas_dsyr_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr_b
 
 $(BUILD_DIR)/test_cblas_dsyrk_b.o: $(TEST_DIR)/test_cblas_dsyrk_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsyrk_b.c -o $(BUILD_DIR)/test_cblas_dsyrk_b.o
 
 $(BUILD_DIR)/test_cblas_dsyrk_b: $(BUILD_DIR)/test_cblas_dsyrk_b.o $(BUILD_DIR)/cblas_dsyrk_b.o $(BUILD_DIR)/cblas_dsyrk_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsyrk_b.o $(BUILD_DIR)/cblas_dsyrk_b.o $(BUILD_DIR)/cblas_dsyrk_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyrk_b
+	$(CC) $(BUILD_DIR)/test_cblas_dsyrk_b.o $(BUILD_DIR)/cblas_dsyrk_b.o $(BUILD_DIR)/cblas_dsyrk_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyrk_b
 
 $(BUILD_DIR)/test_cblas_dtbmv_b.o: $(TEST_DIR)/test_cblas_dtbmv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtbmv_b.c -o $(BUILD_DIR)/test_cblas_dtbmv_b.o
 
 $(BUILD_DIR)/test_cblas_dtbmv_b: $(BUILD_DIR)/test_cblas_dtbmv_b.o $(BUILD_DIR)/cblas_dtbmv_b.o $(BUILD_DIR)/cblas_dtbmv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtbmv_b.o $(BUILD_DIR)/cblas_dtbmv_b.o $(BUILD_DIR)/cblas_dtbmv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtbmv_b
+	$(CC) $(BUILD_DIR)/test_cblas_dtbmv_b.o $(BUILD_DIR)/cblas_dtbmv_b.o $(BUILD_DIR)/cblas_dtbmv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtbmv_b
 
 $(BUILD_DIR)/test_cblas_dtpmv_b.o: $(TEST_DIR)/test_cblas_dtpmv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtpmv_b.c -o $(BUILD_DIR)/test_cblas_dtpmv_b.o
 
 $(BUILD_DIR)/test_cblas_dtpmv_b: $(BUILD_DIR)/test_cblas_dtpmv_b.o $(BUILD_DIR)/cblas_dtpmv_b.o $(BUILD_DIR)/cblas_dtpmv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtpmv_b.o $(BUILD_DIR)/cblas_dtpmv_b.o $(BUILD_DIR)/cblas_dtpmv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtpmv_b
+	$(CC) $(BUILD_DIR)/test_cblas_dtpmv_b.o $(BUILD_DIR)/cblas_dtpmv_b.o $(BUILD_DIR)/cblas_dtpmv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtpmv_b
 
 $(BUILD_DIR)/test_cblas_dtrmm_b.o: $(TEST_DIR)/test_cblas_dtrmm_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtrmm_b.c -o $(BUILD_DIR)/test_cblas_dtrmm_b.o
 
 $(BUILD_DIR)/test_cblas_dtrmm_b: $(BUILD_DIR)/test_cblas_dtrmm_b.o $(BUILD_DIR)/cblas_dtrmm_b.o $(BUILD_DIR)/cblas_dtrmm_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtrmm_b.o $(BUILD_DIR)/cblas_dtrmm_b.o $(BUILD_DIR)/cblas_dtrmm_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrmm_b
+	$(CC) $(BUILD_DIR)/test_cblas_dtrmm_b.o $(BUILD_DIR)/cblas_dtrmm_b.o $(BUILD_DIR)/cblas_dtrmm_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrmm_b
 
 $(BUILD_DIR)/test_cblas_dtrmv_b.o: $(TEST_DIR)/test_cblas_dtrmv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtrmv_b.c -o $(BUILD_DIR)/test_cblas_dtrmv_b.o
 
 $(BUILD_DIR)/test_cblas_dtrmv_b: $(BUILD_DIR)/test_cblas_dtrmv_b.o $(BUILD_DIR)/cblas_dtrmv_b.o $(BUILD_DIR)/cblas_dtrmv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtrmv_b.o $(BUILD_DIR)/cblas_dtrmv_b.o $(BUILD_DIR)/cblas_dtrmv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrmv_b
+	$(CC) $(BUILD_DIR)/test_cblas_dtrmv_b.o $(BUILD_DIR)/cblas_dtrmv_b.o $(BUILD_DIR)/cblas_dtrmv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrmv_b
 
 $(BUILD_DIR)/test_cblas_dtrsm_b.o: $(TEST_DIR)/test_cblas_dtrsm_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtrsm_b.c -o $(BUILD_DIR)/test_cblas_dtrsm_b.o
 
 $(BUILD_DIR)/test_cblas_dtrsm_b: $(BUILD_DIR)/test_cblas_dtrsm_b.o $(BUILD_DIR)/cblas_dtrsm_b.o $(BUILD_DIR)/cblas_dtrsm_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtrsm_b.o $(BUILD_DIR)/cblas_dtrsm_b.o $(BUILD_DIR)/cblas_dtrsm_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrsm_b
+	$(CC) $(BUILD_DIR)/test_cblas_dtrsm_b.o $(BUILD_DIR)/cblas_dtrsm_b.o $(BUILD_DIR)/cblas_dtrsm_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrsm_b
 
 $(BUILD_DIR)/test_cblas_dtrsv_b.o: $(TEST_DIR)/test_cblas_dtrsv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtrsv_b.c -o $(BUILD_DIR)/test_cblas_dtrsv_b.o
 
 $(BUILD_DIR)/test_cblas_dtrsv_b: $(BUILD_DIR)/test_cblas_dtrsv_b.o $(BUILD_DIR)/cblas_dtrsv_b.o $(BUILD_DIR)/cblas_dtrsv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtrsv_b.o $(BUILD_DIR)/cblas_dtrsv_b.o $(BUILD_DIR)/cblas_dtrsv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrsv_b
+	$(CC) $(BUILD_DIR)/test_cblas_dtrsv_b.o $(BUILD_DIR)/cblas_dtrsv_b.o $(BUILD_DIR)/cblas_dtrsv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrsv_b
 
 $(BUILD_DIR)/test_cblas_sasum_b.o: $(TEST_DIR)/test_cblas_sasum_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sasum_b.c -o $(BUILD_DIR)/test_cblas_sasum_b.o
 
 $(BUILD_DIR)/test_cblas_sasum_b: $(BUILD_DIR)/test_cblas_sasum_b.o $(BUILD_DIR)/cblas_sasum_b.o $(BUILD_DIR)/cblas_sasum_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_sasum_b.o $(BUILD_DIR)/cblas_sasum_b.o $(BUILD_DIR)/cblas_sasum_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sasum_b
+	$(CC) $(BUILD_DIR)/test_cblas_sasum_b.o $(BUILD_DIR)/cblas_sasum_b.o $(BUILD_DIR)/cblas_sasum_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sasum_b
 
 $(BUILD_DIR)/test_cblas_saxpy_b.o: $(TEST_DIR)/test_cblas_saxpy_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_saxpy_b.c -o $(BUILD_DIR)/test_cblas_saxpy_b.o
 
 $(BUILD_DIR)/test_cblas_saxpy_b: $(BUILD_DIR)/test_cblas_saxpy_b.o $(BUILD_DIR)/cblas_saxpy_b.o $(BUILD_DIR)/cblas_saxpy_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_saxpy_b.o $(BUILD_DIR)/cblas_saxpy_b.o $(BUILD_DIR)/cblas_saxpy_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_saxpy_b
+	$(CC) $(BUILD_DIR)/test_cblas_saxpy_b.o $(BUILD_DIR)/cblas_saxpy_b.o $(BUILD_DIR)/cblas_saxpy_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_saxpy_b
 
 $(BUILD_DIR)/test_cblas_scopy_b.o: $(TEST_DIR)/test_cblas_scopy_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_scopy_b.c -o $(BUILD_DIR)/test_cblas_scopy_b.o
 
 $(BUILD_DIR)/test_cblas_scopy_b: $(BUILD_DIR)/test_cblas_scopy_b.o $(BUILD_DIR)/cblas_scopy_b.o $(BUILD_DIR)/cblas_scopy_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_scopy_b.o $(BUILD_DIR)/cblas_scopy_b.o $(BUILD_DIR)/cblas_scopy_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_scopy_b
+	$(CC) $(BUILD_DIR)/test_cblas_scopy_b.o $(BUILD_DIR)/cblas_scopy_b.o $(BUILD_DIR)/cblas_scopy_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_scopy_b
 
 $(BUILD_DIR)/test_cblas_sdot_b.o: $(TEST_DIR)/test_cblas_sdot_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sdot_b.c -o $(BUILD_DIR)/test_cblas_sdot_b.o
 
 $(BUILD_DIR)/test_cblas_sdot_b: $(BUILD_DIR)/test_cblas_sdot_b.o $(BUILD_DIR)/cblas_sdot_b.o $(BUILD_DIR)/cblas_sdot_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_sdot_b.o $(BUILD_DIR)/cblas_sdot_b.o $(BUILD_DIR)/cblas_sdot_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sdot_b
+	$(CC) $(BUILD_DIR)/test_cblas_sdot_b.o $(BUILD_DIR)/cblas_sdot_b.o $(BUILD_DIR)/cblas_sdot_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sdot_b
 
 $(BUILD_DIR)/test_cblas_sgbmv_b.o: $(TEST_DIR)/test_cblas_sgbmv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sgbmv_b.c -o $(BUILD_DIR)/test_cblas_sgbmv_b.o
 
 $(BUILD_DIR)/test_cblas_sgbmv_b: $(BUILD_DIR)/test_cblas_sgbmv_b.o $(BUILD_DIR)/cblas_sgbmv_b.o $(BUILD_DIR)/cblas_sgbmv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_sgbmv_b.o $(BUILD_DIR)/cblas_sgbmv_b.o $(BUILD_DIR)/cblas_sgbmv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgbmv_b
+	$(CC) $(BUILD_DIR)/test_cblas_sgbmv_b.o $(BUILD_DIR)/cblas_sgbmv_b.o $(BUILD_DIR)/cblas_sgbmv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgbmv_b
 
 $(BUILD_DIR)/test_cblas_sgemm_b.o: $(TEST_DIR)/test_cblas_sgemm_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sgemm_b.c -o $(BUILD_DIR)/test_cblas_sgemm_b.o
 
 $(BUILD_DIR)/test_cblas_sgemm_b: $(BUILD_DIR)/test_cblas_sgemm_b.o $(BUILD_DIR)/cblas_sgemm_b.o $(BUILD_DIR)/cblas_sgemm_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_sgemm_b.o $(BUILD_DIR)/cblas_sgemm_b.o $(BUILD_DIR)/cblas_sgemm_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgemm_b
+	$(CC) $(BUILD_DIR)/test_cblas_sgemm_b.o $(BUILD_DIR)/cblas_sgemm_b.o $(BUILD_DIR)/cblas_sgemm_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgemm_b
 
 $(BUILD_DIR)/test_cblas_sgemv_b.o: $(TEST_DIR)/test_cblas_sgemv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sgemv_b.c -o $(BUILD_DIR)/test_cblas_sgemv_b.o
 
 $(BUILD_DIR)/test_cblas_sgemv_b: $(BUILD_DIR)/test_cblas_sgemv_b.o $(BUILD_DIR)/cblas_sgemv_b.o $(BUILD_DIR)/cblas_sgemv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_sgemv_b.o $(BUILD_DIR)/cblas_sgemv_b.o $(BUILD_DIR)/cblas_sgemv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgemv_b
+	$(CC) $(BUILD_DIR)/test_cblas_sgemv_b.o $(BUILD_DIR)/cblas_sgemv_b.o $(BUILD_DIR)/cblas_sgemv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgemv_b
 
 $(BUILD_DIR)/test_cblas_sger_b.o: $(TEST_DIR)/test_cblas_sger_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sger_b.c -o $(BUILD_DIR)/test_cblas_sger_b.o
 
 $(BUILD_DIR)/test_cblas_sger_b: $(BUILD_DIR)/test_cblas_sger_b.o $(BUILD_DIR)/cblas_sger_b.o $(BUILD_DIR)/cblas_sger_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_sger_b.o $(BUILD_DIR)/cblas_sger_b.o $(BUILD_DIR)/cblas_sger_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sger_b
+	$(CC) $(BUILD_DIR)/test_cblas_sger_b.o $(BUILD_DIR)/cblas_sger_b.o $(BUILD_DIR)/cblas_sger_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sger_b
 
 $(BUILD_DIR)/test_cblas_snrm2_b.o: $(TEST_DIR)/test_cblas_snrm2_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_snrm2_b.c -o $(BUILD_DIR)/test_cblas_snrm2_b.o
 
 $(BUILD_DIR)/test_cblas_snrm2_b: $(BUILD_DIR)/test_cblas_snrm2_b.o $(BUILD_DIR)/cblas_snrm2_b.o $(BUILD_DIR)/cblas_snrm2_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_snrm2_b.o $(BUILD_DIR)/cblas_snrm2_b.o $(BUILD_DIR)/cblas_snrm2_b_fortran.o $(BUILD_DIR)/DIFFSIZES.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_snrm2_b
+	$(CC) $(BUILD_DIR)/test_cblas_snrm2_b.o $(BUILD_DIR)/cblas_snrm2_b.o $(BUILD_DIR)/cblas_snrm2_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/DIFFSIZES.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_snrm2_b
 
 $(BUILD_DIR)/test_cblas_ssbmv_b.o: $(TEST_DIR)/test_cblas_ssbmv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssbmv_b.c -o $(BUILD_DIR)/test_cblas_ssbmv_b.o
 
 $(BUILD_DIR)/test_cblas_ssbmv_b: $(BUILD_DIR)/test_cblas_ssbmv_b.o $(BUILD_DIR)/cblas_ssbmv_b.o $(BUILD_DIR)/cblas_ssbmv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssbmv_b.o $(BUILD_DIR)/cblas_ssbmv_b.o $(BUILD_DIR)/cblas_ssbmv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssbmv_b
+	$(CC) $(BUILD_DIR)/test_cblas_ssbmv_b.o $(BUILD_DIR)/cblas_ssbmv_b.o $(BUILD_DIR)/cblas_ssbmv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssbmv_b
 
 $(BUILD_DIR)/test_cblas_sscal_b.o: $(TEST_DIR)/test_cblas_sscal_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sscal_b.c -o $(BUILD_DIR)/test_cblas_sscal_b.o
 
 $(BUILD_DIR)/test_cblas_sscal_b: $(BUILD_DIR)/test_cblas_sscal_b.o $(BUILD_DIR)/cblas_sscal_b.o $(BUILD_DIR)/cblas_sscal_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_sscal_b.o $(BUILD_DIR)/cblas_sscal_b.o $(BUILD_DIR)/cblas_sscal_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sscal_b
+	$(CC) $(BUILD_DIR)/test_cblas_sscal_b.o $(BUILD_DIR)/cblas_sscal_b.o $(BUILD_DIR)/cblas_sscal_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sscal_b
 
 $(BUILD_DIR)/test_cblas_sspmv_b.o: $(TEST_DIR)/test_cblas_sspmv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sspmv_b.c -o $(BUILD_DIR)/test_cblas_sspmv_b.o
 
 $(BUILD_DIR)/test_cblas_sspmv_b: $(BUILD_DIR)/test_cblas_sspmv_b.o $(BUILD_DIR)/cblas_sspmv_b.o $(BUILD_DIR)/cblas_sspmv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_sspmv_b.o $(BUILD_DIR)/cblas_sspmv_b.o $(BUILD_DIR)/cblas_sspmv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspmv_b
+	$(CC) $(BUILD_DIR)/test_cblas_sspmv_b.o $(BUILD_DIR)/cblas_sspmv_b.o $(BUILD_DIR)/cblas_sspmv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspmv_b
 
 $(BUILD_DIR)/test_cblas_sspr2_b.o: $(TEST_DIR)/test_cblas_sspr2_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sspr2_b.c -o $(BUILD_DIR)/test_cblas_sspr2_b.o
 
 $(BUILD_DIR)/test_cblas_sspr2_b: $(BUILD_DIR)/test_cblas_sspr2_b.o $(BUILD_DIR)/cblas_sspr2_b.o $(BUILD_DIR)/cblas_sspr2_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_sspr2_b.o $(BUILD_DIR)/cblas_sspr2_b.o $(BUILD_DIR)/cblas_sspr2_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspr2_b
+	$(CC) $(BUILD_DIR)/test_cblas_sspr2_b.o $(BUILD_DIR)/cblas_sspr2_b.o $(BUILD_DIR)/cblas_sspr2_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspr2_b
 
 $(BUILD_DIR)/test_cblas_sspr_b.o: $(TEST_DIR)/test_cblas_sspr_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sspr_b.c -o $(BUILD_DIR)/test_cblas_sspr_b.o
 
 $(BUILD_DIR)/test_cblas_sspr_b: $(BUILD_DIR)/test_cblas_sspr_b.o $(BUILD_DIR)/cblas_sspr_b.o $(BUILD_DIR)/cblas_sspr_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_sspr_b.o $(BUILD_DIR)/cblas_sspr_b.o $(BUILD_DIR)/cblas_sspr_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspr_b
+	$(CC) $(BUILD_DIR)/test_cblas_sspr_b.o $(BUILD_DIR)/cblas_sspr_b.o $(BUILD_DIR)/cblas_sspr_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspr_b
 
 $(BUILD_DIR)/test_cblas_sswap_b.o: $(TEST_DIR)/test_cblas_sswap_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sswap_b.c -o $(BUILD_DIR)/test_cblas_sswap_b.o
 
 $(BUILD_DIR)/test_cblas_sswap_b: $(BUILD_DIR)/test_cblas_sswap_b.o $(BUILD_DIR)/cblas_sswap_b.o $(BUILD_DIR)/cblas_sswap_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_sswap_b.o $(BUILD_DIR)/cblas_sswap_b.o $(BUILD_DIR)/cblas_sswap_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sswap_b
+	$(CC) $(BUILD_DIR)/test_cblas_sswap_b.o $(BUILD_DIR)/cblas_sswap_b.o $(BUILD_DIR)/cblas_sswap_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sswap_b
 
 $(BUILD_DIR)/test_cblas_ssymm_b.o: $(TEST_DIR)/test_cblas_ssymm_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssymm_b.c -o $(BUILD_DIR)/test_cblas_ssymm_b.o
 
 $(BUILD_DIR)/test_cblas_ssymm_b: $(BUILD_DIR)/test_cblas_ssymm_b.o $(BUILD_DIR)/cblas_ssymm_b.o $(BUILD_DIR)/cblas_ssymm_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssymm_b.o $(BUILD_DIR)/cblas_ssymm_b.o $(BUILD_DIR)/cblas_ssymm_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssymm_b
+	$(CC) $(BUILD_DIR)/test_cblas_ssymm_b.o $(BUILD_DIR)/cblas_ssymm_b.o $(BUILD_DIR)/cblas_ssymm_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssymm_b
 
 $(BUILD_DIR)/test_cblas_ssymv_b.o: $(TEST_DIR)/test_cblas_ssymv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssymv_b.c -o $(BUILD_DIR)/test_cblas_ssymv_b.o
 
 $(BUILD_DIR)/test_cblas_ssymv_b: $(BUILD_DIR)/test_cblas_ssymv_b.o $(BUILD_DIR)/cblas_ssymv_b.o $(BUILD_DIR)/cblas_ssymv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssymv_b.o $(BUILD_DIR)/cblas_ssymv_b.o $(BUILD_DIR)/cblas_ssymv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssymv_b
+	$(CC) $(BUILD_DIR)/test_cblas_ssymv_b.o $(BUILD_DIR)/cblas_ssymv_b.o $(BUILD_DIR)/cblas_ssymv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssymv_b
 
 $(BUILD_DIR)/test_cblas_ssyr2_b.o: $(TEST_DIR)/test_cblas_ssyr2_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssyr2_b.c -o $(BUILD_DIR)/test_cblas_ssyr2_b.o
 
 $(BUILD_DIR)/test_cblas_ssyr2_b: $(BUILD_DIR)/test_cblas_ssyr2_b.o $(BUILD_DIR)/cblas_ssyr2_b.o $(BUILD_DIR)/cblas_ssyr2_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssyr2_b.o $(BUILD_DIR)/cblas_ssyr2_b.o $(BUILD_DIR)/cblas_ssyr2_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr2_b
+	$(CC) $(BUILD_DIR)/test_cblas_ssyr2_b.o $(BUILD_DIR)/cblas_ssyr2_b.o $(BUILD_DIR)/cblas_ssyr2_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr2_b
 
 $(BUILD_DIR)/test_cblas_ssyr2k_b.o: $(TEST_DIR)/test_cblas_ssyr2k_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssyr2k_b.c -o $(BUILD_DIR)/test_cblas_ssyr2k_b.o
 
 $(BUILD_DIR)/test_cblas_ssyr2k_b: $(BUILD_DIR)/test_cblas_ssyr2k_b.o $(BUILD_DIR)/cblas_ssyr2k_b.o $(BUILD_DIR)/cblas_ssyr2k_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssyr2k_b.o $(BUILD_DIR)/cblas_ssyr2k_b.o $(BUILD_DIR)/cblas_ssyr2k_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr2k_b
+	$(CC) $(BUILD_DIR)/test_cblas_ssyr2k_b.o $(BUILD_DIR)/cblas_ssyr2k_b.o $(BUILD_DIR)/cblas_ssyr2k_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr2k_b
 
 $(BUILD_DIR)/test_cblas_ssyr_b.o: $(TEST_DIR)/test_cblas_ssyr_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssyr_b.c -o $(BUILD_DIR)/test_cblas_ssyr_b.o
 
 $(BUILD_DIR)/test_cblas_ssyr_b: $(BUILD_DIR)/test_cblas_ssyr_b.o $(BUILD_DIR)/cblas_ssyr_b.o $(BUILD_DIR)/cblas_ssyr_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssyr_b.o $(BUILD_DIR)/cblas_ssyr_b.o $(BUILD_DIR)/cblas_ssyr_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr_b
+	$(CC) $(BUILD_DIR)/test_cblas_ssyr_b.o $(BUILD_DIR)/cblas_ssyr_b.o $(BUILD_DIR)/cblas_ssyr_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr_b
 
 $(BUILD_DIR)/test_cblas_ssyrk_b.o: $(TEST_DIR)/test_cblas_ssyrk_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssyrk_b.c -o $(BUILD_DIR)/test_cblas_ssyrk_b.o
 
 $(BUILD_DIR)/test_cblas_ssyrk_b: $(BUILD_DIR)/test_cblas_ssyrk_b.o $(BUILD_DIR)/cblas_ssyrk_b.o $(BUILD_DIR)/cblas_ssyrk_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssyrk_b.o $(BUILD_DIR)/cblas_ssyrk_b.o $(BUILD_DIR)/cblas_ssyrk_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyrk_b
+	$(CC) $(BUILD_DIR)/test_cblas_ssyrk_b.o $(BUILD_DIR)/cblas_ssyrk_b.o $(BUILD_DIR)/cblas_ssyrk_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyrk_b
 
 $(BUILD_DIR)/test_cblas_stbmv_b.o: $(TEST_DIR)/test_cblas_stbmv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_stbmv_b.c -o $(BUILD_DIR)/test_cblas_stbmv_b.o
 
 $(BUILD_DIR)/test_cblas_stbmv_b: $(BUILD_DIR)/test_cblas_stbmv_b.o $(BUILD_DIR)/cblas_stbmv_b.o $(BUILD_DIR)/cblas_stbmv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_stbmv_b.o $(BUILD_DIR)/cblas_stbmv_b.o $(BUILD_DIR)/cblas_stbmv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_stbmv_b
+	$(CC) $(BUILD_DIR)/test_cblas_stbmv_b.o $(BUILD_DIR)/cblas_stbmv_b.o $(BUILD_DIR)/cblas_stbmv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_stbmv_b
 
 $(BUILD_DIR)/test_cblas_stpmv_b.o: $(TEST_DIR)/test_cblas_stpmv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_stpmv_b.c -o $(BUILD_DIR)/test_cblas_stpmv_b.o
 
 $(BUILD_DIR)/test_cblas_stpmv_b: $(BUILD_DIR)/test_cblas_stpmv_b.o $(BUILD_DIR)/cblas_stpmv_b.o $(BUILD_DIR)/cblas_stpmv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_stpmv_b.o $(BUILD_DIR)/cblas_stpmv_b.o $(BUILD_DIR)/cblas_stpmv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_stpmv_b
+	$(CC) $(BUILD_DIR)/test_cblas_stpmv_b.o $(BUILD_DIR)/cblas_stpmv_b.o $(BUILD_DIR)/cblas_stpmv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_stpmv_b
 
 $(BUILD_DIR)/test_cblas_strmm_b.o: $(TEST_DIR)/test_cblas_strmm_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_strmm_b.c -o $(BUILD_DIR)/test_cblas_strmm_b.o
 
 $(BUILD_DIR)/test_cblas_strmm_b: $(BUILD_DIR)/test_cblas_strmm_b.o $(BUILD_DIR)/cblas_strmm_b.o $(BUILD_DIR)/cblas_strmm_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_strmm_b.o $(BUILD_DIR)/cblas_strmm_b.o $(BUILD_DIR)/cblas_strmm_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strmm_b
+	$(CC) $(BUILD_DIR)/test_cblas_strmm_b.o $(BUILD_DIR)/cblas_strmm_b.o $(BUILD_DIR)/cblas_strmm_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strmm_b
 
 $(BUILD_DIR)/test_cblas_strmv_b.o: $(TEST_DIR)/test_cblas_strmv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_strmv_b.c -o $(BUILD_DIR)/test_cblas_strmv_b.o
 
 $(BUILD_DIR)/test_cblas_strmv_b: $(BUILD_DIR)/test_cblas_strmv_b.o $(BUILD_DIR)/cblas_strmv_b.o $(BUILD_DIR)/cblas_strmv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_strmv_b.o $(BUILD_DIR)/cblas_strmv_b.o $(BUILD_DIR)/cblas_strmv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strmv_b
+	$(CC) $(BUILD_DIR)/test_cblas_strmv_b.o $(BUILD_DIR)/cblas_strmv_b.o $(BUILD_DIR)/cblas_strmv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strmv_b
 
 $(BUILD_DIR)/test_cblas_strsm_b.o: $(TEST_DIR)/test_cblas_strsm_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_strsm_b.c -o $(BUILD_DIR)/test_cblas_strsm_b.o
 
 $(BUILD_DIR)/test_cblas_strsm_b: $(BUILD_DIR)/test_cblas_strsm_b.o $(BUILD_DIR)/cblas_strsm_b.o $(BUILD_DIR)/cblas_strsm_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_strsm_b.o $(BUILD_DIR)/cblas_strsm_b.o $(BUILD_DIR)/cblas_strsm_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strsm_b
+	$(CC) $(BUILD_DIR)/test_cblas_strsm_b.o $(BUILD_DIR)/cblas_strsm_b.o $(BUILD_DIR)/cblas_strsm_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strsm_b
 
 $(BUILD_DIR)/test_cblas_strsv_b.o: $(TEST_DIR)/test_cblas_strsv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_strsv_b.c -o $(BUILD_DIR)/test_cblas_strsv_b.o
 
 $(BUILD_DIR)/test_cblas_strsv_b: $(BUILD_DIR)/test_cblas_strsv_b.o $(BUILD_DIR)/cblas_strsv_b.o $(BUILD_DIR)/cblas_strsv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_strsv_b.o $(BUILD_DIR)/cblas_strsv_b.o $(BUILD_DIR)/cblas_strsv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strsv_b
+	$(CC) $(BUILD_DIR)/test_cblas_strsv_b.o $(BUILD_DIR)/cblas_strsv_b.o $(BUILD_DIR)/cblas_strsv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strsv_b
 
 $(BUILD_DIR)/test_cblas_zaxpy_b.o: $(TEST_DIR)/test_cblas_zaxpy_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zaxpy_b.c -o $(BUILD_DIR)/test_cblas_zaxpy_b.o
 
 $(BUILD_DIR)/test_cblas_zaxpy_b: $(BUILD_DIR)/test_cblas_zaxpy_b.o $(BUILD_DIR)/cblas_zaxpy_b.o $(BUILD_DIR)/cblas_zaxpy_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zaxpy_b.o $(BUILD_DIR)/cblas_zaxpy_b.o $(BUILD_DIR)/cblas_zaxpy_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zaxpy_b
+	$(CC) $(BUILD_DIR)/test_cblas_zaxpy_b.o $(BUILD_DIR)/cblas_zaxpy_b.o $(BUILD_DIR)/cblas_zaxpy_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zaxpy_b
 
 $(BUILD_DIR)/test_cblas_zcopy_b.o: $(TEST_DIR)/test_cblas_zcopy_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zcopy_b.c -o $(BUILD_DIR)/test_cblas_zcopy_b.o
 
 $(BUILD_DIR)/test_cblas_zcopy_b: $(BUILD_DIR)/test_cblas_zcopy_b.o $(BUILD_DIR)/cblas_zcopy_b.o $(BUILD_DIR)/cblas_zcopy_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zcopy_b.o $(BUILD_DIR)/cblas_zcopy_b.o $(BUILD_DIR)/cblas_zcopy_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zcopy_b
+	$(CC) $(BUILD_DIR)/test_cblas_zcopy_b.o $(BUILD_DIR)/cblas_zcopy_b.o $(BUILD_DIR)/cblas_zcopy_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zcopy_b
 
 $(BUILD_DIR)/test_cblas_zdotc_sub_b.o: $(TEST_DIR)/test_cblas_zdotc_sub_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zdotc_sub_b.c -o $(BUILD_DIR)/test_cblas_zdotc_sub_b.o
 
 $(BUILD_DIR)/test_cblas_zdotc_sub_b: $(BUILD_DIR)/test_cblas_zdotc_sub_b.o $(BUILD_DIR)/cblas_zdotc_sub_b.o $(BUILD_DIR)/cblas_zdotc_sub_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zdotc_sub_b.o $(BUILD_DIR)/cblas_zdotc_sub_b.o $(BUILD_DIR)/cblas_zdotc_sub_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdotc_sub_b
+	$(CC) $(BUILD_DIR)/test_cblas_zdotc_sub_b.o $(BUILD_DIR)/cblas_zdotc_sub_b.o $(BUILD_DIR)/cblas_zdotc_sub_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdotc_sub_b
 
 $(BUILD_DIR)/test_cblas_zdotu_sub_b.o: $(TEST_DIR)/test_cblas_zdotu_sub_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zdotu_sub_b.c -o $(BUILD_DIR)/test_cblas_zdotu_sub_b.o
 
 $(BUILD_DIR)/test_cblas_zdotu_sub_b: $(BUILD_DIR)/test_cblas_zdotu_sub_b.o $(BUILD_DIR)/cblas_zdotu_sub_b.o $(BUILD_DIR)/cblas_zdotu_sub_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zdotu_sub_b.o $(BUILD_DIR)/cblas_zdotu_sub_b.o $(BUILD_DIR)/cblas_zdotu_sub_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdotu_sub_b
+	$(CC) $(BUILD_DIR)/test_cblas_zdotu_sub_b.o $(BUILD_DIR)/cblas_zdotu_sub_b.o $(BUILD_DIR)/cblas_zdotu_sub_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdotu_sub_b
 
 $(BUILD_DIR)/test_cblas_zdscal_b.o: $(TEST_DIR)/test_cblas_zdscal_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zdscal_b.c -o $(BUILD_DIR)/test_cblas_zdscal_b.o
 
 $(BUILD_DIR)/test_cblas_zdscal_b: $(BUILD_DIR)/test_cblas_zdscal_b.o $(BUILD_DIR)/cblas_zdscal_b.o $(BUILD_DIR)/cblas_zdscal_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zdscal_b.o $(BUILD_DIR)/cblas_zdscal_b.o $(BUILD_DIR)/cblas_zdscal_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdscal_b
+	$(CC) $(BUILD_DIR)/test_cblas_zdscal_b.o $(BUILD_DIR)/cblas_zdscal_b.o $(BUILD_DIR)/cblas_zdscal_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdscal_b
 
 $(BUILD_DIR)/test_cblas_zgbmv_b.o: $(TEST_DIR)/test_cblas_zgbmv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zgbmv_b.c -o $(BUILD_DIR)/test_cblas_zgbmv_b.o
 
 $(BUILD_DIR)/test_cblas_zgbmv_b: $(BUILD_DIR)/test_cblas_zgbmv_b.o $(BUILD_DIR)/cblas_zgbmv_b.o $(BUILD_DIR)/cblas_zgbmv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zgbmv_b.o $(BUILD_DIR)/cblas_zgbmv_b.o $(BUILD_DIR)/cblas_zgbmv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgbmv_b
+	$(CC) $(BUILD_DIR)/test_cblas_zgbmv_b.o $(BUILD_DIR)/cblas_zgbmv_b.o $(BUILD_DIR)/cblas_zgbmv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgbmv_b
 
 $(BUILD_DIR)/test_cblas_zgemm_b.o: $(TEST_DIR)/test_cblas_zgemm_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zgemm_b.c -o $(BUILD_DIR)/test_cblas_zgemm_b.o
 
 $(BUILD_DIR)/test_cblas_zgemm_b: $(BUILD_DIR)/test_cblas_zgemm_b.o $(BUILD_DIR)/cblas_zgemm_b.o $(BUILD_DIR)/cblas_zgemm_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zgemm_b.o $(BUILD_DIR)/cblas_zgemm_b.o $(BUILD_DIR)/cblas_zgemm_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgemm_b
+	$(CC) $(BUILD_DIR)/test_cblas_zgemm_b.o $(BUILD_DIR)/cblas_zgemm_b.o $(BUILD_DIR)/cblas_zgemm_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgemm_b
 
 $(BUILD_DIR)/test_cblas_zgemv_b.o: $(TEST_DIR)/test_cblas_zgemv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zgemv_b.c -o $(BUILD_DIR)/test_cblas_zgemv_b.o
 
 $(BUILD_DIR)/test_cblas_zgemv_b: $(BUILD_DIR)/test_cblas_zgemv_b.o $(BUILD_DIR)/cblas_zgemv_b.o $(BUILD_DIR)/cblas_zgemv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zgemv_b.o $(BUILD_DIR)/cblas_zgemv_b.o $(BUILD_DIR)/cblas_zgemv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgemv_b
+	$(CC) $(BUILD_DIR)/test_cblas_zgemv_b.o $(BUILD_DIR)/cblas_zgemv_b.o $(BUILD_DIR)/cblas_zgemv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgemv_b
 
 $(BUILD_DIR)/test_cblas_zgerc_b.o: $(TEST_DIR)/test_cblas_zgerc_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zgerc_b.c -o $(BUILD_DIR)/test_cblas_zgerc_b.o
 
 $(BUILD_DIR)/test_cblas_zgerc_b: $(BUILD_DIR)/test_cblas_zgerc_b.o $(BUILD_DIR)/cblas_zgerc_b.o $(BUILD_DIR)/cblas_zgerc_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zgerc_b.o $(BUILD_DIR)/cblas_zgerc_b.o $(BUILD_DIR)/cblas_zgerc_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgerc_b
+	$(CC) $(BUILD_DIR)/test_cblas_zgerc_b.o $(BUILD_DIR)/cblas_zgerc_b.o $(BUILD_DIR)/cblas_zgerc_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgerc_b
 
 $(BUILD_DIR)/test_cblas_zgeru_b.o: $(TEST_DIR)/test_cblas_zgeru_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zgeru_b.c -o $(BUILD_DIR)/test_cblas_zgeru_b.o
 
 $(BUILD_DIR)/test_cblas_zgeru_b: $(BUILD_DIR)/test_cblas_zgeru_b.o $(BUILD_DIR)/cblas_zgeru_b.o $(BUILD_DIR)/cblas_zgeru_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zgeru_b.o $(BUILD_DIR)/cblas_zgeru_b.o $(BUILD_DIR)/cblas_zgeru_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgeru_b
+	$(CC) $(BUILD_DIR)/test_cblas_zgeru_b.o $(BUILD_DIR)/cblas_zgeru_b.o $(BUILD_DIR)/cblas_zgeru_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgeru_b
 
 $(BUILD_DIR)/test_cblas_zhbmv_b.o: $(TEST_DIR)/test_cblas_zhbmv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zhbmv_b.c -o $(BUILD_DIR)/test_cblas_zhbmv_b.o
 
 $(BUILD_DIR)/test_cblas_zhbmv_b: $(BUILD_DIR)/test_cblas_zhbmv_b.o $(BUILD_DIR)/cblas_zhbmv_b.o $(BUILD_DIR)/cblas_zhbmv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zhbmv_b.o $(BUILD_DIR)/cblas_zhbmv_b.o $(BUILD_DIR)/cblas_zhbmv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhbmv_b
+	$(CC) $(BUILD_DIR)/test_cblas_zhbmv_b.o $(BUILD_DIR)/cblas_zhbmv_b.o $(BUILD_DIR)/cblas_zhbmv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhbmv_b
 
 $(BUILD_DIR)/test_cblas_zhemm_b.o: $(TEST_DIR)/test_cblas_zhemm_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zhemm_b.c -o $(BUILD_DIR)/test_cblas_zhemm_b.o
 
 $(BUILD_DIR)/test_cblas_zhemm_b: $(BUILD_DIR)/test_cblas_zhemm_b.o $(BUILD_DIR)/cblas_zhemm_b.o $(BUILD_DIR)/cblas_zhemm_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zhemm_b.o $(BUILD_DIR)/cblas_zhemm_b.o $(BUILD_DIR)/cblas_zhemm_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhemm_b
+	$(CC) $(BUILD_DIR)/test_cblas_zhemm_b.o $(BUILD_DIR)/cblas_zhemm_b.o $(BUILD_DIR)/cblas_zhemm_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhemm_b
 
 $(BUILD_DIR)/test_cblas_zhemv_b.o: $(TEST_DIR)/test_cblas_zhemv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zhemv_b.c -o $(BUILD_DIR)/test_cblas_zhemv_b.o
 
 $(BUILD_DIR)/test_cblas_zhemv_b: $(BUILD_DIR)/test_cblas_zhemv_b.o $(BUILD_DIR)/cblas_zhemv_b.o $(BUILD_DIR)/cblas_zhemv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zhemv_b.o $(BUILD_DIR)/cblas_zhemv_b.o $(BUILD_DIR)/cblas_zhemv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhemv_b
+	$(CC) $(BUILD_DIR)/test_cblas_zhemv_b.o $(BUILD_DIR)/cblas_zhemv_b.o $(BUILD_DIR)/cblas_zhemv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhemv_b
 
 $(BUILD_DIR)/test_cblas_zscal_b.o: $(TEST_DIR)/test_cblas_zscal_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zscal_b.c -o $(BUILD_DIR)/test_cblas_zscal_b.o
 
 $(BUILD_DIR)/test_cblas_zscal_b: $(BUILD_DIR)/test_cblas_zscal_b.o $(BUILD_DIR)/cblas_zscal_b.o $(BUILD_DIR)/cblas_zscal_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zscal_b.o $(BUILD_DIR)/cblas_zscal_b.o $(BUILD_DIR)/cblas_zscal_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zscal_b
+	$(CC) $(BUILD_DIR)/test_cblas_zscal_b.o $(BUILD_DIR)/cblas_zscal_b.o $(BUILD_DIR)/cblas_zscal_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zscal_b
 
 $(BUILD_DIR)/test_cblas_zswap_b.o: $(TEST_DIR)/test_cblas_zswap_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zswap_b.c -o $(BUILD_DIR)/test_cblas_zswap_b.o
 
 $(BUILD_DIR)/test_cblas_zswap_b: $(BUILD_DIR)/test_cblas_zswap_b.o $(BUILD_DIR)/cblas_zswap_b.o $(BUILD_DIR)/cblas_zswap_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zswap_b.o $(BUILD_DIR)/cblas_zswap_b.o $(BUILD_DIR)/cblas_zswap_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zswap_b
+	$(CC) $(BUILD_DIR)/test_cblas_zswap_b.o $(BUILD_DIR)/cblas_zswap_b.o $(BUILD_DIR)/cblas_zswap_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zswap_b
 
 $(BUILD_DIR)/test_cblas_zsymm_b.o: $(TEST_DIR)/test_cblas_zsymm_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zsymm_b.c -o $(BUILD_DIR)/test_cblas_zsymm_b.o
 
 $(BUILD_DIR)/test_cblas_zsymm_b: $(BUILD_DIR)/test_cblas_zsymm_b.o $(BUILD_DIR)/cblas_zsymm_b.o $(BUILD_DIR)/cblas_zsymm_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zsymm_b.o $(BUILD_DIR)/cblas_zsymm_b.o $(BUILD_DIR)/cblas_zsymm_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsymm_b
+	$(CC) $(BUILD_DIR)/test_cblas_zsymm_b.o $(BUILD_DIR)/cblas_zsymm_b.o $(BUILD_DIR)/cblas_zsymm_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsymm_b
 
 $(BUILD_DIR)/test_cblas_zsyr2k_b.o: $(TEST_DIR)/test_cblas_zsyr2k_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zsyr2k_b.c -o $(BUILD_DIR)/test_cblas_zsyr2k_b.o
 
 $(BUILD_DIR)/test_cblas_zsyr2k_b: $(BUILD_DIR)/test_cblas_zsyr2k_b.o $(BUILD_DIR)/cblas_zsyr2k_b.o $(BUILD_DIR)/cblas_zsyr2k_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zsyr2k_b.o $(BUILD_DIR)/cblas_zsyr2k_b.o $(BUILD_DIR)/cblas_zsyr2k_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsyr2k_b
+	$(CC) $(BUILD_DIR)/test_cblas_zsyr2k_b.o $(BUILD_DIR)/cblas_zsyr2k_b.o $(BUILD_DIR)/cblas_zsyr2k_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsyr2k_b
 
 $(BUILD_DIR)/test_cblas_zsyrk_b.o: $(TEST_DIR)/test_cblas_zsyrk_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zsyrk_b.c -o $(BUILD_DIR)/test_cblas_zsyrk_b.o
 
 $(BUILD_DIR)/test_cblas_zsyrk_b: $(BUILD_DIR)/test_cblas_zsyrk_b.o $(BUILD_DIR)/cblas_zsyrk_b.o $(BUILD_DIR)/cblas_zsyrk_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zsyrk_b.o $(BUILD_DIR)/cblas_zsyrk_b.o $(BUILD_DIR)/cblas_zsyrk_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsyrk_b
+	$(CC) $(BUILD_DIR)/test_cblas_zsyrk_b.o $(BUILD_DIR)/cblas_zsyrk_b.o $(BUILD_DIR)/cblas_zsyrk_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsyrk_b
 
 $(BUILD_DIR)/test_cblas_ztbmv_b.o: $(TEST_DIR)/test_cblas_ztbmv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztbmv_b.c -o $(BUILD_DIR)/test_cblas_ztbmv_b.o
 
 $(BUILD_DIR)/test_cblas_ztbmv_b: $(BUILD_DIR)/test_cblas_ztbmv_b.o $(BUILD_DIR)/cblas_ztbmv_b.o $(BUILD_DIR)/cblas_ztbmv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztbmv_b.o $(BUILD_DIR)/cblas_ztbmv_b.o $(BUILD_DIR)/cblas_ztbmv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztbmv_b
+	$(CC) $(BUILD_DIR)/test_cblas_ztbmv_b.o $(BUILD_DIR)/cblas_ztbmv_b.o $(BUILD_DIR)/cblas_ztbmv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztbmv_b
 
 $(BUILD_DIR)/test_cblas_ztpmv_b.o: $(TEST_DIR)/test_cblas_ztpmv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztpmv_b.c -o $(BUILD_DIR)/test_cblas_ztpmv_b.o
 
 $(BUILD_DIR)/test_cblas_ztpmv_b: $(BUILD_DIR)/test_cblas_ztpmv_b.o $(BUILD_DIR)/cblas_ztpmv_b.o $(BUILD_DIR)/cblas_ztpmv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztpmv_b.o $(BUILD_DIR)/cblas_ztpmv_b.o $(BUILD_DIR)/cblas_ztpmv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztpmv_b
+	$(CC) $(BUILD_DIR)/test_cblas_ztpmv_b.o $(BUILD_DIR)/cblas_ztpmv_b.o $(BUILD_DIR)/cblas_ztpmv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztpmv_b
 
 $(BUILD_DIR)/test_cblas_ztrmm_b.o: $(TEST_DIR)/test_cblas_ztrmm_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztrmm_b.c -o $(BUILD_DIR)/test_cblas_ztrmm_b.o
 
 $(BUILD_DIR)/test_cblas_ztrmm_b: $(BUILD_DIR)/test_cblas_ztrmm_b.o $(BUILD_DIR)/cblas_ztrmm_b.o $(BUILD_DIR)/cblas_ztrmm_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztrmm_b.o $(BUILD_DIR)/cblas_ztrmm_b.o $(BUILD_DIR)/cblas_ztrmm_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrmm_b
+	$(CC) $(BUILD_DIR)/test_cblas_ztrmm_b.o $(BUILD_DIR)/cblas_ztrmm_b.o $(BUILD_DIR)/cblas_ztrmm_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrmm_b
 
 $(BUILD_DIR)/test_cblas_ztrmv_b.o: $(TEST_DIR)/test_cblas_ztrmv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztrmv_b.c -o $(BUILD_DIR)/test_cblas_ztrmv_b.o
 
 $(BUILD_DIR)/test_cblas_ztrmv_b: $(BUILD_DIR)/test_cblas_ztrmv_b.o $(BUILD_DIR)/cblas_ztrmv_b.o $(BUILD_DIR)/cblas_ztrmv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztrmv_b.o $(BUILD_DIR)/cblas_ztrmv_b.o $(BUILD_DIR)/cblas_ztrmv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrmv_b
+	$(CC) $(BUILD_DIR)/test_cblas_ztrmv_b.o $(BUILD_DIR)/cblas_ztrmv_b.o $(BUILD_DIR)/cblas_ztrmv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrmv_b
 
 $(BUILD_DIR)/test_cblas_ztrsm_b.o: $(TEST_DIR)/test_cblas_ztrsm_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztrsm_b.c -o $(BUILD_DIR)/test_cblas_ztrsm_b.o
 
 $(BUILD_DIR)/test_cblas_ztrsm_b: $(BUILD_DIR)/test_cblas_ztrsm_b.o $(BUILD_DIR)/cblas_ztrsm_b.o $(BUILD_DIR)/cblas_ztrsm_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztrsm_b.o $(BUILD_DIR)/cblas_ztrsm_b.o $(BUILD_DIR)/cblas_ztrsm_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrsm_b
+	$(CC) $(BUILD_DIR)/test_cblas_ztrsm_b.o $(BUILD_DIR)/cblas_ztrsm_b.o $(BUILD_DIR)/cblas_ztrsm_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrsm_b
 
 $(BUILD_DIR)/test_cblas_ztrsv_b.o: $(TEST_DIR)/test_cblas_ztrsv_b.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztrsv_b.c -o $(BUILD_DIR)/test_cblas_ztrsv_b.o
 
 $(BUILD_DIR)/test_cblas_ztrsv_b: $(BUILD_DIR)/test_cblas_ztrsv_b.o $(BUILD_DIR)/cblas_ztrsv_b.o $(BUILD_DIR)/cblas_ztrsv_b_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztrsv_b.o $(BUILD_DIR)/cblas_ztrsv_b.o $(BUILD_DIR)/cblas_ztrsv_b_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrsv_b
+	$(CC) $(BUILD_DIR)/test_cblas_ztrsv_b.o $(BUILD_DIR)/cblas_ztrsv_b.o $(BUILD_DIR)/cblas_ztrsv_b_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrsv_b
 
 $(BUILD_DIR)/test_cblas_caxpy_dv.o: $(TEST_DIR)/test_cblas_caxpy_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_caxpy_dv.c -o $(BUILD_DIR)/test_cblas_caxpy_dv.o
 
 $(BUILD_DIR)/test_cblas_caxpy_dv: $(BUILD_DIR)/test_cblas_caxpy_dv.o $(BUILD_DIR)/cblas_caxpy_dv.o $(BUILD_DIR)/cblas_caxpy_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_caxpy_dv.o $(BUILD_DIR)/cblas_caxpy_dv.o $(BUILD_DIR)/cblas_caxpy_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_caxpy_dv
+	$(CC) $(BUILD_DIR)/test_cblas_caxpy_dv.o $(BUILD_DIR)/cblas_caxpy_dv.o $(BUILD_DIR)/cblas_caxpy_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_caxpy_dv
 
 $(BUILD_DIR)/test_cblas_ccopy_dv.o: $(TEST_DIR)/test_cblas_ccopy_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ccopy_dv.c -o $(BUILD_DIR)/test_cblas_ccopy_dv.o
 
 $(BUILD_DIR)/test_cblas_ccopy_dv: $(BUILD_DIR)/test_cblas_ccopy_dv.o $(BUILD_DIR)/cblas_ccopy_dv.o $(BUILD_DIR)/cblas_ccopy_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ccopy_dv.o $(BUILD_DIR)/cblas_ccopy_dv.o $(BUILD_DIR)/cblas_ccopy_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ccopy_dv
+	$(CC) $(BUILD_DIR)/test_cblas_ccopy_dv.o $(BUILD_DIR)/cblas_ccopy_dv.o $(BUILD_DIR)/cblas_ccopy_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ccopy_dv
 
 $(BUILD_DIR)/test_cblas_cdotc_sub_dv.o: $(TEST_DIR)/test_cblas_cdotc_sub_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cdotc_sub_dv.c -o $(BUILD_DIR)/test_cblas_cdotc_sub_dv.o
 
 $(BUILD_DIR)/test_cblas_cdotc_sub_dv: $(BUILD_DIR)/test_cblas_cdotc_sub_dv.o $(BUILD_DIR)/cblas_cdotc_sub_dv.o $(BUILD_DIR)/cblas_cdotc_sub_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_cdotc_sub_dv.o $(BUILD_DIR)/cblas_cdotc_sub_dv.o $(BUILD_DIR)/cblas_cdotc_sub_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cdotc_sub_dv
+	$(CC) $(BUILD_DIR)/test_cblas_cdotc_sub_dv.o $(BUILD_DIR)/cblas_cdotc_sub_dv.o $(BUILD_DIR)/cblas_cdotc_sub_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cdotc_sub_dv
 
 $(BUILD_DIR)/test_cblas_cdotu_sub_dv.o: $(TEST_DIR)/test_cblas_cdotu_sub_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cdotu_sub_dv.c -o $(BUILD_DIR)/test_cblas_cdotu_sub_dv.o
 
 $(BUILD_DIR)/test_cblas_cdotu_sub_dv: $(BUILD_DIR)/test_cblas_cdotu_sub_dv.o $(BUILD_DIR)/cblas_cdotu_sub_dv.o $(BUILD_DIR)/cblas_cdotu_sub_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_cdotu_sub_dv.o $(BUILD_DIR)/cblas_cdotu_sub_dv.o $(BUILD_DIR)/cblas_cdotu_sub_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cdotu_sub_dv
+	$(CC) $(BUILD_DIR)/test_cblas_cdotu_sub_dv.o $(BUILD_DIR)/cblas_cdotu_sub_dv.o $(BUILD_DIR)/cblas_cdotu_sub_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cdotu_sub_dv
 
 $(BUILD_DIR)/test_cblas_cgbmv_dv.o: $(TEST_DIR)/test_cblas_cgbmv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cgbmv_dv.c -o $(BUILD_DIR)/test_cblas_cgbmv_dv.o
 
 $(BUILD_DIR)/test_cblas_cgbmv_dv: $(BUILD_DIR)/test_cblas_cgbmv_dv.o $(BUILD_DIR)/cblas_cgbmv_dv.o $(BUILD_DIR)/cblas_cgbmv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_cgbmv_dv.o $(BUILD_DIR)/cblas_cgbmv_dv.o $(BUILD_DIR)/cblas_cgbmv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgbmv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_cgbmv_dv.o $(BUILD_DIR)/cblas_cgbmv_dv.o $(BUILD_DIR)/cblas_cgbmv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgbmv_dv
 
 $(BUILD_DIR)/test_cblas_cgemm_dv.o: $(TEST_DIR)/test_cblas_cgemm_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cgemm_dv.c -o $(BUILD_DIR)/test_cblas_cgemm_dv.o
 
 $(BUILD_DIR)/test_cblas_cgemm_dv: $(BUILD_DIR)/test_cblas_cgemm_dv.o $(BUILD_DIR)/cblas_cgemm_dv.o $(BUILD_DIR)/cblas_cgemm_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_cgemm_dv.o $(BUILD_DIR)/cblas_cgemm_dv.o $(BUILD_DIR)/cblas_cgemm_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgemm_dv
+	$(CC) $(BUILD_DIR)/test_cblas_cgemm_dv.o $(BUILD_DIR)/cblas_cgemm_dv.o $(BUILD_DIR)/cblas_cgemm_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgemm_dv
 
 $(BUILD_DIR)/test_cblas_cgemv_dv.o: $(TEST_DIR)/test_cblas_cgemv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cgemv_dv.c -o $(BUILD_DIR)/test_cblas_cgemv_dv.o
 
 $(BUILD_DIR)/test_cblas_cgemv_dv: $(BUILD_DIR)/test_cblas_cgemv_dv.o $(BUILD_DIR)/cblas_cgemv_dv.o $(BUILD_DIR)/cblas_cgemv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_cgemv_dv.o $(BUILD_DIR)/cblas_cgemv_dv.o $(BUILD_DIR)/cblas_cgemv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgemv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_cgemv_dv.o $(BUILD_DIR)/cblas_cgemv_dv.o $(BUILD_DIR)/cblas_cgemv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgemv_dv
 
 $(BUILD_DIR)/test_cblas_cgerc_dv.o: $(TEST_DIR)/test_cblas_cgerc_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cgerc_dv.c -o $(BUILD_DIR)/test_cblas_cgerc_dv.o
 
 $(BUILD_DIR)/test_cblas_cgerc_dv: $(BUILD_DIR)/test_cblas_cgerc_dv.o $(BUILD_DIR)/cblas_cgerc_dv.o $(BUILD_DIR)/cblas_cgerc_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_cgerc_dv.o $(BUILD_DIR)/cblas_cgerc_dv.o $(BUILD_DIR)/cblas_cgerc_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgerc_dv
+	$(CC) $(BUILD_DIR)/test_cblas_cgerc_dv.o $(BUILD_DIR)/cblas_cgerc_dv.o $(BUILD_DIR)/cblas_cgerc_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgerc_dv
 
 $(BUILD_DIR)/test_cblas_cgeru_dv.o: $(TEST_DIR)/test_cblas_cgeru_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cgeru_dv.c -o $(BUILD_DIR)/test_cblas_cgeru_dv.o
 
 $(BUILD_DIR)/test_cblas_cgeru_dv: $(BUILD_DIR)/test_cblas_cgeru_dv.o $(BUILD_DIR)/cblas_cgeru_dv.o $(BUILD_DIR)/cblas_cgeru_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_cgeru_dv.o $(BUILD_DIR)/cblas_cgeru_dv.o $(BUILD_DIR)/cblas_cgeru_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgeru_dv
+	$(CC) $(BUILD_DIR)/test_cblas_cgeru_dv.o $(BUILD_DIR)/cblas_cgeru_dv.o $(BUILD_DIR)/cblas_cgeru_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgeru_dv
 
 $(BUILD_DIR)/test_cblas_chbmv_dv.o: $(TEST_DIR)/test_cblas_chbmv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_chbmv_dv.c -o $(BUILD_DIR)/test_cblas_chbmv_dv.o
 
 $(BUILD_DIR)/test_cblas_chbmv_dv: $(BUILD_DIR)/test_cblas_chbmv_dv.o $(BUILD_DIR)/cblas_chbmv_dv.o $(BUILD_DIR)/cblas_chbmv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_chbmv_dv.o $(BUILD_DIR)/cblas_chbmv_dv.o $(BUILD_DIR)/cblas_chbmv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chbmv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_chbmv_dv.o $(BUILD_DIR)/cblas_chbmv_dv.o $(BUILD_DIR)/cblas_chbmv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chbmv_dv
 
 $(BUILD_DIR)/test_cblas_chemm_dv.o: $(TEST_DIR)/test_cblas_chemm_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_chemm_dv.c -o $(BUILD_DIR)/test_cblas_chemm_dv.o
 
 $(BUILD_DIR)/test_cblas_chemm_dv: $(BUILD_DIR)/test_cblas_chemm_dv.o $(BUILD_DIR)/cblas_chemm_dv.o $(BUILD_DIR)/cblas_chemm_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_chemm_dv.o $(BUILD_DIR)/cblas_chemm_dv.o $(BUILD_DIR)/cblas_chemm_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chemm_dv
+	$(CC) $(BUILD_DIR)/test_cblas_chemm_dv.o $(BUILD_DIR)/cblas_chemm_dv.o $(BUILD_DIR)/cblas_chemm_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chemm_dv
 
 $(BUILD_DIR)/test_cblas_chemv_dv.o: $(TEST_DIR)/test_cblas_chemv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_chemv_dv.c -o $(BUILD_DIR)/test_cblas_chemv_dv.o
 
 $(BUILD_DIR)/test_cblas_chemv_dv: $(BUILD_DIR)/test_cblas_chemv_dv.o $(BUILD_DIR)/cblas_chemv_dv.o $(BUILD_DIR)/cblas_chemv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_chemv_dv.o $(BUILD_DIR)/cblas_chemv_dv.o $(BUILD_DIR)/cblas_chemv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chemv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_chemv_dv.o $(BUILD_DIR)/cblas_chemv_dv.o $(BUILD_DIR)/cblas_chemv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chemv_dv
 
 $(BUILD_DIR)/test_cblas_cscal_dv.o: $(TEST_DIR)/test_cblas_cscal_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cscal_dv.c -o $(BUILD_DIR)/test_cblas_cscal_dv.o
 
 $(BUILD_DIR)/test_cblas_cscal_dv: $(BUILD_DIR)/test_cblas_cscal_dv.o $(BUILD_DIR)/cblas_cscal_dv.o $(BUILD_DIR)/cblas_cscal_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_cscal_dv.o $(BUILD_DIR)/cblas_cscal_dv.o $(BUILD_DIR)/cblas_cscal_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cscal_dv
+	$(CC) $(BUILD_DIR)/test_cblas_cscal_dv.o $(BUILD_DIR)/cblas_cscal_dv.o $(BUILD_DIR)/cblas_cscal_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cscal_dv
 
 $(BUILD_DIR)/test_cblas_cswap_dv.o: $(TEST_DIR)/test_cblas_cswap_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cswap_dv.c -o $(BUILD_DIR)/test_cblas_cswap_dv.o
 
 $(BUILD_DIR)/test_cblas_cswap_dv: $(BUILD_DIR)/test_cblas_cswap_dv.o $(BUILD_DIR)/cblas_cswap_dv.o $(BUILD_DIR)/cblas_cswap_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_cswap_dv.o $(BUILD_DIR)/cblas_cswap_dv.o $(BUILD_DIR)/cblas_cswap_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cswap_dv
+	$(CC) $(BUILD_DIR)/test_cblas_cswap_dv.o $(BUILD_DIR)/cblas_cswap_dv.o $(BUILD_DIR)/cblas_cswap_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cswap_dv
 
 $(BUILD_DIR)/test_cblas_csymm_dv.o: $(TEST_DIR)/test_cblas_csymm_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_csymm_dv.c -o $(BUILD_DIR)/test_cblas_csymm_dv.o
 
 $(BUILD_DIR)/test_cblas_csymm_dv: $(BUILD_DIR)/test_cblas_csymm_dv.o $(BUILD_DIR)/cblas_csymm_dv.o $(BUILD_DIR)/cblas_csymm_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_csymm_dv.o $(BUILD_DIR)/cblas_csymm_dv.o $(BUILD_DIR)/cblas_csymm_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csymm_dv
+	$(CC) $(BUILD_DIR)/test_cblas_csymm_dv.o $(BUILD_DIR)/cblas_csymm_dv.o $(BUILD_DIR)/cblas_csymm_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csymm_dv
 
 $(BUILD_DIR)/test_cblas_csyr2k_dv.o: $(TEST_DIR)/test_cblas_csyr2k_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_csyr2k_dv.c -o $(BUILD_DIR)/test_cblas_csyr2k_dv.o
 
 $(BUILD_DIR)/test_cblas_csyr2k_dv: $(BUILD_DIR)/test_cblas_csyr2k_dv.o $(BUILD_DIR)/cblas_csyr2k_dv.o $(BUILD_DIR)/cblas_csyr2k_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_csyr2k_dv.o $(BUILD_DIR)/cblas_csyr2k_dv.o $(BUILD_DIR)/cblas_csyr2k_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csyr2k_dv
+	$(CC) $(BUILD_DIR)/test_cblas_csyr2k_dv.o $(BUILD_DIR)/cblas_csyr2k_dv.o $(BUILD_DIR)/cblas_csyr2k_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csyr2k_dv
 
 $(BUILD_DIR)/test_cblas_csyrk_dv.o: $(TEST_DIR)/test_cblas_csyrk_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_csyrk_dv.c -o $(BUILD_DIR)/test_cblas_csyrk_dv.o
 
 $(BUILD_DIR)/test_cblas_csyrk_dv: $(BUILD_DIR)/test_cblas_csyrk_dv.o $(BUILD_DIR)/cblas_csyrk_dv.o $(BUILD_DIR)/cblas_csyrk_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_csyrk_dv.o $(BUILD_DIR)/cblas_csyrk_dv.o $(BUILD_DIR)/cblas_csyrk_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csyrk_dv
+	$(CC) $(BUILD_DIR)/test_cblas_csyrk_dv.o $(BUILD_DIR)/cblas_csyrk_dv.o $(BUILD_DIR)/cblas_csyrk_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csyrk_dv
 
 $(BUILD_DIR)/test_cblas_ctbmv_dv.o: $(TEST_DIR)/test_cblas_ctbmv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctbmv_dv.c -o $(BUILD_DIR)/test_cblas_ctbmv_dv.o
 
 $(BUILD_DIR)/test_cblas_ctbmv_dv: $(BUILD_DIR)/test_cblas_ctbmv_dv.o $(BUILD_DIR)/cblas_ctbmv_dv.o $(BUILD_DIR)/cblas_ctbmv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctbmv_dv.o $(BUILD_DIR)/cblas_ctbmv_dv.o $(BUILD_DIR)/cblas_ctbmv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctbmv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_ctbmv_dv.o $(BUILD_DIR)/cblas_ctbmv_dv.o $(BUILD_DIR)/cblas_ctbmv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctbmv_dv
 
 $(BUILD_DIR)/test_cblas_ctpmv_dv.o: $(TEST_DIR)/test_cblas_ctpmv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctpmv_dv.c -o $(BUILD_DIR)/test_cblas_ctpmv_dv.o
 
 $(BUILD_DIR)/test_cblas_ctpmv_dv: $(BUILD_DIR)/test_cblas_ctpmv_dv.o $(BUILD_DIR)/cblas_ctpmv_dv.o $(BUILD_DIR)/cblas_ctpmv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctpmv_dv.o $(BUILD_DIR)/cblas_ctpmv_dv.o $(BUILD_DIR)/cblas_ctpmv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctpmv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_ctpmv_dv.o $(BUILD_DIR)/cblas_ctpmv_dv.o $(BUILD_DIR)/cblas_ctpmv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctpmv_dv
 
 $(BUILD_DIR)/test_cblas_ctrmm_dv.o: $(TEST_DIR)/test_cblas_ctrmm_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctrmm_dv.c -o $(BUILD_DIR)/test_cblas_ctrmm_dv.o
 
 $(BUILD_DIR)/test_cblas_ctrmm_dv: $(BUILD_DIR)/test_cblas_ctrmm_dv.o $(BUILD_DIR)/cblas_ctrmm_dv.o $(BUILD_DIR)/cblas_ctrmm_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctrmm_dv.o $(BUILD_DIR)/cblas_ctrmm_dv.o $(BUILD_DIR)/cblas_ctrmm_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrmm_dv
+	$(CC) $(BUILD_DIR)/test_cblas_ctrmm_dv.o $(BUILD_DIR)/cblas_ctrmm_dv.o $(BUILD_DIR)/cblas_ctrmm_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrmm_dv
 
 $(BUILD_DIR)/test_cblas_ctrmv_dv.o: $(TEST_DIR)/test_cblas_ctrmv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctrmv_dv.c -o $(BUILD_DIR)/test_cblas_ctrmv_dv.o
 
 $(BUILD_DIR)/test_cblas_ctrmv_dv: $(BUILD_DIR)/test_cblas_ctrmv_dv.o $(BUILD_DIR)/cblas_ctrmv_dv.o $(BUILD_DIR)/cblas_ctrmv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctrmv_dv.o $(BUILD_DIR)/cblas_ctrmv_dv.o $(BUILD_DIR)/cblas_ctrmv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrmv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_ctrmv_dv.o $(BUILD_DIR)/cblas_ctrmv_dv.o $(BUILD_DIR)/cblas_ctrmv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrmv_dv
 
 $(BUILD_DIR)/test_cblas_ctrsm_dv.o: $(TEST_DIR)/test_cblas_ctrsm_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctrsm_dv.c -o $(BUILD_DIR)/test_cblas_ctrsm_dv.o
 
 $(BUILD_DIR)/test_cblas_ctrsm_dv: $(BUILD_DIR)/test_cblas_ctrsm_dv.o $(BUILD_DIR)/cblas_ctrsm_dv.o $(BUILD_DIR)/cblas_ctrsm_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctrsm_dv.o $(BUILD_DIR)/cblas_ctrsm_dv.o $(BUILD_DIR)/cblas_ctrsm_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrsm_dv
+	$(CC) $(BUILD_DIR)/test_cblas_ctrsm_dv.o $(BUILD_DIR)/cblas_ctrsm_dv.o $(BUILD_DIR)/cblas_ctrsm_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrsm_dv
 
 $(BUILD_DIR)/test_cblas_ctrsv_dv.o: $(TEST_DIR)/test_cblas_ctrsv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctrsv_dv.c -o $(BUILD_DIR)/test_cblas_ctrsv_dv.o
 
 $(BUILD_DIR)/test_cblas_ctrsv_dv: $(BUILD_DIR)/test_cblas_ctrsv_dv.o $(BUILD_DIR)/cblas_ctrsv_dv.o $(BUILD_DIR)/cblas_ctrsv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctrsv_dv.o $(BUILD_DIR)/cblas_ctrsv_dv.o $(BUILD_DIR)/cblas_ctrsv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrsv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_ctrsv_dv.o $(BUILD_DIR)/cblas_ctrsv_dv.o $(BUILD_DIR)/cblas_ctrsv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrsv_dv
 
 $(BUILD_DIR)/test_cblas_dasum_dv.o: $(TEST_DIR)/test_cblas_dasum_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dasum_dv.c -o $(BUILD_DIR)/test_cblas_dasum_dv.o
 
 $(BUILD_DIR)/test_cblas_dasum_dv: $(BUILD_DIR)/test_cblas_dasum_dv.o $(BUILD_DIR)/cblas_dasum_dv.o $(BUILD_DIR)/cblas_dasum_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dasum_dv.o $(BUILD_DIR)/cblas_dasum_dv.o $(BUILD_DIR)/cblas_dasum_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dasum_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dasum_dv.o $(BUILD_DIR)/cblas_dasum_dv.o $(BUILD_DIR)/cblas_dasum_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dasum_dv
 
 $(BUILD_DIR)/test_cblas_daxpy_dv.o: $(TEST_DIR)/test_cblas_daxpy_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_daxpy_dv.c -o $(BUILD_DIR)/test_cblas_daxpy_dv.o
 
 $(BUILD_DIR)/test_cblas_daxpy_dv: $(BUILD_DIR)/test_cblas_daxpy_dv.o $(BUILD_DIR)/cblas_daxpy_dv.o $(BUILD_DIR)/cblas_daxpy_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_daxpy_dv.o $(BUILD_DIR)/cblas_daxpy_dv.o $(BUILD_DIR)/cblas_daxpy_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_daxpy_dv
+	$(CC) $(BUILD_DIR)/test_cblas_daxpy_dv.o $(BUILD_DIR)/cblas_daxpy_dv.o $(BUILD_DIR)/cblas_daxpy_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_daxpy_dv
 
 $(BUILD_DIR)/test_cblas_dcopy_dv.o: $(TEST_DIR)/test_cblas_dcopy_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dcopy_dv.c -o $(BUILD_DIR)/test_cblas_dcopy_dv.o
 
 $(BUILD_DIR)/test_cblas_dcopy_dv: $(BUILD_DIR)/test_cblas_dcopy_dv.o $(BUILD_DIR)/cblas_dcopy_dv.o $(BUILD_DIR)/cblas_dcopy_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dcopy_dv.o $(BUILD_DIR)/cblas_dcopy_dv.o $(BUILD_DIR)/cblas_dcopy_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dcopy_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dcopy_dv.o $(BUILD_DIR)/cblas_dcopy_dv.o $(BUILD_DIR)/cblas_dcopy_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dcopy_dv
 
 $(BUILD_DIR)/test_cblas_ddot_dv.o: $(TEST_DIR)/test_cblas_ddot_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ddot_dv.c -o $(BUILD_DIR)/test_cblas_ddot_dv.o
 
 $(BUILD_DIR)/test_cblas_ddot_dv: $(BUILD_DIR)/test_cblas_ddot_dv.o $(BUILD_DIR)/cblas_ddot_dv.o $(BUILD_DIR)/cblas_ddot_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ddot_dv.o $(BUILD_DIR)/cblas_ddot_dv.o $(BUILD_DIR)/cblas_ddot_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ddot_dv
+	$(CC) $(BUILD_DIR)/test_cblas_ddot_dv.o $(BUILD_DIR)/cblas_ddot_dv.o $(BUILD_DIR)/cblas_ddot_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ddot_dv
 
 $(BUILD_DIR)/test_cblas_dgbmv_dv.o: $(TEST_DIR)/test_cblas_dgbmv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dgbmv_dv.c -o $(BUILD_DIR)/test_cblas_dgbmv_dv.o
 
 $(BUILD_DIR)/test_cblas_dgbmv_dv: $(BUILD_DIR)/test_cblas_dgbmv_dv.o $(BUILD_DIR)/cblas_dgbmv_dv.o $(BUILD_DIR)/cblas_dgbmv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dgbmv_dv.o $(BUILD_DIR)/cblas_dgbmv_dv.o $(BUILD_DIR)/cblas_dgbmv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgbmv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dgbmv_dv.o $(BUILD_DIR)/cblas_dgbmv_dv.o $(BUILD_DIR)/cblas_dgbmv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgbmv_dv
 
 $(BUILD_DIR)/test_cblas_dgemm_dv.o: $(TEST_DIR)/test_cblas_dgemm_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dgemm_dv.c -o $(BUILD_DIR)/test_cblas_dgemm_dv.o
 
 $(BUILD_DIR)/test_cblas_dgemm_dv: $(BUILD_DIR)/test_cblas_dgemm_dv.o $(BUILD_DIR)/cblas_dgemm_dv.o $(BUILD_DIR)/cblas_dgemm_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dgemm_dv.o $(BUILD_DIR)/cblas_dgemm_dv.o $(BUILD_DIR)/cblas_dgemm_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgemm_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dgemm_dv.o $(BUILD_DIR)/cblas_dgemm_dv.o $(BUILD_DIR)/cblas_dgemm_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgemm_dv
 
 $(BUILD_DIR)/test_cblas_dgemv_dv.o: $(TEST_DIR)/test_cblas_dgemv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dgemv_dv.c -o $(BUILD_DIR)/test_cblas_dgemv_dv.o
 
 $(BUILD_DIR)/test_cblas_dgemv_dv: $(BUILD_DIR)/test_cblas_dgemv_dv.o $(BUILD_DIR)/cblas_dgemv_dv.o $(BUILD_DIR)/cblas_dgemv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dgemv_dv.o $(BUILD_DIR)/cblas_dgemv_dv.o $(BUILD_DIR)/cblas_dgemv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgemv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dgemv_dv.o $(BUILD_DIR)/cblas_dgemv_dv.o $(BUILD_DIR)/cblas_dgemv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgemv_dv
 
 $(BUILD_DIR)/test_cblas_dger_dv.o: $(TEST_DIR)/test_cblas_dger_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dger_dv.c -o $(BUILD_DIR)/test_cblas_dger_dv.o
 
 $(BUILD_DIR)/test_cblas_dger_dv: $(BUILD_DIR)/test_cblas_dger_dv.o $(BUILD_DIR)/cblas_dger_dv.o $(BUILD_DIR)/cblas_dger_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dger_dv.o $(BUILD_DIR)/cblas_dger_dv.o $(BUILD_DIR)/cblas_dger_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dger_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dger_dv.o $(BUILD_DIR)/cblas_dger_dv.o $(BUILD_DIR)/cblas_dger_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dger_dv
 
 $(BUILD_DIR)/test_cblas_dnrm2_dv.o: $(TEST_DIR)/test_cblas_dnrm2_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dnrm2_dv.c -o $(BUILD_DIR)/test_cblas_dnrm2_dv.o
 
 $(BUILD_DIR)/test_cblas_dnrm2_dv: $(BUILD_DIR)/test_cblas_dnrm2_dv.o $(BUILD_DIR)/cblas_dnrm2_dv.o $(BUILD_DIR)/cblas_dnrm2_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dnrm2_dv.o $(BUILD_DIR)/cblas_dnrm2_dv.o $(BUILD_DIR)/cblas_dnrm2_dv_fortran.o $(BUILD_DIR)/DIFFSIZES.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dnrm2_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dnrm2_dv.o $(BUILD_DIR)/cblas_dnrm2_dv.o $(BUILD_DIR)/cblas_dnrm2_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/DIFFSIZES.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dnrm2_dv
 
 $(BUILD_DIR)/test_cblas_dsbmv_dv.o: $(TEST_DIR)/test_cblas_dsbmv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsbmv_dv.c -o $(BUILD_DIR)/test_cblas_dsbmv_dv.o
 
 $(BUILD_DIR)/test_cblas_dsbmv_dv: $(BUILD_DIR)/test_cblas_dsbmv_dv.o $(BUILD_DIR)/cblas_dsbmv_dv.o $(BUILD_DIR)/cblas_dsbmv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsbmv_dv.o $(BUILD_DIR)/cblas_dsbmv_dv.o $(BUILD_DIR)/cblas_dsbmv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsbmv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dsbmv_dv.o $(BUILD_DIR)/cblas_dsbmv_dv.o $(BUILD_DIR)/cblas_dsbmv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsbmv_dv
 
 $(BUILD_DIR)/test_cblas_dscal_dv.o: $(TEST_DIR)/test_cblas_dscal_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dscal_dv.c -o $(BUILD_DIR)/test_cblas_dscal_dv.o
 
 $(BUILD_DIR)/test_cblas_dscal_dv: $(BUILD_DIR)/test_cblas_dscal_dv.o $(BUILD_DIR)/cblas_dscal_dv.o $(BUILD_DIR)/cblas_dscal_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dscal_dv.o $(BUILD_DIR)/cblas_dscal_dv.o $(BUILD_DIR)/cblas_dscal_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dscal_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dscal_dv.o $(BUILD_DIR)/cblas_dscal_dv.o $(BUILD_DIR)/cblas_dscal_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dscal_dv
 
 $(BUILD_DIR)/test_cblas_dspmv_dv.o: $(TEST_DIR)/test_cblas_dspmv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dspmv_dv.c -o $(BUILD_DIR)/test_cblas_dspmv_dv.o
 
 $(BUILD_DIR)/test_cblas_dspmv_dv: $(BUILD_DIR)/test_cblas_dspmv_dv.o $(BUILD_DIR)/cblas_dspmv_dv.o $(BUILD_DIR)/cblas_dspmv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dspmv_dv.o $(BUILD_DIR)/cblas_dspmv_dv.o $(BUILD_DIR)/cblas_dspmv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspmv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dspmv_dv.o $(BUILD_DIR)/cblas_dspmv_dv.o $(BUILD_DIR)/cblas_dspmv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspmv_dv
 
 $(BUILD_DIR)/test_cblas_dspr2_dv.o: $(TEST_DIR)/test_cblas_dspr2_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dspr2_dv.c -o $(BUILD_DIR)/test_cblas_dspr2_dv.o
 
 $(BUILD_DIR)/test_cblas_dspr2_dv: $(BUILD_DIR)/test_cblas_dspr2_dv.o $(BUILD_DIR)/cblas_dspr2_dv.o $(BUILD_DIR)/cblas_dspr2_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dspr2_dv.o $(BUILD_DIR)/cblas_dspr2_dv.o $(BUILD_DIR)/cblas_dspr2_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspr2_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dspr2_dv.o $(BUILD_DIR)/cblas_dspr2_dv.o $(BUILD_DIR)/cblas_dspr2_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspr2_dv
 
 $(BUILD_DIR)/test_cblas_dspr_dv.o: $(TEST_DIR)/test_cblas_dspr_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dspr_dv.c -o $(BUILD_DIR)/test_cblas_dspr_dv.o
 
 $(BUILD_DIR)/test_cblas_dspr_dv: $(BUILD_DIR)/test_cblas_dspr_dv.o $(BUILD_DIR)/cblas_dspr_dv.o $(BUILD_DIR)/cblas_dspr_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dspr_dv.o $(BUILD_DIR)/cblas_dspr_dv.o $(BUILD_DIR)/cblas_dspr_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspr_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dspr_dv.o $(BUILD_DIR)/cblas_dspr_dv.o $(BUILD_DIR)/cblas_dspr_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspr_dv
 
 $(BUILD_DIR)/test_cblas_dswap_dv.o: $(TEST_DIR)/test_cblas_dswap_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dswap_dv.c -o $(BUILD_DIR)/test_cblas_dswap_dv.o
 
 $(BUILD_DIR)/test_cblas_dswap_dv: $(BUILD_DIR)/test_cblas_dswap_dv.o $(BUILD_DIR)/cblas_dswap_dv.o $(BUILD_DIR)/cblas_dswap_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dswap_dv.o $(BUILD_DIR)/cblas_dswap_dv.o $(BUILD_DIR)/cblas_dswap_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dswap_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dswap_dv.o $(BUILD_DIR)/cblas_dswap_dv.o $(BUILD_DIR)/cblas_dswap_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dswap_dv
 
 $(BUILD_DIR)/test_cblas_dsymm_dv.o: $(TEST_DIR)/test_cblas_dsymm_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsymm_dv.c -o $(BUILD_DIR)/test_cblas_dsymm_dv.o
 
 $(BUILD_DIR)/test_cblas_dsymm_dv: $(BUILD_DIR)/test_cblas_dsymm_dv.o $(BUILD_DIR)/cblas_dsymm_dv.o $(BUILD_DIR)/cblas_dsymm_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsymm_dv.o $(BUILD_DIR)/cblas_dsymm_dv.o $(BUILD_DIR)/cblas_dsymm_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsymm_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dsymm_dv.o $(BUILD_DIR)/cblas_dsymm_dv.o $(BUILD_DIR)/cblas_dsymm_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsymm_dv
 
 $(BUILD_DIR)/test_cblas_dsymv_dv.o: $(TEST_DIR)/test_cblas_dsymv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsymv_dv.c -o $(BUILD_DIR)/test_cblas_dsymv_dv.o
 
 $(BUILD_DIR)/test_cblas_dsymv_dv: $(BUILD_DIR)/test_cblas_dsymv_dv.o $(BUILD_DIR)/cblas_dsymv_dv.o $(BUILD_DIR)/cblas_dsymv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsymv_dv.o $(BUILD_DIR)/cblas_dsymv_dv.o $(BUILD_DIR)/cblas_dsymv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsymv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dsymv_dv.o $(BUILD_DIR)/cblas_dsymv_dv.o $(BUILD_DIR)/cblas_dsymv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsymv_dv
 
 $(BUILD_DIR)/test_cblas_dsyr2_dv.o: $(TEST_DIR)/test_cblas_dsyr2_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsyr2_dv.c -o $(BUILD_DIR)/test_cblas_dsyr2_dv.o
 
 $(BUILD_DIR)/test_cblas_dsyr2_dv: $(BUILD_DIR)/test_cblas_dsyr2_dv.o $(BUILD_DIR)/cblas_dsyr2_dv.o $(BUILD_DIR)/cblas_dsyr2_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsyr2_dv.o $(BUILD_DIR)/cblas_dsyr2_dv.o $(BUILD_DIR)/cblas_dsyr2_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr2_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dsyr2_dv.o $(BUILD_DIR)/cblas_dsyr2_dv.o $(BUILD_DIR)/cblas_dsyr2_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr2_dv
 
 $(BUILD_DIR)/test_cblas_dsyr2k_dv.o: $(TEST_DIR)/test_cblas_dsyr2k_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsyr2k_dv.c -o $(BUILD_DIR)/test_cblas_dsyr2k_dv.o
 
 $(BUILD_DIR)/test_cblas_dsyr2k_dv: $(BUILD_DIR)/test_cblas_dsyr2k_dv.o $(BUILD_DIR)/cblas_dsyr2k_dv.o $(BUILD_DIR)/cblas_dsyr2k_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsyr2k_dv.o $(BUILD_DIR)/cblas_dsyr2k_dv.o $(BUILD_DIR)/cblas_dsyr2k_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr2k_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dsyr2k_dv.o $(BUILD_DIR)/cblas_dsyr2k_dv.o $(BUILD_DIR)/cblas_dsyr2k_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr2k_dv
 
 $(BUILD_DIR)/test_cblas_dsyr_dv.o: $(TEST_DIR)/test_cblas_dsyr_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsyr_dv.c -o $(BUILD_DIR)/test_cblas_dsyr_dv.o
 
 $(BUILD_DIR)/test_cblas_dsyr_dv: $(BUILD_DIR)/test_cblas_dsyr_dv.o $(BUILD_DIR)/cblas_dsyr_dv.o $(BUILD_DIR)/cblas_dsyr_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsyr_dv.o $(BUILD_DIR)/cblas_dsyr_dv.o $(BUILD_DIR)/cblas_dsyr_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dsyr_dv.o $(BUILD_DIR)/cblas_dsyr_dv.o $(BUILD_DIR)/cblas_dsyr_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr_dv
 
 $(BUILD_DIR)/test_cblas_dsyrk_dv.o: $(TEST_DIR)/test_cblas_dsyrk_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsyrk_dv.c -o $(BUILD_DIR)/test_cblas_dsyrk_dv.o
 
 $(BUILD_DIR)/test_cblas_dsyrk_dv: $(BUILD_DIR)/test_cblas_dsyrk_dv.o $(BUILD_DIR)/cblas_dsyrk_dv.o $(BUILD_DIR)/cblas_dsyrk_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsyrk_dv.o $(BUILD_DIR)/cblas_dsyrk_dv.o $(BUILD_DIR)/cblas_dsyrk_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyrk_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dsyrk_dv.o $(BUILD_DIR)/cblas_dsyrk_dv.o $(BUILD_DIR)/cblas_dsyrk_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyrk_dv
 
 $(BUILD_DIR)/test_cblas_dtbmv_dv.o: $(TEST_DIR)/test_cblas_dtbmv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtbmv_dv.c -o $(BUILD_DIR)/test_cblas_dtbmv_dv.o
 
 $(BUILD_DIR)/test_cblas_dtbmv_dv: $(BUILD_DIR)/test_cblas_dtbmv_dv.o $(BUILD_DIR)/cblas_dtbmv_dv.o $(BUILD_DIR)/cblas_dtbmv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtbmv_dv.o $(BUILD_DIR)/cblas_dtbmv_dv.o $(BUILD_DIR)/cblas_dtbmv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtbmv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dtbmv_dv.o $(BUILD_DIR)/cblas_dtbmv_dv.o $(BUILD_DIR)/cblas_dtbmv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtbmv_dv
 
 $(BUILD_DIR)/test_cblas_dtpmv_dv.o: $(TEST_DIR)/test_cblas_dtpmv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtpmv_dv.c -o $(BUILD_DIR)/test_cblas_dtpmv_dv.o
 
 $(BUILD_DIR)/test_cblas_dtpmv_dv: $(BUILD_DIR)/test_cblas_dtpmv_dv.o $(BUILD_DIR)/cblas_dtpmv_dv.o $(BUILD_DIR)/cblas_dtpmv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtpmv_dv.o $(BUILD_DIR)/cblas_dtpmv_dv.o $(BUILD_DIR)/cblas_dtpmv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtpmv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dtpmv_dv.o $(BUILD_DIR)/cblas_dtpmv_dv.o $(BUILD_DIR)/cblas_dtpmv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtpmv_dv
 
 $(BUILD_DIR)/test_cblas_dtrmm_dv.o: $(TEST_DIR)/test_cblas_dtrmm_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtrmm_dv.c -o $(BUILD_DIR)/test_cblas_dtrmm_dv.o
 
 $(BUILD_DIR)/test_cblas_dtrmm_dv: $(BUILD_DIR)/test_cblas_dtrmm_dv.o $(BUILD_DIR)/cblas_dtrmm_dv.o $(BUILD_DIR)/cblas_dtrmm_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtrmm_dv.o $(BUILD_DIR)/cblas_dtrmm_dv.o $(BUILD_DIR)/cblas_dtrmm_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrmm_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dtrmm_dv.o $(BUILD_DIR)/cblas_dtrmm_dv.o $(BUILD_DIR)/cblas_dtrmm_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrmm_dv
 
 $(BUILD_DIR)/test_cblas_dtrmv_dv.o: $(TEST_DIR)/test_cblas_dtrmv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtrmv_dv.c -o $(BUILD_DIR)/test_cblas_dtrmv_dv.o
 
 $(BUILD_DIR)/test_cblas_dtrmv_dv: $(BUILD_DIR)/test_cblas_dtrmv_dv.o $(BUILD_DIR)/cblas_dtrmv_dv.o $(BUILD_DIR)/cblas_dtrmv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtrmv_dv.o $(BUILD_DIR)/cblas_dtrmv_dv.o $(BUILD_DIR)/cblas_dtrmv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrmv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dtrmv_dv.o $(BUILD_DIR)/cblas_dtrmv_dv.o $(BUILD_DIR)/cblas_dtrmv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrmv_dv
 
 $(BUILD_DIR)/test_cblas_dtrsm_dv.o: $(TEST_DIR)/test_cblas_dtrsm_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtrsm_dv.c -o $(BUILD_DIR)/test_cblas_dtrsm_dv.o
 
 $(BUILD_DIR)/test_cblas_dtrsm_dv: $(BUILD_DIR)/test_cblas_dtrsm_dv.o $(BUILD_DIR)/cblas_dtrsm_dv.o $(BUILD_DIR)/cblas_dtrsm_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtrsm_dv.o $(BUILD_DIR)/cblas_dtrsm_dv.o $(BUILD_DIR)/cblas_dtrsm_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrsm_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dtrsm_dv.o $(BUILD_DIR)/cblas_dtrsm_dv.o $(BUILD_DIR)/cblas_dtrsm_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrsm_dv
 
 $(BUILD_DIR)/test_cblas_dtrsv_dv.o: $(TEST_DIR)/test_cblas_dtrsv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtrsv_dv.c -o $(BUILD_DIR)/test_cblas_dtrsv_dv.o
 
 $(BUILD_DIR)/test_cblas_dtrsv_dv: $(BUILD_DIR)/test_cblas_dtrsv_dv.o $(BUILD_DIR)/cblas_dtrsv_dv.o $(BUILD_DIR)/cblas_dtrsv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtrsv_dv.o $(BUILD_DIR)/cblas_dtrsv_dv.o $(BUILD_DIR)/cblas_dtrsv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrsv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_dtrsv_dv.o $(BUILD_DIR)/cblas_dtrsv_dv.o $(BUILD_DIR)/cblas_dtrsv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrsv_dv
 
 $(BUILD_DIR)/test_cblas_sasum_dv.o: $(TEST_DIR)/test_cblas_sasum_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sasum_dv.c -o $(BUILD_DIR)/test_cblas_sasum_dv.o
 
 $(BUILD_DIR)/test_cblas_sasum_dv: $(BUILD_DIR)/test_cblas_sasum_dv.o $(BUILD_DIR)/cblas_sasum_dv.o $(BUILD_DIR)/cblas_sasum_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_sasum_dv.o $(BUILD_DIR)/cblas_sasum_dv.o $(BUILD_DIR)/cblas_sasum_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sasum_dv
+	$(CC) $(BUILD_DIR)/test_cblas_sasum_dv.o $(BUILD_DIR)/cblas_sasum_dv.o $(BUILD_DIR)/cblas_sasum_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sasum_dv
 
 $(BUILD_DIR)/test_cblas_saxpy_dv.o: $(TEST_DIR)/test_cblas_saxpy_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_saxpy_dv.c -o $(BUILD_DIR)/test_cblas_saxpy_dv.o
 
 $(BUILD_DIR)/test_cblas_saxpy_dv: $(BUILD_DIR)/test_cblas_saxpy_dv.o $(BUILD_DIR)/cblas_saxpy_dv.o $(BUILD_DIR)/cblas_saxpy_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_saxpy_dv.o $(BUILD_DIR)/cblas_saxpy_dv.o $(BUILD_DIR)/cblas_saxpy_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_saxpy_dv
+	$(CC) $(BUILD_DIR)/test_cblas_saxpy_dv.o $(BUILD_DIR)/cblas_saxpy_dv.o $(BUILD_DIR)/cblas_saxpy_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_saxpy_dv
 
 $(BUILD_DIR)/test_cblas_scopy_dv.o: $(TEST_DIR)/test_cblas_scopy_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_scopy_dv.c -o $(BUILD_DIR)/test_cblas_scopy_dv.o
 
 $(BUILD_DIR)/test_cblas_scopy_dv: $(BUILD_DIR)/test_cblas_scopy_dv.o $(BUILD_DIR)/cblas_scopy_dv.o $(BUILD_DIR)/cblas_scopy_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_scopy_dv.o $(BUILD_DIR)/cblas_scopy_dv.o $(BUILD_DIR)/cblas_scopy_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_scopy_dv
+	$(CC) $(BUILD_DIR)/test_cblas_scopy_dv.o $(BUILD_DIR)/cblas_scopy_dv.o $(BUILD_DIR)/cblas_scopy_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_scopy_dv
 
 $(BUILD_DIR)/test_cblas_sdot_dv.o: $(TEST_DIR)/test_cblas_sdot_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sdot_dv.c -o $(BUILD_DIR)/test_cblas_sdot_dv.o
 
 $(BUILD_DIR)/test_cblas_sdot_dv: $(BUILD_DIR)/test_cblas_sdot_dv.o $(BUILD_DIR)/cblas_sdot_dv.o $(BUILD_DIR)/cblas_sdot_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_sdot_dv.o $(BUILD_DIR)/cblas_sdot_dv.o $(BUILD_DIR)/cblas_sdot_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sdot_dv
+	$(CC) $(BUILD_DIR)/test_cblas_sdot_dv.o $(BUILD_DIR)/cblas_sdot_dv.o $(BUILD_DIR)/cblas_sdot_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sdot_dv
 
 $(BUILD_DIR)/test_cblas_sgbmv_dv.o: $(TEST_DIR)/test_cblas_sgbmv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sgbmv_dv.c -o $(BUILD_DIR)/test_cblas_sgbmv_dv.o
 
 $(BUILD_DIR)/test_cblas_sgbmv_dv: $(BUILD_DIR)/test_cblas_sgbmv_dv.o $(BUILD_DIR)/cblas_sgbmv_dv.o $(BUILD_DIR)/cblas_sgbmv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_sgbmv_dv.o $(BUILD_DIR)/cblas_sgbmv_dv.o $(BUILD_DIR)/cblas_sgbmv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgbmv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_sgbmv_dv.o $(BUILD_DIR)/cblas_sgbmv_dv.o $(BUILD_DIR)/cblas_sgbmv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgbmv_dv
 
 $(BUILD_DIR)/test_cblas_sgemm_dv.o: $(TEST_DIR)/test_cblas_sgemm_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sgemm_dv.c -o $(BUILD_DIR)/test_cblas_sgemm_dv.o
 
 $(BUILD_DIR)/test_cblas_sgemm_dv: $(BUILD_DIR)/test_cblas_sgemm_dv.o $(BUILD_DIR)/cblas_sgemm_dv.o $(BUILD_DIR)/cblas_sgemm_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_sgemm_dv.o $(BUILD_DIR)/cblas_sgemm_dv.o $(BUILD_DIR)/cblas_sgemm_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgemm_dv
+	$(CC) $(BUILD_DIR)/test_cblas_sgemm_dv.o $(BUILD_DIR)/cblas_sgemm_dv.o $(BUILD_DIR)/cblas_sgemm_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgemm_dv
 
 $(BUILD_DIR)/test_cblas_sgemv_dv.o: $(TEST_DIR)/test_cblas_sgemv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sgemv_dv.c -o $(BUILD_DIR)/test_cblas_sgemv_dv.o
 
 $(BUILD_DIR)/test_cblas_sgemv_dv: $(BUILD_DIR)/test_cblas_sgemv_dv.o $(BUILD_DIR)/cblas_sgemv_dv.o $(BUILD_DIR)/cblas_sgemv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_sgemv_dv.o $(BUILD_DIR)/cblas_sgemv_dv.o $(BUILD_DIR)/cblas_sgemv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgemv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_sgemv_dv.o $(BUILD_DIR)/cblas_sgemv_dv.o $(BUILD_DIR)/cblas_sgemv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgemv_dv
 
 $(BUILD_DIR)/test_cblas_sger_dv.o: $(TEST_DIR)/test_cblas_sger_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sger_dv.c -o $(BUILD_DIR)/test_cblas_sger_dv.o
 
 $(BUILD_DIR)/test_cblas_sger_dv: $(BUILD_DIR)/test_cblas_sger_dv.o $(BUILD_DIR)/cblas_sger_dv.o $(BUILD_DIR)/cblas_sger_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_sger_dv.o $(BUILD_DIR)/cblas_sger_dv.o $(BUILD_DIR)/cblas_sger_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sger_dv
+	$(CC) $(BUILD_DIR)/test_cblas_sger_dv.o $(BUILD_DIR)/cblas_sger_dv.o $(BUILD_DIR)/cblas_sger_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sger_dv
 
 $(BUILD_DIR)/test_cblas_snrm2_dv.o: $(TEST_DIR)/test_cblas_snrm2_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_snrm2_dv.c -o $(BUILD_DIR)/test_cblas_snrm2_dv.o
 
 $(BUILD_DIR)/test_cblas_snrm2_dv: $(BUILD_DIR)/test_cblas_snrm2_dv.o $(BUILD_DIR)/cblas_snrm2_dv.o $(BUILD_DIR)/cblas_snrm2_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_snrm2_dv.o $(BUILD_DIR)/cblas_snrm2_dv.o $(BUILD_DIR)/cblas_snrm2_dv_fortran.o $(BUILD_DIR)/DIFFSIZES.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_snrm2_dv
+	$(CC) $(BUILD_DIR)/test_cblas_snrm2_dv.o $(BUILD_DIR)/cblas_snrm2_dv.o $(BUILD_DIR)/cblas_snrm2_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/DIFFSIZES.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_snrm2_dv
 
 $(BUILD_DIR)/test_cblas_ssbmv_dv.o: $(TEST_DIR)/test_cblas_ssbmv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssbmv_dv.c -o $(BUILD_DIR)/test_cblas_ssbmv_dv.o
 
 $(BUILD_DIR)/test_cblas_ssbmv_dv: $(BUILD_DIR)/test_cblas_ssbmv_dv.o $(BUILD_DIR)/cblas_ssbmv_dv.o $(BUILD_DIR)/cblas_ssbmv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssbmv_dv.o $(BUILD_DIR)/cblas_ssbmv_dv.o $(BUILD_DIR)/cblas_ssbmv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssbmv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_ssbmv_dv.o $(BUILD_DIR)/cblas_ssbmv_dv.o $(BUILD_DIR)/cblas_ssbmv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssbmv_dv
 
 $(BUILD_DIR)/test_cblas_sscal_dv.o: $(TEST_DIR)/test_cblas_sscal_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sscal_dv.c -o $(BUILD_DIR)/test_cblas_sscal_dv.o
 
 $(BUILD_DIR)/test_cblas_sscal_dv: $(BUILD_DIR)/test_cblas_sscal_dv.o $(BUILD_DIR)/cblas_sscal_dv.o $(BUILD_DIR)/cblas_sscal_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_sscal_dv.o $(BUILD_DIR)/cblas_sscal_dv.o $(BUILD_DIR)/cblas_sscal_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sscal_dv
+	$(CC) $(BUILD_DIR)/test_cblas_sscal_dv.o $(BUILD_DIR)/cblas_sscal_dv.o $(BUILD_DIR)/cblas_sscal_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sscal_dv
 
 $(BUILD_DIR)/test_cblas_sspmv_dv.o: $(TEST_DIR)/test_cblas_sspmv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sspmv_dv.c -o $(BUILD_DIR)/test_cblas_sspmv_dv.o
 
 $(BUILD_DIR)/test_cblas_sspmv_dv: $(BUILD_DIR)/test_cblas_sspmv_dv.o $(BUILD_DIR)/cblas_sspmv_dv.o $(BUILD_DIR)/cblas_sspmv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_sspmv_dv.o $(BUILD_DIR)/cblas_sspmv_dv.o $(BUILD_DIR)/cblas_sspmv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspmv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_sspmv_dv.o $(BUILD_DIR)/cblas_sspmv_dv.o $(BUILD_DIR)/cblas_sspmv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspmv_dv
 
 $(BUILD_DIR)/test_cblas_sspr2_dv.o: $(TEST_DIR)/test_cblas_sspr2_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sspr2_dv.c -o $(BUILD_DIR)/test_cblas_sspr2_dv.o
 
 $(BUILD_DIR)/test_cblas_sspr2_dv: $(BUILD_DIR)/test_cblas_sspr2_dv.o $(BUILD_DIR)/cblas_sspr2_dv.o $(BUILD_DIR)/cblas_sspr2_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_sspr2_dv.o $(BUILD_DIR)/cblas_sspr2_dv.o $(BUILD_DIR)/cblas_sspr2_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspr2_dv
+	$(CC) $(BUILD_DIR)/test_cblas_sspr2_dv.o $(BUILD_DIR)/cblas_sspr2_dv.o $(BUILD_DIR)/cblas_sspr2_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspr2_dv
 
 $(BUILD_DIR)/test_cblas_sspr_dv.o: $(TEST_DIR)/test_cblas_sspr_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sspr_dv.c -o $(BUILD_DIR)/test_cblas_sspr_dv.o
 
 $(BUILD_DIR)/test_cblas_sspr_dv: $(BUILD_DIR)/test_cblas_sspr_dv.o $(BUILD_DIR)/cblas_sspr_dv.o $(BUILD_DIR)/cblas_sspr_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_sspr_dv.o $(BUILD_DIR)/cblas_sspr_dv.o $(BUILD_DIR)/cblas_sspr_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspr_dv
+	$(CC) $(BUILD_DIR)/test_cblas_sspr_dv.o $(BUILD_DIR)/cblas_sspr_dv.o $(BUILD_DIR)/cblas_sspr_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspr_dv
 
 $(BUILD_DIR)/test_cblas_sswap_dv.o: $(TEST_DIR)/test_cblas_sswap_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sswap_dv.c -o $(BUILD_DIR)/test_cblas_sswap_dv.o
 
 $(BUILD_DIR)/test_cblas_sswap_dv: $(BUILD_DIR)/test_cblas_sswap_dv.o $(BUILD_DIR)/cblas_sswap_dv.o $(BUILD_DIR)/cblas_sswap_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_sswap_dv.o $(BUILD_DIR)/cblas_sswap_dv.o $(BUILD_DIR)/cblas_sswap_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sswap_dv
+	$(CC) $(BUILD_DIR)/test_cblas_sswap_dv.o $(BUILD_DIR)/cblas_sswap_dv.o $(BUILD_DIR)/cblas_sswap_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sswap_dv
 
 $(BUILD_DIR)/test_cblas_ssymm_dv.o: $(TEST_DIR)/test_cblas_ssymm_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssymm_dv.c -o $(BUILD_DIR)/test_cblas_ssymm_dv.o
 
 $(BUILD_DIR)/test_cblas_ssymm_dv: $(BUILD_DIR)/test_cblas_ssymm_dv.o $(BUILD_DIR)/cblas_ssymm_dv.o $(BUILD_DIR)/cblas_ssymm_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssymm_dv.o $(BUILD_DIR)/cblas_ssymm_dv.o $(BUILD_DIR)/cblas_ssymm_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssymm_dv
+	$(CC) $(BUILD_DIR)/test_cblas_ssymm_dv.o $(BUILD_DIR)/cblas_ssymm_dv.o $(BUILD_DIR)/cblas_ssymm_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssymm_dv
 
 $(BUILD_DIR)/test_cblas_ssymv_dv.o: $(TEST_DIR)/test_cblas_ssymv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssymv_dv.c -o $(BUILD_DIR)/test_cblas_ssymv_dv.o
 
 $(BUILD_DIR)/test_cblas_ssymv_dv: $(BUILD_DIR)/test_cblas_ssymv_dv.o $(BUILD_DIR)/cblas_ssymv_dv.o $(BUILD_DIR)/cblas_ssymv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssymv_dv.o $(BUILD_DIR)/cblas_ssymv_dv.o $(BUILD_DIR)/cblas_ssymv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssymv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_ssymv_dv.o $(BUILD_DIR)/cblas_ssymv_dv.o $(BUILD_DIR)/cblas_ssymv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssymv_dv
 
 $(BUILD_DIR)/test_cblas_ssyr2_dv.o: $(TEST_DIR)/test_cblas_ssyr2_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssyr2_dv.c -o $(BUILD_DIR)/test_cblas_ssyr2_dv.o
 
 $(BUILD_DIR)/test_cblas_ssyr2_dv: $(BUILD_DIR)/test_cblas_ssyr2_dv.o $(BUILD_DIR)/cblas_ssyr2_dv.o $(BUILD_DIR)/cblas_ssyr2_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssyr2_dv.o $(BUILD_DIR)/cblas_ssyr2_dv.o $(BUILD_DIR)/cblas_ssyr2_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr2_dv
+	$(CC) $(BUILD_DIR)/test_cblas_ssyr2_dv.o $(BUILD_DIR)/cblas_ssyr2_dv.o $(BUILD_DIR)/cblas_ssyr2_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr2_dv
 
 $(BUILD_DIR)/test_cblas_ssyr2k_dv.o: $(TEST_DIR)/test_cblas_ssyr2k_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssyr2k_dv.c -o $(BUILD_DIR)/test_cblas_ssyr2k_dv.o
 
 $(BUILD_DIR)/test_cblas_ssyr2k_dv: $(BUILD_DIR)/test_cblas_ssyr2k_dv.o $(BUILD_DIR)/cblas_ssyr2k_dv.o $(BUILD_DIR)/cblas_ssyr2k_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssyr2k_dv.o $(BUILD_DIR)/cblas_ssyr2k_dv.o $(BUILD_DIR)/cblas_ssyr2k_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr2k_dv
+	$(CC) $(BUILD_DIR)/test_cblas_ssyr2k_dv.o $(BUILD_DIR)/cblas_ssyr2k_dv.o $(BUILD_DIR)/cblas_ssyr2k_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr2k_dv
 
 $(BUILD_DIR)/test_cblas_ssyr_dv.o: $(TEST_DIR)/test_cblas_ssyr_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssyr_dv.c -o $(BUILD_DIR)/test_cblas_ssyr_dv.o
 
 $(BUILD_DIR)/test_cblas_ssyr_dv: $(BUILD_DIR)/test_cblas_ssyr_dv.o $(BUILD_DIR)/cblas_ssyr_dv.o $(BUILD_DIR)/cblas_ssyr_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssyr_dv.o $(BUILD_DIR)/cblas_ssyr_dv.o $(BUILD_DIR)/cblas_ssyr_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr_dv
+	$(CC) $(BUILD_DIR)/test_cblas_ssyr_dv.o $(BUILD_DIR)/cblas_ssyr_dv.o $(BUILD_DIR)/cblas_ssyr_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr_dv
 
 $(BUILD_DIR)/test_cblas_ssyrk_dv.o: $(TEST_DIR)/test_cblas_ssyrk_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssyrk_dv.c -o $(BUILD_DIR)/test_cblas_ssyrk_dv.o
 
 $(BUILD_DIR)/test_cblas_ssyrk_dv: $(BUILD_DIR)/test_cblas_ssyrk_dv.o $(BUILD_DIR)/cblas_ssyrk_dv.o $(BUILD_DIR)/cblas_ssyrk_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssyrk_dv.o $(BUILD_DIR)/cblas_ssyrk_dv.o $(BUILD_DIR)/cblas_ssyrk_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyrk_dv
+	$(CC) $(BUILD_DIR)/test_cblas_ssyrk_dv.o $(BUILD_DIR)/cblas_ssyrk_dv.o $(BUILD_DIR)/cblas_ssyrk_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyrk_dv
 
 $(BUILD_DIR)/test_cblas_stbmv_dv.o: $(TEST_DIR)/test_cblas_stbmv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_stbmv_dv.c -o $(BUILD_DIR)/test_cblas_stbmv_dv.o
 
 $(BUILD_DIR)/test_cblas_stbmv_dv: $(BUILD_DIR)/test_cblas_stbmv_dv.o $(BUILD_DIR)/cblas_stbmv_dv.o $(BUILD_DIR)/cblas_stbmv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_stbmv_dv.o $(BUILD_DIR)/cblas_stbmv_dv.o $(BUILD_DIR)/cblas_stbmv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_stbmv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_stbmv_dv.o $(BUILD_DIR)/cblas_stbmv_dv.o $(BUILD_DIR)/cblas_stbmv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_stbmv_dv
 
 $(BUILD_DIR)/test_cblas_stpmv_dv.o: $(TEST_DIR)/test_cblas_stpmv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_stpmv_dv.c -o $(BUILD_DIR)/test_cblas_stpmv_dv.o
 
 $(BUILD_DIR)/test_cblas_stpmv_dv: $(BUILD_DIR)/test_cblas_stpmv_dv.o $(BUILD_DIR)/cblas_stpmv_dv.o $(BUILD_DIR)/cblas_stpmv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_stpmv_dv.o $(BUILD_DIR)/cblas_stpmv_dv.o $(BUILD_DIR)/cblas_stpmv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_stpmv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_stpmv_dv.o $(BUILD_DIR)/cblas_stpmv_dv.o $(BUILD_DIR)/cblas_stpmv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_stpmv_dv
 
 $(BUILD_DIR)/test_cblas_strmm_dv.o: $(TEST_DIR)/test_cblas_strmm_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_strmm_dv.c -o $(BUILD_DIR)/test_cblas_strmm_dv.o
 
 $(BUILD_DIR)/test_cblas_strmm_dv: $(BUILD_DIR)/test_cblas_strmm_dv.o $(BUILD_DIR)/cblas_strmm_dv.o $(BUILD_DIR)/cblas_strmm_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_strmm_dv.o $(BUILD_DIR)/cblas_strmm_dv.o $(BUILD_DIR)/cblas_strmm_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strmm_dv
+	$(CC) $(BUILD_DIR)/test_cblas_strmm_dv.o $(BUILD_DIR)/cblas_strmm_dv.o $(BUILD_DIR)/cblas_strmm_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strmm_dv
 
 $(BUILD_DIR)/test_cblas_strmv_dv.o: $(TEST_DIR)/test_cblas_strmv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_strmv_dv.c -o $(BUILD_DIR)/test_cblas_strmv_dv.o
 
 $(BUILD_DIR)/test_cblas_strmv_dv: $(BUILD_DIR)/test_cblas_strmv_dv.o $(BUILD_DIR)/cblas_strmv_dv.o $(BUILD_DIR)/cblas_strmv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_strmv_dv.o $(BUILD_DIR)/cblas_strmv_dv.o $(BUILD_DIR)/cblas_strmv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strmv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_strmv_dv.o $(BUILD_DIR)/cblas_strmv_dv.o $(BUILD_DIR)/cblas_strmv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strmv_dv
 
 $(BUILD_DIR)/test_cblas_strsm_dv.o: $(TEST_DIR)/test_cblas_strsm_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_strsm_dv.c -o $(BUILD_DIR)/test_cblas_strsm_dv.o
 
 $(BUILD_DIR)/test_cblas_strsm_dv: $(BUILD_DIR)/test_cblas_strsm_dv.o $(BUILD_DIR)/cblas_strsm_dv.o $(BUILD_DIR)/cblas_strsm_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_strsm_dv.o $(BUILD_DIR)/cblas_strsm_dv.o $(BUILD_DIR)/cblas_strsm_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strsm_dv
+	$(CC) $(BUILD_DIR)/test_cblas_strsm_dv.o $(BUILD_DIR)/cblas_strsm_dv.o $(BUILD_DIR)/cblas_strsm_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strsm_dv
 
 $(BUILD_DIR)/test_cblas_strsv_dv.o: $(TEST_DIR)/test_cblas_strsv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_strsv_dv.c -o $(BUILD_DIR)/test_cblas_strsv_dv.o
 
 $(BUILD_DIR)/test_cblas_strsv_dv: $(BUILD_DIR)/test_cblas_strsv_dv.o $(BUILD_DIR)/cblas_strsv_dv.o $(BUILD_DIR)/cblas_strsv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_strsv_dv.o $(BUILD_DIR)/cblas_strsv_dv.o $(BUILD_DIR)/cblas_strsv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strsv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_strsv_dv.o $(BUILD_DIR)/cblas_strsv_dv.o $(BUILD_DIR)/cblas_strsv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strsv_dv
 
 $(BUILD_DIR)/test_cblas_zaxpy_dv.o: $(TEST_DIR)/test_cblas_zaxpy_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zaxpy_dv.c -o $(BUILD_DIR)/test_cblas_zaxpy_dv.o
 
 $(BUILD_DIR)/test_cblas_zaxpy_dv: $(BUILD_DIR)/test_cblas_zaxpy_dv.o $(BUILD_DIR)/cblas_zaxpy_dv.o $(BUILD_DIR)/cblas_zaxpy_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zaxpy_dv.o $(BUILD_DIR)/cblas_zaxpy_dv.o $(BUILD_DIR)/cblas_zaxpy_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zaxpy_dv
+	$(CC) $(BUILD_DIR)/test_cblas_zaxpy_dv.o $(BUILD_DIR)/cblas_zaxpy_dv.o $(BUILD_DIR)/cblas_zaxpy_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zaxpy_dv
 
 $(BUILD_DIR)/test_cblas_zcopy_dv.o: $(TEST_DIR)/test_cblas_zcopy_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zcopy_dv.c -o $(BUILD_DIR)/test_cblas_zcopy_dv.o
 
 $(BUILD_DIR)/test_cblas_zcopy_dv: $(BUILD_DIR)/test_cblas_zcopy_dv.o $(BUILD_DIR)/cblas_zcopy_dv.o $(BUILD_DIR)/cblas_zcopy_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zcopy_dv.o $(BUILD_DIR)/cblas_zcopy_dv.o $(BUILD_DIR)/cblas_zcopy_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zcopy_dv
+	$(CC) $(BUILD_DIR)/test_cblas_zcopy_dv.o $(BUILD_DIR)/cblas_zcopy_dv.o $(BUILD_DIR)/cblas_zcopy_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zcopy_dv
 
 $(BUILD_DIR)/test_cblas_zdotc_sub_dv.o: $(TEST_DIR)/test_cblas_zdotc_sub_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zdotc_sub_dv.c -o $(BUILD_DIR)/test_cblas_zdotc_sub_dv.o
 
 $(BUILD_DIR)/test_cblas_zdotc_sub_dv: $(BUILD_DIR)/test_cblas_zdotc_sub_dv.o $(BUILD_DIR)/cblas_zdotc_sub_dv.o $(BUILD_DIR)/cblas_zdotc_sub_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zdotc_sub_dv.o $(BUILD_DIR)/cblas_zdotc_sub_dv.o $(BUILD_DIR)/cblas_zdotc_sub_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdotc_sub_dv
+	$(CC) $(BUILD_DIR)/test_cblas_zdotc_sub_dv.o $(BUILD_DIR)/cblas_zdotc_sub_dv.o $(BUILD_DIR)/cblas_zdotc_sub_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdotc_sub_dv
 
 $(BUILD_DIR)/test_cblas_zdotu_sub_dv.o: $(TEST_DIR)/test_cblas_zdotu_sub_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zdotu_sub_dv.c -o $(BUILD_DIR)/test_cblas_zdotu_sub_dv.o
 
 $(BUILD_DIR)/test_cblas_zdotu_sub_dv: $(BUILD_DIR)/test_cblas_zdotu_sub_dv.o $(BUILD_DIR)/cblas_zdotu_sub_dv.o $(BUILD_DIR)/cblas_zdotu_sub_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zdotu_sub_dv.o $(BUILD_DIR)/cblas_zdotu_sub_dv.o $(BUILD_DIR)/cblas_zdotu_sub_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdotu_sub_dv
+	$(CC) $(BUILD_DIR)/test_cblas_zdotu_sub_dv.o $(BUILD_DIR)/cblas_zdotu_sub_dv.o $(BUILD_DIR)/cblas_zdotu_sub_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdotu_sub_dv
 
 $(BUILD_DIR)/test_cblas_zdscal_dv.o: $(TEST_DIR)/test_cblas_zdscal_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zdscal_dv.c -o $(BUILD_DIR)/test_cblas_zdscal_dv.o
 
 $(BUILD_DIR)/test_cblas_zdscal_dv: $(BUILD_DIR)/test_cblas_zdscal_dv.o $(BUILD_DIR)/cblas_zdscal_dv.o $(BUILD_DIR)/cblas_zdscal_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zdscal_dv.o $(BUILD_DIR)/cblas_zdscal_dv.o $(BUILD_DIR)/cblas_zdscal_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdscal_dv
+	$(CC) $(BUILD_DIR)/test_cblas_zdscal_dv.o $(BUILD_DIR)/cblas_zdscal_dv.o $(BUILD_DIR)/cblas_zdscal_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdscal_dv
 
 $(BUILD_DIR)/test_cblas_zgbmv_dv.o: $(TEST_DIR)/test_cblas_zgbmv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zgbmv_dv.c -o $(BUILD_DIR)/test_cblas_zgbmv_dv.o
 
 $(BUILD_DIR)/test_cblas_zgbmv_dv: $(BUILD_DIR)/test_cblas_zgbmv_dv.o $(BUILD_DIR)/cblas_zgbmv_dv.o $(BUILD_DIR)/cblas_zgbmv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zgbmv_dv.o $(BUILD_DIR)/cblas_zgbmv_dv.o $(BUILD_DIR)/cblas_zgbmv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgbmv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_zgbmv_dv.o $(BUILD_DIR)/cblas_zgbmv_dv.o $(BUILD_DIR)/cblas_zgbmv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgbmv_dv
 
 $(BUILD_DIR)/test_cblas_zgemm_dv.o: $(TEST_DIR)/test_cblas_zgemm_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zgemm_dv.c -o $(BUILD_DIR)/test_cblas_zgemm_dv.o
 
 $(BUILD_DIR)/test_cblas_zgemm_dv: $(BUILD_DIR)/test_cblas_zgemm_dv.o $(BUILD_DIR)/cblas_zgemm_dv.o $(BUILD_DIR)/cblas_zgemm_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zgemm_dv.o $(BUILD_DIR)/cblas_zgemm_dv.o $(BUILD_DIR)/cblas_zgemm_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgemm_dv
+	$(CC) $(BUILD_DIR)/test_cblas_zgemm_dv.o $(BUILD_DIR)/cblas_zgemm_dv.o $(BUILD_DIR)/cblas_zgemm_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgemm_dv
 
 $(BUILD_DIR)/test_cblas_zgemv_dv.o: $(TEST_DIR)/test_cblas_zgemv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zgemv_dv.c -o $(BUILD_DIR)/test_cblas_zgemv_dv.o
 
 $(BUILD_DIR)/test_cblas_zgemv_dv: $(BUILD_DIR)/test_cblas_zgemv_dv.o $(BUILD_DIR)/cblas_zgemv_dv.o $(BUILD_DIR)/cblas_zgemv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zgemv_dv.o $(BUILD_DIR)/cblas_zgemv_dv.o $(BUILD_DIR)/cblas_zgemv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgemv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_zgemv_dv.o $(BUILD_DIR)/cblas_zgemv_dv.o $(BUILD_DIR)/cblas_zgemv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgemv_dv
 
 $(BUILD_DIR)/test_cblas_zgerc_dv.o: $(TEST_DIR)/test_cblas_zgerc_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zgerc_dv.c -o $(BUILD_DIR)/test_cblas_zgerc_dv.o
 
 $(BUILD_DIR)/test_cblas_zgerc_dv: $(BUILD_DIR)/test_cblas_zgerc_dv.o $(BUILD_DIR)/cblas_zgerc_dv.o $(BUILD_DIR)/cblas_zgerc_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zgerc_dv.o $(BUILD_DIR)/cblas_zgerc_dv.o $(BUILD_DIR)/cblas_zgerc_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgerc_dv
+	$(CC) $(BUILD_DIR)/test_cblas_zgerc_dv.o $(BUILD_DIR)/cblas_zgerc_dv.o $(BUILD_DIR)/cblas_zgerc_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgerc_dv
 
 $(BUILD_DIR)/test_cblas_zgeru_dv.o: $(TEST_DIR)/test_cblas_zgeru_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zgeru_dv.c -o $(BUILD_DIR)/test_cblas_zgeru_dv.o
 
 $(BUILD_DIR)/test_cblas_zgeru_dv: $(BUILD_DIR)/test_cblas_zgeru_dv.o $(BUILD_DIR)/cblas_zgeru_dv.o $(BUILD_DIR)/cblas_zgeru_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zgeru_dv.o $(BUILD_DIR)/cblas_zgeru_dv.o $(BUILD_DIR)/cblas_zgeru_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgeru_dv
+	$(CC) $(BUILD_DIR)/test_cblas_zgeru_dv.o $(BUILD_DIR)/cblas_zgeru_dv.o $(BUILD_DIR)/cblas_zgeru_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgeru_dv
 
 $(BUILD_DIR)/test_cblas_zhbmv_dv.o: $(TEST_DIR)/test_cblas_zhbmv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zhbmv_dv.c -o $(BUILD_DIR)/test_cblas_zhbmv_dv.o
 
 $(BUILD_DIR)/test_cblas_zhbmv_dv: $(BUILD_DIR)/test_cblas_zhbmv_dv.o $(BUILD_DIR)/cblas_zhbmv_dv.o $(BUILD_DIR)/cblas_zhbmv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zhbmv_dv.o $(BUILD_DIR)/cblas_zhbmv_dv.o $(BUILD_DIR)/cblas_zhbmv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhbmv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_zhbmv_dv.o $(BUILD_DIR)/cblas_zhbmv_dv.o $(BUILD_DIR)/cblas_zhbmv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhbmv_dv
 
 $(BUILD_DIR)/test_cblas_zhemm_dv.o: $(TEST_DIR)/test_cblas_zhemm_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zhemm_dv.c -o $(BUILD_DIR)/test_cblas_zhemm_dv.o
 
 $(BUILD_DIR)/test_cblas_zhemm_dv: $(BUILD_DIR)/test_cblas_zhemm_dv.o $(BUILD_DIR)/cblas_zhemm_dv.o $(BUILD_DIR)/cblas_zhemm_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zhemm_dv.o $(BUILD_DIR)/cblas_zhemm_dv.o $(BUILD_DIR)/cblas_zhemm_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhemm_dv
+	$(CC) $(BUILD_DIR)/test_cblas_zhemm_dv.o $(BUILD_DIR)/cblas_zhemm_dv.o $(BUILD_DIR)/cblas_zhemm_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhemm_dv
 
 $(BUILD_DIR)/test_cblas_zhemv_dv.o: $(TEST_DIR)/test_cblas_zhemv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zhemv_dv.c -o $(BUILD_DIR)/test_cblas_zhemv_dv.o
 
 $(BUILD_DIR)/test_cblas_zhemv_dv: $(BUILD_DIR)/test_cblas_zhemv_dv.o $(BUILD_DIR)/cblas_zhemv_dv.o $(BUILD_DIR)/cblas_zhemv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zhemv_dv.o $(BUILD_DIR)/cblas_zhemv_dv.o $(BUILD_DIR)/cblas_zhemv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhemv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_zhemv_dv.o $(BUILD_DIR)/cblas_zhemv_dv.o $(BUILD_DIR)/cblas_zhemv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhemv_dv
 
 $(BUILD_DIR)/test_cblas_zscal_dv.o: $(TEST_DIR)/test_cblas_zscal_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zscal_dv.c -o $(BUILD_DIR)/test_cblas_zscal_dv.o
 
 $(BUILD_DIR)/test_cblas_zscal_dv: $(BUILD_DIR)/test_cblas_zscal_dv.o $(BUILD_DIR)/cblas_zscal_dv.o $(BUILD_DIR)/cblas_zscal_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zscal_dv.o $(BUILD_DIR)/cblas_zscal_dv.o $(BUILD_DIR)/cblas_zscal_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zscal_dv
+	$(CC) $(BUILD_DIR)/test_cblas_zscal_dv.o $(BUILD_DIR)/cblas_zscal_dv.o $(BUILD_DIR)/cblas_zscal_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zscal_dv
 
 $(BUILD_DIR)/test_cblas_zswap_dv.o: $(TEST_DIR)/test_cblas_zswap_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zswap_dv.c -o $(BUILD_DIR)/test_cblas_zswap_dv.o
 
 $(BUILD_DIR)/test_cblas_zswap_dv: $(BUILD_DIR)/test_cblas_zswap_dv.o $(BUILD_DIR)/cblas_zswap_dv.o $(BUILD_DIR)/cblas_zswap_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zswap_dv.o $(BUILD_DIR)/cblas_zswap_dv.o $(BUILD_DIR)/cblas_zswap_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zswap_dv
+	$(CC) $(BUILD_DIR)/test_cblas_zswap_dv.o $(BUILD_DIR)/cblas_zswap_dv.o $(BUILD_DIR)/cblas_zswap_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zswap_dv
 
 $(BUILD_DIR)/test_cblas_zsymm_dv.o: $(TEST_DIR)/test_cblas_zsymm_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zsymm_dv.c -o $(BUILD_DIR)/test_cblas_zsymm_dv.o
 
 $(BUILD_DIR)/test_cblas_zsymm_dv: $(BUILD_DIR)/test_cblas_zsymm_dv.o $(BUILD_DIR)/cblas_zsymm_dv.o $(BUILD_DIR)/cblas_zsymm_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zsymm_dv.o $(BUILD_DIR)/cblas_zsymm_dv.o $(BUILD_DIR)/cblas_zsymm_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsymm_dv
+	$(CC) $(BUILD_DIR)/test_cblas_zsymm_dv.o $(BUILD_DIR)/cblas_zsymm_dv.o $(BUILD_DIR)/cblas_zsymm_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsymm_dv
 
 $(BUILD_DIR)/test_cblas_zsyr2k_dv.o: $(TEST_DIR)/test_cblas_zsyr2k_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zsyr2k_dv.c -o $(BUILD_DIR)/test_cblas_zsyr2k_dv.o
 
 $(BUILD_DIR)/test_cblas_zsyr2k_dv: $(BUILD_DIR)/test_cblas_zsyr2k_dv.o $(BUILD_DIR)/cblas_zsyr2k_dv.o $(BUILD_DIR)/cblas_zsyr2k_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zsyr2k_dv.o $(BUILD_DIR)/cblas_zsyr2k_dv.o $(BUILD_DIR)/cblas_zsyr2k_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsyr2k_dv
+	$(CC) $(BUILD_DIR)/test_cblas_zsyr2k_dv.o $(BUILD_DIR)/cblas_zsyr2k_dv.o $(BUILD_DIR)/cblas_zsyr2k_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsyr2k_dv
 
 $(BUILD_DIR)/test_cblas_zsyrk_dv.o: $(TEST_DIR)/test_cblas_zsyrk_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zsyrk_dv.c -o $(BUILD_DIR)/test_cblas_zsyrk_dv.o
 
 $(BUILD_DIR)/test_cblas_zsyrk_dv: $(BUILD_DIR)/test_cblas_zsyrk_dv.o $(BUILD_DIR)/cblas_zsyrk_dv.o $(BUILD_DIR)/cblas_zsyrk_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_zsyrk_dv.o $(BUILD_DIR)/cblas_zsyrk_dv.o $(BUILD_DIR)/cblas_zsyrk_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsyrk_dv
+	$(CC) $(BUILD_DIR)/test_cblas_zsyrk_dv.o $(BUILD_DIR)/cblas_zsyrk_dv.o $(BUILD_DIR)/cblas_zsyrk_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsyrk_dv
 
 $(BUILD_DIR)/test_cblas_ztbmv_dv.o: $(TEST_DIR)/test_cblas_ztbmv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztbmv_dv.c -o $(BUILD_DIR)/test_cblas_ztbmv_dv.o
 
 $(BUILD_DIR)/test_cblas_ztbmv_dv: $(BUILD_DIR)/test_cblas_ztbmv_dv.o $(BUILD_DIR)/cblas_ztbmv_dv.o $(BUILD_DIR)/cblas_ztbmv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztbmv_dv.o $(BUILD_DIR)/cblas_ztbmv_dv.o $(BUILD_DIR)/cblas_ztbmv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztbmv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_ztbmv_dv.o $(BUILD_DIR)/cblas_ztbmv_dv.o $(BUILD_DIR)/cblas_ztbmv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztbmv_dv
 
 $(BUILD_DIR)/test_cblas_ztpmv_dv.o: $(TEST_DIR)/test_cblas_ztpmv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztpmv_dv.c -o $(BUILD_DIR)/test_cblas_ztpmv_dv.o
 
 $(BUILD_DIR)/test_cblas_ztpmv_dv: $(BUILD_DIR)/test_cblas_ztpmv_dv.o $(BUILD_DIR)/cblas_ztpmv_dv.o $(BUILD_DIR)/cblas_ztpmv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztpmv_dv.o $(BUILD_DIR)/cblas_ztpmv_dv.o $(BUILD_DIR)/cblas_ztpmv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztpmv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_ztpmv_dv.o $(BUILD_DIR)/cblas_ztpmv_dv.o $(BUILD_DIR)/cblas_ztpmv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztpmv_dv
 
 $(BUILD_DIR)/test_cblas_ztrmm_dv.o: $(TEST_DIR)/test_cblas_ztrmm_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztrmm_dv.c -o $(BUILD_DIR)/test_cblas_ztrmm_dv.o
 
 $(BUILD_DIR)/test_cblas_ztrmm_dv: $(BUILD_DIR)/test_cblas_ztrmm_dv.o $(BUILD_DIR)/cblas_ztrmm_dv.o $(BUILD_DIR)/cblas_ztrmm_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztrmm_dv.o $(BUILD_DIR)/cblas_ztrmm_dv.o $(BUILD_DIR)/cblas_ztrmm_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrmm_dv
+	$(CC) $(BUILD_DIR)/test_cblas_ztrmm_dv.o $(BUILD_DIR)/cblas_ztrmm_dv.o $(BUILD_DIR)/cblas_ztrmm_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrmm_dv
 
 $(BUILD_DIR)/test_cblas_ztrmv_dv.o: $(TEST_DIR)/test_cblas_ztrmv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztrmv_dv.c -o $(BUILD_DIR)/test_cblas_ztrmv_dv.o
 
 $(BUILD_DIR)/test_cblas_ztrmv_dv: $(BUILD_DIR)/test_cblas_ztrmv_dv.o $(BUILD_DIR)/cblas_ztrmv_dv.o $(BUILD_DIR)/cblas_ztrmv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztrmv_dv.o $(BUILD_DIR)/cblas_ztrmv_dv.o $(BUILD_DIR)/cblas_ztrmv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrmv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_ztrmv_dv.o $(BUILD_DIR)/cblas_ztrmv_dv.o $(BUILD_DIR)/cblas_ztrmv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrmv_dv
 
 $(BUILD_DIR)/test_cblas_ztrsm_dv.o: $(TEST_DIR)/test_cblas_ztrsm_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztrsm_dv.c -o $(BUILD_DIR)/test_cblas_ztrsm_dv.o
 
 $(BUILD_DIR)/test_cblas_ztrsm_dv: $(BUILD_DIR)/test_cblas_ztrsm_dv.o $(BUILD_DIR)/cblas_ztrsm_dv.o $(BUILD_DIR)/cblas_ztrsm_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztrsm_dv.o $(BUILD_DIR)/cblas_ztrsm_dv.o $(BUILD_DIR)/cblas_ztrsm_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrsm_dv
+	$(CC) $(BUILD_DIR)/test_cblas_ztrsm_dv.o $(BUILD_DIR)/cblas_ztrsm_dv.o $(BUILD_DIR)/cblas_ztrsm_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrsm_dv
 
 $(BUILD_DIR)/test_cblas_ztrsv_dv.o: $(TEST_DIR)/test_cblas_ztrsv_dv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztrsv_dv.c -o $(BUILD_DIR)/test_cblas_ztrsv_dv.o
 
 $(BUILD_DIR)/test_cblas_ztrsv_dv: $(BUILD_DIR)/test_cblas_ztrsv_dv.o $(BUILD_DIR)/cblas_ztrsv_dv.o $(BUILD_DIR)/cblas_ztrsv_dv_fortran.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztrsv_dv.o $(BUILD_DIR)/cblas_ztrsv_dv.o $(BUILD_DIR)/cblas_ztrsv_dv_fortran.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrsv_dv
+	$(CC) $(BUILD_DIR)/test_cblas_ztrsv_dv.o $(BUILD_DIR)/cblas_ztrsv_dv.o $(BUILD_DIR)/cblas_ztrsv_dv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrsv_dv
 
 $(BUILD_DIR)/test_cblas_caxpy_bv.o: $(TEST_DIR)/test_cblas_caxpy_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_caxpy_bv.c -o $(BUILD_DIR)/test_cblas_caxpy_bv.o
 
 $(BUILD_DIR)/test_cblas_caxpy_bv: $(BUILD_DIR)/test_cblas_caxpy_bv.o $(BUILD_DIR)/cblas_caxpy_bv.o $(BUILD_DIR)/cblas_caxpy_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_caxpy_bv.o $(BUILD_DIR)/cblas_caxpy_bv.o $(BUILD_DIR)/cblas_caxpy_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_caxpy_bv
+	$(CC) $(BUILD_DIR)/test_cblas_caxpy_bv.o $(BUILD_DIR)/cblas_caxpy_bv.o $(BUILD_DIR)/cblas_caxpy_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_caxpy_bv
 
 $(BUILD_DIR)/test_cblas_ccopy_bv.o: $(TEST_DIR)/test_cblas_ccopy_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ccopy_bv.c -o $(BUILD_DIR)/test_cblas_ccopy_bv.o
 
 $(BUILD_DIR)/test_cblas_ccopy_bv: $(BUILD_DIR)/test_cblas_ccopy_bv.o $(BUILD_DIR)/cblas_ccopy_bv.o $(BUILD_DIR)/cblas_ccopy_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ccopy_bv.o $(BUILD_DIR)/cblas_ccopy_bv.o $(BUILD_DIR)/cblas_ccopy_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ccopy_bv
+	$(CC) $(BUILD_DIR)/test_cblas_ccopy_bv.o $(BUILD_DIR)/cblas_ccopy_bv.o $(BUILD_DIR)/cblas_ccopy_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ccopy_bv
 
 $(BUILD_DIR)/test_cblas_cdotc_sub_bv.o: $(TEST_DIR)/test_cblas_cdotc_sub_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cdotc_sub_bv.c -o $(BUILD_DIR)/test_cblas_cdotc_sub_bv.o
 
 $(BUILD_DIR)/test_cblas_cdotc_sub_bv: $(BUILD_DIR)/test_cblas_cdotc_sub_bv.o $(BUILD_DIR)/cblas_cdotc_sub_bv.o $(BUILD_DIR)/cblas_cdotc_sub_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_cdotc_sub_bv.o $(BUILD_DIR)/cblas_cdotc_sub_bv.o $(BUILD_DIR)/cblas_cdotc_sub_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cdotc_sub_bv
+	$(CC) $(BUILD_DIR)/test_cblas_cdotc_sub_bv.o $(BUILD_DIR)/cblas_cdotc_sub_bv.o $(BUILD_DIR)/cblas_cdotc_sub_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cdotc_sub_bv
 
 $(BUILD_DIR)/test_cblas_cdotu_sub_bv.o: $(TEST_DIR)/test_cblas_cdotu_sub_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cdotu_sub_bv.c -o $(BUILD_DIR)/test_cblas_cdotu_sub_bv.o
 
 $(BUILD_DIR)/test_cblas_cdotu_sub_bv: $(BUILD_DIR)/test_cblas_cdotu_sub_bv.o $(BUILD_DIR)/cblas_cdotu_sub_bv.o $(BUILD_DIR)/cblas_cdotu_sub_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_cdotu_sub_bv.o $(BUILD_DIR)/cblas_cdotu_sub_bv.o $(BUILD_DIR)/cblas_cdotu_sub_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cdotu_sub_bv
+	$(CC) $(BUILD_DIR)/test_cblas_cdotu_sub_bv.o $(BUILD_DIR)/cblas_cdotu_sub_bv.o $(BUILD_DIR)/cblas_cdotu_sub_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cdotu_sub_bv
 
 $(BUILD_DIR)/test_cblas_cgbmv_bv.o: $(TEST_DIR)/test_cblas_cgbmv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cgbmv_bv.c -o $(BUILD_DIR)/test_cblas_cgbmv_bv.o
 
 $(BUILD_DIR)/test_cblas_cgbmv_bv: $(BUILD_DIR)/test_cblas_cgbmv_bv.o $(BUILD_DIR)/cblas_cgbmv_bv.o $(BUILD_DIR)/cblas_cgbmv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_cgbmv_bv.o $(BUILD_DIR)/cblas_cgbmv_bv.o $(BUILD_DIR)/cblas_cgbmv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgbmv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_cgbmv_bv.o $(BUILD_DIR)/cblas_cgbmv_bv.o $(BUILD_DIR)/cblas_cgbmv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgbmv_bv
 
 $(BUILD_DIR)/test_cblas_cgemm_bv.o: $(TEST_DIR)/test_cblas_cgemm_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cgemm_bv.c -o $(BUILD_DIR)/test_cblas_cgemm_bv.o
 
 $(BUILD_DIR)/test_cblas_cgemm_bv: $(BUILD_DIR)/test_cblas_cgemm_bv.o $(BUILD_DIR)/cblas_cgemm_bv.o $(BUILD_DIR)/cblas_cgemm_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_cgemm_bv.o $(BUILD_DIR)/cblas_cgemm_bv.o $(BUILD_DIR)/cblas_cgemm_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgemm_bv
+	$(CC) $(BUILD_DIR)/test_cblas_cgemm_bv.o $(BUILD_DIR)/cblas_cgemm_bv.o $(BUILD_DIR)/cblas_cgemm_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgemm_bv
 
 $(BUILD_DIR)/test_cblas_cgemv_bv.o: $(TEST_DIR)/test_cblas_cgemv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cgemv_bv.c -o $(BUILD_DIR)/test_cblas_cgemv_bv.o
 
 $(BUILD_DIR)/test_cblas_cgemv_bv: $(BUILD_DIR)/test_cblas_cgemv_bv.o $(BUILD_DIR)/cblas_cgemv_bv.o $(BUILD_DIR)/cblas_cgemv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_cgemv_bv.o $(BUILD_DIR)/cblas_cgemv_bv.o $(BUILD_DIR)/cblas_cgemv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgemv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_cgemv_bv.o $(BUILD_DIR)/cblas_cgemv_bv.o $(BUILD_DIR)/cblas_cgemv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgemv_bv
 
 $(BUILD_DIR)/test_cblas_cgerc_bv.o: $(TEST_DIR)/test_cblas_cgerc_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cgerc_bv.c -o $(BUILD_DIR)/test_cblas_cgerc_bv.o
 
 $(BUILD_DIR)/test_cblas_cgerc_bv: $(BUILD_DIR)/test_cblas_cgerc_bv.o $(BUILD_DIR)/cblas_cgerc_bv.o $(BUILD_DIR)/cblas_cgerc_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_cgerc_bv.o $(BUILD_DIR)/cblas_cgerc_bv.o $(BUILD_DIR)/cblas_cgerc_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgerc_bv
+	$(CC) $(BUILD_DIR)/test_cblas_cgerc_bv.o $(BUILD_DIR)/cblas_cgerc_bv.o $(BUILD_DIR)/cblas_cgerc_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgerc_bv
 
 $(BUILD_DIR)/test_cblas_cgeru_bv.o: $(TEST_DIR)/test_cblas_cgeru_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cgeru_bv.c -o $(BUILD_DIR)/test_cblas_cgeru_bv.o
 
 $(BUILD_DIR)/test_cblas_cgeru_bv: $(BUILD_DIR)/test_cblas_cgeru_bv.o $(BUILD_DIR)/cblas_cgeru_bv.o $(BUILD_DIR)/cblas_cgeru_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_cgeru_bv.o $(BUILD_DIR)/cblas_cgeru_bv.o $(BUILD_DIR)/cblas_cgeru_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgeru_bv
+	$(CC) $(BUILD_DIR)/test_cblas_cgeru_bv.o $(BUILD_DIR)/cblas_cgeru_bv.o $(BUILD_DIR)/cblas_cgeru_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cgeru_bv
 
 $(BUILD_DIR)/test_cblas_chbmv_bv.o: $(TEST_DIR)/test_cblas_chbmv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_chbmv_bv.c -o $(BUILD_DIR)/test_cblas_chbmv_bv.o
 
 $(BUILD_DIR)/test_cblas_chbmv_bv: $(BUILD_DIR)/test_cblas_chbmv_bv.o $(BUILD_DIR)/cblas_chbmv_bv.o $(BUILD_DIR)/cblas_chbmv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_chbmv_bv.o $(BUILD_DIR)/cblas_chbmv_bv.o $(BUILD_DIR)/cblas_chbmv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chbmv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_chbmv_bv.o $(BUILD_DIR)/cblas_chbmv_bv.o $(BUILD_DIR)/cblas_chbmv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chbmv_bv
 
 $(BUILD_DIR)/test_cblas_chemm_bv.o: $(TEST_DIR)/test_cblas_chemm_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_chemm_bv.c -o $(BUILD_DIR)/test_cblas_chemm_bv.o
 
 $(BUILD_DIR)/test_cblas_chemm_bv: $(BUILD_DIR)/test_cblas_chemm_bv.o $(BUILD_DIR)/cblas_chemm_bv.o $(BUILD_DIR)/cblas_chemm_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_chemm_bv.o $(BUILD_DIR)/cblas_chemm_bv.o $(BUILD_DIR)/cblas_chemm_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chemm_bv
+	$(CC) $(BUILD_DIR)/test_cblas_chemm_bv.o $(BUILD_DIR)/cblas_chemm_bv.o $(BUILD_DIR)/cblas_chemm_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chemm_bv
 
 $(BUILD_DIR)/test_cblas_chemv_bv.o: $(TEST_DIR)/test_cblas_chemv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_chemv_bv.c -o $(BUILD_DIR)/test_cblas_chemv_bv.o
 
 $(BUILD_DIR)/test_cblas_chemv_bv: $(BUILD_DIR)/test_cblas_chemv_bv.o $(BUILD_DIR)/cblas_chemv_bv.o $(BUILD_DIR)/cblas_chemv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_chemv_bv.o $(BUILD_DIR)/cblas_chemv_bv.o $(BUILD_DIR)/cblas_chemv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chemv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_chemv_bv.o $(BUILD_DIR)/cblas_chemv_bv.o $(BUILD_DIR)/cblas_chemv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_chemv_bv
 
 $(BUILD_DIR)/test_cblas_cscal_bv.o: $(TEST_DIR)/test_cblas_cscal_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cscal_bv.c -o $(BUILD_DIR)/test_cblas_cscal_bv.o
 
 $(BUILD_DIR)/test_cblas_cscal_bv: $(BUILD_DIR)/test_cblas_cscal_bv.o $(BUILD_DIR)/cblas_cscal_bv.o $(BUILD_DIR)/cblas_cscal_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_cscal_bv.o $(BUILD_DIR)/cblas_cscal_bv.o $(BUILD_DIR)/cblas_cscal_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cscal_bv
+	$(CC) $(BUILD_DIR)/test_cblas_cscal_bv.o $(BUILD_DIR)/cblas_cscal_bv.o $(BUILD_DIR)/cblas_cscal_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cscal_bv
 
 $(BUILD_DIR)/test_cblas_cswap_bv.o: $(TEST_DIR)/test_cblas_cswap_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_cswap_bv.c -o $(BUILD_DIR)/test_cblas_cswap_bv.o
 
 $(BUILD_DIR)/test_cblas_cswap_bv: $(BUILD_DIR)/test_cblas_cswap_bv.o $(BUILD_DIR)/cblas_cswap_bv.o $(BUILD_DIR)/cblas_cswap_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_cswap_bv.o $(BUILD_DIR)/cblas_cswap_bv.o $(BUILD_DIR)/cblas_cswap_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cswap_bv
+	$(CC) $(BUILD_DIR)/test_cblas_cswap_bv.o $(BUILD_DIR)/cblas_cswap_bv.o $(BUILD_DIR)/cblas_cswap_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_cswap_bv
 
 $(BUILD_DIR)/test_cblas_csymm_bv.o: $(TEST_DIR)/test_cblas_csymm_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_csymm_bv.c -o $(BUILD_DIR)/test_cblas_csymm_bv.o
 
 $(BUILD_DIR)/test_cblas_csymm_bv: $(BUILD_DIR)/test_cblas_csymm_bv.o $(BUILD_DIR)/cblas_csymm_bv.o $(BUILD_DIR)/cblas_csymm_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_csymm_bv.o $(BUILD_DIR)/cblas_csymm_bv.o $(BUILD_DIR)/cblas_csymm_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csymm_bv
+	$(CC) $(BUILD_DIR)/test_cblas_csymm_bv.o $(BUILD_DIR)/cblas_csymm_bv.o $(BUILD_DIR)/cblas_csymm_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csymm_bv
 
 $(BUILD_DIR)/test_cblas_csyr2k_bv.o: $(TEST_DIR)/test_cblas_csyr2k_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_csyr2k_bv.c -o $(BUILD_DIR)/test_cblas_csyr2k_bv.o
 
 $(BUILD_DIR)/test_cblas_csyr2k_bv: $(BUILD_DIR)/test_cblas_csyr2k_bv.o $(BUILD_DIR)/cblas_csyr2k_bv.o $(BUILD_DIR)/cblas_csyr2k_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_csyr2k_bv.o $(BUILD_DIR)/cblas_csyr2k_bv.o $(BUILD_DIR)/cblas_csyr2k_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csyr2k_bv
+	$(CC) $(BUILD_DIR)/test_cblas_csyr2k_bv.o $(BUILD_DIR)/cblas_csyr2k_bv.o $(BUILD_DIR)/cblas_csyr2k_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csyr2k_bv
 
 $(BUILD_DIR)/test_cblas_csyrk_bv.o: $(TEST_DIR)/test_cblas_csyrk_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_csyrk_bv.c -o $(BUILD_DIR)/test_cblas_csyrk_bv.o
 
 $(BUILD_DIR)/test_cblas_csyrk_bv: $(BUILD_DIR)/test_cblas_csyrk_bv.o $(BUILD_DIR)/cblas_csyrk_bv.o $(BUILD_DIR)/cblas_csyrk_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_csyrk_bv.o $(BUILD_DIR)/cblas_csyrk_bv.o $(BUILD_DIR)/cblas_csyrk_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csyrk_bv
+	$(CC) $(BUILD_DIR)/test_cblas_csyrk_bv.o $(BUILD_DIR)/cblas_csyrk_bv.o $(BUILD_DIR)/cblas_csyrk_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_csyrk_bv
 
 $(BUILD_DIR)/test_cblas_ctbmv_bv.o: $(TEST_DIR)/test_cblas_ctbmv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctbmv_bv.c -o $(BUILD_DIR)/test_cblas_ctbmv_bv.o
 
 $(BUILD_DIR)/test_cblas_ctbmv_bv: $(BUILD_DIR)/test_cblas_ctbmv_bv.o $(BUILD_DIR)/cblas_ctbmv_bv.o $(BUILD_DIR)/cblas_ctbmv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctbmv_bv.o $(BUILD_DIR)/cblas_ctbmv_bv.o $(BUILD_DIR)/cblas_ctbmv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctbmv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_ctbmv_bv.o $(BUILD_DIR)/cblas_ctbmv_bv.o $(BUILD_DIR)/cblas_ctbmv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctbmv_bv
 
 $(BUILD_DIR)/test_cblas_ctpmv_bv.o: $(TEST_DIR)/test_cblas_ctpmv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctpmv_bv.c -o $(BUILD_DIR)/test_cblas_ctpmv_bv.o
 
 $(BUILD_DIR)/test_cblas_ctpmv_bv: $(BUILD_DIR)/test_cblas_ctpmv_bv.o $(BUILD_DIR)/cblas_ctpmv_bv.o $(BUILD_DIR)/cblas_ctpmv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctpmv_bv.o $(BUILD_DIR)/cblas_ctpmv_bv.o $(BUILD_DIR)/cblas_ctpmv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctpmv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_ctpmv_bv.o $(BUILD_DIR)/cblas_ctpmv_bv.o $(BUILD_DIR)/cblas_ctpmv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctpmv_bv
 
 $(BUILD_DIR)/test_cblas_ctrmm_bv.o: $(TEST_DIR)/test_cblas_ctrmm_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctrmm_bv.c -o $(BUILD_DIR)/test_cblas_ctrmm_bv.o
 
 $(BUILD_DIR)/test_cblas_ctrmm_bv: $(BUILD_DIR)/test_cblas_ctrmm_bv.o $(BUILD_DIR)/cblas_ctrmm_bv.o $(BUILD_DIR)/cblas_ctrmm_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctrmm_bv.o $(BUILD_DIR)/cblas_ctrmm_bv.o $(BUILD_DIR)/cblas_ctrmm_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrmm_bv
+	$(CC) $(BUILD_DIR)/test_cblas_ctrmm_bv.o $(BUILD_DIR)/cblas_ctrmm_bv.o $(BUILD_DIR)/cblas_ctrmm_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrmm_bv
 
 $(BUILD_DIR)/test_cblas_ctrmv_bv.o: $(TEST_DIR)/test_cblas_ctrmv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctrmv_bv.c -o $(BUILD_DIR)/test_cblas_ctrmv_bv.o
 
 $(BUILD_DIR)/test_cblas_ctrmv_bv: $(BUILD_DIR)/test_cblas_ctrmv_bv.o $(BUILD_DIR)/cblas_ctrmv_bv.o $(BUILD_DIR)/cblas_ctrmv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctrmv_bv.o $(BUILD_DIR)/cblas_ctrmv_bv.o $(BUILD_DIR)/cblas_ctrmv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrmv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_ctrmv_bv.o $(BUILD_DIR)/cblas_ctrmv_bv.o $(BUILD_DIR)/cblas_ctrmv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrmv_bv
 
 $(BUILD_DIR)/test_cblas_ctrsm_bv.o: $(TEST_DIR)/test_cblas_ctrsm_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctrsm_bv.c -o $(BUILD_DIR)/test_cblas_ctrsm_bv.o
 
 $(BUILD_DIR)/test_cblas_ctrsm_bv: $(BUILD_DIR)/test_cblas_ctrsm_bv.o $(BUILD_DIR)/cblas_ctrsm_bv.o $(BUILD_DIR)/cblas_ctrsm_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctrsm_bv.o $(BUILD_DIR)/cblas_ctrsm_bv.o $(BUILD_DIR)/cblas_ctrsm_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrsm_bv
+	$(CC) $(BUILD_DIR)/test_cblas_ctrsm_bv.o $(BUILD_DIR)/cblas_ctrsm_bv.o $(BUILD_DIR)/cblas_ctrsm_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrsm_bv
 
 $(BUILD_DIR)/test_cblas_ctrsv_bv.o: $(TEST_DIR)/test_cblas_ctrsv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ctrsv_bv.c -o $(BUILD_DIR)/test_cblas_ctrsv_bv.o
 
 $(BUILD_DIR)/test_cblas_ctrsv_bv: $(BUILD_DIR)/test_cblas_ctrsv_bv.o $(BUILD_DIR)/cblas_ctrsv_bv.o $(BUILD_DIR)/cblas_ctrsv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ctrsv_bv.o $(BUILD_DIR)/cblas_ctrsv_bv.o $(BUILD_DIR)/cblas_ctrsv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrsv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_ctrsv_bv.o $(BUILD_DIR)/cblas_ctrsv_bv.o $(BUILD_DIR)/cblas_ctrsv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ctrsv_bv
 
 $(BUILD_DIR)/test_cblas_dasum_bv.o: $(TEST_DIR)/test_cblas_dasum_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dasum_bv.c -o $(BUILD_DIR)/test_cblas_dasum_bv.o
 
 $(BUILD_DIR)/test_cblas_dasum_bv: $(BUILD_DIR)/test_cblas_dasum_bv.o $(BUILD_DIR)/cblas_dasum_bv.o $(BUILD_DIR)/cblas_dasum_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dasum_bv.o $(BUILD_DIR)/cblas_dasum_bv.o $(BUILD_DIR)/cblas_dasum_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dasum_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dasum_bv.o $(BUILD_DIR)/cblas_dasum_bv.o $(BUILD_DIR)/cblas_dasum_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dasum_bv
 
 $(BUILD_DIR)/test_cblas_daxpy_bv.o: $(TEST_DIR)/test_cblas_daxpy_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_daxpy_bv.c -o $(BUILD_DIR)/test_cblas_daxpy_bv.o
 
 $(BUILD_DIR)/test_cblas_daxpy_bv: $(BUILD_DIR)/test_cblas_daxpy_bv.o $(BUILD_DIR)/cblas_daxpy_bv.o $(BUILD_DIR)/cblas_daxpy_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_daxpy_bv.o $(BUILD_DIR)/cblas_daxpy_bv.o $(BUILD_DIR)/cblas_daxpy_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_daxpy_bv
+	$(CC) $(BUILD_DIR)/test_cblas_daxpy_bv.o $(BUILD_DIR)/cblas_daxpy_bv.o $(BUILD_DIR)/cblas_daxpy_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_daxpy_bv
 
 $(BUILD_DIR)/test_cblas_dcopy_bv.o: $(TEST_DIR)/test_cblas_dcopy_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dcopy_bv.c -o $(BUILD_DIR)/test_cblas_dcopy_bv.o
 
 $(BUILD_DIR)/test_cblas_dcopy_bv: $(BUILD_DIR)/test_cblas_dcopy_bv.o $(BUILD_DIR)/cblas_dcopy_bv.o $(BUILD_DIR)/cblas_dcopy_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dcopy_bv.o $(BUILD_DIR)/cblas_dcopy_bv.o $(BUILD_DIR)/cblas_dcopy_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dcopy_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dcopy_bv.o $(BUILD_DIR)/cblas_dcopy_bv.o $(BUILD_DIR)/cblas_dcopy_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dcopy_bv
 
 $(BUILD_DIR)/test_cblas_ddot_bv.o: $(TEST_DIR)/test_cblas_ddot_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ddot_bv.c -o $(BUILD_DIR)/test_cblas_ddot_bv.o
 
 $(BUILD_DIR)/test_cblas_ddot_bv: $(BUILD_DIR)/test_cblas_ddot_bv.o $(BUILD_DIR)/cblas_ddot_bv.o $(BUILD_DIR)/cblas_ddot_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ddot_bv.o $(BUILD_DIR)/cblas_ddot_bv.o $(BUILD_DIR)/cblas_ddot_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ddot_bv
+	$(CC) $(BUILD_DIR)/test_cblas_ddot_bv.o $(BUILD_DIR)/cblas_ddot_bv.o $(BUILD_DIR)/cblas_ddot_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ddot_bv
 
 $(BUILD_DIR)/test_cblas_dgbmv_bv.o: $(TEST_DIR)/test_cblas_dgbmv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dgbmv_bv.c -o $(BUILD_DIR)/test_cblas_dgbmv_bv.o
 
 $(BUILD_DIR)/test_cblas_dgbmv_bv: $(BUILD_DIR)/test_cblas_dgbmv_bv.o $(BUILD_DIR)/cblas_dgbmv_bv.o $(BUILD_DIR)/cblas_dgbmv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dgbmv_bv.o $(BUILD_DIR)/cblas_dgbmv_bv.o $(BUILD_DIR)/cblas_dgbmv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgbmv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dgbmv_bv.o $(BUILD_DIR)/cblas_dgbmv_bv.o $(BUILD_DIR)/cblas_dgbmv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgbmv_bv
 
 $(BUILD_DIR)/test_cblas_dgemm_bv.o: $(TEST_DIR)/test_cblas_dgemm_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dgemm_bv.c -o $(BUILD_DIR)/test_cblas_dgemm_bv.o
 
 $(BUILD_DIR)/test_cblas_dgemm_bv: $(BUILD_DIR)/test_cblas_dgemm_bv.o $(BUILD_DIR)/cblas_dgemm_bv.o $(BUILD_DIR)/cblas_dgemm_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dgemm_bv.o $(BUILD_DIR)/cblas_dgemm_bv.o $(BUILD_DIR)/cblas_dgemm_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgemm_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dgemm_bv.o $(BUILD_DIR)/cblas_dgemm_bv.o $(BUILD_DIR)/cblas_dgemm_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgemm_bv
 
 $(BUILD_DIR)/test_cblas_dgemv_bv.o: $(TEST_DIR)/test_cblas_dgemv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dgemv_bv.c -o $(BUILD_DIR)/test_cblas_dgemv_bv.o
 
 $(BUILD_DIR)/test_cblas_dgemv_bv: $(BUILD_DIR)/test_cblas_dgemv_bv.o $(BUILD_DIR)/cblas_dgemv_bv.o $(BUILD_DIR)/cblas_dgemv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dgemv_bv.o $(BUILD_DIR)/cblas_dgemv_bv.o $(BUILD_DIR)/cblas_dgemv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgemv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dgemv_bv.o $(BUILD_DIR)/cblas_dgemv_bv.o $(BUILD_DIR)/cblas_dgemv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dgemv_bv
 
 $(BUILD_DIR)/test_cblas_dger_bv.o: $(TEST_DIR)/test_cblas_dger_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dger_bv.c -o $(BUILD_DIR)/test_cblas_dger_bv.o
 
 $(BUILD_DIR)/test_cblas_dger_bv: $(BUILD_DIR)/test_cblas_dger_bv.o $(BUILD_DIR)/cblas_dger_bv.o $(BUILD_DIR)/cblas_dger_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dger_bv.o $(BUILD_DIR)/cblas_dger_bv.o $(BUILD_DIR)/cblas_dger_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dger_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dger_bv.o $(BUILD_DIR)/cblas_dger_bv.o $(BUILD_DIR)/cblas_dger_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dger_bv
 
 $(BUILD_DIR)/test_cblas_dnrm2_bv.o: $(TEST_DIR)/test_cblas_dnrm2_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dnrm2_bv.c -o $(BUILD_DIR)/test_cblas_dnrm2_bv.o
 
 $(BUILD_DIR)/test_cblas_dnrm2_bv: $(BUILD_DIR)/test_cblas_dnrm2_bv.o $(BUILD_DIR)/cblas_dnrm2_bv.o $(BUILD_DIR)/cblas_dnrm2_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dnrm2_bv.o $(BUILD_DIR)/cblas_dnrm2_bv.o $(BUILD_DIR)/cblas_dnrm2_bv_fortran.o $(BUILD_DIR)/DIFFSIZES.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dnrm2_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dnrm2_bv.o $(BUILD_DIR)/cblas_dnrm2_bv.o $(BUILD_DIR)/cblas_dnrm2_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/DIFFSIZES.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dnrm2_bv
 
 $(BUILD_DIR)/test_cblas_dsbmv_bv.o: $(TEST_DIR)/test_cblas_dsbmv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsbmv_bv.c -o $(BUILD_DIR)/test_cblas_dsbmv_bv.o
 
 $(BUILD_DIR)/test_cblas_dsbmv_bv: $(BUILD_DIR)/test_cblas_dsbmv_bv.o $(BUILD_DIR)/cblas_dsbmv_bv.o $(BUILD_DIR)/cblas_dsbmv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsbmv_bv.o $(BUILD_DIR)/cblas_dsbmv_bv.o $(BUILD_DIR)/cblas_dsbmv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsbmv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dsbmv_bv.o $(BUILD_DIR)/cblas_dsbmv_bv.o $(BUILD_DIR)/cblas_dsbmv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsbmv_bv
 
 $(BUILD_DIR)/test_cblas_dscal_bv.o: $(TEST_DIR)/test_cblas_dscal_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dscal_bv.c -o $(BUILD_DIR)/test_cblas_dscal_bv.o
 
 $(BUILD_DIR)/test_cblas_dscal_bv: $(BUILD_DIR)/test_cblas_dscal_bv.o $(BUILD_DIR)/cblas_dscal_bv.o $(BUILD_DIR)/cblas_dscal_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dscal_bv.o $(BUILD_DIR)/cblas_dscal_bv.o $(BUILD_DIR)/cblas_dscal_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dscal_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dscal_bv.o $(BUILD_DIR)/cblas_dscal_bv.o $(BUILD_DIR)/cblas_dscal_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dscal_bv
 
 $(BUILD_DIR)/test_cblas_dspmv_bv.o: $(TEST_DIR)/test_cblas_dspmv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dspmv_bv.c -o $(BUILD_DIR)/test_cblas_dspmv_bv.o
 
 $(BUILD_DIR)/test_cblas_dspmv_bv: $(BUILD_DIR)/test_cblas_dspmv_bv.o $(BUILD_DIR)/cblas_dspmv_bv.o $(BUILD_DIR)/cblas_dspmv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dspmv_bv.o $(BUILD_DIR)/cblas_dspmv_bv.o $(BUILD_DIR)/cblas_dspmv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspmv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dspmv_bv.o $(BUILD_DIR)/cblas_dspmv_bv.o $(BUILD_DIR)/cblas_dspmv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspmv_bv
 
 $(BUILD_DIR)/test_cblas_dspr2_bv.o: $(TEST_DIR)/test_cblas_dspr2_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dspr2_bv.c -o $(BUILD_DIR)/test_cblas_dspr2_bv.o
 
 $(BUILD_DIR)/test_cblas_dspr2_bv: $(BUILD_DIR)/test_cblas_dspr2_bv.o $(BUILD_DIR)/cblas_dspr2_bv.o $(BUILD_DIR)/cblas_dspr2_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dspr2_bv.o $(BUILD_DIR)/cblas_dspr2_bv.o $(BUILD_DIR)/cblas_dspr2_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspr2_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dspr2_bv.o $(BUILD_DIR)/cblas_dspr2_bv.o $(BUILD_DIR)/cblas_dspr2_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspr2_bv
 
 $(BUILD_DIR)/test_cblas_dspr_bv.o: $(TEST_DIR)/test_cblas_dspr_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dspr_bv.c -o $(BUILD_DIR)/test_cblas_dspr_bv.o
 
 $(BUILD_DIR)/test_cblas_dspr_bv: $(BUILD_DIR)/test_cblas_dspr_bv.o $(BUILD_DIR)/cblas_dspr_bv.o $(BUILD_DIR)/cblas_dspr_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dspr_bv.o $(BUILD_DIR)/cblas_dspr_bv.o $(BUILD_DIR)/cblas_dspr_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspr_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dspr_bv.o $(BUILD_DIR)/cblas_dspr_bv.o $(BUILD_DIR)/cblas_dspr_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dspr_bv
 
 $(BUILD_DIR)/test_cblas_dswap_bv.o: $(TEST_DIR)/test_cblas_dswap_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dswap_bv.c -o $(BUILD_DIR)/test_cblas_dswap_bv.o
 
 $(BUILD_DIR)/test_cblas_dswap_bv: $(BUILD_DIR)/test_cblas_dswap_bv.o $(BUILD_DIR)/cblas_dswap_bv.o $(BUILD_DIR)/cblas_dswap_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dswap_bv.o $(BUILD_DIR)/cblas_dswap_bv.o $(BUILD_DIR)/cblas_dswap_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dswap_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dswap_bv.o $(BUILD_DIR)/cblas_dswap_bv.o $(BUILD_DIR)/cblas_dswap_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dswap_bv
 
 $(BUILD_DIR)/test_cblas_dsymm_bv.o: $(TEST_DIR)/test_cblas_dsymm_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsymm_bv.c -o $(BUILD_DIR)/test_cblas_dsymm_bv.o
 
 $(BUILD_DIR)/test_cblas_dsymm_bv: $(BUILD_DIR)/test_cblas_dsymm_bv.o $(BUILD_DIR)/cblas_dsymm_bv.o $(BUILD_DIR)/cblas_dsymm_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsymm_bv.o $(BUILD_DIR)/cblas_dsymm_bv.o $(BUILD_DIR)/cblas_dsymm_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsymm_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dsymm_bv.o $(BUILD_DIR)/cblas_dsymm_bv.o $(BUILD_DIR)/cblas_dsymm_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsymm_bv
 
 $(BUILD_DIR)/test_cblas_dsymv_bv.o: $(TEST_DIR)/test_cblas_dsymv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsymv_bv.c -o $(BUILD_DIR)/test_cblas_dsymv_bv.o
 
 $(BUILD_DIR)/test_cblas_dsymv_bv: $(BUILD_DIR)/test_cblas_dsymv_bv.o $(BUILD_DIR)/cblas_dsymv_bv.o $(BUILD_DIR)/cblas_dsymv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsymv_bv.o $(BUILD_DIR)/cblas_dsymv_bv.o $(BUILD_DIR)/cblas_dsymv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsymv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dsymv_bv.o $(BUILD_DIR)/cblas_dsymv_bv.o $(BUILD_DIR)/cblas_dsymv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsymv_bv
 
 $(BUILD_DIR)/test_cblas_dsyr2_bv.o: $(TEST_DIR)/test_cblas_dsyr2_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsyr2_bv.c -o $(BUILD_DIR)/test_cblas_dsyr2_bv.o
 
 $(BUILD_DIR)/test_cblas_dsyr2_bv: $(BUILD_DIR)/test_cblas_dsyr2_bv.o $(BUILD_DIR)/cblas_dsyr2_bv.o $(BUILD_DIR)/cblas_dsyr2_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsyr2_bv.o $(BUILD_DIR)/cblas_dsyr2_bv.o $(BUILD_DIR)/cblas_dsyr2_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr2_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dsyr2_bv.o $(BUILD_DIR)/cblas_dsyr2_bv.o $(BUILD_DIR)/cblas_dsyr2_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr2_bv
 
 $(BUILD_DIR)/test_cblas_dsyr2k_bv.o: $(TEST_DIR)/test_cblas_dsyr2k_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsyr2k_bv.c -o $(BUILD_DIR)/test_cblas_dsyr2k_bv.o
 
 $(BUILD_DIR)/test_cblas_dsyr2k_bv: $(BUILD_DIR)/test_cblas_dsyr2k_bv.o $(BUILD_DIR)/cblas_dsyr2k_bv.o $(BUILD_DIR)/cblas_dsyr2k_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsyr2k_bv.o $(BUILD_DIR)/cblas_dsyr2k_bv.o $(BUILD_DIR)/cblas_dsyr2k_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr2k_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dsyr2k_bv.o $(BUILD_DIR)/cblas_dsyr2k_bv.o $(BUILD_DIR)/cblas_dsyr2k_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr2k_bv
 
 $(BUILD_DIR)/test_cblas_dsyr_bv.o: $(TEST_DIR)/test_cblas_dsyr_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsyr_bv.c -o $(BUILD_DIR)/test_cblas_dsyr_bv.o
 
 $(BUILD_DIR)/test_cblas_dsyr_bv: $(BUILD_DIR)/test_cblas_dsyr_bv.o $(BUILD_DIR)/cblas_dsyr_bv.o $(BUILD_DIR)/cblas_dsyr_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsyr_bv.o $(BUILD_DIR)/cblas_dsyr_bv.o $(BUILD_DIR)/cblas_dsyr_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dsyr_bv.o $(BUILD_DIR)/cblas_dsyr_bv.o $(BUILD_DIR)/cblas_dsyr_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyr_bv
 
 $(BUILD_DIR)/test_cblas_dsyrk_bv.o: $(TEST_DIR)/test_cblas_dsyrk_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dsyrk_bv.c -o $(BUILD_DIR)/test_cblas_dsyrk_bv.o
 
 $(BUILD_DIR)/test_cblas_dsyrk_bv: $(BUILD_DIR)/test_cblas_dsyrk_bv.o $(BUILD_DIR)/cblas_dsyrk_bv.o $(BUILD_DIR)/cblas_dsyrk_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dsyrk_bv.o $(BUILD_DIR)/cblas_dsyrk_bv.o $(BUILD_DIR)/cblas_dsyrk_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyrk_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dsyrk_bv.o $(BUILD_DIR)/cblas_dsyrk_bv.o $(BUILD_DIR)/cblas_dsyrk_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dsyrk_bv
 
 $(BUILD_DIR)/test_cblas_dtbmv_bv.o: $(TEST_DIR)/test_cblas_dtbmv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtbmv_bv.c -o $(BUILD_DIR)/test_cblas_dtbmv_bv.o
 
 $(BUILD_DIR)/test_cblas_dtbmv_bv: $(BUILD_DIR)/test_cblas_dtbmv_bv.o $(BUILD_DIR)/cblas_dtbmv_bv.o $(BUILD_DIR)/cblas_dtbmv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtbmv_bv.o $(BUILD_DIR)/cblas_dtbmv_bv.o $(BUILD_DIR)/cblas_dtbmv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtbmv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dtbmv_bv.o $(BUILD_DIR)/cblas_dtbmv_bv.o $(BUILD_DIR)/cblas_dtbmv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtbmv_bv
 
 $(BUILD_DIR)/test_cblas_dtpmv_bv.o: $(TEST_DIR)/test_cblas_dtpmv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtpmv_bv.c -o $(BUILD_DIR)/test_cblas_dtpmv_bv.o
 
 $(BUILD_DIR)/test_cblas_dtpmv_bv: $(BUILD_DIR)/test_cblas_dtpmv_bv.o $(BUILD_DIR)/cblas_dtpmv_bv.o $(BUILD_DIR)/cblas_dtpmv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtpmv_bv.o $(BUILD_DIR)/cblas_dtpmv_bv.o $(BUILD_DIR)/cblas_dtpmv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtpmv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dtpmv_bv.o $(BUILD_DIR)/cblas_dtpmv_bv.o $(BUILD_DIR)/cblas_dtpmv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtpmv_bv
 
 $(BUILD_DIR)/test_cblas_dtrmm_bv.o: $(TEST_DIR)/test_cblas_dtrmm_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtrmm_bv.c -o $(BUILD_DIR)/test_cblas_dtrmm_bv.o
 
 $(BUILD_DIR)/test_cblas_dtrmm_bv: $(BUILD_DIR)/test_cblas_dtrmm_bv.o $(BUILD_DIR)/cblas_dtrmm_bv.o $(BUILD_DIR)/cblas_dtrmm_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtrmm_bv.o $(BUILD_DIR)/cblas_dtrmm_bv.o $(BUILD_DIR)/cblas_dtrmm_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrmm_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dtrmm_bv.o $(BUILD_DIR)/cblas_dtrmm_bv.o $(BUILD_DIR)/cblas_dtrmm_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrmm_bv
 
 $(BUILD_DIR)/test_cblas_dtrmv_bv.o: $(TEST_DIR)/test_cblas_dtrmv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtrmv_bv.c -o $(BUILD_DIR)/test_cblas_dtrmv_bv.o
 
 $(BUILD_DIR)/test_cblas_dtrmv_bv: $(BUILD_DIR)/test_cblas_dtrmv_bv.o $(BUILD_DIR)/cblas_dtrmv_bv.o $(BUILD_DIR)/cblas_dtrmv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtrmv_bv.o $(BUILD_DIR)/cblas_dtrmv_bv.o $(BUILD_DIR)/cblas_dtrmv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrmv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dtrmv_bv.o $(BUILD_DIR)/cblas_dtrmv_bv.o $(BUILD_DIR)/cblas_dtrmv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrmv_bv
 
 $(BUILD_DIR)/test_cblas_dtrsm_bv.o: $(TEST_DIR)/test_cblas_dtrsm_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtrsm_bv.c -o $(BUILD_DIR)/test_cblas_dtrsm_bv.o
 
 $(BUILD_DIR)/test_cblas_dtrsm_bv: $(BUILD_DIR)/test_cblas_dtrsm_bv.o $(BUILD_DIR)/cblas_dtrsm_bv.o $(BUILD_DIR)/cblas_dtrsm_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtrsm_bv.o $(BUILD_DIR)/cblas_dtrsm_bv.o $(BUILD_DIR)/cblas_dtrsm_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrsm_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dtrsm_bv.o $(BUILD_DIR)/cblas_dtrsm_bv.o $(BUILD_DIR)/cblas_dtrsm_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrsm_bv
 
 $(BUILD_DIR)/test_cblas_dtrsv_bv.o: $(TEST_DIR)/test_cblas_dtrsv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_dtrsv_bv.c -o $(BUILD_DIR)/test_cblas_dtrsv_bv.o
 
 $(BUILD_DIR)/test_cblas_dtrsv_bv: $(BUILD_DIR)/test_cblas_dtrsv_bv.o $(BUILD_DIR)/cblas_dtrsv_bv.o $(BUILD_DIR)/cblas_dtrsv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_dtrsv_bv.o $(BUILD_DIR)/cblas_dtrsv_bv.o $(BUILD_DIR)/cblas_dtrsv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrsv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_dtrsv_bv.o $(BUILD_DIR)/cblas_dtrsv_bv.o $(BUILD_DIR)/cblas_dtrsv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_dtrsv_bv
 
 $(BUILD_DIR)/test_cblas_sasum_bv.o: $(TEST_DIR)/test_cblas_sasum_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sasum_bv.c -o $(BUILD_DIR)/test_cblas_sasum_bv.o
 
 $(BUILD_DIR)/test_cblas_sasum_bv: $(BUILD_DIR)/test_cblas_sasum_bv.o $(BUILD_DIR)/cblas_sasum_bv.o $(BUILD_DIR)/cblas_sasum_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_sasum_bv.o $(BUILD_DIR)/cblas_sasum_bv.o $(BUILD_DIR)/cblas_sasum_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sasum_bv
+	$(CC) $(BUILD_DIR)/test_cblas_sasum_bv.o $(BUILD_DIR)/cblas_sasum_bv.o $(BUILD_DIR)/cblas_sasum_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sasum_bv
 
 $(BUILD_DIR)/test_cblas_saxpy_bv.o: $(TEST_DIR)/test_cblas_saxpy_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_saxpy_bv.c -o $(BUILD_DIR)/test_cblas_saxpy_bv.o
 
 $(BUILD_DIR)/test_cblas_saxpy_bv: $(BUILD_DIR)/test_cblas_saxpy_bv.o $(BUILD_DIR)/cblas_saxpy_bv.o $(BUILD_DIR)/cblas_saxpy_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_saxpy_bv.o $(BUILD_DIR)/cblas_saxpy_bv.o $(BUILD_DIR)/cblas_saxpy_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_saxpy_bv
+	$(CC) $(BUILD_DIR)/test_cblas_saxpy_bv.o $(BUILD_DIR)/cblas_saxpy_bv.o $(BUILD_DIR)/cblas_saxpy_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_saxpy_bv
 
 $(BUILD_DIR)/test_cblas_scopy_bv.o: $(TEST_DIR)/test_cblas_scopy_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_scopy_bv.c -o $(BUILD_DIR)/test_cblas_scopy_bv.o
 
 $(BUILD_DIR)/test_cblas_scopy_bv: $(BUILD_DIR)/test_cblas_scopy_bv.o $(BUILD_DIR)/cblas_scopy_bv.o $(BUILD_DIR)/cblas_scopy_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_scopy_bv.o $(BUILD_DIR)/cblas_scopy_bv.o $(BUILD_DIR)/cblas_scopy_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_scopy_bv
+	$(CC) $(BUILD_DIR)/test_cblas_scopy_bv.o $(BUILD_DIR)/cblas_scopy_bv.o $(BUILD_DIR)/cblas_scopy_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_scopy_bv
 
 $(BUILD_DIR)/test_cblas_sdot_bv.o: $(TEST_DIR)/test_cblas_sdot_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sdot_bv.c -o $(BUILD_DIR)/test_cblas_sdot_bv.o
 
 $(BUILD_DIR)/test_cblas_sdot_bv: $(BUILD_DIR)/test_cblas_sdot_bv.o $(BUILD_DIR)/cblas_sdot_bv.o $(BUILD_DIR)/cblas_sdot_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_sdot_bv.o $(BUILD_DIR)/cblas_sdot_bv.o $(BUILD_DIR)/cblas_sdot_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sdot_bv
+	$(CC) $(BUILD_DIR)/test_cblas_sdot_bv.o $(BUILD_DIR)/cblas_sdot_bv.o $(BUILD_DIR)/cblas_sdot_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sdot_bv
 
 $(BUILD_DIR)/test_cblas_sgbmv_bv.o: $(TEST_DIR)/test_cblas_sgbmv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sgbmv_bv.c -o $(BUILD_DIR)/test_cblas_sgbmv_bv.o
 
 $(BUILD_DIR)/test_cblas_sgbmv_bv: $(BUILD_DIR)/test_cblas_sgbmv_bv.o $(BUILD_DIR)/cblas_sgbmv_bv.o $(BUILD_DIR)/cblas_sgbmv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_sgbmv_bv.o $(BUILD_DIR)/cblas_sgbmv_bv.o $(BUILD_DIR)/cblas_sgbmv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgbmv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_sgbmv_bv.o $(BUILD_DIR)/cblas_sgbmv_bv.o $(BUILD_DIR)/cblas_sgbmv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgbmv_bv
 
 $(BUILD_DIR)/test_cblas_sgemm_bv.o: $(TEST_DIR)/test_cblas_sgemm_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sgemm_bv.c -o $(BUILD_DIR)/test_cblas_sgemm_bv.o
 
 $(BUILD_DIR)/test_cblas_sgemm_bv: $(BUILD_DIR)/test_cblas_sgemm_bv.o $(BUILD_DIR)/cblas_sgemm_bv.o $(BUILD_DIR)/cblas_sgemm_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_sgemm_bv.o $(BUILD_DIR)/cblas_sgemm_bv.o $(BUILD_DIR)/cblas_sgemm_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgemm_bv
+	$(CC) $(BUILD_DIR)/test_cblas_sgemm_bv.o $(BUILD_DIR)/cblas_sgemm_bv.o $(BUILD_DIR)/cblas_sgemm_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgemm_bv
 
 $(BUILD_DIR)/test_cblas_sgemv_bv.o: $(TEST_DIR)/test_cblas_sgemv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sgemv_bv.c -o $(BUILD_DIR)/test_cblas_sgemv_bv.o
 
 $(BUILD_DIR)/test_cblas_sgemv_bv: $(BUILD_DIR)/test_cblas_sgemv_bv.o $(BUILD_DIR)/cblas_sgemv_bv.o $(BUILD_DIR)/cblas_sgemv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_sgemv_bv.o $(BUILD_DIR)/cblas_sgemv_bv.o $(BUILD_DIR)/cblas_sgemv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgemv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_sgemv_bv.o $(BUILD_DIR)/cblas_sgemv_bv.o $(BUILD_DIR)/cblas_sgemv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sgemv_bv
 
 $(BUILD_DIR)/test_cblas_sger_bv.o: $(TEST_DIR)/test_cblas_sger_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sger_bv.c -o $(BUILD_DIR)/test_cblas_sger_bv.o
 
 $(BUILD_DIR)/test_cblas_sger_bv: $(BUILD_DIR)/test_cblas_sger_bv.o $(BUILD_DIR)/cblas_sger_bv.o $(BUILD_DIR)/cblas_sger_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_sger_bv.o $(BUILD_DIR)/cblas_sger_bv.o $(BUILD_DIR)/cblas_sger_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sger_bv
+	$(CC) $(BUILD_DIR)/test_cblas_sger_bv.o $(BUILD_DIR)/cblas_sger_bv.o $(BUILD_DIR)/cblas_sger_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sger_bv
 
 $(BUILD_DIR)/test_cblas_snrm2_bv.o: $(TEST_DIR)/test_cblas_snrm2_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_snrm2_bv.c -o $(BUILD_DIR)/test_cblas_snrm2_bv.o
 
 $(BUILD_DIR)/test_cblas_snrm2_bv: $(BUILD_DIR)/test_cblas_snrm2_bv.o $(BUILD_DIR)/cblas_snrm2_bv.o $(BUILD_DIR)/cblas_snrm2_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_snrm2_bv.o $(BUILD_DIR)/cblas_snrm2_bv.o $(BUILD_DIR)/cblas_snrm2_bv_fortran.o $(BUILD_DIR)/DIFFSIZES.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_snrm2_bv
+	$(CC) $(BUILD_DIR)/test_cblas_snrm2_bv.o $(BUILD_DIR)/cblas_snrm2_bv.o $(BUILD_DIR)/cblas_snrm2_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/DIFFSIZES.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_snrm2_bv
 
 $(BUILD_DIR)/test_cblas_ssbmv_bv.o: $(TEST_DIR)/test_cblas_ssbmv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssbmv_bv.c -o $(BUILD_DIR)/test_cblas_ssbmv_bv.o
 
 $(BUILD_DIR)/test_cblas_ssbmv_bv: $(BUILD_DIR)/test_cblas_ssbmv_bv.o $(BUILD_DIR)/cblas_ssbmv_bv.o $(BUILD_DIR)/cblas_ssbmv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssbmv_bv.o $(BUILD_DIR)/cblas_ssbmv_bv.o $(BUILD_DIR)/cblas_ssbmv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssbmv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_ssbmv_bv.o $(BUILD_DIR)/cblas_ssbmv_bv.o $(BUILD_DIR)/cblas_ssbmv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssbmv_bv
 
 $(BUILD_DIR)/test_cblas_sscal_bv.o: $(TEST_DIR)/test_cblas_sscal_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sscal_bv.c -o $(BUILD_DIR)/test_cblas_sscal_bv.o
 
 $(BUILD_DIR)/test_cblas_sscal_bv: $(BUILD_DIR)/test_cblas_sscal_bv.o $(BUILD_DIR)/cblas_sscal_bv.o $(BUILD_DIR)/cblas_sscal_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_sscal_bv.o $(BUILD_DIR)/cblas_sscal_bv.o $(BUILD_DIR)/cblas_sscal_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sscal_bv
+	$(CC) $(BUILD_DIR)/test_cblas_sscal_bv.o $(BUILD_DIR)/cblas_sscal_bv.o $(BUILD_DIR)/cblas_sscal_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sscal_bv
 
 $(BUILD_DIR)/test_cblas_sspmv_bv.o: $(TEST_DIR)/test_cblas_sspmv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sspmv_bv.c -o $(BUILD_DIR)/test_cblas_sspmv_bv.o
 
 $(BUILD_DIR)/test_cblas_sspmv_bv: $(BUILD_DIR)/test_cblas_sspmv_bv.o $(BUILD_DIR)/cblas_sspmv_bv.o $(BUILD_DIR)/cblas_sspmv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_sspmv_bv.o $(BUILD_DIR)/cblas_sspmv_bv.o $(BUILD_DIR)/cblas_sspmv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspmv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_sspmv_bv.o $(BUILD_DIR)/cblas_sspmv_bv.o $(BUILD_DIR)/cblas_sspmv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspmv_bv
 
 $(BUILD_DIR)/test_cblas_sspr2_bv.o: $(TEST_DIR)/test_cblas_sspr2_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sspr2_bv.c -o $(BUILD_DIR)/test_cblas_sspr2_bv.o
 
 $(BUILD_DIR)/test_cblas_sspr2_bv: $(BUILD_DIR)/test_cblas_sspr2_bv.o $(BUILD_DIR)/cblas_sspr2_bv.o $(BUILD_DIR)/cblas_sspr2_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_sspr2_bv.o $(BUILD_DIR)/cblas_sspr2_bv.o $(BUILD_DIR)/cblas_sspr2_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspr2_bv
+	$(CC) $(BUILD_DIR)/test_cblas_sspr2_bv.o $(BUILD_DIR)/cblas_sspr2_bv.o $(BUILD_DIR)/cblas_sspr2_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspr2_bv
 
 $(BUILD_DIR)/test_cblas_sspr_bv.o: $(TEST_DIR)/test_cblas_sspr_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sspr_bv.c -o $(BUILD_DIR)/test_cblas_sspr_bv.o
 
 $(BUILD_DIR)/test_cblas_sspr_bv: $(BUILD_DIR)/test_cblas_sspr_bv.o $(BUILD_DIR)/cblas_sspr_bv.o $(BUILD_DIR)/cblas_sspr_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_sspr_bv.o $(BUILD_DIR)/cblas_sspr_bv.o $(BUILD_DIR)/cblas_sspr_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspr_bv
+	$(CC) $(BUILD_DIR)/test_cblas_sspr_bv.o $(BUILD_DIR)/cblas_sspr_bv.o $(BUILD_DIR)/cblas_sspr_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sspr_bv
 
 $(BUILD_DIR)/test_cblas_sswap_bv.o: $(TEST_DIR)/test_cblas_sswap_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_sswap_bv.c -o $(BUILD_DIR)/test_cblas_sswap_bv.o
 
 $(BUILD_DIR)/test_cblas_sswap_bv: $(BUILD_DIR)/test_cblas_sswap_bv.o $(BUILD_DIR)/cblas_sswap_bv.o $(BUILD_DIR)/cblas_sswap_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_sswap_bv.o $(BUILD_DIR)/cblas_sswap_bv.o $(BUILD_DIR)/cblas_sswap_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sswap_bv
+	$(CC) $(BUILD_DIR)/test_cblas_sswap_bv.o $(BUILD_DIR)/cblas_sswap_bv.o $(BUILD_DIR)/cblas_sswap_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_sswap_bv
 
 $(BUILD_DIR)/test_cblas_ssymm_bv.o: $(TEST_DIR)/test_cblas_ssymm_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssymm_bv.c -o $(BUILD_DIR)/test_cblas_ssymm_bv.o
 
 $(BUILD_DIR)/test_cblas_ssymm_bv: $(BUILD_DIR)/test_cblas_ssymm_bv.o $(BUILD_DIR)/cblas_ssymm_bv.o $(BUILD_DIR)/cblas_ssymm_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssymm_bv.o $(BUILD_DIR)/cblas_ssymm_bv.o $(BUILD_DIR)/cblas_ssymm_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssymm_bv
+	$(CC) $(BUILD_DIR)/test_cblas_ssymm_bv.o $(BUILD_DIR)/cblas_ssymm_bv.o $(BUILD_DIR)/cblas_ssymm_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssymm_bv
 
 $(BUILD_DIR)/test_cblas_ssymv_bv.o: $(TEST_DIR)/test_cblas_ssymv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssymv_bv.c -o $(BUILD_DIR)/test_cblas_ssymv_bv.o
 
 $(BUILD_DIR)/test_cblas_ssymv_bv: $(BUILD_DIR)/test_cblas_ssymv_bv.o $(BUILD_DIR)/cblas_ssymv_bv.o $(BUILD_DIR)/cblas_ssymv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssymv_bv.o $(BUILD_DIR)/cblas_ssymv_bv.o $(BUILD_DIR)/cblas_ssymv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssymv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_ssymv_bv.o $(BUILD_DIR)/cblas_ssymv_bv.o $(BUILD_DIR)/cblas_ssymv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssymv_bv
 
 $(BUILD_DIR)/test_cblas_ssyr2_bv.o: $(TEST_DIR)/test_cblas_ssyr2_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssyr2_bv.c -o $(BUILD_DIR)/test_cblas_ssyr2_bv.o
 
 $(BUILD_DIR)/test_cblas_ssyr2_bv: $(BUILD_DIR)/test_cblas_ssyr2_bv.o $(BUILD_DIR)/cblas_ssyr2_bv.o $(BUILD_DIR)/cblas_ssyr2_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssyr2_bv.o $(BUILD_DIR)/cblas_ssyr2_bv.o $(BUILD_DIR)/cblas_ssyr2_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr2_bv
+	$(CC) $(BUILD_DIR)/test_cblas_ssyr2_bv.o $(BUILD_DIR)/cblas_ssyr2_bv.o $(BUILD_DIR)/cblas_ssyr2_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr2_bv
 
 $(BUILD_DIR)/test_cblas_ssyr2k_bv.o: $(TEST_DIR)/test_cblas_ssyr2k_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssyr2k_bv.c -o $(BUILD_DIR)/test_cblas_ssyr2k_bv.o
 
 $(BUILD_DIR)/test_cblas_ssyr2k_bv: $(BUILD_DIR)/test_cblas_ssyr2k_bv.o $(BUILD_DIR)/cblas_ssyr2k_bv.o $(BUILD_DIR)/cblas_ssyr2k_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssyr2k_bv.o $(BUILD_DIR)/cblas_ssyr2k_bv.o $(BUILD_DIR)/cblas_ssyr2k_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr2k_bv
+	$(CC) $(BUILD_DIR)/test_cblas_ssyr2k_bv.o $(BUILD_DIR)/cblas_ssyr2k_bv.o $(BUILD_DIR)/cblas_ssyr2k_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr2k_bv
 
 $(BUILD_DIR)/test_cblas_ssyr_bv.o: $(TEST_DIR)/test_cblas_ssyr_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssyr_bv.c -o $(BUILD_DIR)/test_cblas_ssyr_bv.o
 
 $(BUILD_DIR)/test_cblas_ssyr_bv: $(BUILD_DIR)/test_cblas_ssyr_bv.o $(BUILD_DIR)/cblas_ssyr_bv.o $(BUILD_DIR)/cblas_ssyr_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssyr_bv.o $(BUILD_DIR)/cblas_ssyr_bv.o $(BUILD_DIR)/cblas_ssyr_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr_bv
+	$(CC) $(BUILD_DIR)/test_cblas_ssyr_bv.o $(BUILD_DIR)/cblas_ssyr_bv.o $(BUILD_DIR)/cblas_ssyr_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyr_bv
 
 $(BUILD_DIR)/test_cblas_ssyrk_bv.o: $(TEST_DIR)/test_cblas_ssyrk_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ssyrk_bv.c -o $(BUILD_DIR)/test_cblas_ssyrk_bv.o
 
 $(BUILD_DIR)/test_cblas_ssyrk_bv: $(BUILD_DIR)/test_cblas_ssyrk_bv.o $(BUILD_DIR)/cblas_ssyrk_bv.o $(BUILD_DIR)/cblas_ssyrk_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ssyrk_bv.o $(BUILD_DIR)/cblas_ssyrk_bv.o $(BUILD_DIR)/cblas_ssyrk_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyrk_bv
+	$(CC) $(BUILD_DIR)/test_cblas_ssyrk_bv.o $(BUILD_DIR)/cblas_ssyrk_bv.o $(BUILD_DIR)/cblas_ssyrk_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ssyrk_bv
 
 $(BUILD_DIR)/test_cblas_stbmv_bv.o: $(TEST_DIR)/test_cblas_stbmv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_stbmv_bv.c -o $(BUILD_DIR)/test_cblas_stbmv_bv.o
 
 $(BUILD_DIR)/test_cblas_stbmv_bv: $(BUILD_DIR)/test_cblas_stbmv_bv.o $(BUILD_DIR)/cblas_stbmv_bv.o $(BUILD_DIR)/cblas_stbmv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_stbmv_bv.o $(BUILD_DIR)/cblas_stbmv_bv.o $(BUILD_DIR)/cblas_stbmv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_stbmv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_stbmv_bv.o $(BUILD_DIR)/cblas_stbmv_bv.o $(BUILD_DIR)/cblas_stbmv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_stbmv_bv
 
 $(BUILD_DIR)/test_cblas_stpmv_bv.o: $(TEST_DIR)/test_cblas_stpmv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_stpmv_bv.c -o $(BUILD_DIR)/test_cblas_stpmv_bv.o
 
 $(BUILD_DIR)/test_cblas_stpmv_bv: $(BUILD_DIR)/test_cblas_stpmv_bv.o $(BUILD_DIR)/cblas_stpmv_bv.o $(BUILD_DIR)/cblas_stpmv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_stpmv_bv.o $(BUILD_DIR)/cblas_stpmv_bv.o $(BUILD_DIR)/cblas_stpmv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_stpmv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_stpmv_bv.o $(BUILD_DIR)/cblas_stpmv_bv.o $(BUILD_DIR)/cblas_stpmv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_stpmv_bv
 
 $(BUILD_DIR)/test_cblas_strmm_bv.o: $(TEST_DIR)/test_cblas_strmm_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_strmm_bv.c -o $(BUILD_DIR)/test_cblas_strmm_bv.o
 
 $(BUILD_DIR)/test_cblas_strmm_bv: $(BUILD_DIR)/test_cblas_strmm_bv.o $(BUILD_DIR)/cblas_strmm_bv.o $(BUILD_DIR)/cblas_strmm_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_strmm_bv.o $(BUILD_DIR)/cblas_strmm_bv.o $(BUILD_DIR)/cblas_strmm_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strmm_bv
+	$(CC) $(BUILD_DIR)/test_cblas_strmm_bv.o $(BUILD_DIR)/cblas_strmm_bv.o $(BUILD_DIR)/cblas_strmm_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strmm_bv
 
 $(BUILD_DIR)/test_cblas_strmv_bv.o: $(TEST_DIR)/test_cblas_strmv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_strmv_bv.c -o $(BUILD_DIR)/test_cblas_strmv_bv.o
 
 $(BUILD_DIR)/test_cblas_strmv_bv: $(BUILD_DIR)/test_cblas_strmv_bv.o $(BUILD_DIR)/cblas_strmv_bv.o $(BUILD_DIR)/cblas_strmv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_strmv_bv.o $(BUILD_DIR)/cblas_strmv_bv.o $(BUILD_DIR)/cblas_strmv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strmv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_strmv_bv.o $(BUILD_DIR)/cblas_strmv_bv.o $(BUILD_DIR)/cblas_strmv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strmv_bv
 
 $(BUILD_DIR)/test_cblas_strsm_bv.o: $(TEST_DIR)/test_cblas_strsm_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_strsm_bv.c -o $(BUILD_DIR)/test_cblas_strsm_bv.o
 
 $(BUILD_DIR)/test_cblas_strsm_bv: $(BUILD_DIR)/test_cblas_strsm_bv.o $(BUILD_DIR)/cblas_strsm_bv.o $(BUILD_DIR)/cblas_strsm_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_strsm_bv.o $(BUILD_DIR)/cblas_strsm_bv.o $(BUILD_DIR)/cblas_strsm_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strsm_bv
+	$(CC) $(BUILD_DIR)/test_cblas_strsm_bv.o $(BUILD_DIR)/cblas_strsm_bv.o $(BUILD_DIR)/cblas_strsm_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strsm_bv
 
 $(BUILD_DIR)/test_cblas_strsv_bv.o: $(TEST_DIR)/test_cblas_strsv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_strsv_bv.c -o $(BUILD_DIR)/test_cblas_strsv_bv.o
 
 $(BUILD_DIR)/test_cblas_strsv_bv: $(BUILD_DIR)/test_cblas_strsv_bv.o $(BUILD_DIR)/cblas_strsv_bv.o $(BUILD_DIR)/cblas_strsv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_strsv_bv.o $(BUILD_DIR)/cblas_strsv_bv.o $(BUILD_DIR)/cblas_strsv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strsv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_strsv_bv.o $(BUILD_DIR)/cblas_strsv_bv.o $(BUILD_DIR)/cblas_strsv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_strsv_bv
 
 $(BUILD_DIR)/test_cblas_zaxpy_bv.o: $(TEST_DIR)/test_cblas_zaxpy_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zaxpy_bv.c -o $(BUILD_DIR)/test_cblas_zaxpy_bv.o
 
 $(BUILD_DIR)/test_cblas_zaxpy_bv: $(BUILD_DIR)/test_cblas_zaxpy_bv.o $(BUILD_DIR)/cblas_zaxpy_bv.o $(BUILD_DIR)/cblas_zaxpy_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zaxpy_bv.o $(BUILD_DIR)/cblas_zaxpy_bv.o $(BUILD_DIR)/cblas_zaxpy_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zaxpy_bv
+	$(CC) $(BUILD_DIR)/test_cblas_zaxpy_bv.o $(BUILD_DIR)/cblas_zaxpy_bv.o $(BUILD_DIR)/cblas_zaxpy_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zaxpy_bv
 
 $(BUILD_DIR)/test_cblas_zcopy_bv.o: $(TEST_DIR)/test_cblas_zcopy_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zcopy_bv.c -o $(BUILD_DIR)/test_cblas_zcopy_bv.o
 
 $(BUILD_DIR)/test_cblas_zcopy_bv: $(BUILD_DIR)/test_cblas_zcopy_bv.o $(BUILD_DIR)/cblas_zcopy_bv.o $(BUILD_DIR)/cblas_zcopy_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zcopy_bv.o $(BUILD_DIR)/cblas_zcopy_bv.o $(BUILD_DIR)/cblas_zcopy_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zcopy_bv
+	$(CC) $(BUILD_DIR)/test_cblas_zcopy_bv.o $(BUILD_DIR)/cblas_zcopy_bv.o $(BUILD_DIR)/cblas_zcopy_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zcopy_bv
 
 $(BUILD_DIR)/test_cblas_zdotc_sub_bv.o: $(TEST_DIR)/test_cblas_zdotc_sub_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zdotc_sub_bv.c -o $(BUILD_DIR)/test_cblas_zdotc_sub_bv.o
 
 $(BUILD_DIR)/test_cblas_zdotc_sub_bv: $(BUILD_DIR)/test_cblas_zdotc_sub_bv.o $(BUILD_DIR)/cblas_zdotc_sub_bv.o $(BUILD_DIR)/cblas_zdotc_sub_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zdotc_sub_bv.o $(BUILD_DIR)/cblas_zdotc_sub_bv.o $(BUILD_DIR)/cblas_zdotc_sub_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdotc_sub_bv
+	$(CC) $(BUILD_DIR)/test_cblas_zdotc_sub_bv.o $(BUILD_DIR)/cblas_zdotc_sub_bv.o $(BUILD_DIR)/cblas_zdotc_sub_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdotc_sub_bv
 
 $(BUILD_DIR)/test_cblas_zdotu_sub_bv.o: $(TEST_DIR)/test_cblas_zdotu_sub_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zdotu_sub_bv.c -o $(BUILD_DIR)/test_cblas_zdotu_sub_bv.o
 
 $(BUILD_DIR)/test_cblas_zdotu_sub_bv: $(BUILD_DIR)/test_cblas_zdotu_sub_bv.o $(BUILD_DIR)/cblas_zdotu_sub_bv.o $(BUILD_DIR)/cblas_zdotu_sub_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zdotu_sub_bv.o $(BUILD_DIR)/cblas_zdotu_sub_bv.o $(BUILD_DIR)/cblas_zdotu_sub_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdotu_sub_bv
+	$(CC) $(BUILD_DIR)/test_cblas_zdotu_sub_bv.o $(BUILD_DIR)/cblas_zdotu_sub_bv.o $(BUILD_DIR)/cblas_zdotu_sub_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdotu_sub_bv
 
 $(BUILD_DIR)/test_cblas_zdscal_bv.o: $(TEST_DIR)/test_cblas_zdscal_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zdscal_bv.c -o $(BUILD_DIR)/test_cblas_zdscal_bv.o
 
 $(BUILD_DIR)/test_cblas_zdscal_bv: $(BUILD_DIR)/test_cblas_zdscal_bv.o $(BUILD_DIR)/cblas_zdscal_bv.o $(BUILD_DIR)/cblas_zdscal_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zdscal_bv.o $(BUILD_DIR)/cblas_zdscal_bv.o $(BUILD_DIR)/cblas_zdscal_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdscal_bv
+	$(CC) $(BUILD_DIR)/test_cblas_zdscal_bv.o $(BUILD_DIR)/cblas_zdscal_bv.o $(BUILD_DIR)/cblas_zdscal_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zdscal_bv
 
 $(BUILD_DIR)/test_cblas_zgbmv_bv.o: $(TEST_DIR)/test_cblas_zgbmv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zgbmv_bv.c -o $(BUILD_DIR)/test_cblas_zgbmv_bv.o
 
 $(BUILD_DIR)/test_cblas_zgbmv_bv: $(BUILD_DIR)/test_cblas_zgbmv_bv.o $(BUILD_DIR)/cblas_zgbmv_bv.o $(BUILD_DIR)/cblas_zgbmv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zgbmv_bv.o $(BUILD_DIR)/cblas_zgbmv_bv.o $(BUILD_DIR)/cblas_zgbmv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgbmv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_zgbmv_bv.o $(BUILD_DIR)/cblas_zgbmv_bv.o $(BUILD_DIR)/cblas_zgbmv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgbmv_bv
 
 $(BUILD_DIR)/test_cblas_zgemm_bv.o: $(TEST_DIR)/test_cblas_zgemm_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zgemm_bv.c -o $(BUILD_DIR)/test_cblas_zgemm_bv.o
 
 $(BUILD_DIR)/test_cblas_zgemm_bv: $(BUILD_DIR)/test_cblas_zgemm_bv.o $(BUILD_DIR)/cblas_zgemm_bv.o $(BUILD_DIR)/cblas_zgemm_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zgemm_bv.o $(BUILD_DIR)/cblas_zgemm_bv.o $(BUILD_DIR)/cblas_zgemm_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgemm_bv
+	$(CC) $(BUILD_DIR)/test_cblas_zgemm_bv.o $(BUILD_DIR)/cblas_zgemm_bv.o $(BUILD_DIR)/cblas_zgemm_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgemm_bv
 
 $(BUILD_DIR)/test_cblas_zgemv_bv.o: $(TEST_DIR)/test_cblas_zgemv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zgemv_bv.c -o $(BUILD_DIR)/test_cblas_zgemv_bv.o
 
 $(BUILD_DIR)/test_cblas_zgemv_bv: $(BUILD_DIR)/test_cblas_zgemv_bv.o $(BUILD_DIR)/cblas_zgemv_bv.o $(BUILD_DIR)/cblas_zgemv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zgemv_bv.o $(BUILD_DIR)/cblas_zgemv_bv.o $(BUILD_DIR)/cblas_zgemv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgemv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_zgemv_bv.o $(BUILD_DIR)/cblas_zgemv_bv.o $(BUILD_DIR)/cblas_zgemv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgemv_bv
 
 $(BUILD_DIR)/test_cblas_zgerc_bv.o: $(TEST_DIR)/test_cblas_zgerc_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zgerc_bv.c -o $(BUILD_DIR)/test_cblas_zgerc_bv.o
 
 $(BUILD_DIR)/test_cblas_zgerc_bv: $(BUILD_DIR)/test_cblas_zgerc_bv.o $(BUILD_DIR)/cblas_zgerc_bv.o $(BUILD_DIR)/cblas_zgerc_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zgerc_bv.o $(BUILD_DIR)/cblas_zgerc_bv.o $(BUILD_DIR)/cblas_zgerc_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgerc_bv
+	$(CC) $(BUILD_DIR)/test_cblas_zgerc_bv.o $(BUILD_DIR)/cblas_zgerc_bv.o $(BUILD_DIR)/cblas_zgerc_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgerc_bv
 
 $(BUILD_DIR)/test_cblas_zgeru_bv.o: $(TEST_DIR)/test_cblas_zgeru_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zgeru_bv.c -o $(BUILD_DIR)/test_cblas_zgeru_bv.o
 
 $(BUILD_DIR)/test_cblas_zgeru_bv: $(BUILD_DIR)/test_cblas_zgeru_bv.o $(BUILD_DIR)/cblas_zgeru_bv.o $(BUILD_DIR)/cblas_zgeru_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zgeru_bv.o $(BUILD_DIR)/cblas_zgeru_bv.o $(BUILD_DIR)/cblas_zgeru_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgeru_bv
+	$(CC) $(BUILD_DIR)/test_cblas_zgeru_bv.o $(BUILD_DIR)/cblas_zgeru_bv.o $(BUILD_DIR)/cblas_zgeru_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zgeru_bv
 
 $(BUILD_DIR)/test_cblas_zhbmv_bv.o: $(TEST_DIR)/test_cblas_zhbmv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zhbmv_bv.c -o $(BUILD_DIR)/test_cblas_zhbmv_bv.o
 
 $(BUILD_DIR)/test_cblas_zhbmv_bv: $(BUILD_DIR)/test_cblas_zhbmv_bv.o $(BUILD_DIR)/cblas_zhbmv_bv.o $(BUILD_DIR)/cblas_zhbmv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zhbmv_bv.o $(BUILD_DIR)/cblas_zhbmv_bv.o $(BUILD_DIR)/cblas_zhbmv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhbmv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_zhbmv_bv.o $(BUILD_DIR)/cblas_zhbmv_bv.o $(BUILD_DIR)/cblas_zhbmv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhbmv_bv
 
 $(BUILD_DIR)/test_cblas_zhemm_bv.o: $(TEST_DIR)/test_cblas_zhemm_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zhemm_bv.c -o $(BUILD_DIR)/test_cblas_zhemm_bv.o
 
 $(BUILD_DIR)/test_cblas_zhemm_bv: $(BUILD_DIR)/test_cblas_zhemm_bv.o $(BUILD_DIR)/cblas_zhemm_bv.o $(BUILD_DIR)/cblas_zhemm_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zhemm_bv.o $(BUILD_DIR)/cblas_zhemm_bv.o $(BUILD_DIR)/cblas_zhemm_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhemm_bv
+	$(CC) $(BUILD_DIR)/test_cblas_zhemm_bv.o $(BUILD_DIR)/cblas_zhemm_bv.o $(BUILD_DIR)/cblas_zhemm_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhemm_bv
 
 $(BUILD_DIR)/test_cblas_zhemv_bv.o: $(TEST_DIR)/test_cblas_zhemv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zhemv_bv.c -o $(BUILD_DIR)/test_cblas_zhemv_bv.o
 
 $(BUILD_DIR)/test_cblas_zhemv_bv: $(BUILD_DIR)/test_cblas_zhemv_bv.o $(BUILD_DIR)/cblas_zhemv_bv.o $(BUILD_DIR)/cblas_zhemv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zhemv_bv.o $(BUILD_DIR)/cblas_zhemv_bv.o $(BUILD_DIR)/cblas_zhemv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhemv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_zhemv_bv.o $(BUILD_DIR)/cblas_zhemv_bv.o $(BUILD_DIR)/cblas_zhemv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zhemv_bv
 
 $(BUILD_DIR)/test_cblas_zscal_bv.o: $(TEST_DIR)/test_cblas_zscal_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zscal_bv.c -o $(BUILD_DIR)/test_cblas_zscal_bv.o
 
 $(BUILD_DIR)/test_cblas_zscal_bv: $(BUILD_DIR)/test_cblas_zscal_bv.o $(BUILD_DIR)/cblas_zscal_bv.o $(BUILD_DIR)/cblas_zscal_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zscal_bv.o $(BUILD_DIR)/cblas_zscal_bv.o $(BUILD_DIR)/cblas_zscal_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zscal_bv
+	$(CC) $(BUILD_DIR)/test_cblas_zscal_bv.o $(BUILD_DIR)/cblas_zscal_bv.o $(BUILD_DIR)/cblas_zscal_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zscal_bv
 
 $(BUILD_DIR)/test_cblas_zswap_bv.o: $(TEST_DIR)/test_cblas_zswap_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zswap_bv.c -o $(BUILD_DIR)/test_cblas_zswap_bv.o
 
 $(BUILD_DIR)/test_cblas_zswap_bv: $(BUILD_DIR)/test_cblas_zswap_bv.o $(BUILD_DIR)/cblas_zswap_bv.o $(BUILD_DIR)/cblas_zswap_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zswap_bv.o $(BUILD_DIR)/cblas_zswap_bv.o $(BUILD_DIR)/cblas_zswap_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zswap_bv
+	$(CC) $(BUILD_DIR)/test_cblas_zswap_bv.o $(BUILD_DIR)/cblas_zswap_bv.o $(BUILD_DIR)/cblas_zswap_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zswap_bv
 
 $(BUILD_DIR)/test_cblas_zsymm_bv.o: $(TEST_DIR)/test_cblas_zsymm_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zsymm_bv.c -o $(BUILD_DIR)/test_cblas_zsymm_bv.o
 
 $(BUILD_DIR)/test_cblas_zsymm_bv: $(BUILD_DIR)/test_cblas_zsymm_bv.o $(BUILD_DIR)/cblas_zsymm_bv.o $(BUILD_DIR)/cblas_zsymm_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zsymm_bv.o $(BUILD_DIR)/cblas_zsymm_bv.o $(BUILD_DIR)/cblas_zsymm_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsymm_bv
+	$(CC) $(BUILD_DIR)/test_cblas_zsymm_bv.o $(BUILD_DIR)/cblas_zsymm_bv.o $(BUILD_DIR)/cblas_zsymm_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsymm_bv
 
 $(BUILD_DIR)/test_cblas_zsyr2k_bv.o: $(TEST_DIR)/test_cblas_zsyr2k_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zsyr2k_bv.c -o $(BUILD_DIR)/test_cblas_zsyr2k_bv.o
 
 $(BUILD_DIR)/test_cblas_zsyr2k_bv: $(BUILD_DIR)/test_cblas_zsyr2k_bv.o $(BUILD_DIR)/cblas_zsyr2k_bv.o $(BUILD_DIR)/cblas_zsyr2k_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zsyr2k_bv.o $(BUILD_DIR)/cblas_zsyr2k_bv.o $(BUILD_DIR)/cblas_zsyr2k_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsyr2k_bv
+	$(CC) $(BUILD_DIR)/test_cblas_zsyr2k_bv.o $(BUILD_DIR)/cblas_zsyr2k_bv.o $(BUILD_DIR)/cblas_zsyr2k_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsyr2k_bv
 
 $(BUILD_DIR)/test_cblas_zsyrk_bv.o: $(TEST_DIR)/test_cblas_zsyrk_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_zsyrk_bv.c -o $(BUILD_DIR)/test_cblas_zsyrk_bv.o
 
 $(BUILD_DIR)/test_cblas_zsyrk_bv: $(BUILD_DIR)/test_cblas_zsyrk_bv.o $(BUILD_DIR)/cblas_zsyrk_bv.o $(BUILD_DIR)/cblas_zsyrk_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_zsyrk_bv.o $(BUILD_DIR)/cblas_zsyrk_bv.o $(BUILD_DIR)/cblas_zsyrk_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsyrk_bv
+	$(CC) $(BUILD_DIR)/test_cblas_zsyrk_bv.o $(BUILD_DIR)/cblas_zsyrk_bv.o $(BUILD_DIR)/cblas_zsyrk_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_zsyrk_bv
 
 $(BUILD_DIR)/test_cblas_ztbmv_bv.o: $(TEST_DIR)/test_cblas_ztbmv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztbmv_bv.c -o $(BUILD_DIR)/test_cblas_ztbmv_bv.o
 
 $(BUILD_DIR)/test_cblas_ztbmv_bv: $(BUILD_DIR)/test_cblas_ztbmv_bv.o $(BUILD_DIR)/cblas_ztbmv_bv.o $(BUILD_DIR)/cblas_ztbmv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztbmv_bv.o $(BUILD_DIR)/cblas_ztbmv_bv.o $(BUILD_DIR)/cblas_ztbmv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztbmv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_ztbmv_bv.o $(BUILD_DIR)/cblas_ztbmv_bv.o $(BUILD_DIR)/cblas_ztbmv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztbmv_bv
 
 $(BUILD_DIR)/test_cblas_ztpmv_bv.o: $(TEST_DIR)/test_cblas_ztpmv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztpmv_bv.c -o $(BUILD_DIR)/test_cblas_ztpmv_bv.o
 
 $(BUILD_DIR)/test_cblas_ztpmv_bv: $(BUILD_DIR)/test_cblas_ztpmv_bv.o $(BUILD_DIR)/cblas_ztpmv_bv.o $(BUILD_DIR)/cblas_ztpmv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztpmv_bv.o $(BUILD_DIR)/cblas_ztpmv_bv.o $(BUILD_DIR)/cblas_ztpmv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztpmv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_ztpmv_bv.o $(BUILD_DIR)/cblas_ztpmv_bv.o $(BUILD_DIR)/cblas_ztpmv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztpmv_bv
 
 $(BUILD_DIR)/test_cblas_ztrmm_bv.o: $(TEST_DIR)/test_cblas_ztrmm_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztrmm_bv.c -o $(BUILD_DIR)/test_cblas_ztrmm_bv.o
 
 $(BUILD_DIR)/test_cblas_ztrmm_bv: $(BUILD_DIR)/test_cblas_ztrmm_bv.o $(BUILD_DIR)/cblas_ztrmm_bv.o $(BUILD_DIR)/cblas_ztrmm_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztrmm_bv.o $(BUILD_DIR)/cblas_ztrmm_bv.o $(BUILD_DIR)/cblas_ztrmm_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrmm_bv
+	$(CC) $(BUILD_DIR)/test_cblas_ztrmm_bv.o $(BUILD_DIR)/cblas_ztrmm_bv.o $(BUILD_DIR)/cblas_ztrmm_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrmm_bv
 
 $(BUILD_DIR)/test_cblas_ztrmv_bv.o: $(TEST_DIR)/test_cblas_ztrmv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztrmv_bv.c -o $(BUILD_DIR)/test_cblas_ztrmv_bv.o
 
 $(BUILD_DIR)/test_cblas_ztrmv_bv: $(BUILD_DIR)/test_cblas_ztrmv_bv.o $(BUILD_DIR)/cblas_ztrmv_bv.o $(BUILD_DIR)/cblas_ztrmv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztrmv_bv.o $(BUILD_DIR)/cblas_ztrmv_bv.o $(BUILD_DIR)/cblas_ztrmv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrmv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_ztrmv_bv.o $(BUILD_DIR)/cblas_ztrmv_bv.o $(BUILD_DIR)/cblas_ztrmv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrmv_bv
 
 $(BUILD_DIR)/test_cblas_ztrsm_bv.o: $(TEST_DIR)/test_cblas_ztrsm_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztrsm_bv.c -o $(BUILD_DIR)/test_cblas_ztrsm_bv.o
 
 $(BUILD_DIR)/test_cblas_ztrsm_bv: $(BUILD_DIR)/test_cblas_ztrsm_bv.o $(BUILD_DIR)/cblas_ztrsm_bv.o $(BUILD_DIR)/cblas_ztrsm_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztrsm_bv.o $(BUILD_DIR)/cblas_ztrsm_bv.o $(BUILD_DIR)/cblas_ztrsm_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrsm_bv
+	$(CC) $(BUILD_DIR)/test_cblas_ztrsm_bv.o $(BUILD_DIR)/cblas_ztrsm_bv.o $(BUILD_DIR)/cblas_ztrsm_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrsm_bv
 
 $(BUILD_DIR)/test_cblas_ztrsv_bv.o: $(TEST_DIR)/test_cblas_ztrsv_bv.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_DIR)/test_cblas_ztrsv_bv.c -o $(BUILD_DIR)/test_cblas_ztrsv_bv.o
 
 $(BUILD_DIR)/test_cblas_ztrsv_bv: $(BUILD_DIR)/test_cblas_ztrsv_bv.o $(BUILD_DIR)/cblas_ztrsv_bv.o $(BUILD_DIR)/cblas_ztrsv_bv_fortran.o $(BUILD_DIR)/adStack.o
-	$(CC) $(BUILD_DIR)/test_cblas_ztrsv_bv.o $(BUILD_DIR)/cblas_ztrsv_bv.o $(BUILD_DIR)/cblas_ztrsv_bv_fortran.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrsv_bv
+	$(CC) $(BUILD_DIR)/test_cblas_ztrsv_bv.o $(BUILD_DIR)/cblas_ztrsv_bv.o $(BUILD_DIR)/cblas_ztrsv_bv_fortran.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/adStack.o $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/test_cblas_ztrsv_bv
 
-$(BUILD_DIR)/libcblas_diff.a: $(BUILD_DIR)/cblas_caxpy_d.o $(BUILD_DIR)/cblas_ccopy_d.o $(BUILD_DIR)/cblas_cdotc_sub_d.o $(BUILD_DIR)/cblas_cdotu_sub_d.o $(BUILD_DIR)/cblas_cgbmv_d.o $(BUILD_DIR)/cblas_cgemm_d.o $(BUILD_DIR)/cblas_cgemv_d.o $(BUILD_DIR)/cblas_cgerc_d.o $(BUILD_DIR)/cblas_cgeru_d.o $(BUILD_DIR)/cblas_chbmv_d.o $(BUILD_DIR)/cblas_chemm_d.o $(BUILD_DIR)/cblas_chemv_d.o $(BUILD_DIR)/cblas_cscal_d.o $(BUILD_DIR)/cblas_cswap_d.o $(BUILD_DIR)/cblas_csymm_d.o $(BUILD_DIR)/cblas_csyr2k_d.o $(BUILD_DIR)/cblas_csyrk_d.o $(BUILD_DIR)/cblas_ctbmv_d.o $(BUILD_DIR)/cblas_ctpmv_d.o $(BUILD_DIR)/cblas_ctrmm_d.o $(BUILD_DIR)/cblas_ctrmv_d.o $(BUILD_DIR)/cblas_ctrsm_d.o $(BUILD_DIR)/cblas_ctrsv_d.o $(BUILD_DIR)/cblas_dasum_d.o $(BUILD_DIR)/cblas_daxpy_d.o $(BUILD_DIR)/cblas_dcopy_d.o $(BUILD_DIR)/cblas_ddot_d.o $(BUILD_DIR)/cblas_dgbmv_d.o $(BUILD_DIR)/cblas_dgemm_d.o $(BUILD_DIR)/cblas_dgemv_d.o $(BUILD_DIR)/cblas_dger_d.o $(BUILD_DIR)/cblas_dnrm2_d.o $(BUILD_DIR)/cblas_dsbmv_d.o $(BUILD_DIR)/cblas_dscal_d.o $(BUILD_DIR)/cblas_dspmv_d.o $(BUILD_DIR)/cblas_dspr2_d.o $(BUILD_DIR)/cblas_dspr_d.o $(BUILD_DIR)/cblas_dswap_d.o $(BUILD_DIR)/cblas_dsymm_d.o $(BUILD_DIR)/cblas_dsymv_d.o $(BUILD_DIR)/cblas_dsyr2_d.o $(BUILD_DIR)/cblas_dsyr2k_d.o $(BUILD_DIR)/cblas_dsyr_d.o $(BUILD_DIR)/cblas_dsyrk_d.o $(BUILD_DIR)/cblas_dtbmv_d.o $(BUILD_DIR)/cblas_dtpmv_d.o $(BUILD_DIR)/cblas_dtrmm_d.o $(BUILD_DIR)/cblas_dtrmv_d.o $(BUILD_DIR)/cblas_dtrsm_d.o $(BUILD_DIR)/cblas_dtrsv_d.o $(BUILD_DIR)/cblas_sasum_d.o $(BUILD_DIR)/cblas_saxpy_d.o $(BUILD_DIR)/cblas_scopy_d.o $(BUILD_DIR)/cblas_sdot_d.o $(BUILD_DIR)/cblas_sgbmv_d.o $(BUILD_DIR)/cblas_sgemm_d.o $(BUILD_DIR)/cblas_sgemv_d.o $(BUILD_DIR)/cblas_sger_d.o $(BUILD_DIR)/cblas_snrm2_d.o $(BUILD_DIR)/cblas_ssbmv_d.o $(BUILD_DIR)/cblas_sscal_d.o $(BUILD_DIR)/cblas_sspmv_d.o $(BUILD_DIR)/cblas_sspr2_d.o $(BUILD_DIR)/cblas_sspr_d.o $(BUILD_DIR)/cblas_sswap_d.o $(BUILD_DIR)/cblas_ssymm_d.o $(BUILD_DIR)/cblas_ssymv_d.o $(BUILD_DIR)/cblas_ssyr2_d.o $(BUILD_DIR)/cblas_ssyr2k_d.o $(BUILD_DIR)/cblas_ssyr_d.o $(BUILD_DIR)/cblas_ssyrk_d.o $(BUILD_DIR)/cblas_stbmv_d.o $(BUILD_DIR)/cblas_stpmv_d.o $(BUILD_DIR)/cblas_strmm_d.o $(BUILD_DIR)/cblas_strmv_d.o $(BUILD_DIR)/cblas_strsm_d.o $(BUILD_DIR)/cblas_strsv_d.o $(BUILD_DIR)/cblas_zaxpy_d.o $(BUILD_DIR)/cblas_zcopy_d.o $(BUILD_DIR)/cblas_zdotc_sub_d.o $(BUILD_DIR)/cblas_zdotu_sub_d.o $(BUILD_DIR)/cblas_zdscal_d.o $(BUILD_DIR)/cblas_zgbmv_d.o $(BUILD_DIR)/cblas_zgemm_d.o $(BUILD_DIR)/cblas_zgemv_d.o $(BUILD_DIR)/cblas_zgerc_d.o $(BUILD_DIR)/cblas_zgeru_d.o $(BUILD_DIR)/cblas_zhbmv_d.o $(BUILD_DIR)/cblas_zhemm_d.o $(BUILD_DIR)/cblas_zhemv_d.o $(BUILD_DIR)/cblas_zscal_d.o $(BUILD_DIR)/cblas_zswap_d.o $(BUILD_DIR)/cblas_zsymm_d.o $(BUILD_DIR)/cblas_zsyr2k_d.o $(BUILD_DIR)/cblas_zsyrk_d.o $(BUILD_DIR)/cblas_ztbmv_d.o $(BUILD_DIR)/cblas_ztpmv_d.o $(BUILD_DIR)/cblas_ztrmm_d.o $(BUILD_DIR)/cblas_ztrmv_d.o $(BUILD_DIR)/cblas_ztrsm_d.o $(BUILD_DIR)/cblas_ztrsv_d.o $(BUILD_DIR)/cblas_caxpy_b.o $(BUILD_DIR)/cblas_ccopy_b.o $(BUILD_DIR)/cblas_cdotc_sub_b.o $(BUILD_DIR)/cblas_cdotu_sub_b.o $(BUILD_DIR)/cblas_cgbmv_b.o $(BUILD_DIR)/cblas_cgemm_b.o $(BUILD_DIR)/cblas_cgemv_b.o $(BUILD_DIR)/cblas_cgerc_b.o $(BUILD_DIR)/cblas_cgeru_b.o $(BUILD_DIR)/cblas_chbmv_b.o $(BUILD_DIR)/cblas_chemm_b.o $(BUILD_DIR)/cblas_chemv_b.o $(BUILD_DIR)/cblas_cscal_b.o $(BUILD_DIR)/cblas_cswap_b.o $(BUILD_DIR)/cblas_csymm_b.o $(BUILD_DIR)/cblas_csyr2k_b.o $(BUILD_DIR)/cblas_csyrk_b.o $(BUILD_DIR)/cblas_ctbmv_b.o $(BUILD_DIR)/cblas_ctpmv_b.o $(BUILD_DIR)/cblas_ctrmm_b.o $(BUILD_DIR)/cblas_ctrmv_b.o $(BUILD_DIR)/cblas_ctrsm_b.o $(BUILD_DIR)/cblas_ctrsv_b.o $(BUILD_DIR)/cblas_dasum_b.o $(BUILD_DIR)/cblas_daxpy_b.o $(BUILD_DIR)/cblas_dcopy_b.o $(BUILD_DIR)/cblas_ddot_b.o $(BUILD_DIR)/cblas_dgbmv_b.o $(BUILD_DIR)/cblas_dgemm_b.o $(BUILD_DIR)/cblas_dgemv_b.o $(BUILD_DIR)/cblas_dger_b.o $(BUILD_DIR)/cblas_dnrm2_b.o $(BUILD_DIR)/cblas_dsbmv_b.o $(BUILD_DIR)/cblas_dscal_b.o $(BUILD_DIR)/cblas_dspmv_b.o $(BUILD_DIR)/cblas_dspr2_b.o $(BUILD_DIR)/cblas_dspr_b.o $(BUILD_DIR)/cblas_dswap_b.o $(BUILD_DIR)/cblas_dsymm_b.o $(BUILD_DIR)/cblas_dsymv_b.o $(BUILD_DIR)/cblas_dsyr2_b.o $(BUILD_DIR)/cblas_dsyr2k_b.o $(BUILD_DIR)/cblas_dsyr_b.o $(BUILD_DIR)/cblas_dsyrk_b.o $(BUILD_DIR)/cblas_dtbmv_b.o $(BUILD_DIR)/cblas_dtpmv_b.o $(BUILD_DIR)/cblas_dtrmm_b.o $(BUILD_DIR)/cblas_dtrmv_b.o $(BUILD_DIR)/cblas_dtrsm_b.o $(BUILD_DIR)/cblas_dtrsv_b.o $(BUILD_DIR)/cblas_sasum_b.o $(BUILD_DIR)/cblas_saxpy_b.o $(BUILD_DIR)/cblas_scopy_b.o $(BUILD_DIR)/cblas_sdot_b.o $(BUILD_DIR)/cblas_sgbmv_b.o $(BUILD_DIR)/cblas_sgemm_b.o $(BUILD_DIR)/cblas_sgemv_b.o $(BUILD_DIR)/cblas_sger_b.o $(BUILD_DIR)/cblas_snrm2_b.o $(BUILD_DIR)/cblas_ssbmv_b.o $(BUILD_DIR)/cblas_sscal_b.o $(BUILD_DIR)/cblas_sspmv_b.o $(BUILD_DIR)/cblas_sspr2_b.o $(BUILD_DIR)/cblas_sspr_b.o $(BUILD_DIR)/cblas_sswap_b.o $(BUILD_DIR)/cblas_ssymm_b.o $(BUILD_DIR)/cblas_ssymv_b.o $(BUILD_DIR)/cblas_ssyr2_b.o $(BUILD_DIR)/cblas_ssyr2k_b.o $(BUILD_DIR)/cblas_ssyr_b.o $(BUILD_DIR)/cblas_ssyrk_b.o $(BUILD_DIR)/cblas_stbmv_b.o $(BUILD_DIR)/cblas_stpmv_b.o $(BUILD_DIR)/cblas_strmm_b.o $(BUILD_DIR)/cblas_strmv_b.o $(BUILD_DIR)/cblas_strsm_b.o $(BUILD_DIR)/cblas_strsv_b.o $(BUILD_DIR)/cblas_zaxpy_b.o $(BUILD_DIR)/cblas_zcopy_b.o $(BUILD_DIR)/cblas_zdotc_sub_b.o $(BUILD_DIR)/cblas_zdotu_sub_b.o $(BUILD_DIR)/cblas_zdscal_b.o $(BUILD_DIR)/cblas_zgbmv_b.o $(BUILD_DIR)/cblas_zgemm_b.o $(BUILD_DIR)/cblas_zgemv_b.o $(BUILD_DIR)/cblas_zgerc_b.o $(BUILD_DIR)/cblas_zgeru_b.o $(BUILD_DIR)/cblas_zhbmv_b.o $(BUILD_DIR)/cblas_zhemm_b.o $(BUILD_DIR)/cblas_zhemv_b.o $(BUILD_DIR)/cblas_zscal_b.o $(BUILD_DIR)/cblas_zswap_b.o $(BUILD_DIR)/cblas_zsymm_b.o $(BUILD_DIR)/cblas_zsyr2k_b.o $(BUILD_DIR)/cblas_zsyrk_b.o $(BUILD_DIR)/cblas_ztbmv_b.o $(BUILD_DIR)/cblas_ztpmv_b.o $(BUILD_DIR)/cblas_ztrmm_b.o $(BUILD_DIR)/cblas_ztrmv_b.o $(BUILD_DIR)/cblas_ztrsm_b.o $(BUILD_DIR)/cblas_ztrsv_b.o $(BUILD_DIR)/cblas_caxpy_dv.o $(BUILD_DIR)/cblas_ccopy_dv.o $(BUILD_DIR)/cblas_cdotc_sub_dv.o $(BUILD_DIR)/cblas_cdotu_sub_dv.o $(BUILD_DIR)/cblas_cgbmv_dv.o $(BUILD_DIR)/cblas_cgemm_dv.o $(BUILD_DIR)/cblas_cgemv_dv.o $(BUILD_DIR)/cblas_cgerc_dv.o $(BUILD_DIR)/cblas_cgeru_dv.o $(BUILD_DIR)/cblas_chbmv_dv.o $(BUILD_DIR)/cblas_chemm_dv.o $(BUILD_DIR)/cblas_chemv_dv.o $(BUILD_DIR)/cblas_cscal_dv.o $(BUILD_DIR)/cblas_cswap_dv.o $(BUILD_DIR)/cblas_csymm_dv.o $(BUILD_DIR)/cblas_csyr2k_dv.o $(BUILD_DIR)/cblas_csyrk_dv.o $(BUILD_DIR)/cblas_ctbmv_dv.o $(BUILD_DIR)/cblas_ctpmv_dv.o $(BUILD_DIR)/cblas_ctrmm_dv.o $(BUILD_DIR)/cblas_ctrmv_dv.o $(BUILD_DIR)/cblas_ctrsm_dv.o $(BUILD_DIR)/cblas_ctrsv_dv.o $(BUILD_DIR)/cblas_dasum_dv.o $(BUILD_DIR)/cblas_daxpy_dv.o $(BUILD_DIR)/cblas_dcopy_dv.o $(BUILD_DIR)/cblas_ddot_dv.o $(BUILD_DIR)/cblas_dgbmv_dv.o $(BUILD_DIR)/cblas_dgemm_dv.o $(BUILD_DIR)/cblas_dgemv_dv.o $(BUILD_DIR)/cblas_dger_dv.o $(BUILD_DIR)/cblas_dnrm2_dv.o $(BUILD_DIR)/cblas_dsbmv_dv.o $(BUILD_DIR)/cblas_dscal_dv.o $(BUILD_DIR)/cblas_dspmv_dv.o $(BUILD_DIR)/cblas_dspr2_dv.o $(BUILD_DIR)/cblas_dspr_dv.o $(BUILD_DIR)/cblas_dswap_dv.o $(BUILD_DIR)/cblas_dsymm_dv.o $(BUILD_DIR)/cblas_dsymv_dv.o $(BUILD_DIR)/cblas_dsyr2_dv.o $(BUILD_DIR)/cblas_dsyr2k_dv.o $(BUILD_DIR)/cblas_dsyr_dv.o $(BUILD_DIR)/cblas_dsyrk_dv.o $(BUILD_DIR)/cblas_dtbmv_dv.o $(BUILD_DIR)/cblas_dtpmv_dv.o $(BUILD_DIR)/cblas_dtrmm_dv.o $(BUILD_DIR)/cblas_dtrmv_dv.o $(BUILD_DIR)/cblas_dtrsm_dv.o $(BUILD_DIR)/cblas_dtrsv_dv.o $(BUILD_DIR)/cblas_sasum_dv.o $(BUILD_DIR)/cblas_saxpy_dv.o $(BUILD_DIR)/cblas_scopy_dv.o $(BUILD_DIR)/cblas_sdot_dv.o $(BUILD_DIR)/cblas_sgbmv_dv.o $(BUILD_DIR)/cblas_sgemm_dv.o $(BUILD_DIR)/cblas_sgemv_dv.o $(BUILD_DIR)/cblas_sger_dv.o $(BUILD_DIR)/cblas_snrm2_dv.o $(BUILD_DIR)/cblas_ssbmv_dv.o $(BUILD_DIR)/cblas_sscal_dv.o $(BUILD_DIR)/cblas_sspmv_dv.o $(BUILD_DIR)/cblas_sspr2_dv.o $(BUILD_DIR)/cblas_sspr_dv.o $(BUILD_DIR)/cblas_sswap_dv.o $(BUILD_DIR)/cblas_ssymm_dv.o $(BUILD_DIR)/cblas_ssymv_dv.o $(BUILD_DIR)/cblas_ssyr2_dv.o $(BUILD_DIR)/cblas_ssyr2k_dv.o $(BUILD_DIR)/cblas_ssyr_dv.o $(BUILD_DIR)/cblas_ssyrk_dv.o $(BUILD_DIR)/cblas_stbmv_dv.o $(BUILD_DIR)/cblas_stpmv_dv.o $(BUILD_DIR)/cblas_strmm_dv.o $(BUILD_DIR)/cblas_strmv_dv.o $(BUILD_DIR)/cblas_strsm_dv.o $(BUILD_DIR)/cblas_strsv_dv.o $(BUILD_DIR)/cblas_zaxpy_dv.o $(BUILD_DIR)/cblas_zcopy_dv.o $(BUILD_DIR)/cblas_zdotc_sub_dv.o $(BUILD_DIR)/cblas_zdotu_sub_dv.o $(BUILD_DIR)/cblas_zdscal_dv.o $(BUILD_DIR)/cblas_zgbmv_dv.o $(BUILD_DIR)/cblas_zgemm_dv.o $(BUILD_DIR)/cblas_zgemv_dv.o $(BUILD_DIR)/cblas_zgerc_dv.o $(BUILD_DIR)/cblas_zgeru_dv.o $(BUILD_DIR)/cblas_zhbmv_dv.o $(BUILD_DIR)/cblas_zhemm_dv.o $(BUILD_DIR)/cblas_zhemv_dv.o $(BUILD_DIR)/cblas_zscal_dv.o $(BUILD_DIR)/cblas_zswap_dv.o $(BUILD_DIR)/cblas_zsymm_dv.o $(BUILD_DIR)/cblas_zsyr2k_dv.o $(BUILD_DIR)/cblas_zsyrk_dv.o $(BUILD_DIR)/cblas_ztbmv_dv.o $(BUILD_DIR)/cblas_ztpmv_dv.o $(BUILD_DIR)/cblas_ztrmm_dv.o $(BUILD_DIR)/cblas_ztrmv_dv.o $(BUILD_DIR)/cblas_ztrsm_dv.o $(BUILD_DIR)/cblas_ztrsv_dv.o $(BUILD_DIR)/cblas_caxpy_bv.o $(BUILD_DIR)/cblas_ccopy_bv.o $(BUILD_DIR)/cblas_cdotc_sub_bv.o $(BUILD_DIR)/cblas_cdotu_sub_bv.o $(BUILD_DIR)/cblas_cgbmv_bv.o $(BUILD_DIR)/cblas_cgemm_bv.o $(BUILD_DIR)/cblas_cgemv_bv.o $(BUILD_DIR)/cblas_cgerc_bv.o $(BUILD_DIR)/cblas_cgeru_bv.o $(BUILD_DIR)/cblas_chbmv_bv.o $(BUILD_DIR)/cblas_chemm_bv.o $(BUILD_DIR)/cblas_chemv_bv.o $(BUILD_DIR)/cblas_cscal_bv.o $(BUILD_DIR)/cblas_cswap_bv.o $(BUILD_DIR)/cblas_csymm_bv.o $(BUILD_DIR)/cblas_csyr2k_bv.o $(BUILD_DIR)/cblas_csyrk_bv.o $(BUILD_DIR)/cblas_ctbmv_bv.o $(BUILD_DIR)/cblas_ctpmv_bv.o $(BUILD_DIR)/cblas_ctrmm_bv.o $(BUILD_DIR)/cblas_ctrmv_bv.o $(BUILD_DIR)/cblas_ctrsm_bv.o $(BUILD_DIR)/cblas_ctrsv_bv.o $(BUILD_DIR)/cblas_dasum_bv.o $(BUILD_DIR)/cblas_daxpy_bv.o $(BUILD_DIR)/cblas_dcopy_bv.o $(BUILD_DIR)/cblas_ddot_bv.o $(BUILD_DIR)/cblas_dgbmv_bv.o $(BUILD_DIR)/cblas_dgemm_bv.o $(BUILD_DIR)/cblas_dgemv_bv.o $(BUILD_DIR)/cblas_dger_bv.o $(BUILD_DIR)/cblas_dnrm2_bv.o $(BUILD_DIR)/cblas_dsbmv_bv.o $(BUILD_DIR)/cblas_dscal_bv.o $(BUILD_DIR)/cblas_dspmv_bv.o $(BUILD_DIR)/cblas_dspr2_bv.o $(BUILD_DIR)/cblas_dspr_bv.o $(BUILD_DIR)/cblas_dswap_bv.o $(BUILD_DIR)/cblas_dsymm_bv.o $(BUILD_DIR)/cblas_dsymv_bv.o $(BUILD_DIR)/cblas_dsyr2_bv.o $(BUILD_DIR)/cblas_dsyr2k_bv.o $(BUILD_DIR)/cblas_dsyr_bv.o $(BUILD_DIR)/cblas_dsyrk_bv.o $(BUILD_DIR)/cblas_dtbmv_bv.o $(BUILD_DIR)/cblas_dtpmv_bv.o $(BUILD_DIR)/cblas_dtrmm_bv.o $(BUILD_DIR)/cblas_dtrmv_bv.o $(BUILD_DIR)/cblas_dtrsm_bv.o $(BUILD_DIR)/cblas_dtrsv_bv.o $(BUILD_DIR)/cblas_sasum_bv.o $(BUILD_DIR)/cblas_saxpy_bv.o $(BUILD_DIR)/cblas_scopy_bv.o $(BUILD_DIR)/cblas_sdot_bv.o $(BUILD_DIR)/cblas_sgbmv_bv.o $(BUILD_DIR)/cblas_sgemm_bv.o $(BUILD_DIR)/cblas_sgemv_bv.o $(BUILD_DIR)/cblas_sger_bv.o $(BUILD_DIR)/cblas_snrm2_bv.o $(BUILD_DIR)/cblas_ssbmv_bv.o $(BUILD_DIR)/cblas_sscal_bv.o $(BUILD_DIR)/cblas_sspmv_bv.o $(BUILD_DIR)/cblas_sspr2_bv.o $(BUILD_DIR)/cblas_sspr_bv.o $(BUILD_DIR)/cblas_sswap_bv.o $(BUILD_DIR)/cblas_ssymm_bv.o $(BUILD_DIR)/cblas_ssymv_bv.o $(BUILD_DIR)/cblas_ssyr2_bv.o $(BUILD_DIR)/cblas_ssyr2k_bv.o $(BUILD_DIR)/cblas_ssyr_bv.o $(BUILD_DIR)/cblas_ssyrk_bv.o $(BUILD_DIR)/cblas_stbmv_bv.o $(BUILD_DIR)/cblas_stpmv_bv.o $(BUILD_DIR)/cblas_strmm_bv.o $(BUILD_DIR)/cblas_strmv_bv.o $(BUILD_DIR)/cblas_strsm_bv.o $(BUILD_DIR)/cblas_strsv_bv.o $(BUILD_DIR)/cblas_zaxpy_bv.o $(BUILD_DIR)/cblas_zcopy_bv.o $(BUILD_DIR)/cblas_zdotc_sub_bv.o $(BUILD_DIR)/cblas_zdotu_sub_bv.o $(BUILD_DIR)/cblas_zdscal_bv.o $(BUILD_DIR)/cblas_zgbmv_bv.o $(BUILD_DIR)/cblas_zgemm_bv.o $(BUILD_DIR)/cblas_zgemv_bv.o $(BUILD_DIR)/cblas_zgerc_bv.o $(BUILD_DIR)/cblas_zgeru_bv.o $(BUILD_DIR)/cblas_zhbmv_bv.o $(BUILD_DIR)/cblas_zhemm_bv.o $(BUILD_DIR)/cblas_zhemv_bv.o $(BUILD_DIR)/cblas_zscal_bv.o $(BUILD_DIR)/cblas_zswap_bv.o $(BUILD_DIR)/cblas_zsymm_bv.o $(BUILD_DIR)/cblas_zsyr2k_bv.o $(BUILD_DIR)/cblas_zsyrk_bv.o $(BUILD_DIR)/cblas_ztbmv_bv.o $(BUILD_DIR)/cblas_ztpmv_bv.o $(BUILD_DIR)/cblas_ztrmm_bv.o $(BUILD_DIR)/cblas_ztrmv_bv.o $(BUILD_DIR)/cblas_ztrsm_bv.o $(BUILD_DIR)/cblas_ztrsv_bv.o $(BUILD_DIR)/DIFFSIZES.o $(BUILD_DIR)/cblas_caxpy_b_fortran.o $(BUILD_DIR)/cblas_caxpy_bv_fortran.o $(BUILD_DIR)/cblas_caxpy_d_fortran.o $(BUILD_DIR)/cblas_caxpy_dv_fortran.o $(BUILD_DIR)/cblas_ccopy_b_fortran.o $(BUILD_DIR)/cblas_ccopy_bv_fortran.o $(BUILD_DIR)/cblas_ccopy_d_fortran.o $(BUILD_DIR)/cblas_ccopy_dv_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_b_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_bv_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_d_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_dv_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_b_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_bv_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_d_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_dv_fortran.o $(BUILD_DIR)/cblas_cgbmv_b_fortran.o $(BUILD_DIR)/cblas_cgbmv_bv_fortran.o $(BUILD_DIR)/cblas_cgbmv_d_fortran.o $(BUILD_DIR)/cblas_cgbmv_dv_fortran.o $(BUILD_DIR)/cblas_cgemm_b_fortran.o $(BUILD_DIR)/cblas_cgemm_bv_fortran.o $(BUILD_DIR)/cblas_cgemm_d_fortran.o $(BUILD_DIR)/cblas_cgemm_dv_fortran.o $(BUILD_DIR)/cblas_cgemv_b_fortran.o $(BUILD_DIR)/cblas_cgemv_bv_fortran.o $(BUILD_DIR)/cblas_cgemv_d_fortran.o $(BUILD_DIR)/cblas_cgemv_dv_fortran.o $(BUILD_DIR)/cblas_cgerc_b_fortran.o $(BUILD_DIR)/cblas_cgerc_bv_fortran.o $(BUILD_DIR)/cblas_cgerc_d_fortran.o $(BUILD_DIR)/cblas_cgerc_dv_fortran.o $(BUILD_DIR)/cblas_cgeru_b_fortran.o $(BUILD_DIR)/cblas_cgeru_bv_fortran.o $(BUILD_DIR)/cblas_cgeru_d_fortran.o $(BUILD_DIR)/cblas_cgeru_dv_fortran.o $(BUILD_DIR)/cblas_chbmv_b_fortran.o $(BUILD_DIR)/cblas_chbmv_bv_fortran.o $(BUILD_DIR)/cblas_chbmv_d_fortran.o $(BUILD_DIR)/cblas_chbmv_dv_fortran.o $(BUILD_DIR)/cblas_chemm_b_fortran.o $(BUILD_DIR)/cblas_chemm_bv_fortran.o $(BUILD_DIR)/cblas_chemm_d_fortran.o $(BUILD_DIR)/cblas_chemm_dv_fortran.o $(BUILD_DIR)/cblas_chemv_b_fortran.o $(BUILD_DIR)/cblas_chemv_bv_fortran.o $(BUILD_DIR)/cblas_chemv_d_fortran.o $(BUILD_DIR)/cblas_chemv_dv_fortran.o $(BUILD_DIR)/cblas_cscal_b_fortran.o $(BUILD_DIR)/cblas_cscal_bv_fortran.o $(BUILD_DIR)/cblas_cscal_d_fortran.o $(BUILD_DIR)/cblas_cscal_dv_fortran.o $(BUILD_DIR)/cblas_cswap_b_fortran.o $(BUILD_DIR)/cblas_cswap_bv_fortran.o $(BUILD_DIR)/cblas_cswap_d_fortran.o $(BUILD_DIR)/cblas_cswap_dv_fortran.o $(BUILD_DIR)/cblas_csymm_b_fortran.o $(BUILD_DIR)/cblas_csymm_bv_fortran.o $(BUILD_DIR)/cblas_csymm_d_fortran.o $(BUILD_DIR)/cblas_csymm_dv_fortran.o $(BUILD_DIR)/cblas_csyr2k_b_fortran.o $(BUILD_DIR)/cblas_csyr2k_bv_fortran.o $(BUILD_DIR)/cblas_csyr2k_d_fortran.o $(BUILD_DIR)/cblas_csyr2k_dv_fortran.o $(BUILD_DIR)/cblas_csyrk_b_fortran.o $(BUILD_DIR)/cblas_csyrk_bv_fortran.o $(BUILD_DIR)/cblas_csyrk_d_fortran.o $(BUILD_DIR)/cblas_csyrk_dv_fortran.o $(BUILD_DIR)/cblas_ctbmv_b_fortran.o $(BUILD_DIR)/cblas_ctbmv_bv_fortran.o $(BUILD_DIR)/cblas_ctbmv_d_fortran.o $(BUILD_DIR)/cblas_ctbmv_dv_fortran.o $(BUILD_DIR)/cblas_ctpmv_b_fortran.o $(BUILD_DIR)/cblas_ctpmv_bv_fortran.o $(BUILD_DIR)/cblas_ctpmv_d_fortran.o $(BUILD_DIR)/cblas_ctpmv_dv_fortran.o $(BUILD_DIR)/cblas_ctrmm_b_fortran.o $(BUILD_DIR)/cblas_ctrmm_bv_fortran.o $(BUILD_DIR)/cblas_ctrmm_d_fortran.o $(BUILD_DIR)/cblas_ctrmm_dv_fortran.o $(BUILD_DIR)/cblas_ctrmv_b_fortran.o $(BUILD_DIR)/cblas_ctrmv_bv_fortran.o $(BUILD_DIR)/cblas_ctrmv_d_fortran.o $(BUILD_DIR)/cblas_ctrmv_dv_fortran.o $(BUILD_DIR)/cblas_ctrsm_b_fortran.o $(BUILD_DIR)/cblas_ctrsm_bv_fortran.o $(BUILD_DIR)/cblas_ctrsm_d_fortran.o $(BUILD_DIR)/cblas_ctrsm_dv_fortran.o $(BUILD_DIR)/cblas_ctrsv_b_fortran.o $(BUILD_DIR)/cblas_ctrsv_bv_fortran.o $(BUILD_DIR)/cblas_ctrsv_d_fortran.o $(BUILD_DIR)/cblas_ctrsv_dv_fortran.o $(BUILD_DIR)/cblas_dasum_b_fortran.o $(BUILD_DIR)/cblas_dasum_bv_fortran.o $(BUILD_DIR)/cblas_dasum_d_fortran.o $(BUILD_DIR)/cblas_dasum_dv_fortran.o $(BUILD_DIR)/cblas_daxpy_b_fortran.o $(BUILD_DIR)/cblas_daxpy_bv_fortran.o $(BUILD_DIR)/cblas_daxpy_d_fortran.o $(BUILD_DIR)/cblas_daxpy_dv_fortran.o $(BUILD_DIR)/cblas_dcopy_b_fortran.o $(BUILD_DIR)/cblas_dcopy_bv_fortran.o $(BUILD_DIR)/cblas_dcopy_d_fortran.o $(BUILD_DIR)/cblas_dcopy_dv_fortran.o $(BUILD_DIR)/cblas_ddot_b_fortran.o $(BUILD_DIR)/cblas_ddot_bv_fortran.o $(BUILD_DIR)/cblas_ddot_d_fortran.o $(BUILD_DIR)/cblas_ddot_dv_fortran.o $(BUILD_DIR)/cblas_dgbmv_b_fortran.o $(BUILD_DIR)/cblas_dgbmv_bv_fortran.o $(BUILD_DIR)/cblas_dgbmv_d_fortran.o $(BUILD_DIR)/cblas_dgbmv_dv_fortran.o $(BUILD_DIR)/cblas_dgemm_b_fortran.o $(BUILD_DIR)/cblas_dgemm_bv_fortran.o $(BUILD_DIR)/cblas_dgemm_d_fortran.o $(BUILD_DIR)/cblas_dgemm_dv_fortran.o $(BUILD_DIR)/cblas_dgemv_b_fortran.o $(BUILD_DIR)/cblas_dgemv_bv_fortran.o $(BUILD_DIR)/cblas_dgemv_d_fortran.o $(BUILD_DIR)/cblas_dgemv_dv_fortran.o $(BUILD_DIR)/cblas_dger_b_fortran.o $(BUILD_DIR)/cblas_dger_bv_fortran.o $(BUILD_DIR)/cblas_dger_d_fortran.o $(BUILD_DIR)/cblas_dger_dv_fortran.o $(BUILD_DIR)/cblas_dnrm2_b_fortran.o $(BUILD_DIR)/cblas_dnrm2_bv_fortran.o $(BUILD_DIR)/cblas_dnrm2_d_fortran.o $(BUILD_DIR)/cblas_dnrm2_dv_fortran.o $(BUILD_DIR)/cblas_dsbmv_b_fortran.o $(BUILD_DIR)/cblas_dsbmv_bv_fortran.o $(BUILD_DIR)/cblas_dsbmv_d_fortran.o $(BUILD_DIR)/cblas_dsbmv_dv_fortran.o $(BUILD_DIR)/cblas_dscal_b_fortran.o $(BUILD_DIR)/cblas_dscal_bv_fortran.o $(BUILD_DIR)/cblas_dscal_d_fortran.o $(BUILD_DIR)/cblas_dscal_dv_fortran.o $(BUILD_DIR)/cblas_dspmv_b_fortran.o $(BUILD_DIR)/cblas_dspmv_bv_fortran.o $(BUILD_DIR)/cblas_dspmv_d_fortran.o $(BUILD_DIR)/cblas_dspmv_dv_fortran.o $(BUILD_DIR)/cblas_dspr2_b_fortran.o $(BUILD_DIR)/cblas_dspr2_bv_fortran.o $(BUILD_DIR)/cblas_dspr2_d_fortran.o $(BUILD_DIR)/cblas_dspr2_dv_fortran.o $(BUILD_DIR)/cblas_dspr_b_fortran.o $(BUILD_DIR)/cblas_dspr_bv_fortran.o $(BUILD_DIR)/cblas_dspr_d_fortran.o $(BUILD_DIR)/cblas_dspr_dv_fortran.o $(BUILD_DIR)/cblas_dswap_b_fortran.o $(BUILD_DIR)/cblas_dswap_bv_fortran.o $(BUILD_DIR)/cblas_dswap_d_fortran.o $(BUILD_DIR)/cblas_dswap_dv_fortran.o $(BUILD_DIR)/cblas_dsymm_b_fortran.o $(BUILD_DIR)/cblas_dsymm_bv_fortran.o $(BUILD_DIR)/cblas_dsymm_d_fortran.o $(BUILD_DIR)/cblas_dsymm_dv_fortran.o $(BUILD_DIR)/cblas_dsymv_b_fortran.o $(BUILD_DIR)/cblas_dsymv_bv_fortran.o $(BUILD_DIR)/cblas_dsymv_d_fortran.o $(BUILD_DIR)/cblas_dsymv_dv_fortran.o $(BUILD_DIR)/cblas_dsyr2_b_fortran.o $(BUILD_DIR)/cblas_dsyr2_bv_fortran.o $(BUILD_DIR)/cblas_dsyr2_d_fortran.o $(BUILD_DIR)/cblas_dsyr2_dv_fortran.o $(BUILD_DIR)/cblas_dsyr2k_b_fortran.o $(BUILD_DIR)/cblas_dsyr2k_bv_fortran.o $(BUILD_DIR)/cblas_dsyr2k_d_fortran.o $(BUILD_DIR)/cblas_dsyr2k_dv_fortran.o $(BUILD_DIR)/cblas_dsyr_b_fortran.o $(BUILD_DIR)/cblas_dsyr_bv_fortran.o $(BUILD_DIR)/cblas_dsyr_d_fortran.o $(BUILD_DIR)/cblas_dsyr_dv_fortran.o $(BUILD_DIR)/cblas_dsyrk_b_fortran.o $(BUILD_DIR)/cblas_dsyrk_bv_fortran.o $(BUILD_DIR)/cblas_dsyrk_d_fortran.o $(BUILD_DIR)/cblas_dsyrk_dv_fortran.o $(BUILD_DIR)/cblas_dtbmv_b_fortran.o $(BUILD_DIR)/cblas_dtbmv_bv_fortran.o $(BUILD_DIR)/cblas_dtbmv_d_fortran.o $(BUILD_DIR)/cblas_dtbmv_dv_fortran.o $(BUILD_DIR)/cblas_dtpmv_b_fortran.o $(BUILD_DIR)/cblas_dtpmv_bv_fortran.o $(BUILD_DIR)/cblas_dtpmv_d_fortran.o $(BUILD_DIR)/cblas_dtpmv_dv_fortran.o $(BUILD_DIR)/cblas_dtrmm_b_fortran.o $(BUILD_DIR)/cblas_dtrmm_bv_fortran.o $(BUILD_DIR)/cblas_dtrmm_d_fortran.o $(BUILD_DIR)/cblas_dtrmm_dv_fortran.o $(BUILD_DIR)/cblas_dtrmv_b_fortran.o $(BUILD_DIR)/cblas_dtrmv_bv_fortran.o $(BUILD_DIR)/cblas_dtrmv_d_fortran.o $(BUILD_DIR)/cblas_dtrmv_dv_fortran.o $(BUILD_DIR)/cblas_dtrsm_b_fortran.o $(BUILD_DIR)/cblas_dtrsm_bv_fortran.o $(BUILD_DIR)/cblas_dtrsm_d_fortran.o $(BUILD_DIR)/cblas_dtrsm_dv_fortran.o $(BUILD_DIR)/cblas_dtrsv_b_fortran.o $(BUILD_DIR)/cblas_dtrsv_bv_fortran.o $(BUILD_DIR)/cblas_dtrsv_d_fortran.o $(BUILD_DIR)/cblas_dtrsv_dv_fortran.o $(BUILD_DIR)/cblas_sasum_b_fortran.o $(BUILD_DIR)/cblas_sasum_bv_fortran.o $(BUILD_DIR)/cblas_sasum_d_fortran.o $(BUILD_DIR)/cblas_sasum_dv_fortran.o $(BUILD_DIR)/cblas_saxpy_b_fortran.o $(BUILD_DIR)/cblas_saxpy_bv_fortran.o $(BUILD_DIR)/cblas_saxpy_d_fortran.o $(BUILD_DIR)/cblas_saxpy_dv_fortran.o $(BUILD_DIR)/cblas_scopy_b_fortran.o $(BUILD_DIR)/cblas_scopy_bv_fortran.o $(BUILD_DIR)/cblas_scopy_d_fortran.o $(BUILD_DIR)/cblas_scopy_dv_fortran.o $(BUILD_DIR)/cblas_sdot_b_fortran.o $(BUILD_DIR)/cblas_sdot_bv_fortran.o $(BUILD_DIR)/cblas_sdot_d_fortran.o $(BUILD_DIR)/cblas_sdot_dv_fortran.o $(BUILD_DIR)/cblas_sgbmv_b_fortran.o $(BUILD_DIR)/cblas_sgbmv_bv_fortran.o $(BUILD_DIR)/cblas_sgbmv_d_fortran.o $(BUILD_DIR)/cblas_sgbmv_dv_fortran.o $(BUILD_DIR)/cblas_sgemm_b_fortran.o $(BUILD_DIR)/cblas_sgemm_bv_fortran.o $(BUILD_DIR)/cblas_sgemm_d_fortran.o $(BUILD_DIR)/cblas_sgemm_dv_fortran.o $(BUILD_DIR)/cblas_sgemv_b_fortran.o $(BUILD_DIR)/cblas_sgemv_bv_fortran.o $(BUILD_DIR)/cblas_sgemv_d_fortran.o $(BUILD_DIR)/cblas_sgemv_dv_fortran.o $(BUILD_DIR)/cblas_sger_b_fortran.o $(BUILD_DIR)/cblas_sger_bv_fortran.o $(BUILD_DIR)/cblas_sger_d_fortran.o $(BUILD_DIR)/cblas_sger_dv_fortran.o $(BUILD_DIR)/cblas_snrm2_b_fortran.o $(BUILD_DIR)/cblas_snrm2_bv_fortran.o $(BUILD_DIR)/cblas_snrm2_d_fortran.o $(BUILD_DIR)/cblas_snrm2_dv_fortran.o $(BUILD_DIR)/cblas_ssbmv_b_fortran.o $(BUILD_DIR)/cblas_ssbmv_bv_fortran.o $(BUILD_DIR)/cblas_ssbmv_d_fortran.o $(BUILD_DIR)/cblas_ssbmv_dv_fortran.o $(BUILD_DIR)/cblas_sscal_b_fortran.o $(BUILD_DIR)/cblas_sscal_bv_fortran.o $(BUILD_DIR)/cblas_sscal_d_fortran.o $(BUILD_DIR)/cblas_sscal_dv_fortran.o $(BUILD_DIR)/cblas_sspmv_b_fortran.o $(BUILD_DIR)/cblas_sspmv_bv_fortran.o $(BUILD_DIR)/cblas_sspmv_d_fortran.o $(BUILD_DIR)/cblas_sspmv_dv_fortran.o $(BUILD_DIR)/cblas_sspr2_b_fortran.o $(BUILD_DIR)/cblas_sspr2_bv_fortran.o $(BUILD_DIR)/cblas_sspr2_d_fortran.o $(BUILD_DIR)/cblas_sspr2_dv_fortran.o $(BUILD_DIR)/cblas_sspr_b_fortran.o $(BUILD_DIR)/cblas_sspr_bv_fortran.o $(BUILD_DIR)/cblas_sspr_d_fortran.o $(BUILD_DIR)/cblas_sspr_dv_fortran.o $(BUILD_DIR)/cblas_sswap_b_fortran.o $(BUILD_DIR)/cblas_sswap_bv_fortran.o $(BUILD_DIR)/cblas_sswap_d_fortran.o $(BUILD_DIR)/cblas_sswap_dv_fortran.o $(BUILD_DIR)/cblas_ssymm_b_fortran.o $(BUILD_DIR)/cblas_ssymm_bv_fortran.o $(BUILD_DIR)/cblas_ssymm_d_fortran.o $(BUILD_DIR)/cblas_ssymm_dv_fortran.o $(BUILD_DIR)/cblas_ssymv_b_fortran.o $(BUILD_DIR)/cblas_ssymv_bv_fortran.o $(BUILD_DIR)/cblas_ssymv_d_fortran.o $(BUILD_DIR)/cblas_ssymv_dv_fortran.o $(BUILD_DIR)/cblas_ssyr2_b_fortran.o $(BUILD_DIR)/cblas_ssyr2_bv_fortran.o $(BUILD_DIR)/cblas_ssyr2_d_fortran.o $(BUILD_DIR)/cblas_ssyr2_dv_fortran.o $(BUILD_DIR)/cblas_ssyr2k_b_fortran.o $(BUILD_DIR)/cblas_ssyr2k_bv_fortran.o $(BUILD_DIR)/cblas_ssyr2k_d_fortran.o $(BUILD_DIR)/cblas_ssyr2k_dv_fortran.o $(BUILD_DIR)/cblas_ssyr_b_fortran.o $(BUILD_DIR)/cblas_ssyr_bv_fortran.o $(BUILD_DIR)/cblas_ssyr_d_fortran.o $(BUILD_DIR)/cblas_ssyr_dv_fortran.o $(BUILD_DIR)/cblas_ssyrk_b_fortran.o $(BUILD_DIR)/cblas_ssyrk_bv_fortran.o $(BUILD_DIR)/cblas_ssyrk_d_fortran.o $(BUILD_DIR)/cblas_ssyrk_dv_fortran.o $(BUILD_DIR)/cblas_stbmv_b_fortran.o $(BUILD_DIR)/cblas_stbmv_bv_fortran.o $(BUILD_DIR)/cblas_stbmv_d_fortran.o $(BUILD_DIR)/cblas_stbmv_dv_fortran.o $(BUILD_DIR)/cblas_stpmv_b_fortran.o $(BUILD_DIR)/cblas_stpmv_bv_fortran.o $(BUILD_DIR)/cblas_stpmv_d_fortran.o $(BUILD_DIR)/cblas_stpmv_dv_fortran.o $(BUILD_DIR)/cblas_strmm_b_fortran.o $(BUILD_DIR)/cblas_strmm_bv_fortran.o $(BUILD_DIR)/cblas_strmm_d_fortran.o $(BUILD_DIR)/cblas_strmm_dv_fortran.o $(BUILD_DIR)/cblas_strmv_b_fortran.o $(BUILD_DIR)/cblas_strmv_bv_fortran.o $(BUILD_DIR)/cblas_strmv_d_fortran.o $(BUILD_DIR)/cblas_strmv_dv_fortran.o $(BUILD_DIR)/cblas_strsm_b_fortran.o $(BUILD_DIR)/cblas_strsm_bv_fortran.o $(BUILD_DIR)/cblas_strsm_d_fortran.o $(BUILD_DIR)/cblas_strsm_dv_fortran.o $(BUILD_DIR)/cblas_strsv_b_fortran.o $(BUILD_DIR)/cblas_strsv_bv_fortran.o $(BUILD_DIR)/cblas_strsv_d_fortran.o $(BUILD_DIR)/cblas_strsv_dv_fortran.o $(BUILD_DIR)/cblas_zaxpy_b_fortran.o $(BUILD_DIR)/cblas_zaxpy_bv_fortran.o $(BUILD_DIR)/cblas_zaxpy_d_fortran.o $(BUILD_DIR)/cblas_zaxpy_dv_fortran.o $(BUILD_DIR)/cblas_zcopy_b_fortran.o $(BUILD_DIR)/cblas_zcopy_bv_fortran.o $(BUILD_DIR)/cblas_zcopy_d_fortran.o $(BUILD_DIR)/cblas_zcopy_dv_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_b_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_bv_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_d_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_dv_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_b_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_bv_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_d_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_dv_fortran.o $(BUILD_DIR)/cblas_zdscal_b_fortran.o $(BUILD_DIR)/cblas_zdscal_bv_fortran.o $(BUILD_DIR)/cblas_zdscal_d_fortran.o $(BUILD_DIR)/cblas_zdscal_dv_fortran.o $(BUILD_DIR)/cblas_zgbmv_b_fortran.o $(BUILD_DIR)/cblas_zgbmv_bv_fortran.o $(BUILD_DIR)/cblas_zgbmv_d_fortran.o $(BUILD_DIR)/cblas_zgbmv_dv_fortran.o $(BUILD_DIR)/cblas_zgemm_b_fortran.o $(BUILD_DIR)/cblas_zgemm_bv_fortran.o $(BUILD_DIR)/cblas_zgemm_d_fortran.o $(BUILD_DIR)/cblas_zgemm_dv_fortran.o $(BUILD_DIR)/cblas_zgemv_b_fortran.o $(BUILD_DIR)/cblas_zgemv_bv_fortran.o $(BUILD_DIR)/cblas_zgemv_d_fortran.o $(BUILD_DIR)/cblas_zgemv_dv_fortran.o $(BUILD_DIR)/cblas_zgerc_b_fortran.o $(BUILD_DIR)/cblas_zgerc_bv_fortran.o $(BUILD_DIR)/cblas_zgerc_d_fortran.o $(BUILD_DIR)/cblas_zgerc_dv_fortran.o $(BUILD_DIR)/cblas_zgeru_b_fortran.o $(BUILD_DIR)/cblas_zgeru_bv_fortran.o $(BUILD_DIR)/cblas_zgeru_d_fortran.o $(BUILD_DIR)/cblas_zgeru_dv_fortran.o $(BUILD_DIR)/cblas_zhbmv_b_fortran.o $(BUILD_DIR)/cblas_zhbmv_bv_fortran.o $(BUILD_DIR)/cblas_zhbmv_d_fortran.o $(BUILD_DIR)/cblas_zhbmv_dv_fortran.o $(BUILD_DIR)/cblas_zhemm_b_fortran.o $(BUILD_DIR)/cblas_zhemm_bv_fortran.o $(BUILD_DIR)/cblas_zhemm_d_fortran.o $(BUILD_DIR)/cblas_zhemm_dv_fortran.o $(BUILD_DIR)/cblas_zhemv_b_fortran.o $(BUILD_DIR)/cblas_zhemv_bv_fortran.o $(BUILD_DIR)/cblas_zhemv_d_fortran.o $(BUILD_DIR)/cblas_zhemv_dv_fortran.o $(BUILD_DIR)/cblas_zscal_b_fortran.o $(BUILD_DIR)/cblas_zscal_bv_fortran.o $(BUILD_DIR)/cblas_zscal_d_fortran.o $(BUILD_DIR)/cblas_zscal_dv_fortran.o $(BUILD_DIR)/cblas_zswap_b_fortran.o $(BUILD_DIR)/cblas_zswap_bv_fortran.o $(BUILD_DIR)/cblas_zswap_d_fortran.o $(BUILD_DIR)/cblas_zswap_dv_fortran.o $(BUILD_DIR)/cblas_zsymm_b_fortran.o $(BUILD_DIR)/cblas_zsymm_bv_fortran.o $(BUILD_DIR)/cblas_zsymm_d_fortran.o $(BUILD_DIR)/cblas_zsymm_dv_fortran.o $(BUILD_DIR)/cblas_zsyr2k_b_fortran.o $(BUILD_DIR)/cblas_zsyr2k_bv_fortran.o $(BUILD_DIR)/cblas_zsyr2k_d_fortran.o $(BUILD_DIR)/cblas_zsyr2k_dv_fortran.o $(BUILD_DIR)/cblas_zsyrk_b_fortran.o $(BUILD_DIR)/cblas_zsyrk_bv_fortran.o $(BUILD_DIR)/cblas_zsyrk_d_fortran.o $(BUILD_DIR)/cblas_zsyrk_dv_fortran.o $(BUILD_DIR)/cblas_ztbmv_b_fortran.o $(BUILD_DIR)/cblas_ztbmv_bv_fortran.o $(BUILD_DIR)/cblas_ztbmv_d_fortran.o $(BUILD_DIR)/cblas_ztbmv_dv_fortran.o $(BUILD_DIR)/cblas_ztpmv_b_fortran.o $(BUILD_DIR)/cblas_ztpmv_bv_fortran.o $(BUILD_DIR)/cblas_ztpmv_d_fortran.o $(BUILD_DIR)/cblas_ztpmv_dv_fortran.o $(BUILD_DIR)/cblas_ztrmm_b_fortran.o $(BUILD_DIR)/cblas_ztrmm_bv_fortran.o $(BUILD_DIR)/cblas_ztrmm_d_fortran.o $(BUILD_DIR)/cblas_ztrmm_dv_fortran.o $(BUILD_DIR)/cblas_ztrmv_b_fortran.o $(BUILD_DIR)/cblas_ztrmv_bv_fortran.o $(BUILD_DIR)/cblas_ztrmv_d_fortran.o $(BUILD_DIR)/cblas_ztrmv_dv_fortran.o $(BUILD_DIR)/cblas_ztrsm_b_fortran.o $(BUILD_DIR)/cblas_ztrsm_bv_fortran.o $(BUILD_DIR)/cblas_ztrsm_d_fortran.o $(BUILD_DIR)/cblas_ztrsm_dv_fortran.o $(BUILD_DIR)/cblas_ztrsv_b_fortran.o $(BUILD_DIR)/cblas_ztrsv_bv_fortran.o $(BUILD_DIR)/cblas_ztrsv_d_fortran.o $(BUILD_DIR)/cblas_ztrsv_dv_fortran.o
-	ar rcu $(BUILD_DIR)/libcblas_diff.a $(BUILD_DIR)/cblas_caxpy_d.o $(BUILD_DIR)/cblas_ccopy_d.o $(BUILD_DIR)/cblas_cdotc_sub_d.o $(BUILD_DIR)/cblas_cdotu_sub_d.o $(BUILD_DIR)/cblas_cgbmv_d.o $(BUILD_DIR)/cblas_cgemm_d.o $(BUILD_DIR)/cblas_cgemv_d.o $(BUILD_DIR)/cblas_cgerc_d.o $(BUILD_DIR)/cblas_cgeru_d.o $(BUILD_DIR)/cblas_chbmv_d.o $(BUILD_DIR)/cblas_chemm_d.o $(BUILD_DIR)/cblas_chemv_d.o $(BUILD_DIR)/cblas_cscal_d.o $(BUILD_DIR)/cblas_cswap_d.o $(BUILD_DIR)/cblas_csymm_d.o $(BUILD_DIR)/cblas_csyr2k_d.o $(BUILD_DIR)/cblas_csyrk_d.o $(BUILD_DIR)/cblas_ctbmv_d.o $(BUILD_DIR)/cblas_ctpmv_d.o $(BUILD_DIR)/cblas_ctrmm_d.o $(BUILD_DIR)/cblas_ctrmv_d.o $(BUILD_DIR)/cblas_ctrsm_d.o $(BUILD_DIR)/cblas_ctrsv_d.o $(BUILD_DIR)/cblas_dasum_d.o $(BUILD_DIR)/cblas_daxpy_d.o $(BUILD_DIR)/cblas_dcopy_d.o $(BUILD_DIR)/cblas_ddot_d.o $(BUILD_DIR)/cblas_dgbmv_d.o $(BUILD_DIR)/cblas_dgemm_d.o $(BUILD_DIR)/cblas_dgemv_d.o $(BUILD_DIR)/cblas_dger_d.o $(BUILD_DIR)/cblas_dnrm2_d.o $(BUILD_DIR)/cblas_dsbmv_d.o $(BUILD_DIR)/cblas_dscal_d.o $(BUILD_DIR)/cblas_dspmv_d.o $(BUILD_DIR)/cblas_dspr2_d.o $(BUILD_DIR)/cblas_dspr_d.o $(BUILD_DIR)/cblas_dswap_d.o $(BUILD_DIR)/cblas_dsymm_d.o $(BUILD_DIR)/cblas_dsymv_d.o $(BUILD_DIR)/cblas_dsyr2_d.o $(BUILD_DIR)/cblas_dsyr2k_d.o $(BUILD_DIR)/cblas_dsyr_d.o $(BUILD_DIR)/cblas_dsyrk_d.o $(BUILD_DIR)/cblas_dtbmv_d.o $(BUILD_DIR)/cblas_dtpmv_d.o $(BUILD_DIR)/cblas_dtrmm_d.o $(BUILD_DIR)/cblas_dtrmv_d.o $(BUILD_DIR)/cblas_dtrsm_d.o $(BUILD_DIR)/cblas_dtrsv_d.o $(BUILD_DIR)/cblas_sasum_d.o $(BUILD_DIR)/cblas_saxpy_d.o $(BUILD_DIR)/cblas_scopy_d.o $(BUILD_DIR)/cblas_sdot_d.o $(BUILD_DIR)/cblas_sgbmv_d.o $(BUILD_DIR)/cblas_sgemm_d.o $(BUILD_DIR)/cblas_sgemv_d.o $(BUILD_DIR)/cblas_sger_d.o $(BUILD_DIR)/cblas_snrm2_d.o $(BUILD_DIR)/cblas_ssbmv_d.o $(BUILD_DIR)/cblas_sscal_d.o $(BUILD_DIR)/cblas_sspmv_d.o $(BUILD_DIR)/cblas_sspr2_d.o $(BUILD_DIR)/cblas_sspr_d.o $(BUILD_DIR)/cblas_sswap_d.o $(BUILD_DIR)/cblas_ssymm_d.o $(BUILD_DIR)/cblas_ssymv_d.o $(BUILD_DIR)/cblas_ssyr2_d.o $(BUILD_DIR)/cblas_ssyr2k_d.o $(BUILD_DIR)/cblas_ssyr_d.o $(BUILD_DIR)/cblas_ssyrk_d.o $(BUILD_DIR)/cblas_stbmv_d.o $(BUILD_DIR)/cblas_stpmv_d.o $(BUILD_DIR)/cblas_strmm_d.o $(BUILD_DIR)/cblas_strmv_d.o $(BUILD_DIR)/cblas_strsm_d.o $(BUILD_DIR)/cblas_strsv_d.o $(BUILD_DIR)/cblas_zaxpy_d.o $(BUILD_DIR)/cblas_zcopy_d.o $(BUILD_DIR)/cblas_zdotc_sub_d.o $(BUILD_DIR)/cblas_zdotu_sub_d.o $(BUILD_DIR)/cblas_zdscal_d.o $(BUILD_DIR)/cblas_zgbmv_d.o $(BUILD_DIR)/cblas_zgemm_d.o $(BUILD_DIR)/cblas_zgemv_d.o $(BUILD_DIR)/cblas_zgerc_d.o $(BUILD_DIR)/cblas_zgeru_d.o $(BUILD_DIR)/cblas_zhbmv_d.o $(BUILD_DIR)/cblas_zhemm_d.o $(BUILD_DIR)/cblas_zhemv_d.o $(BUILD_DIR)/cblas_zscal_d.o $(BUILD_DIR)/cblas_zswap_d.o $(BUILD_DIR)/cblas_zsymm_d.o $(BUILD_DIR)/cblas_zsyr2k_d.o $(BUILD_DIR)/cblas_zsyrk_d.o $(BUILD_DIR)/cblas_ztbmv_d.o $(BUILD_DIR)/cblas_ztpmv_d.o $(BUILD_DIR)/cblas_ztrmm_d.o $(BUILD_DIR)/cblas_ztrmv_d.o $(BUILD_DIR)/cblas_ztrsm_d.o $(BUILD_DIR)/cblas_ztrsv_d.o $(BUILD_DIR)/cblas_caxpy_b.o $(BUILD_DIR)/cblas_ccopy_b.o $(BUILD_DIR)/cblas_cdotc_sub_b.o $(BUILD_DIR)/cblas_cdotu_sub_b.o $(BUILD_DIR)/cblas_cgbmv_b.o $(BUILD_DIR)/cblas_cgemm_b.o $(BUILD_DIR)/cblas_cgemv_b.o $(BUILD_DIR)/cblas_cgerc_b.o $(BUILD_DIR)/cblas_cgeru_b.o $(BUILD_DIR)/cblas_chbmv_b.o $(BUILD_DIR)/cblas_chemm_b.o $(BUILD_DIR)/cblas_chemv_b.o $(BUILD_DIR)/cblas_cscal_b.o $(BUILD_DIR)/cblas_cswap_b.o $(BUILD_DIR)/cblas_csymm_b.o $(BUILD_DIR)/cblas_csyr2k_b.o $(BUILD_DIR)/cblas_csyrk_b.o $(BUILD_DIR)/cblas_ctbmv_b.o $(BUILD_DIR)/cblas_ctpmv_b.o $(BUILD_DIR)/cblas_ctrmm_b.o $(BUILD_DIR)/cblas_ctrmv_b.o $(BUILD_DIR)/cblas_ctrsm_b.o $(BUILD_DIR)/cblas_ctrsv_b.o $(BUILD_DIR)/cblas_dasum_b.o $(BUILD_DIR)/cblas_daxpy_b.o $(BUILD_DIR)/cblas_dcopy_b.o $(BUILD_DIR)/cblas_ddot_b.o $(BUILD_DIR)/cblas_dgbmv_b.o $(BUILD_DIR)/cblas_dgemm_b.o $(BUILD_DIR)/cblas_dgemv_b.o $(BUILD_DIR)/cblas_dger_b.o $(BUILD_DIR)/cblas_dnrm2_b.o $(BUILD_DIR)/cblas_dsbmv_b.o $(BUILD_DIR)/cblas_dscal_b.o $(BUILD_DIR)/cblas_dspmv_b.o $(BUILD_DIR)/cblas_dspr2_b.o $(BUILD_DIR)/cblas_dspr_b.o $(BUILD_DIR)/cblas_dswap_b.o $(BUILD_DIR)/cblas_dsymm_b.o $(BUILD_DIR)/cblas_dsymv_b.o $(BUILD_DIR)/cblas_dsyr2_b.o $(BUILD_DIR)/cblas_dsyr2k_b.o $(BUILD_DIR)/cblas_dsyr_b.o $(BUILD_DIR)/cblas_dsyrk_b.o $(BUILD_DIR)/cblas_dtbmv_b.o $(BUILD_DIR)/cblas_dtpmv_b.o $(BUILD_DIR)/cblas_dtrmm_b.o $(BUILD_DIR)/cblas_dtrmv_b.o $(BUILD_DIR)/cblas_dtrsm_b.o $(BUILD_DIR)/cblas_dtrsv_b.o $(BUILD_DIR)/cblas_sasum_b.o $(BUILD_DIR)/cblas_saxpy_b.o $(BUILD_DIR)/cblas_scopy_b.o $(BUILD_DIR)/cblas_sdot_b.o $(BUILD_DIR)/cblas_sgbmv_b.o $(BUILD_DIR)/cblas_sgemm_b.o $(BUILD_DIR)/cblas_sgemv_b.o $(BUILD_DIR)/cblas_sger_b.o $(BUILD_DIR)/cblas_snrm2_b.o $(BUILD_DIR)/cblas_ssbmv_b.o $(BUILD_DIR)/cblas_sscal_b.o $(BUILD_DIR)/cblas_sspmv_b.o $(BUILD_DIR)/cblas_sspr2_b.o $(BUILD_DIR)/cblas_sspr_b.o $(BUILD_DIR)/cblas_sswap_b.o $(BUILD_DIR)/cblas_ssymm_b.o $(BUILD_DIR)/cblas_ssymv_b.o $(BUILD_DIR)/cblas_ssyr2_b.o $(BUILD_DIR)/cblas_ssyr2k_b.o $(BUILD_DIR)/cblas_ssyr_b.o $(BUILD_DIR)/cblas_ssyrk_b.o $(BUILD_DIR)/cblas_stbmv_b.o $(BUILD_DIR)/cblas_stpmv_b.o $(BUILD_DIR)/cblas_strmm_b.o $(BUILD_DIR)/cblas_strmv_b.o $(BUILD_DIR)/cblas_strsm_b.o $(BUILD_DIR)/cblas_strsv_b.o $(BUILD_DIR)/cblas_zaxpy_b.o $(BUILD_DIR)/cblas_zcopy_b.o $(BUILD_DIR)/cblas_zdotc_sub_b.o $(BUILD_DIR)/cblas_zdotu_sub_b.o $(BUILD_DIR)/cblas_zdscal_b.o $(BUILD_DIR)/cblas_zgbmv_b.o $(BUILD_DIR)/cblas_zgemm_b.o $(BUILD_DIR)/cblas_zgemv_b.o $(BUILD_DIR)/cblas_zgerc_b.o $(BUILD_DIR)/cblas_zgeru_b.o $(BUILD_DIR)/cblas_zhbmv_b.o $(BUILD_DIR)/cblas_zhemm_b.o $(BUILD_DIR)/cblas_zhemv_b.o $(BUILD_DIR)/cblas_zscal_b.o $(BUILD_DIR)/cblas_zswap_b.o $(BUILD_DIR)/cblas_zsymm_b.o $(BUILD_DIR)/cblas_zsyr2k_b.o $(BUILD_DIR)/cblas_zsyrk_b.o $(BUILD_DIR)/cblas_ztbmv_b.o $(BUILD_DIR)/cblas_ztpmv_b.o $(BUILD_DIR)/cblas_ztrmm_b.o $(BUILD_DIR)/cblas_ztrmv_b.o $(BUILD_DIR)/cblas_ztrsm_b.o $(BUILD_DIR)/cblas_ztrsv_b.o $(BUILD_DIR)/cblas_caxpy_dv.o $(BUILD_DIR)/cblas_ccopy_dv.o $(BUILD_DIR)/cblas_cdotc_sub_dv.o $(BUILD_DIR)/cblas_cdotu_sub_dv.o $(BUILD_DIR)/cblas_cgbmv_dv.o $(BUILD_DIR)/cblas_cgemm_dv.o $(BUILD_DIR)/cblas_cgemv_dv.o $(BUILD_DIR)/cblas_cgerc_dv.o $(BUILD_DIR)/cblas_cgeru_dv.o $(BUILD_DIR)/cblas_chbmv_dv.o $(BUILD_DIR)/cblas_chemm_dv.o $(BUILD_DIR)/cblas_chemv_dv.o $(BUILD_DIR)/cblas_cscal_dv.o $(BUILD_DIR)/cblas_cswap_dv.o $(BUILD_DIR)/cblas_csymm_dv.o $(BUILD_DIR)/cblas_csyr2k_dv.o $(BUILD_DIR)/cblas_csyrk_dv.o $(BUILD_DIR)/cblas_ctbmv_dv.o $(BUILD_DIR)/cblas_ctpmv_dv.o $(BUILD_DIR)/cblas_ctrmm_dv.o $(BUILD_DIR)/cblas_ctrmv_dv.o $(BUILD_DIR)/cblas_ctrsm_dv.o $(BUILD_DIR)/cblas_ctrsv_dv.o $(BUILD_DIR)/cblas_dasum_dv.o $(BUILD_DIR)/cblas_daxpy_dv.o $(BUILD_DIR)/cblas_dcopy_dv.o $(BUILD_DIR)/cblas_ddot_dv.o $(BUILD_DIR)/cblas_dgbmv_dv.o $(BUILD_DIR)/cblas_dgemm_dv.o $(BUILD_DIR)/cblas_dgemv_dv.o $(BUILD_DIR)/cblas_dger_dv.o $(BUILD_DIR)/cblas_dnrm2_dv.o $(BUILD_DIR)/cblas_dsbmv_dv.o $(BUILD_DIR)/cblas_dscal_dv.o $(BUILD_DIR)/cblas_dspmv_dv.o $(BUILD_DIR)/cblas_dspr2_dv.o $(BUILD_DIR)/cblas_dspr_dv.o $(BUILD_DIR)/cblas_dswap_dv.o $(BUILD_DIR)/cblas_dsymm_dv.o $(BUILD_DIR)/cblas_dsymv_dv.o $(BUILD_DIR)/cblas_dsyr2_dv.o $(BUILD_DIR)/cblas_dsyr2k_dv.o $(BUILD_DIR)/cblas_dsyr_dv.o $(BUILD_DIR)/cblas_dsyrk_dv.o $(BUILD_DIR)/cblas_dtbmv_dv.o $(BUILD_DIR)/cblas_dtpmv_dv.o $(BUILD_DIR)/cblas_dtrmm_dv.o $(BUILD_DIR)/cblas_dtrmv_dv.o $(BUILD_DIR)/cblas_dtrsm_dv.o $(BUILD_DIR)/cblas_dtrsv_dv.o $(BUILD_DIR)/cblas_sasum_dv.o $(BUILD_DIR)/cblas_saxpy_dv.o $(BUILD_DIR)/cblas_scopy_dv.o $(BUILD_DIR)/cblas_sdot_dv.o $(BUILD_DIR)/cblas_sgbmv_dv.o $(BUILD_DIR)/cblas_sgemm_dv.o $(BUILD_DIR)/cblas_sgemv_dv.o $(BUILD_DIR)/cblas_sger_dv.o $(BUILD_DIR)/cblas_snrm2_dv.o $(BUILD_DIR)/cblas_ssbmv_dv.o $(BUILD_DIR)/cblas_sscal_dv.o $(BUILD_DIR)/cblas_sspmv_dv.o $(BUILD_DIR)/cblas_sspr2_dv.o $(BUILD_DIR)/cblas_sspr_dv.o $(BUILD_DIR)/cblas_sswap_dv.o $(BUILD_DIR)/cblas_ssymm_dv.o $(BUILD_DIR)/cblas_ssymv_dv.o $(BUILD_DIR)/cblas_ssyr2_dv.o $(BUILD_DIR)/cblas_ssyr2k_dv.o $(BUILD_DIR)/cblas_ssyr_dv.o $(BUILD_DIR)/cblas_ssyrk_dv.o $(BUILD_DIR)/cblas_stbmv_dv.o $(BUILD_DIR)/cblas_stpmv_dv.o $(BUILD_DIR)/cblas_strmm_dv.o $(BUILD_DIR)/cblas_strmv_dv.o $(BUILD_DIR)/cblas_strsm_dv.o $(BUILD_DIR)/cblas_strsv_dv.o $(BUILD_DIR)/cblas_zaxpy_dv.o $(BUILD_DIR)/cblas_zcopy_dv.o $(BUILD_DIR)/cblas_zdotc_sub_dv.o $(BUILD_DIR)/cblas_zdotu_sub_dv.o $(BUILD_DIR)/cblas_zdscal_dv.o $(BUILD_DIR)/cblas_zgbmv_dv.o $(BUILD_DIR)/cblas_zgemm_dv.o $(BUILD_DIR)/cblas_zgemv_dv.o $(BUILD_DIR)/cblas_zgerc_dv.o $(BUILD_DIR)/cblas_zgeru_dv.o $(BUILD_DIR)/cblas_zhbmv_dv.o $(BUILD_DIR)/cblas_zhemm_dv.o $(BUILD_DIR)/cblas_zhemv_dv.o $(BUILD_DIR)/cblas_zscal_dv.o $(BUILD_DIR)/cblas_zswap_dv.o $(BUILD_DIR)/cblas_zsymm_dv.o $(BUILD_DIR)/cblas_zsyr2k_dv.o $(BUILD_DIR)/cblas_zsyrk_dv.o $(BUILD_DIR)/cblas_ztbmv_dv.o $(BUILD_DIR)/cblas_ztpmv_dv.o $(BUILD_DIR)/cblas_ztrmm_dv.o $(BUILD_DIR)/cblas_ztrmv_dv.o $(BUILD_DIR)/cblas_ztrsm_dv.o $(BUILD_DIR)/cblas_ztrsv_dv.o $(BUILD_DIR)/cblas_caxpy_bv.o $(BUILD_DIR)/cblas_ccopy_bv.o $(BUILD_DIR)/cblas_cdotc_sub_bv.o $(BUILD_DIR)/cblas_cdotu_sub_bv.o $(BUILD_DIR)/cblas_cgbmv_bv.o $(BUILD_DIR)/cblas_cgemm_bv.o $(BUILD_DIR)/cblas_cgemv_bv.o $(BUILD_DIR)/cblas_cgerc_bv.o $(BUILD_DIR)/cblas_cgeru_bv.o $(BUILD_DIR)/cblas_chbmv_bv.o $(BUILD_DIR)/cblas_chemm_bv.o $(BUILD_DIR)/cblas_chemv_bv.o $(BUILD_DIR)/cblas_cscal_bv.o $(BUILD_DIR)/cblas_cswap_bv.o $(BUILD_DIR)/cblas_csymm_bv.o $(BUILD_DIR)/cblas_csyr2k_bv.o $(BUILD_DIR)/cblas_csyrk_bv.o $(BUILD_DIR)/cblas_ctbmv_bv.o $(BUILD_DIR)/cblas_ctpmv_bv.o $(BUILD_DIR)/cblas_ctrmm_bv.o $(BUILD_DIR)/cblas_ctrmv_bv.o $(BUILD_DIR)/cblas_ctrsm_bv.o $(BUILD_DIR)/cblas_ctrsv_bv.o $(BUILD_DIR)/cblas_dasum_bv.o $(BUILD_DIR)/cblas_daxpy_bv.o $(BUILD_DIR)/cblas_dcopy_bv.o $(BUILD_DIR)/cblas_ddot_bv.o $(BUILD_DIR)/cblas_dgbmv_bv.o $(BUILD_DIR)/cblas_dgemm_bv.o $(BUILD_DIR)/cblas_dgemv_bv.o $(BUILD_DIR)/cblas_dger_bv.o $(BUILD_DIR)/cblas_dnrm2_bv.o $(BUILD_DIR)/cblas_dsbmv_bv.o $(BUILD_DIR)/cblas_dscal_bv.o $(BUILD_DIR)/cblas_dspmv_bv.o $(BUILD_DIR)/cblas_dspr2_bv.o $(BUILD_DIR)/cblas_dspr_bv.o $(BUILD_DIR)/cblas_dswap_bv.o $(BUILD_DIR)/cblas_dsymm_bv.o $(BUILD_DIR)/cblas_dsymv_bv.o $(BUILD_DIR)/cblas_dsyr2_bv.o $(BUILD_DIR)/cblas_dsyr2k_bv.o $(BUILD_DIR)/cblas_dsyr_bv.o $(BUILD_DIR)/cblas_dsyrk_bv.o $(BUILD_DIR)/cblas_dtbmv_bv.o $(BUILD_DIR)/cblas_dtpmv_bv.o $(BUILD_DIR)/cblas_dtrmm_bv.o $(BUILD_DIR)/cblas_dtrmv_bv.o $(BUILD_DIR)/cblas_dtrsm_bv.o $(BUILD_DIR)/cblas_dtrsv_bv.o $(BUILD_DIR)/cblas_sasum_bv.o $(BUILD_DIR)/cblas_saxpy_bv.o $(BUILD_DIR)/cblas_scopy_bv.o $(BUILD_DIR)/cblas_sdot_bv.o $(BUILD_DIR)/cblas_sgbmv_bv.o $(BUILD_DIR)/cblas_sgemm_bv.o $(BUILD_DIR)/cblas_sgemv_bv.o $(BUILD_DIR)/cblas_sger_bv.o $(BUILD_DIR)/cblas_snrm2_bv.o $(BUILD_DIR)/cblas_ssbmv_bv.o $(BUILD_DIR)/cblas_sscal_bv.o $(BUILD_DIR)/cblas_sspmv_bv.o $(BUILD_DIR)/cblas_sspr2_bv.o $(BUILD_DIR)/cblas_sspr_bv.o $(BUILD_DIR)/cblas_sswap_bv.o $(BUILD_DIR)/cblas_ssymm_bv.o $(BUILD_DIR)/cblas_ssymv_bv.o $(BUILD_DIR)/cblas_ssyr2_bv.o $(BUILD_DIR)/cblas_ssyr2k_bv.o $(BUILD_DIR)/cblas_ssyr_bv.o $(BUILD_DIR)/cblas_ssyrk_bv.o $(BUILD_DIR)/cblas_stbmv_bv.o $(BUILD_DIR)/cblas_stpmv_bv.o $(BUILD_DIR)/cblas_strmm_bv.o $(BUILD_DIR)/cblas_strmv_bv.o $(BUILD_DIR)/cblas_strsm_bv.o $(BUILD_DIR)/cblas_strsv_bv.o $(BUILD_DIR)/cblas_zaxpy_bv.o $(BUILD_DIR)/cblas_zcopy_bv.o $(BUILD_DIR)/cblas_zdotc_sub_bv.o $(BUILD_DIR)/cblas_zdotu_sub_bv.o $(BUILD_DIR)/cblas_zdscal_bv.o $(BUILD_DIR)/cblas_zgbmv_bv.o $(BUILD_DIR)/cblas_zgemm_bv.o $(BUILD_DIR)/cblas_zgemv_bv.o $(BUILD_DIR)/cblas_zgerc_bv.o $(BUILD_DIR)/cblas_zgeru_bv.o $(BUILD_DIR)/cblas_zhbmv_bv.o $(BUILD_DIR)/cblas_zhemm_bv.o $(BUILD_DIR)/cblas_zhemv_bv.o $(BUILD_DIR)/cblas_zscal_bv.o $(BUILD_DIR)/cblas_zswap_bv.o $(BUILD_DIR)/cblas_zsymm_bv.o $(BUILD_DIR)/cblas_zsyr2k_bv.o $(BUILD_DIR)/cblas_zsyrk_bv.o $(BUILD_DIR)/cblas_ztbmv_bv.o $(BUILD_DIR)/cblas_ztpmv_bv.o $(BUILD_DIR)/cblas_ztrmm_bv.o $(BUILD_DIR)/cblas_ztrmv_bv.o $(BUILD_DIR)/cblas_ztrsm_bv.o $(BUILD_DIR)/cblas_ztrsv_bv.o $(BUILD_DIR)/DIFFSIZES.o $(BUILD_DIR)/cblas_caxpy_b_fortran.o $(BUILD_DIR)/cblas_caxpy_bv_fortran.o $(BUILD_DIR)/cblas_caxpy_d_fortran.o $(BUILD_DIR)/cblas_caxpy_dv_fortran.o $(BUILD_DIR)/cblas_ccopy_b_fortran.o $(BUILD_DIR)/cblas_ccopy_bv_fortran.o $(BUILD_DIR)/cblas_ccopy_d_fortran.o $(BUILD_DIR)/cblas_ccopy_dv_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_b_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_bv_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_d_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_dv_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_b_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_bv_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_d_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_dv_fortran.o $(BUILD_DIR)/cblas_cgbmv_b_fortran.o $(BUILD_DIR)/cblas_cgbmv_bv_fortran.o $(BUILD_DIR)/cblas_cgbmv_d_fortran.o $(BUILD_DIR)/cblas_cgbmv_dv_fortran.o $(BUILD_DIR)/cblas_cgemm_b_fortran.o $(BUILD_DIR)/cblas_cgemm_bv_fortran.o $(BUILD_DIR)/cblas_cgemm_d_fortran.o $(BUILD_DIR)/cblas_cgemm_dv_fortran.o $(BUILD_DIR)/cblas_cgemv_b_fortran.o $(BUILD_DIR)/cblas_cgemv_bv_fortran.o $(BUILD_DIR)/cblas_cgemv_d_fortran.o $(BUILD_DIR)/cblas_cgemv_dv_fortran.o $(BUILD_DIR)/cblas_cgerc_b_fortran.o $(BUILD_DIR)/cblas_cgerc_bv_fortran.o $(BUILD_DIR)/cblas_cgerc_d_fortran.o $(BUILD_DIR)/cblas_cgerc_dv_fortran.o $(BUILD_DIR)/cblas_cgeru_b_fortran.o $(BUILD_DIR)/cblas_cgeru_bv_fortran.o $(BUILD_DIR)/cblas_cgeru_d_fortran.o $(BUILD_DIR)/cblas_cgeru_dv_fortran.o $(BUILD_DIR)/cblas_chbmv_b_fortran.o $(BUILD_DIR)/cblas_chbmv_bv_fortran.o $(BUILD_DIR)/cblas_chbmv_d_fortran.o $(BUILD_DIR)/cblas_chbmv_dv_fortran.o $(BUILD_DIR)/cblas_chemm_b_fortran.o $(BUILD_DIR)/cblas_chemm_bv_fortran.o $(BUILD_DIR)/cblas_chemm_d_fortran.o $(BUILD_DIR)/cblas_chemm_dv_fortran.o $(BUILD_DIR)/cblas_chemv_b_fortran.o $(BUILD_DIR)/cblas_chemv_bv_fortran.o $(BUILD_DIR)/cblas_chemv_d_fortran.o $(BUILD_DIR)/cblas_chemv_dv_fortran.o $(BUILD_DIR)/cblas_cscal_b_fortran.o $(BUILD_DIR)/cblas_cscal_bv_fortran.o $(BUILD_DIR)/cblas_cscal_d_fortran.o $(BUILD_DIR)/cblas_cscal_dv_fortran.o $(BUILD_DIR)/cblas_cswap_b_fortran.o $(BUILD_DIR)/cblas_cswap_bv_fortran.o $(BUILD_DIR)/cblas_cswap_d_fortran.o $(BUILD_DIR)/cblas_cswap_dv_fortran.o $(BUILD_DIR)/cblas_csymm_b_fortran.o $(BUILD_DIR)/cblas_csymm_bv_fortran.o $(BUILD_DIR)/cblas_csymm_d_fortran.o $(BUILD_DIR)/cblas_csymm_dv_fortran.o $(BUILD_DIR)/cblas_csyr2k_b_fortran.o $(BUILD_DIR)/cblas_csyr2k_bv_fortran.o $(BUILD_DIR)/cblas_csyr2k_d_fortran.o $(BUILD_DIR)/cblas_csyr2k_dv_fortran.o $(BUILD_DIR)/cblas_csyrk_b_fortran.o $(BUILD_DIR)/cblas_csyrk_bv_fortran.o $(BUILD_DIR)/cblas_csyrk_d_fortran.o $(BUILD_DIR)/cblas_csyrk_dv_fortran.o $(BUILD_DIR)/cblas_ctbmv_b_fortran.o $(BUILD_DIR)/cblas_ctbmv_bv_fortran.o $(BUILD_DIR)/cblas_ctbmv_d_fortran.o $(BUILD_DIR)/cblas_ctbmv_dv_fortran.o $(BUILD_DIR)/cblas_ctpmv_b_fortran.o $(BUILD_DIR)/cblas_ctpmv_bv_fortran.o $(BUILD_DIR)/cblas_ctpmv_d_fortran.o $(BUILD_DIR)/cblas_ctpmv_dv_fortran.o $(BUILD_DIR)/cblas_ctrmm_b_fortran.o $(BUILD_DIR)/cblas_ctrmm_bv_fortran.o $(BUILD_DIR)/cblas_ctrmm_d_fortran.o $(BUILD_DIR)/cblas_ctrmm_dv_fortran.o $(BUILD_DIR)/cblas_ctrmv_b_fortran.o $(BUILD_DIR)/cblas_ctrmv_bv_fortran.o $(BUILD_DIR)/cblas_ctrmv_d_fortran.o $(BUILD_DIR)/cblas_ctrmv_dv_fortran.o $(BUILD_DIR)/cblas_ctrsm_b_fortran.o $(BUILD_DIR)/cblas_ctrsm_bv_fortran.o $(BUILD_DIR)/cblas_ctrsm_d_fortran.o $(BUILD_DIR)/cblas_ctrsm_dv_fortran.o $(BUILD_DIR)/cblas_ctrsv_b_fortran.o $(BUILD_DIR)/cblas_ctrsv_bv_fortran.o $(BUILD_DIR)/cblas_ctrsv_d_fortran.o $(BUILD_DIR)/cblas_ctrsv_dv_fortran.o $(BUILD_DIR)/cblas_dasum_b_fortran.o $(BUILD_DIR)/cblas_dasum_bv_fortran.o $(BUILD_DIR)/cblas_dasum_d_fortran.o $(BUILD_DIR)/cblas_dasum_dv_fortran.o $(BUILD_DIR)/cblas_daxpy_b_fortran.o $(BUILD_DIR)/cblas_daxpy_bv_fortran.o $(BUILD_DIR)/cblas_daxpy_d_fortran.o $(BUILD_DIR)/cblas_daxpy_dv_fortran.o $(BUILD_DIR)/cblas_dcopy_b_fortran.o $(BUILD_DIR)/cblas_dcopy_bv_fortran.o $(BUILD_DIR)/cblas_dcopy_d_fortran.o $(BUILD_DIR)/cblas_dcopy_dv_fortran.o $(BUILD_DIR)/cblas_ddot_b_fortran.o $(BUILD_DIR)/cblas_ddot_bv_fortran.o $(BUILD_DIR)/cblas_ddot_d_fortran.o $(BUILD_DIR)/cblas_ddot_dv_fortran.o $(BUILD_DIR)/cblas_dgbmv_b_fortran.o $(BUILD_DIR)/cblas_dgbmv_bv_fortran.o $(BUILD_DIR)/cblas_dgbmv_d_fortran.o $(BUILD_DIR)/cblas_dgbmv_dv_fortran.o $(BUILD_DIR)/cblas_dgemm_b_fortran.o $(BUILD_DIR)/cblas_dgemm_bv_fortran.o $(BUILD_DIR)/cblas_dgemm_d_fortran.o $(BUILD_DIR)/cblas_dgemm_dv_fortran.o $(BUILD_DIR)/cblas_dgemv_b_fortran.o $(BUILD_DIR)/cblas_dgemv_bv_fortran.o $(BUILD_DIR)/cblas_dgemv_d_fortran.o $(BUILD_DIR)/cblas_dgemv_dv_fortran.o $(BUILD_DIR)/cblas_dger_b_fortran.o $(BUILD_DIR)/cblas_dger_bv_fortran.o $(BUILD_DIR)/cblas_dger_d_fortran.o $(BUILD_DIR)/cblas_dger_dv_fortran.o $(BUILD_DIR)/cblas_dnrm2_b_fortran.o $(BUILD_DIR)/cblas_dnrm2_bv_fortran.o $(BUILD_DIR)/cblas_dnrm2_d_fortran.o $(BUILD_DIR)/cblas_dnrm2_dv_fortran.o $(BUILD_DIR)/cblas_dsbmv_b_fortran.o $(BUILD_DIR)/cblas_dsbmv_bv_fortran.o $(BUILD_DIR)/cblas_dsbmv_d_fortran.o $(BUILD_DIR)/cblas_dsbmv_dv_fortran.o $(BUILD_DIR)/cblas_dscal_b_fortran.o $(BUILD_DIR)/cblas_dscal_bv_fortran.o $(BUILD_DIR)/cblas_dscal_d_fortran.o $(BUILD_DIR)/cblas_dscal_dv_fortran.o $(BUILD_DIR)/cblas_dspmv_b_fortran.o $(BUILD_DIR)/cblas_dspmv_bv_fortran.o $(BUILD_DIR)/cblas_dspmv_d_fortran.o $(BUILD_DIR)/cblas_dspmv_dv_fortran.o $(BUILD_DIR)/cblas_dspr2_b_fortran.o $(BUILD_DIR)/cblas_dspr2_bv_fortran.o $(BUILD_DIR)/cblas_dspr2_d_fortran.o $(BUILD_DIR)/cblas_dspr2_dv_fortran.o $(BUILD_DIR)/cblas_dspr_b_fortran.o $(BUILD_DIR)/cblas_dspr_bv_fortran.o $(BUILD_DIR)/cblas_dspr_d_fortran.o $(BUILD_DIR)/cblas_dspr_dv_fortran.o $(BUILD_DIR)/cblas_dswap_b_fortran.o $(BUILD_DIR)/cblas_dswap_bv_fortran.o $(BUILD_DIR)/cblas_dswap_d_fortran.o $(BUILD_DIR)/cblas_dswap_dv_fortran.o $(BUILD_DIR)/cblas_dsymm_b_fortran.o $(BUILD_DIR)/cblas_dsymm_bv_fortran.o $(BUILD_DIR)/cblas_dsymm_d_fortran.o $(BUILD_DIR)/cblas_dsymm_dv_fortran.o $(BUILD_DIR)/cblas_dsymv_b_fortran.o $(BUILD_DIR)/cblas_dsymv_bv_fortran.o $(BUILD_DIR)/cblas_dsymv_d_fortran.o $(BUILD_DIR)/cblas_dsymv_dv_fortran.o $(BUILD_DIR)/cblas_dsyr2_b_fortran.o $(BUILD_DIR)/cblas_dsyr2_bv_fortran.o $(BUILD_DIR)/cblas_dsyr2_d_fortran.o $(BUILD_DIR)/cblas_dsyr2_dv_fortran.o $(BUILD_DIR)/cblas_dsyr2k_b_fortran.o $(BUILD_DIR)/cblas_dsyr2k_bv_fortran.o $(BUILD_DIR)/cblas_dsyr2k_d_fortran.o $(BUILD_DIR)/cblas_dsyr2k_dv_fortran.o $(BUILD_DIR)/cblas_dsyr_b_fortran.o $(BUILD_DIR)/cblas_dsyr_bv_fortran.o $(BUILD_DIR)/cblas_dsyr_d_fortran.o $(BUILD_DIR)/cblas_dsyr_dv_fortran.o $(BUILD_DIR)/cblas_dsyrk_b_fortran.o $(BUILD_DIR)/cblas_dsyrk_bv_fortran.o $(BUILD_DIR)/cblas_dsyrk_d_fortran.o $(BUILD_DIR)/cblas_dsyrk_dv_fortran.o $(BUILD_DIR)/cblas_dtbmv_b_fortran.o $(BUILD_DIR)/cblas_dtbmv_bv_fortran.o $(BUILD_DIR)/cblas_dtbmv_d_fortran.o $(BUILD_DIR)/cblas_dtbmv_dv_fortran.o $(BUILD_DIR)/cblas_dtpmv_b_fortran.o $(BUILD_DIR)/cblas_dtpmv_bv_fortran.o $(BUILD_DIR)/cblas_dtpmv_d_fortran.o $(BUILD_DIR)/cblas_dtpmv_dv_fortran.o $(BUILD_DIR)/cblas_dtrmm_b_fortran.o $(BUILD_DIR)/cblas_dtrmm_bv_fortran.o $(BUILD_DIR)/cblas_dtrmm_d_fortran.o $(BUILD_DIR)/cblas_dtrmm_dv_fortran.o $(BUILD_DIR)/cblas_dtrmv_b_fortran.o $(BUILD_DIR)/cblas_dtrmv_bv_fortran.o $(BUILD_DIR)/cblas_dtrmv_d_fortran.o $(BUILD_DIR)/cblas_dtrmv_dv_fortran.o $(BUILD_DIR)/cblas_dtrsm_b_fortran.o $(BUILD_DIR)/cblas_dtrsm_bv_fortran.o $(BUILD_DIR)/cblas_dtrsm_d_fortran.o $(BUILD_DIR)/cblas_dtrsm_dv_fortran.o $(BUILD_DIR)/cblas_dtrsv_b_fortran.o $(BUILD_DIR)/cblas_dtrsv_bv_fortran.o $(BUILD_DIR)/cblas_dtrsv_d_fortran.o $(BUILD_DIR)/cblas_dtrsv_dv_fortran.o $(BUILD_DIR)/cblas_sasum_b_fortran.o $(BUILD_DIR)/cblas_sasum_bv_fortran.o $(BUILD_DIR)/cblas_sasum_d_fortran.o $(BUILD_DIR)/cblas_sasum_dv_fortran.o $(BUILD_DIR)/cblas_saxpy_b_fortran.o $(BUILD_DIR)/cblas_saxpy_bv_fortran.o $(BUILD_DIR)/cblas_saxpy_d_fortran.o $(BUILD_DIR)/cblas_saxpy_dv_fortran.o $(BUILD_DIR)/cblas_scopy_b_fortran.o $(BUILD_DIR)/cblas_scopy_bv_fortran.o $(BUILD_DIR)/cblas_scopy_d_fortran.o $(BUILD_DIR)/cblas_scopy_dv_fortran.o $(BUILD_DIR)/cblas_sdot_b_fortran.o $(BUILD_DIR)/cblas_sdot_bv_fortran.o $(BUILD_DIR)/cblas_sdot_d_fortran.o $(BUILD_DIR)/cblas_sdot_dv_fortran.o $(BUILD_DIR)/cblas_sgbmv_b_fortran.o $(BUILD_DIR)/cblas_sgbmv_bv_fortran.o $(BUILD_DIR)/cblas_sgbmv_d_fortran.o $(BUILD_DIR)/cblas_sgbmv_dv_fortran.o $(BUILD_DIR)/cblas_sgemm_b_fortran.o $(BUILD_DIR)/cblas_sgemm_bv_fortran.o $(BUILD_DIR)/cblas_sgemm_d_fortran.o $(BUILD_DIR)/cblas_sgemm_dv_fortran.o $(BUILD_DIR)/cblas_sgemv_b_fortran.o $(BUILD_DIR)/cblas_sgemv_bv_fortran.o $(BUILD_DIR)/cblas_sgemv_d_fortran.o $(BUILD_DIR)/cblas_sgemv_dv_fortran.o $(BUILD_DIR)/cblas_sger_b_fortran.o $(BUILD_DIR)/cblas_sger_bv_fortran.o $(BUILD_DIR)/cblas_sger_d_fortran.o $(BUILD_DIR)/cblas_sger_dv_fortran.o $(BUILD_DIR)/cblas_snrm2_b_fortran.o $(BUILD_DIR)/cblas_snrm2_bv_fortran.o $(BUILD_DIR)/cblas_snrm2_d_fortran.o $(BUILD_DIR)/cblas_snrm2_dv_fortran.o $(BUILD_DIR)/cblas_ssbmv_b_fortran.o $(BUILD_DIR)/cblas_ssbmv_bv_fortran.o $(BUILD_DIR)/cblas_ssbmv_d_fortran.o $(BUILD_DIR)/cblas_ssbmv_dv_fortran.o $(BUILD_DIR)/cblas_sscal_b_fortran.o $(BUILD_DIR)/cblas_sscal_bv_fortran.o $(BUILD_DIR)/cblas_sscal_d_fortran.o $(BUILD_DIR)/cblas_sscal_dv_fortran.o $(BUILD_DIR)/cblas_sspmv_b_fortran.o $(BUILD_DIR)/cblas_sspmv_bv_fortran.o $(BUILD_DIR)/cblas_sspmv_d_fortran.o $(BUILD_DIR)/cblas_sspmv_dv_fortran.o $(BUILD_DIR)/cblas_sspr2_b_fortran.o $(BUILD_DIR)/cblas_sspr2_bv_fortran.o $(BUILD_DIR)/cblas_sspr2_d_fortran.o $(BUILD_DIR)/cblas_sspr2_dv_fortran.o $(BUILD_DIR)/cblas_sspr_b_fortran.o $(BUILD_DIR)/cblas_sspr_bv_fortran.o $(BUILD_DIR)/cblas_sspr_d_fortran.o $(BUILD_DIR)/cblas_sspr_dv_fortran.o $(BUILD_DIR)/cblas_sswap_b_fortran.o $(BUILD_DIR)/cblas_sswap_bv_fortran.o $(BUILD_DIR)/cblas_sswap_d_fortran.o $(BUILD_DIR)/cblas_sswap_dv_fortran.o $(BUILD_DIR)/cblas_ssymm_b_fortran.o $(BUILD_DIR)/cblas_ssymm_bv_fortran.o $(BUILD_DIR)/cblas_ssymm_d_fortran.o $(BUILD_DIR)/cblas_ssymm_dv_fortran.o $(BUILD_DIR)/cblas_ssymv_b_fortran.o $(BUILD_DIR)/cblas_ssymv_bv_fortran.o $(BUILD_DIR)/cblas_ssymv_d_fortran.o $(BUILD_DIR)/cblas_ssymv_dv_fortran.o $(BUILD_DIR)/cblas_ssyr2_b_fortran.o $(BUILD_DIR)/cblas_ssyr2_bv_fortran.o $(BUILD_DIR)/cblas_ssyr2_d_fortran.o $(BUILD_DIR)/cblas_ssyr2_dv_fortran.o $(BUILD_DIR)/cblas_ssyr2k_b_fortran.o $(BUILD_DIR)/cblas_ssyr2k_bv_fortran.o $(BUILD_DIR)/cblas_ssyr2k_d_fortran.o $(BUILD_DIR)/cblas_ssyr2k_dv_fortran.o $(BUILD_DIR)/cblas_ssyr_b_fortran.o $(BUILD_DIR)/cblas_ssyr_bv_fortran.o $(BUILD_DIR)/cblas_ssyr_d_fortran.o $(BUILD_DIR)/cblas_ssyr_dv_fortran.o $(BUILD_DIR)/cblas_ssyrk_b_fortran.o $(BUILD_DIR)/cblas_ssyrk_bv_fortran.o $(BUILD_DIR)/cblas_ssyrk_d_fortran.o $(BUILD_DIR)/cblas_ssyrk_dv_fortran.o $(BUILD_DIR)/cblas_stbmv_b_fortran.o $(BUILD_DIR)/cblas_stbmv_bv_fortran.o $(BUILD_DIR)/cblas_stbmv_d_fortran.o $(BUILD_DIR)/cblas_stbmv_dv_fortran.o $(BUILD_DIR)/cblas_stpmv_b_fortran.o $(BUILD_DIR)/cblas_stpmv_bv_fortran.o $(BUILD_DIR)/cblas_stpmv_d_fortran.o $(BUILD_DIR)/cblas_stpmv_dv_fortran.o $(BUILD_DIR)/cblas_strmm_b_fortran.o $(BUILD_DIR)/cblas_strmm_bv_fortran.o $(BUILD_DIR)/cblas_strmm_d_fortran.o $(BUILD_DIR)/cblas_strmm_dv_fortran.o $(BUILD_DIR)/cblas_strmv_b_fortran.o $(BUILD_DIR)/cblas_strmv_bv_fortran.o $(BUILD_DIR)/cblas_strmv_d_fortran.o $(BUILD_DIR)/cblas_strmv_dv_fortran.o $(BUILD_DIR)/cblas_strsm_b_fortran.o $(BUILD_DIR)/cblas_strsm_bv_fortran.o $(BUILD_DIR)/cblas_strsm_d_fortran.o $(BUILD_DIR)/cblas_strsm_dv_fortran.o $(BUILD_DIR)/cblas_strsv_b_fortran.o $(BUILD_DIR)/cblas_strsv_bv_fortran.o $(BUILD_DIR)/cblas_strsv_d_fortran.o $(BUILD_DIR)/cblas_strsv_dv_fortran.o $(BUILD_DIR)/cblas_zaxpy_b_fortran.o $(BUILD_DIR)/cblas_zaxpy_bv_fortran.o $(BUILD_DIR)/cblas_zaxpy_d_fortran.o $(BUILD_DIR)/cblas_zaxpy_dv_fortran.o $(BUILD_DIR)/cblas_zcopy_b_fortran.o $(BUILD_DIR)/cblas_zcopy_bv_fortran.o $(BUILD_DIR)/cblas_zcopy_d_fortran.o $(BUILD_DIR)/cblas_zcopy_dv_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_b_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_bv_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_d_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_dv_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_b_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_bv_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_d_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_dv_fortran.o $(BUILD_DIR)/cblas_zdscal_b_fortran.o $(BUILD_DIR)/cblas_zdscal_bv_fortran.o $(BUILD_DIR)/cblas_zdscal_d_fortran.o $(BUILD_DIR)/cblas_zdscal_dv_fortran.o $(BUILD_DIR)/cblas_zgbmv_b_fortran.o $(BUILD_DIR)/cblas_zgbmv_bv_fortran.o $(BUILD_DIR)/cblas_zgbmv_d_fortran.o $(BUILD_DIR)/cblas_zgbmv_dv_fortran.o $(BUILD_DIR)/cblas_zgemm_b_fortran.o $(BUILD_DIR)/cblas_zgemm_bv_fortran.o $(BUILD_DIR)/cblas_zgemm_d_fortran.o $(BUILD_DIR)/cblas_zgemm_dv_fortran.o $(BUILD_DIR)/cblas_zgemv_b_fortran.o $(BUILD_DIR)/cblas_zgemv_bv_fortran.o $(BUILD_DIR)/cblas_zgemv_d_fortran.o $(BUILD_DIR)/cblas_zgemv_dv_fortran.o $(BUILD_DIR)/cblas_zgerc_b_fortran.o $(BUILD_DIR)/cblas_zgerc_bv_fortran.o $(BUILD_DIR)/cblas_zgerc_d_fortran.o $(BUILD_DIR)/cblas_zgerc_dv_fortran.o $(BUILD_DIR)/cblas_zgeru_b_fortran.o $(BUILD_DIR)/cblas_zgeru_bv_fortran.o $(BUILD_DIR)/cblas_zgeru_d_fortran.o $(BUILD_DIR)/cblas_zgeru_dv_fortran.o $(BUILD_DIR)/cblas_zhbmv_b_fortran.o $(BUILD_DIR)/cblas_zhbmv_bv_fortran.o $(BUILD_DIR)/cblas_zhbmv_d_fortran.o $(BUILD_DIR)/cblas_zhbmv_dv_fortran.o $(BUILD_DIR)/cblas_zhemm_b_fortran.o $(BUILD_DIR)/cblas_zhemm_bv_fortran.o $(BUILD_DIR)/cblas_zhemm_d_fortran.o $(BUILD_DIR)/cblas_zhemm_dv_fortran.o $(BUILD_DIR)/cblas_zhemv_b_fortran.o $(BUILD_DIR)/cblas_zhemv_bv_fortran.o $(BUILD_DIR)/cblas_zhemv_d_fortran.o $(BUILD_DIR)/cblas_zhemv_dv_fortran.o $(BUILD_DIR)/cblas_zscal_b_fortran.o $(BUILD_DIR)/cblas_zscal_bv_fortran.o $(BUILD_DIR)/cblas_zscal_d_fortran.o $(BUILD_DIR)/cblas_zscal_dv_fortran.o $(BUILD_DIR)/cblas_zswap_b_fortran.o $(BUILD_DIR)/cblas_zswap_bv_fortran.o $(BUILD_DIR)/cblas_zswap_d_fortran.o $(BUILD_DIR)/cblas_zswap_dv_fortran.o $(BUILD_DIR)/cblas_zsymm_b_fortran.o $(BUILD_DIR)/cblas_zsymm_bv_fortran.o $(BUILD_DIR)/cblas_zsymm_d_fortran.o $(BUILD_DIR)/cblas_zsymm_dv_fortran.o $(BUILD_DIR)/cblas_zsyr2k_b_fortran.o $(BUILD_DIR)/cblas_zsyr2k_bv_fortran.o $(BUILD_DIR)/cblas_zsyr2k_d_fortran.o $(BUILD_DIR)/cblas_zsyr2k_dv_fortran.o $(BUILD_DIR)/cblas_zsyrk_b_fortran.o $(BUILD_DIR)/cblas_zsyrk_bv_fortran.o $(BUILD_DIR)/cblas_zsyrk_d_fortran.o $(BUILD_DIR)/cblas_zsyrk_dv_fortran.o $(BUILD_DIR)/cblas_ztbmv_b_fortran.o $(BUILD_DIR)/cblas_ztbmv_bv_fortran.o $(BUILD_DIR)/cblas_ztbmv_d_fortran.o $(BUILD_DIR)/cblas_ztbmv_dv_fortran.o $(BUILD_DIR)/cblas_ztpmv_b_fortran.o $(BUILD_DIR)/cblas_ztpmv_bv_fortran.o $(BUILD_DIR)/cblas_ztpmv_d_fortran.o $(BUILD_DIR)/cblas_ztpmv_dv_fortran.o $(BUILD_DIR)/cblas_ztrmm_b_fortran.o $(BUILD_DIR)/cblas_ztrmm_bv_fortran.o $(BUILD_DIR)/cblas_ztrmm_d_fortran.o $(BUILD_DIR)/cblas_ztrmm_dv_fortran.o $(BUILD_DIR)/cblas_ztrmv_b_fortran.o $(BUILD_DIR)/cblas_ztrmv_bv_fortran.o $(BUILD_DIR)/cblas_ztrmv_d_fortran.o $(BUILD_DIR)/cblas_ztrmv_dv_fortran.o $(BUILD_DIR)/cblas_ztrsm_b_fortran.o $(BUILD_DIR)/cblas_ztrsm_bv_fortran.o $(BUILD_DIR)/cblas_ztrsm_d_fortran.o $(BUILD_DIR)/cblas_ztrsm_dv_fortran.o $(BUILD_DIR)/cblas_ztrsv_b_fortran.o $(BUILD_DIR)/cblas_ztrsv_bv_fortran.o $(BUILD_DIR)/cblas_ztrsv_d_fortran.o $(BUILD_DIR)/cblas_ztrsv_dv_fortran.o
+$(BUILD_DIR)/libcblas_diff.a: $(BUILD_DIR)/cblas_caxpy_d.o $(BUILD_DIR)/cblas_ccopy_d.o $(BUILD_DIR)/cblas_cdotc_sub_d.o $(BUILD_DIR)/cblas_cdotu_sub_d.o $(BUILD_DIR)/cblas_cgbmv_d.o $(BUILD_DIR)/cblas_cgemm_d.o $(BUILD_DIR)/cblas_cgemv_d.o $(BUILD_DIR)/cblas_cgerc_d.o $(BUILD_DIR)/cblas_cgeru_d.o $(BUILD_DIR)/cblas_chbmv_d.o $(BUILD_DIR)/cblas_chemm_d.o $(BUILD_DIR)/cblas_chemv_d.o $(BUILD_DIR)/cblas_cscal_d.o $(BUILD_DIR)/cblas_cswap_d.o $(BUILD_DIR)/cblas_csymm_d.o $(BUILD_DIR)/cblas_csyr2k_d.o $(BUILD_DIR)/cblas_csyrk_d.o $(BUILD_DIR)/cblas_ctbmv_d.o $(BUILD_DIR)/cblas_ctpmv_d.o $(BUILD_DIR)/cblas_ctrmm_d.o $(BUILD_DIR)/cblas_ctrmv_d.o $(BUILD_DIR)/cblas_ctrsm_d.o $(BUILD_DIR)/cblas_ctrsv_d.o $(BUILD_DIR)/cblas_dasum_d.o $(BUILD_DIR)/cblas_daxpy_d.o $(BUILD_DIR)/cblas_dcopy_d.o $(BUILD_DIR)/cblas_ddot_d.o $(BUILD_DIR)/cblas_dgbmv_d.o $(BUILD_DIR)/cblas_dgemm_d.o $(BUILD_DIR)/cblas_dgemv_d.o $(BUILD_DIR)/cblas_dger_d.o $(BUILD_DIR)/cblas_dnrm2_d.o $(BUILD_DIR)/cblas_dsbmv_d.o $(BUILD_DIR)/cblas_dscal_d.o $(BUILD_DIR)/cblas_dspmv_d.o $(BUILD_DIR)/cblas_dspr2_d.o $(BUILD_DIR)/cblas_dspr_d.o $(BUILD_DIR)/cblas_dswap_d.o $(BUILD_DIR)/cblas_dsymm_d.o $(BUILD_DIR)/cblas_dsymv_d.o $(BUILD_DIR)/cblas_dsyr2_d.o $(BUILD_DIR)/cblas_dsyr2k_d.o $(BUILD_DIR)/cblas_dsyr_d.o $(BUILD_DIR)/cblas_dsyrk_d.o $(BUILD_DIR)/cblas_dtbmv_d.o $(BUILD_DIR)/cblas_dtpmv_d.o $(BUILD_DIR)/cblas_dtrmm_d.o $(BUILD_DIR)/cblas_dtrmv_d.o $(BUILD_DIR)/cblas_dtrsm_d.o $(BUILD_DIR)/cblas_dtrsv_d.o $(BUILD_DIR)/cblas_sasum_d.o $(BUILD_DIR)/cblas_saxpy_d.o $(BUILD_DIR)/cblas_scopy_d.o $(BUILD_DIR)/cblas_sdot_d.o $(BUILD_DIR)/cblas_sgbmv_d.o $(BUILD_DIR)/cblas_sgemm_d.o $(BUILD_DIR)/cblas_sgemv_d.o $(BUILD_DIR)/cblas_sger_d.o $(BUILD_DIR)/cblas_snrm2_d.o $(BUILD_DIR)/cblas_ssbmv_d.o $(BUILD_DIR)/cblas_sscal_d.o $(BUILD_DIR)/cblas_sspmv_d.o $(BUILD_DIR)/cblas_sspr2_d.o $(BUILD_DIR)/cblas_sspr_d.o $(BUILD_DIR)/cblas_sswap_d.o $(BUILD_DIR)/cblas_ssymm_d.o $(BUILD_DIR)/cblas_ssymv_d.o $(BUILD_DIR)/cblas_ssyr2_d.o $(BUILD_DIR)/cblas_ssyr2k_d.o $(BUILD_DIR)/cblas_ssyr_d.o $(BUILD_DIR)/cblas_ssyrk_d.o $(BUILD_DIR)/cblas_stbmv_d.o $(BUILD_DIR)/cblas_stpmv_d.o $(BUILD_DIR)/cblas_strmm_d.o $(BUILD_DIR)/cblas_strmv_d.o $(BUILD_DIR)/cblas_strsm_d.o $(BUILD_DIR)/cblas_strsv_d.o $(BUILD_DIR)/cblas_zaxpy_d.o $(BUILD_DIR)/cblas_zcopy_d.o $(BUILD_DIR)/cblas_zdotc_sub_d.o $(BUILD_DIR)/cblas_zdotu_sub_d.o $(BUILD_DIR)/cblas_zdscal_d.o $(BUILD_DIR)/cblas_zgbmv_d.o $(BUILD_DIR)/cblas_zgemm_d.o $(BUILD_DIR)/cblas_zgemv_d.o $(BUILD_DIR)/cblas_zgerc_d.o $(BUILD_DIR)/cblas_zgeru_d.o $(BUILD_DIR)/cblas_zhbmv_d.o $(BUILD_DIR)/cblas_zhemm_d.o $(BUILD_DIR)/cblas_zhemv_d.o $(BUILD_DIR)/cblas_zscal_d.o $(BUILD_DIR)/cblas_zswap_d.o $(BUILD_DIR)/cblas_zsymm_d.o $(BUILD_DIR)/cblas_zsyr2k_d.o $(BUILD_DIR)/cblas_zsyrk_d.o $(BUILD_DIR)/cblas_ztbmv_d.o $(BUILD_DIR)/cblas_ztpmv_d.o $(BUILD_DIR)/cblas_ztrmm_d.o $(BUILD_DIR)/cblas_ztrmv_d.o $(BUILD_DIR)/cblas_ztrsm_d.o $(BUILD_DIR)/cblas_ztrsv_d.o $(BUILD_DIR)/cblas_caxpy_b.o $(BUILD_DIR)/cblas_ccopy_b.o $(BUILD_DIR)/cblas_cdotc_sub_b.o $(BUILD_DIR)/cblas_cdotu_sub_b.o $(BUILD_DIR)/cblas_cgbmv_b.o $(BUILD_DIR)/cblas_cgemm_b.o $(BUILD_DIR)/cblas_cgemv_b.o $(BUILD_DIR)/cblas_cgerc_b.o $(BUILD_DIR)/cblas_cgeru_b.o $(BUILD_DIR)/cblas_chbmv_b.o $(BUILD_DIR)/cblas_chemm_b.o $(BUILD_DIR)/cblas_chemv_b.o $(BUILD_DIR)/cblas_cscal_b.o $(BUILD_DIR)/cblas_cswap_b.o $(BUILD_DIR)/cblas_csymm_b.o $(BUILD_DIR)/cblas_csyr2k_b.o $(BUILD_DIR)/cblas_csyrk_b.o $(BUILD_DIR)/cblas_ctbmv_b.o $(BUILD_DIR)/cblas_ctpmv_b.o $(BUILD_DIR)/cblas_ctrmm_b.o $(BUILD_DIR)/cblas_ctrmv_b.o $(BUILD_DIR)/cblas_ctrsm_b.o $(BUILD_DIR)/cblas_ctrsv_b.o $(BUILD_DIR)/cblas_dasum_b.o $(BUILD_DIR)/cblas_daxpy_b.o $(BUILD_DIR)/cblas_dcopy_b.o $(BUILD_DIR)/cblas_ddot_b.o $(BUILD_DIR)/cblas_dgbmv_b.o $(BUILD_DIR)/cblas_dgemm_b.o $(BUILD_DIR)/cblas_dgemv_b.o $(BUILD_DIR)/cblas_dger_b.o $(BUILD_DIR)/cblas_dnrm2_b.o $(BUILD_DIR)/cblas_dsbmv_b.o $(BUILD_DIR)/cblas_dscal_b.o $(BUILD_DIR)/cblas_dspmv_b.o $(BUILD_DIR)/cblas_dspr2_b.o $(BUILD_DIR)/cblas_dspr_b.o $(BUILD_DIR)/cblas_dswap_b.o $(BUILD_DIR)/cblas_dsymm_b.o $(BUILD_DIR)/cblas_dsymv_b.o $(BUILD_DIR)/cblas_dsyr2_b.o $(BUILD_DIR)/cblas_dsyr2k_b.o $(BUILD_DIR)/cblas_dsyr_b.o $(BUILD_DIR)/cblas_dsyrk_b.o $(BUILD_DIR)/cblas_dtbmv_b.o $(BUILD_DIR)/cblas_dtpmv_b.o $(BUILD_DIR)/cblas_dtrmm_b.o $(BUILD_DIR)/cblas_dtrmv_b.o $(BUILD_DIR)/cblas_dtrsm_b.o $(BUILD_DIR)/cblas_dtrsv_b.o $(BUILD_DIR)/cblas_sasum_b.o $(BUILD_DIR)/cblas_saxpy_b.o $(BUILD_DIR)/cblas_scopy_b.o $(BUILD_DIR)/cblas_sdot_b.o $(BUILD_DIR)/cblas_sgbmv_b.o $(BUILD_DIR)/cblas_sgemm_b.o $(BUILD_DIR)/cblas_sgemv_b.o $(BUILD_DIR)/cblas_sger_b.o $(BUILD_DIR)/cblas_snrm2_b.o $(BUILD_DIR)/cblas_ssbmv_b.o $(BUILD_DIR)/cblas_sscal_b.o $(BUILD_DIR)/cblas_sspmv_b.o $(BUILD_DIR)/cblas_sspr2_b.o $(BUILD_DIR)/cblas_sspr_b.o $(BUILD_DIR)/cblas_sswap_b.o $(BUILD_DIR)/cblas_ssymm_b.o $(BUILD_DIR)/cblas_ssymv_b.o $(BUILD_DIR)/cblas_ssyr2_b.o $(BUILD_DIR)/cblas_ssyr2k_b.o $(BUILD_DIR)/cblas_ssyr_b.o $(BUILD_DIR)/cblas_ssyrk_b.o $(BUILD_DIR)/cblas_stbmv_b.o $(BUILD_DIR)/cblas_stpmv_b.o $(BUILD_DIR)/cblas_strmm_b.o $(BUILD_DIR)/cblas_strmv_b.o $(BUILD_DIR)/cblas_strsm_b.o $(BUILD_DIR)/cblas_strsv_b.o $(BUILD_DIR)/cblas_zaxpy_b.o $(BUILD_DIR)/cblas_zcopy_b.o $(BUILD_DIR)/cblas_zdotc_sub_b.o $(BUILD_DIR)/cblas_zdotu_sub_b.o $(BUILD_DIR)/cblas_zdscal_b.o $(BUILD_DIR)/cblas_zgbmv_b.o $(BUILD_DIR)/cblas_zgemm_b.o $(BUILD_DIR)/cblas_zgemv_b.o $(BUILD_DIR)/cblas_zgerc_b.o $(BUILD_DIR)/cblas_zgeru_b.o $(BUILD_DIR)/cblas_zhbmv_b.o $(BUILD_DIR)/cblas_zhemm_b.o $(BUILD_DIR)/cblas_zhemv_b.o $(BUILD_DIR)/cblas_zscal_b.o $(BUILD_DIR)/cblas_zswap_b.o $(BUILD_DIR)/cblas_zsymm_b.o $(BUILD_DIR)/cblas_zsyr2k_b.o $(BUILD_DIR)/cblas_zsyrk_b.o $(BUILD_DIR)/cblas_ztbmv_b.o $(BUILD_DIR)/cblas_ztpmv_b.o $(BUILD_DIR)/cblas_ztrmm_b.o $(BUILD_DIR)/cblas_ztrmv_b.o $(BUILD_DIR)/cblas_ztrsm_b.o $(BUILD_DIR)/cblas_ztrsv_b.o $(BUILD_DIR)/cblas_caxpy_dv.o $(BUILD_DIR)/cblas_ccopy_dv.o $(BUILD_DIR)/cblas_cdotc_sub_dv.o $(BUILD_DIR)/cblas_cdotu_sub_dv.o $(BUILD_DIR)/cblas_cgbmv_dv.o $(BUILD_DIR)/cblas_cgemm_dv.o $(BUILD_DIR)/cblas_cgemv_dv.o $(BUILD_DIR)/cblas_cgerc_dv.o $(BUILD_DIR)/cblas_cgeru_dv.o $(BUILD_DIR)/cblas_chbmv_dv.o $(BUILD_DIR)/cblas_chemm_dv.o $(BUILD_DIR)/cblas_chemv_dv.o $(BUILD_DIR)/cblas_cscal_dv.o $(BUILD_DIR)/cblas_cswap_dv.o $(BUILD_DIR)/cblas_csymm_dv.o $(BUILD_DIR)/cblas_csyr2k_dv.o $(BUILD_DIR)/cblas_csyrk_dv.o $(BUILD_DIR)/cblas_ctbmv_dv.o $(BUILD_DIR)/cblas_ctpmv_dv.o $(BUILD_DIR)/cblas_ctrmm_dv.o $(BUILD_DIR)/cblas_ctrmv_dv.o $(BUILD_DIR)/cblas_ctrsm_dv.o $(BUILD_DIR)/cblas_ctrsv_dv.o $(BUILD_DIR)/cblas_dasum_dv.o $(BUILD_DIR)/cblas_daxpy_dv.o $(BUILD_DIR)/cblas_dcopy_dv.o $(BUILD_DIR)/cblas_ddot_dv.o $(BUILD_DIR)/cblas_dgbmv_dv.o $(BUILD_DIR)/cblas_dgemm_dv.o $(BUILD_DIR)/cblas_dgemv_dv.o $(BUILD_DIR)/cblas_dger_dv.o $(BUILD_DIR)/cblas_dnrm2_dv.o $(BUILD_DIR)/cblas_dsbmv_dv.o $(BUILD_DIR)/cblas_dscal_dv.o $(BUILD_DIR)/cblas_dspmv_dv.o $(BUILD_DIR)/cblas_dspr2_dv.o $(BUILD_DIR)/cblas_dspr_dv.o $(BUILD_DIR)/cblas_dswap_dv.o $(BUILD_DIR)/cblas_dsymm_dv.o $(BUILD_DIR)/cblas_dsymv_dv.o $(BUILD_DIR)/cblas_dsyr2_dv.o $(BUILD_DIR)/cblas_dsyr2k_dv.o $(BUILD_DIR)/cblas_dsyr_dv.o $(BUILD_DIR)/cblas_dsyrk_dv.o $(BUILD_DIR)/cblas_dtbmv_dv.o $(BUILD_DIR)/cblas_dtpmv_dv.o $(BUILD_DIR)/cblas_dtrmm_dv.o $(BUILD_DIR)/cblas_dtrmv_dv.o $(BUILD_DIR)/cblas_dtrsm_dv.o $(BUILD_DIR)/cblas_dtrsv_dv.o $(BUILD_DIR)/cblas_sasum_dv.o $(BUILD_DIR)/cblas_saxpy_dv.o $(BUILD_DIR)/cblas_scopy_dv.o $(BUILD_DIR)/cblas_sdot_dv.o $(BUILD_DIR)/cblas_sgbmv_dv.o $(BUILD_DIR)/cblas_sgemm_dv.o $(BUILD_DIR)/cblas_sgemv_dv.o $(BUILD_DIR)/cblas_sger_dv.o $(BUILD_DIR)/cblas_snrm2_dv.o $(BUILD_DIR)/cblas_ssbmv_dv.o $(BUILD_DIR)/cblas_sscal_dv.o $(BUILD_DIR)/cblas_sspmv_dv.o $(BUILD_DIR)/cblas_sspr2_dv.o $(BUILD_DIR)/cblas_sspr_dv.o $(BUILD_DIR)/cblas_sswap_dv.o $(BUILD_DIR)/cblas_ssymm_dv.o $(BUILD_DIR)/cblas_ssymv_dv.o $(BUILD_DIR)/cblas_ssyr2_dv.o $(BUILD_DIR)/cblas_ssyr2k_dv.o $(BUILD_DIR)/cblas_ssyr_dv.o $(BUILD_DIR)/cblas_ssyrk_dv.o $(BUILD_DIR)/cblas_stbmv_dv.o $(BUILD_DIR)/cblas_stpmv_dv.o $(BUILD_DIR)/cblas_strmm_dv.o $(BUILD_DIR)/cblas_strmv_dv.o $(BUILD_DIR)/cblas_strsm_dv.o $(BUILD_DIR)/cblas_strsv_dv.o $(BUILD_DIR)/cblas_zaxpy_dv.o $(BUILD_DIR)/cblas_zcopy_dv.o $(BUILD_DIR)/cblas_zdotc_sub_dv.o $(BUILD_DIR)/cblas_zdotu_sub_dv.o $(BUILD_DIR)/cblas_zdscal_dv.o $(BUILD_DIR)/cblas_zgbmv_dv.o $(BUILD_DIR)/cblas_zgemm_dv.o $(BUILD_DIR)/cblas_zgemv_dv.o $(BUILD_DIR)/cblas_zgerc_dv.o $(BUILD_DIR)/cblas_zgeru_dv.o $(BUILD_DIR)/cblas_zhbmv_dv.o $(BUILD_DIR)/cblas_zhemm_dv.o $(BUILD_DIR)/cblas_zhemv_dv.o $(BUILD_DIR)/cblas_zscal_dv.o $(BUILD_DIR)/cblas_zswap_dv.o $(BUILD_DIR)/cblas_zsymm_dv.o $(BUILD_DIR)/cblas_zsyr2k_dv.o $(BUILD_DIR)/cblas_zsyrk_dv.o $(BUILD_DIR)/cblas_ztbmv_dv.o $(BUILD_DIR)/cblas_ztpmv_dv.o $(BUILD_DIR)/cblas_ztrmm_dv.o $(BUILD_DIR)/cblas_ztrmv_dv.o $(BUILD_DIR)/cblas_ztrsm_dv.o $(BUILD_DIR)/cblas_ztrsv_dv.o $(BUILD_DIR)/cblas_caxpy_bv.o $(BUILD_DIR)/cblas_ccopy_bv.o $(BUILD_DIR)/cblas_cdotc_sub_bv.o $(BUILD_DIR)/cblas_cdotu_sub_bv.o $(BUILD_DIR)/cblas_cgbmv_bv.o $(BUILD_DIR)/cblas_cgemm_bv.o $(BUILD_DIR)/cblas_cgemv_bv.o $(BUILD_DIR)/cblas_cgerc_bv.o $(BUILD_DIR)/cblas_cgeru_bv.o $(BUILD_DIR)/cblas_chbmv_bv.o $(BUILD_DIR)/cblas_chemm_bv.o $(BUILD_DIR)/cblas_chemv_bv.o $(BUILD_DIR)/cblas_cscal_bv.o $(BUILD_DIR)/cblas_cswap_bv.o $(BUILD_DIR)/cblas_csymm_bv.o $(BUILD_DIR)/cblas_csyr2k_bv.o $(BUILD_DIR)/cblas_csyrk_bv.o $(BUILD_DIR)/cblas_ctbmv_bv.o $(BUILD_DIR)/cblas_ctpmv_bv.o $(BUILD_DIR)/cblas_ctrmm_bv.o $(BUILD_DIR)/cblas_ctrmv_bv.o $(BUILD_DIR)/cblas_ctrsm_bv.o $(BUILD_DIR)/cblas_ctrsv_bv.o $(BUILD_DIR)/cblas_dasum_bv.o $(BUILD_DIR)/cblas_daxpy_bv.o $(BUILD_DIR)/cblas_dcopy_bv.o $(BUILD_DIR)/cblas_ddot_bv.o $(BUILD_DIR)/cblas_dgbmv_bv.o $(BUILD_DIR)/cblas_dgemm_bv.o $(BUILD_DIR)/cblas_dgemv_bv.o $(BUILD_DIR)/cblas_dger_bv.o $(BUILD_DIR)/cblas_dnrm2_bv.o $(BUILD_DIR)/cblas_dsbmv_bv.o $(BUILD_DIR)/cblas_dscal_bv.o $(BUILD_DIR)/cblas_dspmv_bv.o $(BUILD_DIR)/cblas_dspr2_bv.o $(BUILD_DIR)/cblas_dspr_bv.o $(BUILD_DIR)/cblas_dswap_bv.o $(BUILD_DIR)/cblas_dsymm_bv.o $(BUILD_DIR)/cblas_dsymv_bv.o $(BUILD_DIR)/cblas_dsyr2_bv.o $(BUILD_DIR)/cblas_dsyr2k_bv.o $(BUILD_DIR)/cblas_dsyr_bv.o $(BUILD_DIR)/cblas_dsyrk_bv.o $(BUILD_DIR)/cblas_dtbmv_bv.o $(BUILD_DIR)/cblas_dtpmv_bv.o $(BUILD_DIR)/cblas_dtrmm_bv.o $(BUILD_DIR)/cblas_dtrmv_bv.o $(BUILD_DIR)/cblas_dtrsm_bv.o $(BUILD_DIR)/cblas_dtrsv_bv.o $(BUILD_DIR)/cblas_sasum_bv.o $(BUILD_DIR)/cblas_saxpy_bv.o $(BUILD_DIR)/cblas_scopy_bv.o $(BUILD_DIR)/cblas_sdot_bv.o $(BUILD_DIR)/cblas_sgbmv_bv.o $(BUILD_DIR)/cblas_sgemm_bv.o $(BUILD_DIR)/cblas_sgemv_bv.o $(BUILD_DIR)/cblas_sger_bv.o $(BUILD_DIR)/cblas_snrm2_bv.o $(BUILD_DIR)/cblas_ssbmv_bv.o $(BUILD_DIR)/cblas_sscal_bv.o $(BUILD_DIR)/cblas_sspmv_bv.o $(BUILD_DIR)/cblas_sspr2_bv.o $(BUILD_DIR)/cblas_sspr_bv.o $(BUILD_DIR)/cblas_sswap_bv.o $(BUILD_DIR)/cblas_ssymm_bv.o $(BUILD_DIR)/cblas_ssymv_bv.o $(BUILD_DIR)/cblas_ssyr2_bv.o $(BUILD_DIR)/cblas_ssyr2k_bv.o $(BUILD_DIR)/cblas_ssyr_bv.o $(BUILD_DIR)/cblas_ssyrk_bv.o $(BUILD_DIR)/cblas_stbmv_bv.o $(BUILD_DIR)/cblas_stpmv_bv.o $(BUILD_DIR)/cblas_strmm_bv.o $(BUILD_DIR)/cblas_strmv_bv.o $(BUILD_DIR)/cblas_strsm_bv.o $(BUILD_DIR)/cblas_strsv_bv.o $(BUILD_DIR)/cblas_zaxpy_bv.o $(BUILD_DIR)/cblas_zcopy_bv.o $(BUILD_DIR)/cblas_zdotc_sub_bv.o $(BUILD_DIR)/cblas_zdotu_sub_bv.o $(BUILD_DIR)/cblas_zdscal_bv.o $(BUILD_DIR)/cblas_zgbmv_bv.o $(BUILD_DIR)/cblas_zgemm_bv.o $(BUILD_DIR)/cblas_zgemv_bv.o $(BUILD_DIR)/cblas_zgerc_bv.o $(BUILD_DIR)/cblas_zgeru_bv.o $(BUILD_DIR)/cblas_zhbmv_bv.o $(BUILD_DIR)/cblas_zhemm_bv.o $(BUILD_DIR)/cblas_zhemv_bv.o $(BUILD_DIR)/cblas_zscal_bv.o $(BUILD_DIR)/cblas_zswap_bv.o $(BUILD_DIR)/cblas_zsymm_bv.o $(BUILD_DIR)/cblas_zsyr2k_bv.o $(BUILD_DIR)/cblas_zsyrk_bv.o $(BUILD_DIR)/cblas_ztbmv_bv.o $(BUILD_DIR)/cblas_ztpmv_bv.o $(BUILD_DIR)/cblas_ztrmm_bv.o $(BUILD_DIR)/cblas_ztrmv_bv.o $(BUILD_DIR)/cblas_ztrsm_bv.o $(BUILD_DIR)/cblas_ztrsv_bv.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES.o $(BUILD_DIR)/cblas_caxpy_b_fortran.o $(BUILD_DIR)/cblas_caxpy_bv_fortran.o $(BUILD_DIR)/cblas_caxpy_d_fortran.o $(BUILD_DIR)/cblas_caxpy_dv_fortran.o $(BUILD_DIR)/cblas_ccopy_b_fortran.o $(BUILD_DIR)/cblas_ccopy_bv_fortran.o $(BUILD_DIR)/cblas_ccopy_d_fortran.o $(BUILD_DIR)/cblas_ccopy_dv_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_b_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_bv_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_d_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_dv_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_b_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_bv_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_d_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_dv_fortran.o $(BUILD_DIR)/cblas_cgbmv_b_fortran.o $(BUILD_DIR)/cblas_cgbmv_bv_fortran.o $(BUILD_DIR)/cblas_cgbmv_d_fortran.o $(BUILD_DIR)/cblas_cgbmv_dv_fortran.o $(BUILD_DIR)/cblas_cgemm_b_fortran.o $(BUILD_DIR)/cblas_cgemm_bv_fortran.o $(BUILD_DIR)/cblas_cgemm_d_fortran.o $(BUILD_DIR)/cblas_cgemm_dv_fortran.o $(BUILD_DIR)/cblas_cgemv_b_fortran.o $(BUILD_DIR)/cblas_cgemv_bv_fortran.o $(BUILD_DIR)/cblas_cgemv_d_fortran.o $(BUILD_DIR)/cblas_cgemv_dv_fortran.o $(BUILD_DIR)/cblas_cgerc_b_fortran.o $(BUILD_DIR)/cblas_cgerc_bv_fortran.o $(BUILD_DIR)/cblas_cgerc_d_fortran.o $(BUILD_DIR)/cblas_cgerc_dv_fortran.o $(BUILD_DIR)/cblas_cgeru_b_fortran.o $(BUILD_DIR)/cblas_cgeru_bv_fortran.o $(BUILD_DIR)/cblas_cgeru_d_fortran.o $(BUILD_DIR)/cblas_cgeru_dv_fortran.o $(BUILD_DIR)/cblas_chbmv_b_fortran.o $(BUILD_DIR)/cblas_chbmv_bv_fortran.o $(BUILD_DIR)/cblas_chbmv_d_fortran.o $(BUILD_DIR)/cblas_chbmv_dv_fortran.o $(BUILD_DIR)/cblas_chemm_b_fortran.o $(BUILD_DIR)/cblas_chemm_bv_fortran.o $(BUILD_DIR)/cblas_chemm_d_fortran.o $(BUILD_DIR)/cblas_chemm_dv_fortran.o $(BUILD_DIR)/cblas_chemv_b_fortran.o $(BUILD_DIR)/cblas_chemv_bv_fortran.o $(BUILD_DIR)/cblas_chemv_d_fortran.o $(BUILD_DIR)/cblas_chemv_dv_fortran.o $(BUILD_DIR)/cblas_cscal_b_fortran.o $(BUILD_DIR)/cblas_cscal_bv_fortran.o $(BUILD_DIR)/cblas_cscal_d_fortran.o $(BUILD_DIR)/cblas_cscal_dv_fortran.o $(BUILD_DIR)/cblas_cswap_b_fortran.o $(BUILD_DIR)/cblas_cswap_bv_fortran.o $(BUILD_DIR)/cblas_cswap_d_fortran.o $(BUILD_DIR)/cblas_cswap_dv_fortran.o $(BUILD_DIR)/cblas_csymm_b_fortran.o $(BUILD_DIR)/cblas_csymm_bv_fortran.o $(BUILD_DIR)/cblas_csymm_d_fortran.o $(BUILD_DIR)/cblas_csymm_dv_fortran.o $(BUILD_DIR)/cblas_csyr2k_b_fortran.o $(BUILD_DIR)/cblas_csyr2k_bv_fortran.o $(BUILD_DIR)/cblas_csyr2k_d_fortran.o $(BUILD_DIR)/cblas_csyr2k_dv_fortran.o $(BUILD_DIR)/cblas_csyrk_b_fortran.o $(BUILD_DIR)/cblas_csyrk_bv_fortran.o $(BUILD_DIR)/cblas_csyrk_d_fortran.o $(BUILD_DIR)/cblas_csyrk_dv_fortran.o $(BUILD_DIR)/cblas_ctbmv_b_fortran.o $(BUILD_DIR)/cblas_ctbmv_bv_fortran.o $(BUILD_DIR)/cblas_ctbmv_d_fortran.o $(BUILD_DIR)/cblas_ctbmv_dv_fortran.o $(BUILD_DIR)/cblas_ctpmv_b_fortran.o $(BUILD_DIR)/cblas_ctpmv_bv_fortran.o $(BUILD_DIR)/cblas_ctpmv_d_fortran.o $(BUILD_DIR)/cblas_ctpmv_dv_fortran.o $(BUILD_DIR)/cblas_ctrmm_b_fortran.o $(BUILD_DIR)/cblas_ctrmm_bv_fortran.o $(BUILD_DIR)/cblas_ctrmm_d_fortran.o $(BUILD_DIR)/cblas_ctrmm_dv_fortran.o $(BUILD_DIR)/cblas_ctrmv_b_fortran.o $(BUILD_DIR)/cblas_ctrmv_bv_fortran.o $(BUILD_DIR)/cblas_ctrmv_d_fortran.o $(BUILD_DIR)/cblas_ctrmv_dv_fortran.o $(BUILD_DIR)/cblas_ctrsm_b_fortran.o $(BUILD_DIR)/cblas_ctrsm_bv_fortran.o $(BUILD_DIR)/cblas_ctrsm_d_fortran.o $(BUILD_DIR)/cblas_ctrsm_dv_fortran.o $(BUILD_DIR)/cblas_ctrsv_b_fortran.o $(BUILD_DIR)/cblas_ctrsv_bv_fortran.o $(BUILD_DIR)/cblas_ctrsv_d_fortran.o $(BUILD_DIR)/cblas_ctrsv_dv_fortran.o $(BUILD_DIR)/cblas_dasum_b_fortran.o $(BUILD_DIR)/cblas_dasum_bv_fortran.o $(BUILD_DIR)/cblas_dasum_d_fortran.o $(BUILD_DIR)/cblas_dasum_dv_fortran.o $(BUILD_DIR)/cblas_daxpy_b_fortran.o $(BUILD_DIR)/cblas_daxpy_bv_fortran.o $(BUILD_DIR)/cblas_daxpy_d_fortran.o $(BUILD_DIR)/cblas_daxpy_dv_fortran.o $(BUILD_DIR)/cblas_dcopy_b_fortran.o $(BUILD_DIR)/cblas_dcopy_bv_fortran.o $(BUILD_DIR)/cblas_dcopy_d_fortran.o $(BUILD_DIR)/cblas_dcopy_dv_fortran.o $(BUILD_DIR)/cblas_ddot_b_fortran.o $(BUILD_DIR)/cblas_ddot_bv_fortran.o $(BUILD_DIR)/cblas_ddot_d_fortran.o $(BUILD_DIR)/cblas_ddot_dv_fortran.o $(BUILD_DIR)/cblas_dgbmv_b_fortran.o $(BUILD_DIR)/cblas_dgbmv_bv_fortran.o $(BUILD_DIR)/cblas_dgbmv_d_fortran.o $(BUILD_DIR)/cblas_dgbmv_dv_fortran.o $(BUILD_DIR)/cblas_dgemm_b_fortran.o $(BUILD_DIR)/cblas_dgemm_bv_fortran.o $(BUILD_DIR)/cblas_dgemm_d_fortran.o $(BUILD_DIR)/cblas_dgemm_dv_fortran.o $(BUILD_DIR)/cblas_dgemv_b_fortran.o $(BUILD_DIR)/cblas_dgemv_bv_fortran.o $(BUILD_DIR)/cblas_dgemv_d_fortran.o $(BUILD_DIR)/cblas_dgemv_dv_fortran.o $(BUILD_DIR)/cblas_dger_b_fortran.o $(BUILD_DIR)/cblas_dger_bv_fortran.o $(BUILD_DIR)/cblas_dger_d_fortran.o $(BUILD_DIR)/cblas_dger_dv_fortran.o $(BUILD_DIR)/cblas_dnrm2_b_fortran.o $(BUILD_DIR)/cblas_dnrm2_bv_fortran.o $(BUILD_DIR)/cblas_dnrm2_d_fortran.o $(BUILD_DIR)/cblas_dnrm2_dv_fortran.o $(BUILD_DIR)/cblas_dsbmv_b_fortran.o $(BUILD_DIR)/cblas_dsbmv_bv_fortran.o $(BUILD_DIR)/cblas_dsbmv_d_fortran.o $(BUILD_DIR)/cblas_dsbmv_dv_fortran.o $(BUILD_DIR)/cblas_dscal_b_fortran.o $(BUILD_DIR)/cblas_dscal_bv_fortran.o $(BUILD_DIR)/cblas_dscal_d_fortran.o $(BUILD_DIR)/cblas_dscal_dv_fortran.o $(BUILD_DIR)/cblas_dspmv_b_fortran.o $(BUILD_DIR)/cblas_dspmv_bv_fortran.o $(BUILD_DIR)/cblas_dspmv_d_fortran.o $(BUILD_DIR)/cblas_dspmv_dv_fortran.o $(BUILD_DIR)/cblas_dspr2_b_fortran.o $(BUILD_DIR)/cblas_dspr2_bv_fortran.o $(BUILD_DIR)/cblas_dspr2_d_fortran.o $(BUILD_DIR)/cblas_dspr2_dv_fortran.o $(BUILD_DIR)/cblas_dspr_b_fortran.o $(BUILD_DIR)/cblas_dspr_bv_fortran.o $(BUILD_DIR)/cblas_dspr_d_fortran.o $(BUILD_DIR)/cblas_dspr_dv_fortran.o $(BUILD_DIR)/cblas_dswap_b_fortran.o $(BUILD_DIR)/cblas_dswap_bv_fortran.o $(BUILD_DIR)/cblas_dswap_d_fortran.o $(BUILD_DIR)/cblas_dswap_dv_fortran.o $(BUILD_DIR)/cblas_dsymm_b_fortran.o $(BUILD_DIR)/cblas_dsymm_bv_fortran.o $(BUILD_DIR)/cblas_dsymm_d_fortran.o $(BUILD_DIR)/cblas_dsymm_dv_fortran.o $(BUILD_DIR)/cblas_dsymv_b_fortran.o $(BUILD_DIR)/cblas_dsymv_bv_fortran.o $(BUILD_DIR)/cblas_dsymv_d_fortran.o $(BUILD_DIR)/cblas_dsymv_dv_fortran.o $(BUILD_DIR)/cblas_dsyr2_b_fortran.o $(BUILD_DIR)/cblas_dsyr2_bv_fortran.o $(BUILD_DIR)/cblas_dsyr2_d_fortran.o $(BUILD_DIR)/cblas_dsyr2_dv_fortran.o $(BUILD_DIR)/cblas_dsyr2k_b_fortran.o $(BUILD_DIR)/cblas_dsyr2k_bv_fortran.o $(BUILD_DIR)/cblas_dsyr2k_d_fortran.o $(BUILD_DIR)/cblas_dsyr2k_dv_fortran.o $(BUILD_DIR)/cblas_dsyr_b_fortran.o $(BUILD_DIR)/cblas_dsyr_bv_fortran.o $(BUILD_DIR)/cblas_dsyr_d_fortran.o $(BUILD_DIR)/cblas_dsyr_dv_fortran.o $(BUILD_DIR)/cblas_dsyrk_b_fortran.o $(BUILD_DIR)/cblas_dsyrk_bv_fortran.o $(BUILD_DIR)/cblas_dsyrk_d_fortran.o $(BUILD_DIR)/cblas_dsyrk_dv_fortran.o $(BUILD_DIR)/cblas_dtbmv_b_fortran.o $(BUILD_DIR)/cblas_dtbmv_bv_fortran.o $(BUILD_DIR)/cblas_dtbmv_d_fortran.o $(BUILD_DIR)/cblas_dtbmv_dv_fortran.o $(BUILD_DIR)/cblas_dtpmv_b_fortran.o $(BUILD_DIR)/cblas_dtpmv_bv_fortran.o $(BUILD_DIR)/cblas_dtpmv_d_fortran.o $(BUILD_DIR)/cblas_dtpmv_dv_fortran.o $(BUILD_DIR)/cblas_dtrmm_b_fortran.o $(BUILD_DIR)/cblas_dtrmm_bv_fortran.o $(BUILD_DIR)/cblas_dtrmm_d_fortran.o $(BUILD_DIR)/cblas_dtrmm_dv_fortran.o $(BUILD_DIR)/cblas_dtrmv_b_fortran.o $(BUILD_DIR)/cblas_dtrmv_bv_fortran.o $(BUILD_DIR)/cblas_dtrmv_d_fortran.o $(BUILD_DIR)/cblas_dtrmv_dv_fortran.o $(BUILD_DIR)/cblas_dtrsm_b_fortran.o $(BUILD_DIR)/cblas_dtrsm_bv_fortran.o $(BUILD_DIR)/cblas_dtrsm_d_fortran.o $(BUILD_DIR)/cblas_dtrsm_dv_fortran.o $(BUILD_DIR)/cblas_dtrsv_b_fortran.o $(BUILD_DIR)/cblas_dtrsv_bv_fortran.o $(BUILD_DIR)/cblas_dtrsv_d_fortran.o $(BUILD_DIR)/cblas_dtrsv_dv_fortran.o $(BUILD_DIR)/cblas_sasum_b_fortran.o $(BUILD_DIR)/cblas_sasum_bv_fortran.o $(BUILD_DIR)/cblas_sasum_d_fortran.o $(BUILD_DIR)/cblas_sasum_dv_fortran.o $(BUILD_DIR)/cblas_saxpy_b_fortran.o $(BUILD_DIR)/cblas_saxpy_bv_fortran.o $(BUILD_DIR)/cblas_saxpy_d_fortran.o $(BUILD_DIR)/cblas_saxpy_dv_fortran.o $(BUILD_DIR)/cblas_scopy_b_fortran.o $(BUILD_DIR)/cblas_scopy_bv_fortran.o $(BUILD_DIR)/cblas_scopy_d_fortran.o $(BUILD_DIR)/cblas_scopy_dv_fortran.o $(BUILD_DIR)/cblas_sdot_b_fortran.o $(BUILD_DIR)/cblas_sdot_bv_fortran.o $(BUILD_DIR)/cblas_sdot_d_fortran.o $(BUILD_DIR)/cblas_sdot_dv_fortran.o $(BUILD_DIR)/cblas_sgbmv_b_fortran.o $(BUILD_DIR)/cblas_sgbmv_bv_fortran.o $(BUILD_DIR)/cblas_sgbmv_d_fortran.o $(BUILD_DIR)/cblas_sgbmv_dv_fortran.o $(BUILD_DIR)/cblas_sgemm_b_fortran.o $(BUILD_DIR)/cblas_sgemm_bv_fortran.o $(BUILD_DIR)/cblas_sgemm_d_fortran.o $(BUILD_DIR)/cblas_sgemm_dv_fortran.o $(BUILD_DIR)/cblas_sgemv_b_fortran.o $(BUILD_DIR)/cblas_sgemv_bv_fortran.o $(BUILD_DIR)/cblas_sgemv_d_fortran.o $(BUILD_DIR)/cblas_sgemv_dv_fortran.o $(BUILD_DIR)/cblas_sger_b_fortran.o $(BUILD_DIR)/cblas_sger_bv_fortran.o $(BUILD_DIR)/cblas_sger_d_fortran.o $(BUILD_DIR)/cblas_sger_dv_fortran.o $(BUILD_DIR)/cblas_snrm2_b_fortran.o $(BUILD_DIR)/cblas_snrm2_bv_fortran.o $(BUILD_DIR)/cblas_snrm2_d_fortran.o $(BUILD_DIR)/cblas_snrm2_dv_fortran.o $(BUILD_DIR)/cblas_ssbmv_b_fortran.o $(BUILD_DIR)/cblas_ssbmv_bv_fortran.o $(BUILD_DIR)/cblas_ssbmv_d_fortran.o $(BUILD_DIR)/cblas_ssbmv_dv_fortran.o $(BUILD_DIR)/cblas_sscal_b_fortran.o $(BUILD_DIR)/cblas_sscal_bv_fortran.o $(BUILD_DIR)/cblas_sscal_d_fortran.o $(BUILD_DIR)/cblas_sscal_dv_fortran.o $(BUILD_DIR)/cblas_sspmv_b_fortran.o $(BUILD_DIR)/cblas_sspmv_bv_fortran.o $(BUILD_DIR)/cblas_sspmv_d_fortran.o $(BUILD_DIR)/cblas_sspmv_dv_fortran.o $(BUILD_DIR)/cblas_sspr2_b_fortran.o $(BUILD_DIR)/cblas_sspr2_bv_fortran.o $(BUILD_DIR)/cblas_sspr2_d_fortran.o $(BUILD_DIR)/cblas_sspr2_dv_fortran.o $(BUILD_DIR)/cblas_sspr_b_fortran.o $(BUILD_DIR)/cblas_sspr_bv_fortran.o $(BUILD_DIR)/cblas_sspr_d_fortran.o $(BUILD_DIR)/cblas_sspr_dv_fortran.o $(BUILD_DIR)/cblas_sswap_b_fortran.o $(BUILD_DIR)/cblas_sswap_bv_fortran.o $(BUILD_DIR)/cblas_sswap_d_fortran.o $(BUILD_DIR)/cblas_sswap_dv_fortran.o $(BUILD_DIR)/cblas_ssymm_b_fortran.o $(BUILD_DIR)/cblas_ssymm_bv_fortran.o $(BUILD_DIR)/cblas_ssymm_d_fortran.o $(BUILD_DIR)/cblas_ssymm_dv_fortran.o $(BUILD_DIR)/cblas_ssymv_b_fortran.o $(BUILD_DIR)/cblas_ssymv_bv_fortran.o $(BUILD_DIR)/cblas_ssymv_d_fortran.o $(BUILD_DIR)/cblas_ssymv_dv_fortran.o $(BUILD_DIR)/cblas_ssyr2_b_fortran.o $(BUILD_DIR)/cblas_ssyr2_bv_fortran.o $(BUILD_DIR)/cblas_ssyr2_d_fortran.o $(BUILD_DIR)/cblas_ssyr2_dv_fortran.o $(BUILD_DIR)/cblas_ssyr2k_b_fortran.o $(BUILD_DIR)/cblas_ssyr2k_bv_fortran.o $(BUILD_DIR)/cblas_ssyr2k_d_fortran.o $(BUILD_DIR)/cblas_ssyr2k_dv_fortran.o $(BUILD_DIR)/cblas_ssyr_b_fortran.o $(BUILD_DIR)/cblas_ssyr_bv_fortran.o $(BUILD_DIR)/cblas_ssyr_d_fortran.o $(BUILD_DIR)/cblas_ssyr_dv_fortran.o $(BUILD_DIR)/cblas_ssyrk_b_fortran.o $(BUILD_DIR)/cblas_ssyrk_bv_fortran.o $(BUILD_DIR)/cblas_ssyrk_d_fortran.o $(BUILD_DIR)/cblas_ssyrk_dv_fortran.o $(BUILD_DIR)/cblas_stbmv_b_fortran.o $(BUILD_DIR)/cblas_stbmv_bv_fortran.o $(BUILD_DIR)/cblas_stbmv_d_fortran.o $(BUILD_DIR)/cblas_stbmv_dv_fortran.o $(BUILD_DIR)/cblas_stpmv_b_fortran.o $(BUILD_DIR)/cblas_stpmv_bv_fortran.o $(BUILD_DIR)/cblas_stpmv_d_fortran.o $(BUILD_DIR)/cblas_stpmv_dv_fortran.o $(BUILD_DIR)/cblas_strmm_b_fortran.o $(BUILD_DIR)/cblas_strmm_bv_fortran.o $(BUILD_DIR)/cblas_strmm_d_fortran.o $(BUILD_DIR)/cblas_strmm_dv_fortran.o $(BUILD_DIR)/cblas_strmv_b_fortran.o $(BUILD_DIR)/cblas_strmv_bv_fortran.o $(BUILD_DIR)/cblas_strmv_d_fortran.o $(BUILD_DIR)/cblas_strmv_dv_fortran.o $(BUILD_DIR)/cblas_strsm_b_fortran.o $(BUILD_DIR)/cblas_strsm_bv_fortran.o $(BUILD_DIR)/cblas_strsm_d_fortran.o $(BUILD_DIR)/cblas_strsm_dv_fortran.o $(BUILD_DIR)/cblas_strsv_b_fortran.o $(BUILD_DIR)/cblas_strsv_bv_fortran.o $(BUILD_DIR)/cblas_strsv_d_fortran.o $(BUILD_DIR)/cblas_strsv_dv_fortran.o $(BUILD_DIR)/cblas_zaxpy_b_fortran.o $(BUILD_DIR)/cblas_zaxpy_bv_fortran.o $(BUILD_DIR)/cblas_zaxpy_d_fortran.o $(BUILD_DIR)/cblas_zaxpy_dv_fortran.o $(BUILD_DIR)/cblas_zcopy_b_fortran.o $(BUILD_DIR)/cblas_zcopy_bv_fortran.o $(BUILD_DIR)/cblas_zcopy_d_fortran.o $(BUILD_DIR)/cblas_zcopy_dv_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_b_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_bv_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_d_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_dv_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_b_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_bv_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_d_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_dv_fortran.o $(BUILD_DIR)/cblas_zdscal_b_fortran.o $(BUILD_DIR)/cblas_zdscal_bv_fortran.o $(BUILD_DIR)/cblas_zdscal_d_fortran.o $(BUILD_DIR)/cblas_zdscal_dv_fortran.o $(BUILD_DIR)/cblas_zgbmv_b_fortran.o $(BUILD_DIR)/cblas_zgbmv_bv_fortran.o $(BUILD_DIR)/cblas_zgbmv_d_fortran.o $(BUILD_DIR)/cblas_zgbmv_dv_fortran.o $(BUILD_DIR)/cblas_zgemm_b_fortran.o $(BUILD_DIR)/cblas_zgemm_bv_fortran.o $(BUILD_DIR)/cblas_zgemm_d_fortran.o $(BUILD_DIR)/cblas_zgemm_dv_fortran.o $(BUILD_DIR)/cblas_zgemv_b_fortran.o $(BUILD_DIR)/cblas_zgemv_bv_fortran.o $(BUILD_DIR)/cblas_zgemv_d_fortran.o $(BUILD_DIR)/cblas_zgemv_dv_fortran.o $(BUILD_DIR)/cblas_zgerc_b_fortran.o $(BUILD_DIR)/cblas_zgerc_bv_fortran.o $(BUILD_DIR)/cblas_zgerc_d_fortran.o $(BUILD_DIR)/cblas_zgerc_dv_fortran.o $(BUILD_DIR)/cblas_zgeru_b_fortran.o $(BUILD_DIR)/cblas_zgeru_bv_fortran.o $(BUILD_DIR)/cblas_zgeru_d_fortran.o $(BUILD_DIR)/cblas_zgeru_dv_fortran.o $(BUILD_DIR)/cblas_zhbmv_b_fortran.o $(BUILD_DIR)/cblas_zhbmv_bv_fortran.o $(BUILD_DIR)/cblas_zhbmv_d_fortran.o $(BUILD_DIR)/cblas_zhbmv_dv_fortran.o $(BUILD_DIR)/cblas_zhemm_b_fortran.o $(BUILD_DIR)/cblas_zhemm_bv_fortran.o $(BUILD_DIR)/cblas_zhemm_d_fortran.o $(BUILD_DIR)/cblas_zhemm_dv_fortran.o $(BUILD_DIR)/cblas_zhemv_b_fortran.o $(BUILD_DIR)/cblas_zhemv_bv_fortran.o $(BUILD_DIR)/cblas_zhemv_d_fortran.o $(BUILD_DIR)/cblas_zhemv_dv_fortran.o $(BUILD_DIR)/cblas_zscal_b_fortran.o $(BUILD_DIR)/cblas_zscal_bv_fortran.o $(BUILD_DIR)/cblas_zscal_d_fortran.o $(BUILD_DIR)/cblas_zscal_dv_fortran.o $(BUILD_DIR)/cblas_zswap_b_fortran.o $(BUILD_DIR)/cblas_zswap_bv_fortran.o $(BUILD_DIR)/cblas_zswap_d_fortran.o $(BUILD_DIR)/cblas_zswap_dv_fortran.o $(BUILD_DIR)/cblas_zsymm_b_fortran.o $(BUILD_DIR)/cblas_zsymm_bv_fortran.o $(BUILD_DIR)/cblas_zsymm_d_fortran.o $(BUILD_DIR)/cblas_zsymm_dv_fortran.o $(BUILD_DIR)/cblas_zsyr2k_b_fortran.o $(BUILD_DIR)/cblas_zsyr2k_bv_fortran.o $(BUILD_DIR)/cblas_zsyr2k_d_fortran.o $(BUILD_DIR)/cblas_zsyr2k_dv_fortran.o $(BUILD_DIR)/cblas_zsyrk_b_fortran.o $(BUILD_DIR)/cblas_zsyrk_bv_fortran.o $(BUILD_DIR)/cblas_zsyrk_d_fortran.o $(BUILD_DIR)/cblas_zsyrk_dv_fortran.o $(BUILD_DIR)/cblas_ztbmv_b_fortran.o $(BUILD_DIR)/cblas_ztbmv_bv_fortran.o $(BUILD_DIR)/cblas_ztbmv_d_fortran.o $(BUILD_DIR)/cblas_ztbmv_dv_fortran.o $(BUILD_DIR)/cblas_ztpmv_b_fortran.o $(BUILD_DIR)/cblas_ztpmv_bv_fortran.o $(BUILD_DIR)/cblas_ztpmv_d_fortran.o $(BUILD_DIR)/cblas_ztpmv_dv_fortran.o $(BUILD_DIR)/cblas_ztrmm_b_fortran.o $(BUILD_DIR)/cblas_ztrmm_bv_fortran.o $(BUILD_DIR)/cblas_ztrmm_d_fortran.o $(BUILD_DIR)/cblas_ztrmm_dv_fortran.o $(BUILD_DIR)/cblas_ztrmv_b_fortran.o $(BUILD_DIR)/cblas_ztrmv_bv_fortran.o $(BUILD_DIR)/cblas_ztrmv_d_fortran.o $(BUILD_DIR)/cblas_ztrmv_dv_fortran.o $(BUILD_DIR)/cblas_ztrsm_b_fortran.o $(BUILD_DIR)/cblas_ztrsm_bv_fortran.o $(BUILD_DIR)/cblas_ztrsm_d_fortran.o $(BUILD_DIR)/cblas_ztrsm_dv_fortran.o $(BUILD_DIR)/cblas_ztrsv_b_fortran.o $(BUILD_DIR)/cblas_ztrsv_bv_fortran.o $(BUILD_DIR)/cblas_ztrsv_d_fortran.o $(BUILD_DIR)/cblas_ztrsv_dv_fortran.o
+	ar rcu $(BUILD_DIR)/libcblas_diff.a $(BUILD_DIR)/cblas_caxpy_d.o $(BUILD_DIR)/cblas_ccopy_d.o $(BUILD_DIR)/cblas_cdotc_sub_d.o $(BUILD_DIR)/cblas_cdotu_sub_d.o $(BUILD_DIR)/cblas_cgbmv_d.o $(BUILD_DIR)/cblas_cgemm_d.o $(BUILD_DIR)/cblas_cgemv_d.o $(BUILD_DIR)/cblas_cgerc_d.o $(BUILD_DIR)/cblas_cgeru_d.o $(BUILD_DIR)/cblas_chbmv_d.o $(BUILD_DIR)/cblas_chemm_d.o $(BUILD_DIR)/cblas_chemv_d.o $(BUILD_DIR)/cblas_cscal_d.o $(BUILD_DIR)/cblas_cswap_d.o $(BUILD_DIR)/cblas_csymm_d.o $(BUILD_DIR)/cblas_csyr2k_d.o $(BUILD_DIR)/cblas_csyrk_d.o $(BUILD_DIR)/cblas_ctbmv_d.o $(BUILD_DIR)/cblas_ctpmv_d.o $(BUILD_DIR)/cblas_ctrmm_d.o $(BUILD_DIR)/cblas_ctrmv_d.o $(BUILD_DIR)/cblas_ctrsm_d.o $(BUILD_DIR)/cblas_ctrsv_d.o $(BUILD_DIR)/cblas_dasum_d.o $(BUILD_DIR)/cblas_daxpy_d.o $(BUILD_DIR)/cblas_dcopy_d.o $(BUILD_DIR)/cblas_ddot_d.o $(BUILD_DIR)/cblas_dgbmv_d.o $(BUILD_DIR)/cblas_dgemm_d.o $(BUILD_DIR)/cblas_dgemv_d.o $(BUILD_DIR)/cblas_dger_d.o $(BUILD_DIR)/cblas_dnrm2_d.o $(BUILD_DIR)/cblas_dsbmv_d.o $(BUILD_DIR)/cblas_dscal_d.o $(BUILD_DIR)/cblas_dspmv_d.o $(BUILD_DIR)/cblas_dspr2_d.o $(BUILD_DIR)/cblas_dspr_d.o $(BUILD_DIR)/cblas_dswap_d.o $(BUILD_DIR)/cblas_dsymm_d.o $(BUILD_DIR)/cblas_dsymv_d.o $(BUILD_DIR)/cblas_dsyr2_d.o $(BUILD_DIR)/cblas_dsyr2k_d.o $(BUILD_DIR)/cblas_dsyr_d.o $(BUILD_DIR)/cblas_dsyrk_d.o $(BUILD_DIR)/cblas_dtbmv_d.o $(BUILD_DIR)/cblas_dtpmv_d.o $(BUILD_DIR)/cblas_dtrmm_d.o $(BUILD_DIR)/cblas_dtrmv_d.o $(BUILD_DIR)/cblas_dtrsm_d.o $(BUILD_DIR)/cblas_dtrsv_d.o $(BUILD_DIR)/cblas_sasum_d.o $(BUILD_DIR)/cblas_saxpy_d.o $(BUILD_DIR)/cblas_scopy_d.o $(BUILD_DIR)/cblas_sdot_d.o $(BUILD_DIR)/cblas_sgbmv_d.o $(BUILD_DIR)/cblas_sgemm_d.o $(BUILD_DIR)/cblas_sgemv_d.o $(BUILD_DIR)/cblas_sger_d.o $(BUILD_DIR)/cblas_snrm2_d.o $(BUILD_DIR)/cblas_ssbmv_d.o $(BUILD_DIR)/cblas_sscal_d.o $(BUILD_DIR)/cblas_sspmv_d.o $(BUILD_DIR)/cblas_sspr2_d.o $(BUILD_DIR)/cblas_sspr_d.o $(BUILD_DIR)/cblas_sswap_d.o $(BUILD_DIR)/cblas_ssymm_d.o $(BUILD_DIR)/cblas_ssymv_d.o $(BUILD_DIR)/cblas_ssyr2_d.o $(BUILD_DIR)/cblas_ssyr2k_d.o $(BUILD_DIR)/cblas_ssyr_d.o $(BUILD_DIR)/cblas_ssyrk_d.o $(BUILD_DIR)/cblas_stbmv_d.o $(BUILD_DIR)/cblas_stpmv_d.o $(BUILD_DIR)/cblas_strmm_d.o $(BUILD_DIR)/cblas_strmv_d.o $(BUILD_DIR)/cblas_strsm_d.o $(BUILD_DIR)/cblas_strsv_d.o $(BUILD_DIR)/cblas_zaxpy_d.o $(BUILD_DIR)/cblas_zcopy_d.o $(BUILD_DIR)/cblas_zdotc_sub_d.o $(BUILD_DIR)/cblas_zdotu_sub_d.o $(BUILD_DIR)/cblas_zdscal_d.o $(BUILD_DIR)/cblas_zgbmv_d.o $(BUILD_DIR)/cblas_zgemm_d.o $(BUILD_DIR)/cblas_zgemv_d.o $(BUILD_DIR)/cblas_zgerc_d.o $(BUILD_DIR)/cblas_zgeru_d.o $(BUILD_DIR)/cblas_zhbmv_d.o $(BUILD_DIR)/cblas_zhemm_d.o $(BUILD_DIR)/cblas_zhemv_d.o $(BUILD_DIR)/cblas_zscal_d.o $(BUILD_DIR)/cblas_zswap_d.o $(BUILD_DIR)/cblas_zsymm_d.o $(BUILD_DIR)/cblas_zsyr2k_d.o $(BUILD_DIR)/cblas_zsyrk_d.o $(BUILD_DIR)/cblas_ztbmv_d.o $(BUILD_DIR)/cblas_ztpmv_d.o $(BUILD_DIR)/cblas_ztrmm_d.o $(BUILD_DIR)/cblas_ztrmv_d.o $(BUILD_DIR)/cblas_ztrsm_d.o $(BUILD_DIR)/cblas_ztrsv_d.o $(BUILD_DIR)/cblas_caxpy_b.o $(BUILD_DIR)/cblas_ccopy_b.o $(BUILD_DIR)/cblas_cdotc_sub_b.o $(BUILD_DIR)/cblas_cdotu_sub_b.o $(BUILD_DIR)/cblas_cgbmv_b.o $(BUILD_DIR)/cblas_cgemm_b.o $(BUILD_DIR)/cblas_cgemv_b.o $(BUILD_DIR)/cblas_cgerc_b.o $(BUILD_DIR)/cblas_cgeru_b.o $(BUILD_DIR)/cblas_chbmv_b.o $(BUILD_DIR)/cblas_chemm_b.o $(BUILD_DIR)/cblas_chemv_b.o $(BUILD_DIR)/cblas_cscal_b.o $(BUILD_DIR)/cblas_cswap_b.o $(BUILD_DIR)/cblas_csymm_b.o $(BUILD_DIR)/cblas_csyr2k_b.o $(BUILD_DIR)/cblas_csyrk_b.o $(BUILD_DIR)/cblas_ctbmv_b.o $(BUILD_DIR)/cblas_ctpmv_b.o $(BUILD_DIR)/cblas_ctrmm_b.o $(BUILD_DIR)/cblas_ctrmv_b.o $(BUILD_DIR)/cblas_ctrsm_b.o $(BUILD_DIR)/cblas_ctrsv_b.o $(BUILD_DIR)/cblas_dasum_b.o $(BUILD_DIR)/cblas_daxpy_b.o $(BUILD_DIR)/cblas_dcopy_b.o $(BUILD_DIR)/cblas_ddot_b.o $(BUILD_DIR)/cblas_dgbmv_b.o $(BUILD_DIR)/cblas_dgemm_b.o $(BUILD_DIR)/cblas_dgemv_b.o $(BUILD_DIR)/cblas_dger_b.o $(BUILD_DIR)/cblas_dnrm2_b.o $(BUILD_DIR)/cblas_dsbmv_b.o $(BUILD_DIR)/cblas_dscal_b.o $(BUILD_DIR)/cblas_dspmv_b.o $(BUILD_DIR)/cblas_dspr2_b.o $(BUILD_DIR)/cblas_dspr_b.o $(BUILD_DIR)/cblas_dswap_b.o $(BUILD_DIR)/cblas_dsymm_b.o $(BUILD_DIR)/cblas_dsymv_b.o $(BUILD_DIR)/cblas_dsyr2_b.o $(BUILD_DIR)/cblas_dsyr2k_b.o $(BUILD_DIR)/cblas_dsyr_b.o $(BUILD_DIR)/cblas_dsyrk_b.o $(BUILD_DIR)/cblas_dtbmv_b.o $(BUILD_DIR)/cblas_dtpmv_b.o $(BUILD_DIR)/cblas_dtrmm_b.o $(BUILD_DIR)/cblas_dtrmv_b.o $(BUILD_DIR)/cblas_dtrsm_b.o $(BUILD_DIR)/cblas_dtrsv_b.o $(BUILD_DIR)/cblas_sasum_b.o $(BUILD_DIR)/cblas_saxpy_b.o $(BUILD_DIR)/cblas_scopy_b.o $(BUILD_DIR)/cblas_sdot_b.o $(BUILD_DIR)/cblas_sgbmv_b.o $(BUILD_DIR)/cblas_sgemm_b.o $(BUILD_DIR)/cblas_sgemv_b.o $(BUILD_DIR)/cblas_sger_b.o $(BUILD_DIR)/cblas_snrm2_b.o $(BUILD_DIR)/cblas_ssbmv_b.o $(BUILD_DIR)/cblas_sscal_b.o $(BUILD_DIR)/cblas_sspmv_b.o $(BUILD_DIR)/cblas_sspr2_b.o $(BUILD_DIR)/cblas_sspr_b.o $(BUILD_DIR)/cblas_sswap_b.o $(BUILD_DIR)/cblas_ssymm_b.o $(BUILD_DIR)/cblas_ssymv_b.o $(BUILD_DIR)/cblas_ssyr2_b.o $(BUILD_DIR)/cblas_ssyr2k_b.o $(BUILD_DIR)/cblas_ssyr_b.o $(BUILD_DIR)/cblas_ssyrk_b.o $(BUILD_DIR)/cblas_stbmv_b.o $(BUILD_DIR)/cblas_stpmv_b.o $(BUILD_DIR)/cblas_strmm_b.o $(BUILD_DIR)/cblas_strmv_b.o $(BUILD_DIR)/cblas_strsm_b.o $(BUILD_DIR)/cblas_strsv_b.o $(BUILD_DIR)/cblas_zaxpy_b.o $(BUILD_DIR)/cblas_zcopy_b.o $(BUILD_DIR)/cblas_zdotc_sub_b.o $(BUILD_DIR)/cblas_zdotu_sub_b.o $(BUILD_DIR)/cblas_zdscal_b.o $(BUILD_DIR)/cblas_zgbmv_b.o $(BUILD_DIR)/cblas_zgemm_b.o $(BUILD_DIR)/cblas_zgemv_b.o $(BUILD_DIR)/cblas_zgerc_b.o $(BUILD_DIR)/cblas_zgeru_b.o $(BUILD_DIR)/cblas_zhbmv_b.o $(BUILD_DIR)/cblas_zhemm_b.o $(BUILD_DIR)/cblas_zhemv_b.o $(BUILD_DIR)/cblas_zscal_b.o $(BUILD_DIR)/cblas_zswap_b.o $(BUILD_DIR)/cblas_zsymm_b.o $(BUILD_DIR)/cblas_zsyr2k_b.o $(BUILD_DIR)/cblas_zsyrk_b.o $(BUILD_DIR)/cblas_ztbmv_b.o $(BUILD_DIR)/cblas_ztpmv_b.o $(BUILD_DIR)/cblas_ztrmm_b.o $(BUILD_DIR)/cblas_ztrmv_b.o $(BUILD_DIR)/cblas_ztrsm_b.o $(BUILD_DIR)/cblas_ztrsv_b.o $(BUILD_DIR)/cblas_caxpy_dv.o $(BUILD_DIR)/cblas_ccopy_dv.o $(BUILD_DIR)/cblas_cdotc_sub_dv.o $(BUILD_DIR)/cblas_cdotu_sub_dv.o $(BUILD_DIR)/cblas_cgbmv_dv.o $(BUILD_DIR)/cblas_cgemm_dv.o $(BUILD_DIR)/cblas_cgemv_dv.o $(BUILD_DIR)/cblas_cgerc_dv.o $(BUILD_DIR)/cblas_cgeru_dv.o $(BUILD_DIR)/cblas_chbmv_dv.o $(BUILD_DIR)/cblas_chemm_dv.o $(BUILD_DIR)/cblas_chemv_dv.o $(BUILD_DIR)/cblas_cscal_dv.o $(BUILD_DIR)/cblas_cswap_dv.o $(BUILD_DIR)/cblas_csymm_dv.o $(BUILD_DIR)/cblas_csyr2k_dv.o $(BUILD_DIR)/cblas_csyrk_dv.o $(BUILD_DIR)/cblas_ctbmv_dv.o $(BUILD_DIR)/cblas_ctpmv_dv.o $(BUILD_DIR)/cblas_ctrmm_dv.o $(BUILD_DIR)/cblas_ctrmv_dv.o $(BUILD_DIR)/cblas_ctrsm_dv.o $(BUILD_DIR)/cblas_ctrsv_dv.o $(BUILD_DIR)/cblas_dasum_dv.o $(BUILD_DIR)/cblas_daxpy_dv.o $(BUILD_DIR)/cblas_dcopy_dv.o $(BUILD_DIR)/cblas_ddot_dv.o $(BUILD_DIR)/cblas_dgbmv_dv.o $(BUILD_DIR)/cblas_dgemm_dv.o $(BUILD_DIR)/cblas_dgemv_dv.o $(BUILD_DIR)/cblas_dger_dv.o $(BUILD_DIR)/cblas_dnrm2_dv.o $(BUILD_DIR)/cblas_dsbmv_dv.o $(BUILD_DIR)/cblas_dscal_dv.o $(BUILD_DIR)/cblas_dspmv_dv.o $(BUILD_DIR)/cblas_dspr2_dv.o $(BUILD_DIR)/cblas_dspr_dv.o $(BUILD_DIR)/cblas_dswap_dv.o $(BUILD_DIR)/cblas_dsymm_dv.o $(BUILD_DIR)/cblas_dsymv_dv.o $(BUILD_DIR)/cblas_dsyr2_dv.o $(BUILD_DIR)/cblas_dsyr2k_dv.o $(BUILD_DIR)/cblas_dsyr_dv.o $(BUILD_DIR)/cblas_dsyrk_dv.o $(BUILD_DIR)/cblas_dtbmv_dv.o $(BUILD_DIR)/cblas_dtpmv_dv.o $(BUILD_DIR)/cblas_dtrmm_dv.o $(BUILD_DIR)/cblas_dtrmv_dv.o $(BUILD_DIR)/cblas_dtrsm_dv.o $(BUILD_DIR)/cblas_dtrsv_dv.o $(BUILD_DIR)/cblas_sasum_dv.o $(BUILD_DIR)/cblas_saxpy_dv.o $(BUILD_DIR)/cblas_scopy_dv.o $(BUILD_DIR)/cblas_sdot_dv.o $(BUILD_DIR)/cblas_sgbmv_dv.o $(BUILD_DIR)/cblas_sgemm_dv.o $(BUILD_DIR)/cblas_sgemv_dv.o $(BUILD_DIR)/cblas_sger_dv.o $(BUILD_DIR)/cblas_snrm2_dv.o $(BUILD_DIR)/cblas_ssbmv_dv.o $(BUILD_DIR)/cblas_sscal_dv.o $(BUILD_DIR)/cblas_sspmv_dv.o $(BUILD_DIR)/cblas_sspr2_dv.o $(BUILD_DIR)/cblas_sspr_dv.o $(BUILD_DIR)/cblas_sswap_dv.o $(BUILD_DIR)/cblas_ssymm_dv.o $(BUILD_DIR)/cblas_ssymv_dv.o $(BUILD_DIR)/cblas_ssyr2_dv.o $(BUILD_DIR)/cblas_ssyr2k_dv.o $(BUILD_DIR)/cblas_ssyr_dv.o $(BUILD_DIR)/cblas_ssyrk_dv.o $(BUILD_DIR)/cblas_stbmv_dv.o $(BUILD_DIR)/cblas_stpmv_dv.o $(BUILD_DIR)/cblas_strmm_dv.o $(BUILD_DIR)/cblas_strmv_dv.o $(BUILD_DIR)/cblas_strsm_dv.o $(BUILD_DIR)/cblas_strsv_dv.o $(BUILD_DIR)/cblas_zaxpy_dv.o $(BUILD_DIR)/cblas_zcopy_dv.o $(BUILD_DIR)/cblas_zdotc_sub_dv.o $(BUILD_DIR)/cblas_zdotu_sub_dv.o $(BUILD_DIR)/cblas_zdscal_dv.o $(BUILD_DIR)/cblas_zgbmv_dv.o $(BUILD_DIR)/cblas_zgemm_dv.o $(BUILD_DIR)/cblas_zgemv_dv.o $(BUILD_DIR)/cblas_zgerc_dv.o $(BUILD_DIR)/cblas_zgeru_dv.o $(BUILD_DIR)/cblas_zhbmv_dv.o $(BUILD_DIR)/cblas_zhemm_dv.o $(BUILD_DIR)/cblas_zhemv_dv.o $(BUILD_DIR)/cblas_zscal_dv.o $(BUILD_DIR)/cblas_zswap_dv.o $(BUILD_DIR)/cblas_zsymm_dv.o $(BUILD_DIR)/cblas_zsyr2k_dv.o $(BUILD_DIR)/cblas_zsyrk_dv.o $(BUILD_DIR)/cblas_ztbmv_dv.o $(BUILD_DIR)/cblas_ztpmv_dv.o $(BUILD_DIR)/cblas_ztrmm_dv.o $(BUILD_DIR)/cblas_ztrmv_dv.o $(BUILD_DIR)/cblas_ztrsm_dv.o $(BUILD_DIR)/cblas_ztrsv_dv.o $(BUILD_DIR)/cblas_caxpy_bv.o $(BUILD_DIR)/cblas_ccopy_bv.o $(BUILD_DIR)/cblas_cdotc_sub_bv.o $(BUILD_DIR)/cblas_cdotu_sub_bv.o $(BUILD_DIR)/cblas_cgbmv_bv.o $(BUILD_DIR)/cblas_cgemm_bv.o $(BUILD_DIR)/cblas_cgemv_bv.o $(BUILD_DIR)/cblas_cgerc_bv.o $(BUILD_DIR)/cblas_cgeru_bv.o $(BUILD_DIR)/cblas_chbmv_bv.o $(BUILD_DIR)/cblas_chemm_bv.o $(BUILD_DIR)/cblas_chemv_bv.o $(BUILD_DIR)/cblas_cscal_bv.o $(BUILD_DIR)/cblas_cswap_bv.o $(BUILD_DIR)/cblas_csymm_bv.o $(BUILD_DIR)/cblas_csyr2k_bv.o $(BUILD_DIR)/cblas_csyrk_bv.o $(BUILD_DIR)/cblas_ctbmv_bv.o $(BUILD_DIR)/cblas_ctpmv_bv.o $(BUILD_DIR)/cblas_ctrmm_bv.o $(BUILD_DIR)/cblas_ctrmv_bv.o $(BUILD_DIR)/cblas_ctrsm_bv.o $(BUILD_DIR)/cblas_ctrsv_bv.o $(BUILD_DIR)/cblas_dasum_bv.o $(BUILD_DIR)/cblas_daxpy_bv.o $(BUILD_DIR)/cblas_dcopy_bv.o $(BUILD_DIR)/cblas_ddot_bv.o $(BUILD_DIR)/cblas_dgbmv_bv.o $(BUILD_DIR)/cblas_dgemm_bv.o $(BUILD_DIR)/cblas_dgemv_bv.o $(BUILD_DIR)/cblas_dger_bv.o $(BUILD_DIR)/cblas_dnrm2_bv.o $(BUILD_DIR)/cblas_dsbmv_bv.o $(BUILD_DIR)/cblas_dscal_bv.o $(BUILD_DIR)/cblas_dspmv_bv.o $(BUILD_DIR)/cblas_dspr2_bv.o $(BUILD_DIR)/cblas_dspr_bv.o $(BUILD_DIR)/cblas_dswap_bv.o $(BUILD_DIR)/cblas_dsymm_bv.o $(BUILD_DIR)/cblas_dsymv_bv.o $(BUILD_DIR)/cblas_dsyr2_bv.o $(BUILD_DIR)/cblas_dsyr2k_bv.o $(BUILD_DIR)/cblas_dsyr_bv.o $(BUILD_DIR)/cblas_dsyrk_bv.o $(BUILD_DIR)/cblas_dtbmv_bv.o $(BUILD_DIR)/cblas_dtpmv_bv.o $(BUILD_DIR)/cblas_dtrmm_bv.o $(BUILD_DIR)/cblas_dtrmv_bv.o $(BUILD_DIR)/cblas_dtrsm_bv.o $(BUILD_DIR)/cblas_dtrsv_bv.o $(BUILD_DIR)/cblas_sasum_bv.o $(BUILD_DIR)/cblas_saxpy_bv.o $(BUILD_DIR)/cblas_scopy_bv.o $(BUILD_DIR)/cblas_sdot_bv.o $(BUILD_DIR)/cblas_sgbmv_bv.o $(BUILD_DIR)/cblas_sgemm_bv.o $(BUILD_DIR)/cblas_sgemv_bv.o $(BUILD_DIR)/cblas_sger_bv.o $(BUILD_DIR)/cblas_snrm2_bv.o $(BUILD_DIR)/cblas_ssbmv_bv.o $(BUILD_DIR)/cblas_sscal_bv.o $(BUILD_DIR)/cblas_sspmv_bv.o $(BUILD_DIR)/cblas_sspr2_bv.o $(BUILD_DIR)/cblas_sspr_bv.o $(BUILD_DIR)/cblas_sswap_bv.o $(BUILD_DIR)/cblas_ssymm_bv.o $(BUILD_DIR)/cblas_ssymv_bv.o $(BUILD_DIR)/cblas_ssyr2_bv.o $(BUILD_DIR)/cblas_ssyr2k_bv.o $(BUILD_DIR)/cblas_ssyr_bv.o $(BUILD_DIR)/cblas_ssyrk_bv.o $(BUILD_DIR)/cblas_stbmv_bv.o $(BUILD_DIR)/cblas_stpmv_bv.o $(BUILD_DIR)/cblas_strmm_bv.o $(BUILD_DIR)/cblas_strmv_bv.o $(BUILD_DIR)/cblas_strsm_bv.o $(BUILD_DIR)/cblas_strsv_bv.o $(BUILD_DIR)/cblas_zaxpy_bv.o $(BUILD_DIR)/cblas_zcopy_bv.o $(BUILD_DIR)/cblas_zdotc_sub_bv.o $(BUILD_DIR)/cblas_zdotu_sub_bv.o $(BUILD_DIR)/cblas_zdscal_bv.o $(BUILD_DIR)/cblas_zgbmv_bv.o $(BUILD_DIR)/cblas_zgemm_bv.o $(BUILD_DIR)/cblas_zgemv_bv.o $(BUILD_DIR)/cblas_zgerc_bv.o $(BUILD_DIR)/cblas_zgeru_bv.o $(BUILD_DIR)/cblas_zhbmv_bv.o $(BUILD_DIR)/cblas_zhemm_bv.o $(BUILD_DIR)/cblas_zhemv_bv.o $(BUILD_DIR)/cblas_zscal_bv.o $(BUILD_DIR)/cblas_zswap_bv.o $(BUILD_DIR)/cblas_zsymm_bv.o $(BUILD_DIR)/cblas_zsyr2k_bv.o $(BUILD_DIR)/cblas_zsyrk_bv.o $(BUILD_DIR)/cblas_ztbmv_bv.o $(BUILD_DIR)/cblas_ztpmv_bv.o $(BUILD_DIR)/cblas_ztrmm_bv.o $(BUILD_DIR)/cblas_ztrmv_bv.o $(BUILD_DIR)/cblas_ztrsm_bv.o $(BUILD_DIR)/cblas_ztrsv_bv.o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o $(BUILD_DIR)/DIFFSIZES_access.o $(BUILD_DIR)/DIFFSIZES.o $(BUILD_DIR)/cblas_caxpy_b_fortran.o $(BUILD_DIR)/cblas_caxpy_bv_fortran.o $(BUILD_DIR)/cblas_caxpy_d_fortran.o $(BUILD_DIR)/cblas_caxpy_dv_fortran.o $(BUILD_DIR)/cblas_ccopy_b_fortran.o $(BUILD_DIR)/cblas_ccopy_bv_fortran.o $(BUILD_DIR)/cblas_ccopy_d_fortran.o $(BUILD_DIR)/cblas_ccopy_dv_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_b_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_bv_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_d_fortran.o $(BUILD_DIR)/cblas_cdotc_sub_dv_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_b_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_bv_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_d_fortran.o $(BUILD_DIR)/cblas_cdotu_sub_dv_fortran.o $(BUILD_DIR)/cblas_cgbmv_b_fortran.o $(BUILD_DIR)/cblas_cgbmv_bv_fortran.o $(BUILD_DIR)/cblas_cgbmv_d_fortran.o $(BUILD_DIR)/cblas_cgbmv_dv_fortran.o $(BUILD_DIR)/cblas_cgemm_b_fortran.o $(BUILD_DIR)/cblas_cgemm_bv_fortran.o $(BUILD_DIR)/cblas_cgemm_d_fortran.o $(BUILD_DIR)/cblas_cgemm_dv_fortran.o $(BUILD_DIR)/cblas_cgemv_b_fortran.o $(BUILD_DIR)/cblas_cgemv_bv_fortran.o $(BUILD_DIR)/cblas_cgemv_d_fortran.o $(BUILD_DIR)/cblas_cgemv_dv_fortran.o $(BUILD_DIR)/cblas_cgerc_b_fortran.o $(BUILD_DIR)/cblas_cgerc_bv_fortran.o $(BUILD_DIR)/cblas_cgerc_d_fortran.o $(BUILD_DIR)/cblas_cgerc_dv_fortran.o $(BUILD_DIR)/cblas_cgeru_b_fortran.o $(BUILD_DIR)/cblas_cgeru_bv_fortran.o $(BUILD_DIR)/cblas_cgeru_d_fortran.o $(BUILD_DIR)/cblas_cgeru_dv_fortran.o $(BUILD_DIR)/cblas_chbmv_b_fortran.o $(BUILD_DIR)/cblas_chbmv_bv_fortran.o $(BUILD_DIR)/cblas_chbmv_d_fortran.o $(BUILD_DIR)/cblas_chbmv_dv_fortran.o $(BUILD_DIR)/cblas_chemm_b_fortran.o $(BUILD_DIR)/cblas_chemm_bv_fortran.o $(BUILD_DIR)/cblas_chemm_d_fortran.o $(BUILD_DIR)/cblas_chemm_dv_fortran.o $(BUILD_DIR)/cblas_chemv_b_fortran.o $(BUILD_DIR)/cblas_chemv_bv_fortran.o $(BUILD_DIR)/cblas_chemv_d_fortran.o $(BUILD_DIR)/cblas_chemv_dv_fortran.o $(BUILD_DIR)/cblas_cscal_b_fortran.o $(BUILD_DIR)/cblas_cscal_bv_fortran.o $(BUILD_DIR)/cblas_cscal_d_fortran.o $(BUILD_DIR)/cblas_cscal_dv_fortran.o $(BUILD_DIR)/cblas_cswap_b_fortran.o $(BUILD_DIR)/cblas_cswap_bv_fortran.o $(BUILD_DIR)/cblas_cswap_d_fortran.o $(BUILD_DIR)/cblas_cswap_dv_fortran.o $(BUILD_DIR)/cblas_csymm_b_fortran.o $(BUILD_DIR)/cblas_csymm_bv_fortran.o $(BUILD_DIR)/cblas_csymm_d_fortran.o $(BUILD_DIR)/cblas_csymm_dv_fortran.o $(BUILD_DIR)/cblas_csyr2k_b_fortran.o $(BUILD_DIR)/cblas_csyr2k_bv_fortran.o $(BUILD_DIR)/cblas_csyr2k_d_fortran.o $(BUILD_DIR)/cblas_csyr2k_dv_fortran.o $(BUILD_DIR)/cblas_csyrk_b_fortran.o $(BUILD_DIR)/cblas_csyrk_bv_fortran.o $(BUILD_DIR)/cblas_csyrk_d_fortran.o $(BUILD_DIR)/cblas_csyrk_dv_fortran.o $(BUILD_DIR)/cblas_ctbmv_b_fortran.o $(BUILD_DIR)/cblas_ctbmv_bv_fortran.o $(BUILD_DIR)/cblas_ctbmv_d_fortran.o $(BUILD_DIR)/cblas_ctbmv_dv_fortran.o $(BUILD_DIR)/cblas_ctpmv_b_fortran.o $(BUILD_DIR)/cblas_ctpmv_bv_fortran.o $(BUILD_DIR)/cblas_ctpmv_d_fortran.o $(BUILD_DIR)/cblas_ctpmv_dv_fortran.o $(BUILD_DIR)/cblas_ctrmm_b_fortran.o $(BUILD_DIR)/cblas_ctrmm_bv_fortran.o $(BUILD_DIR)/cblas_ctrmm_d_fortran.o $(BUILD_DIR)/cblas_ctrmm_dv_fortran.o $(BUILD_DIR)/cblas_ctrmv_b_fortran.o $(BUILD_DIR)/cblas_ctrmv_bv_fortran.o $(BUILD_DIR)/cblas_ctrmv_d_fortran.o $(BUILD_DIR)/cblas_ctrmv_dv_fortran.o $(BUILD_DIR)/cblas_ctrsm_b_fortran.o $(BUILD_DIR)/cblas_ctrsm_bv_fortran.o $(BUILD_DIR)/cblas_ctrsm_d_fortran.o $(BUILD_DIR)/cblas_ctrsm_dv_fortran.o $(BUILD_DIR)/cblas_ctrsv_b_fortran.o $(BUILD_DIR)/cblas_ctrsv_bv_fortran.o $(BUILD_DIR)/cblas_ctrsv_d_fortran.o $(BUILD_DIR)/cblas_ctrsv_dv_fortran.o $(BUILD_DIR)/cblas_dasum_b_fortran.o $(BUILD_DIR)/cblas_dasum_bv_fortran.o $(BUILD_DIR)/cblas_dasum_d_fortran.o $(BUILD_DIR)/cblas_dasum_dv_fortran.o $(BUILD_DIR)/cblas_daxpy_b_fortran.o $(BUILD_DIR)/cblas_daxpy_bv_fortran.o $(BUILD_DIR)/cblas_daxpy_d_fortran.o $(BUILD_DIR)/cblas_daxpy_dv_fortran.o $(BUILD_DIR)/cblas_dcopy_b_fortran.o $(BUILD_DIR)/cblas_dcopy_bv_fortran.o $(BUILD_DIR)/cblas_dcopy_d_fortran.o $(BUILD_DIR)/cblas_dcopy_dv_fortran.o $(BUILD_DIR)/cblas_ddot_b_fortran.o $(BUILD_DIR)/cblas_ddot_bv_fortran.o $(BUILD_DIR)/cblas_ddot_d_fortran.o $(BUILD_DIR)/cblas_ddot_dv_fortran.o $(BUILD_DIR)/cblas_dgbmv_b_fortran.o $(BUILD_DIR)/cblas_dgbmv_bv_fortran.o $(BUILD_DIR)/cblas_dgbmv_d_fortran.o $(BUILD_DIR)/cblas_dgbmv_dv_fortran.o $(BUILD_DIR)/cblas_dgemm_b_fortran.o $(BUILD_DIR)/cblas_dgemm_bv_fortran.o $(BUILD_DIR)/cblas_dgemm_d_fortran.o $(BUILD_DIR)/cblas_dgemm_dv_fortran.o $(BUILD_DIR)/cblas_dgemv_b_fortran.o $(BUILD_DIR)/cblas_dgemv_bv_fortran.o $(BUILD_DIR)/cblas_dgemv_d_fortran.o $(BUILD_DIR)/cblas_dgemv_dv_fortran.o $(BUILD_DIR)/cblas_dger_b_fortran.o $(BUILD_DIR)/cblas_dger_bv_fortran.o $(BUILD_DIR)/cblas_dger_d_fortran.o $(BUILD_DIR)/cblas_dger_dv_fortran.o $(BUILD_DIR)/cblas_dnrm2_b_fortran.o $(BUILD_DIR)/cblas_dnrm2_bv_fortran.o $(BUILD_DIR)/cblas_dnrm2_d_fortran.o $(BUILD_DIR)/cblas_dnrm2_dv_fortran.o $(BUILD_DIR)/cblas_dsbmv_b_fortran.o $(BUILD_DIR)/cblas_dsbmv_bv_fortran.o $(BUILD_DIR)/cblas_dsbmv_d_fortran.o $(BUILD_DIR)/cblas_dsbmv_dv_fortran.o $(BUILD_DIR)/cblas_dscal_b_fortran.o $(BUILD_DIR)/cblas_dscal_bv_fortran.o $(BUILD_DIR)/cblas_dscal_d_fortran.o $(BUILD_DIR)/cblas_dscal_dv_fortran.o $(BUILD_DIR)/cblas_dspmv_b_fortran.o $(BUILD_DIR)/cblas_dspmv_bv_fortran.o $(BUILD_DIR)/cblas_dspmv_d_fortran.o $(BUILD_DIR)/cblas_dspmv_dv_fortran.o $(BUILD_DIR)/cblas_dspr2_b_fortran.o $(BUILD_DIR)/cblas_dspr2_bv_fortran.o $(BUILD_DIR)/cblas_dspr2_d_fortran.o $(BUILD_DIR)/cblas_dspr2_dv_fortran.o $(BUILD_DIR)/cblas_dspr_b_fortran.o $(BUILD_DIR)/cblas_dspr_bv_fortran.o $(BUILD_DIR)/cblas_dspr_d_fortran.o $(BUILD_DIR)/cblas_dspr_dv_fortran.o $(BUILD_DIR)/cblas_dswap_b_fortran.o $(BUILD_DIR)/cblas_dswap_bv_fortran.o $(BUILD_DIR)/cblas_dswap_d_fortran.o $(BUILD_DIR)/cblas_dswap_dv_fortran.o $(BUILD_DIR)/cblas_dsymm_b_fortran.o $(BUILD_DIR)/cblas_dsymm_bv_fortran.o $(BUILD_DIR)/cblas_dsymm_d_fortran.o $(BUILD_DIR)/cblas_dsymm_dv_fortran.o $(BUILD_DIR)/cblas_dsymv_b_fortran.o $(BUILD_DIR)/cblas_dsymv_bv_fortran.o $(BUILD_DIR)/cblas_dsymv_d_fortran.o $(BUILD_DIR)/cblas_dsymv_dv_fortran.o $(BUILD_DIR)/cblas_dsyr2_b_fortran.o $(BUILD_DIR)/cblas_dsyr2_bv_fortran.o $(BUILD_DIR)/cblas_dsyr2_d_fortran.o $(BUILD_DIR)/cblas_dsyr2_dv_fortran.o $(BUILD_DIR)/cblas_dsyr2k_b_fortran.o $(BUILD_DIR)/cblas_dsyr2k_bv_fortran.o $(BUILD_DIR)/cblas_dsyr2k_d_fortran.o $(BUILD_DIR)/cblas_dsyr2k_dv_fortran.o $(BUILD_DIR)/cblas_dsyr_b_fortran.o $(BUILD_DIR)/cblas_dsyr_bv_fortran.o $(BUILD_DIR)/cblas_dsyr_d_fortran.o $(BUILD_DIR)/cblas_dsyr_dv_fortran.o $(BUILD_DIR)/cblas_dsyrk_b_fortran.o $(BUILD_DIR)/cblas_dsyrk_bv_fortran.o $(BUILD_DIR)/cblas_dsyrk_d_fortran.o $(BUILD_DIR)/cblas_dsyrk_dv_fortran.o $(BUILD_DIR)/cblas_dtbmv_b_fortran.o $(BUILD_DIR)/cblas_dtbmv_bv_fortran.o $(BUILD_DIR)/cblas_dtbmv_d_fortran.o $(BUILD_DIR)/cblas_dtbmv_dv_fortran.o $(BUILD_DIR)/cblas_dtpmv_b_fortran.o $(BUILD_DIR)/cblas_dtpmv_bv_fortran.o $(BUILD_DIR)/cblas_dtpmv_d_fortran.o $(BUILD_DIR)/cblas_dtpmv_dv_fortran.o $(BUILD_DIR)/cblas_dtrmm_b_fortran.o $(BUILD_DIR)/cblas_dtrmm_bv_fortran.o $(BUILD_DIR)/cblas_dtrmm_d_fortran.o $(BUILD_DIR)/cblas_dtrmm_dv_fortran.o $(BUILD_DIR)/cblas_dtrmv_b_fortran.o $(BUILD_DIR)/cblas_dtrmv_bv_fortran.o $(BUILD_DIR)/cblas_dtrmv_d_fortran.o $(BUILD_DIR)/cblas_dtrmv_dv_fortran.o $(BUILD_DIR)/cblas_dtrsm_b_fortran.o $(BUILD_DIR)/cblas_dtrsm_bv_fortran.o $(BUILD_DIR)/cblas_dtrsm_d_fortran.o $(BUILD_DIR)/cblas_dtrsm_dv_fortran.o $(BUILD_DIR)/cblas_dtrsv_b_fortran.o $(BUILD_DIR)/cblas_dtrsv_bv_fortran.o $(BUILD_DIR)/cblas_dtrsv_d_fortran.o $(BUILD_DIR)/cblas_dtrsv_dv_fortran.o $(BUILD_DIR)/cblas_sasum_b_fortran.o $(BUILD_DIR)/cblas_sasum_bv_fortran.o $(BUILD_DIR)/cblas_sasum_d_fortran.o $(BUILD_DIR)/cblas_sasum_dv_fortran.o $(BUILD_DIR)/cblas_saxpy_b_fortran.o $(BUILD_DIR)/cblas_saxpy_bv_fortran.o $(BUILD_DIR)/cblas_saxpy_d_fortran.o $(BUILD_DIR)/cblas_saxpy_dv_fortran.o $(BUILD_DIR)/cblas_scopy_b_fortran.o $(BUILD_DIR)/cblas_scopy_bv_fortran.o $(BUILD_DIR)/cblas_scopy_d_fortran.o $(BUILD_DIR)/cblas_scopy_dv_fortran.o $(BUILD_DIR)/cblas_sdot_b_fortran.o $(BUILD_DIR)/cblas_sdot_bv_fortran.o $(BUILD_DIR)/cblas_sdot_d_fortran.o $(BUILD_DIR)/cblas_sdot_dv_fortran.o $(BUILD_DIR)/cblas_sgbmv_b_fortran.o $(BUILD_DIR)/cblas_sgbmv_bv_fortran.o $(BUILD_DIR)/cblas_sgbmv_d_fortran.o $(BUILD_DIR)/cblas_sgbmv_dv_fortran.o $(BUILD_DIR)/cblas_sgemm_b_fortran.o $(BUILD_DIR)/cblas_sgemm_bv_fortran.o $(BUILD_DIR)/cblas_sgemm_d_fortran.o $(BUILD_DIR)/cblas_sgemm_dv_fortran.o $(BUILD_DIR)/cblas_sgemv_b_fortran.o $(BUILD_DIR)/cblas_sgemv_bv_fortran.o $(BUILD_DIR)/cblas_sgemv_d_fortran.o $(BUILD_DIR)/cblas_sgemv_dv_fortran.o $(BUILD_DIR)/cblas_sger_b_fortran.o $(BUILD_DIR)/cblas_sger_bv_fortran.o $(BUILD_DIR)/cblas_sger_d_fortran.o $(BUILD_DIR)/cblas_sger_dv_fortran.o $(BUILD_DIR)/cblas_snrm2_b_fortran.o $(BUILD_DIR)/cblas_snrm2_bv_fortran.o $(BUILD_DIR)/cblas_snrm2_d_fortran.o $(BUILD_DIR)/cblas_snrm2_dv_fortran.o $(BUILD_DIR)/cblas_ssbmv_b_fortran.o $(BUILD_DIR)/cblas_ssbmv_bv_fortran.o $(BUILD_DIR)/cblas_ssbmv_d_fortran.o $(BUILD_DIR)/cblas_ssbmv_dv_fortran.o $(BUILD_DIR)/cblas_sscal_b_fortran.o $(BUILD_DIR)/cblas_sscal_bv_fortran.o $(BUILD_DIR)/cblas_sscal_d_fortran.o $(BUILD_DIR)/cblas_sscal_dv_fortran.o $(BUILD_DIR)/cblas_sspmv_b_fortran.o $(BUILD_DIR)/cblas_sspmv_bv_fortran.o $(BUILD_DIR)/cblas_sspmv_d_fortran.o $(BUILD_DIR)/cblas_sspmv_dv_fortran.o $(BUILD_DIR)/cblas_sspr2_b_fortran.o $(BUILD_DIR)/cblas_sspr2_bv_fortran.o $(BUILD_DIR)/cblas_sspr2_d_fortran.o $(BUILD_DIR)/cblas_sspr2_dv_fortran.o $(BUILD_DIR)/cblas_sspr_b_fortran.o $(BUILD_DIR)/cblas_sspr_bv_fortran.o $(BUILD_DIR)/cblas_sspr_d_fortran.o $(BUILD_DIR)/cblas_sspr_dv_fortran.o $(BUILD_DIR)/cblas_sswap_b_fortran.o $(BUILD_DIR)/cblas_sswap_bv_fortran.o $(BUILD_DIR)/cblas_sswap_d_fortran.o $(BUILD_DIR)/cblas_sswap_dv_fortran.o $(BUILD_DIR)/cblas_ssymm_b_fortran.o $(BUILD_DIR)/cblas_ssymm_bv_fortran.o $(BUILD_DIR)/cblas_ssymm_d_fortran.o $(BUILD_DIR)/cblas_ssymm_dv_fortran.o $(BUILD_DIR)/cblas_ssymv_b_fortran.o $(BUILD_DIR)/cblas_ssymv_bv_fortran.o $(BUILD_DIR)/cblas_ssymv_d_fortran.o $(BUILD_DIR)/cblas_ssymv_dv_fortran.o $(BUILD_DIR)/cblas_ssyr2_b_fortran.o $(BUILD_DIR)/cblas_ssyr2_bv_fortran.o $(BUILD_DIR)/cblas_ssyr2_d_fortran.o $(BUILD_DIR)/cblas_ssyr2_dv_fortran.o $(BUILD_DIR)/cblas_ssyr2k_b_fortran.o $(BUILD_DIR)/cblas_ssyr2k_bv_fortran.o $(BUILD_DIR)/cblas_ssyr2k_d_fortran.o $(BUILD_DIR)/cblas_ssyr2k_dv_fortran.o $(BUILD_DIR)/cblas_ssyr_b_fortran.o $(BUILD_DIR)/cblas_ssyr_bv_fortran.o $(BUILD_DIR)/cblas_ssyr_d_fortran.o $(BUILD_DIR)/cblas_ssyr_dv_fortran.o $(BUILD_DIR)/cblas_ssyrk_b_fortran.o $(BUILD_DIR)/cblas_ssyrk_bv_fortran.o $(BUILD_DIR)/cblas_ssyrk_d_fortran.o $(BUILD_DIR)/cblas_ssyrk_dv_fortran.o $(BUILD_DIR)/cblas_stbmv_b_fortran.o $(BUILD_DIR)/cblas_stbmv_bv_fortran.o $(BUILD_DIR)/cblas_stbmv_d_fortran.o $(BUILD_DIR)/cblas_stbmv_dv_fortran.o $(BUILD_DIR)/cblas_stpmv_b_fortran.o $(BUILD_DIR)/cblas_stpmv_bv_fortran.o $(BUILD_DIR)/cblas_stpmv_d_fortran.o $(BUILD_DIR)/cblas_stpmv_dv_fortran.o $(BUILD_DIR)/cblas_strmm_b_fortran.o $(BUILD_DIR)/cblas_strmm_bv_fortran.o $(BUILD_DIR)/cblas_strmm_d_fortran.o $(BUILD_DIR)/cblas_strmm_dv_fortran.o $(BUILD_DIR)/cblas_strmv_b_fortran.o $(BUILD_DIR)/cblas_strmv_bv_fortran.o $(BUILD_DIR)/cblas_strmv_d_fortran.o $(BUILD_DIR)/cblas_strmv_dv_fortran.o $(BUILD_DIR)/cblas_strsm_b_fortran.o $(BUILD_DIR)/cblas_strsm_bv_fortran.o $(BUILD_DIR)/cblas_strsm_d_fortran.o $(BUILD_DIR)/cblas_strsm_dv_fortran.o $(BUILD_DIR)/cblas_strsv_b_fortran.o $(BUILD_DIR)/cblas_strsv_bv_fortran.o $(BUILD_DIR)/cblas_strsv_d_fortran.o $(BUILD_DIR)/cblas_strsv_dv_fortran.o $(BUILD_DIR)/cblas_zaxpy_b_fortran.o $(BUILD_DIR)/cblas_zaxpy_bv_fortran.o $(BUILD_DIR)/cblas_zaxpy_d_fortran.o $(BUILD_DIR)/cblas_zaxpy_dv_fortran.o $(BUILD_DIR)/cblas_zcopy_b_fortran.o $(BUILD_DIR)/cblas_zcopy_bv_fortran.o $(BUILD_DIR)/cblas_zcopy_d_fortran.o $(BUILD_DIR)/cblas_zcopy_dv_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_b_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_bv_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_d_fortran.o $(BUILD_DIR)/cblas_zdotc_sub_dv_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_b_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_bv_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_d_fortran.o $(BUILD_DIR)/cblas_zdotu_sub_dv_fortran.o $(BUILD_DIR)/cblas_zdscal_b_fortran.o $(BUILD_DIR)/cblas_zdscal_bv_fortran.o $(BUILD_DIR)/cblas_zdscal_d_fortran.o $(BUILD_DIR)/cblas_zdscal_dv_fortran.o $(BUILD_DIR)/cblas_zgbmv_b_fortran.o $(BUILD_DIR)/cblas_zgbmv_bv_fortran.o $(BUILD_DIR)/cblas_zgbmv_d_fortran.o $(BUILD_DIR)/cblas_zgbmv_dv_fortran.o $(BUILD_DIR)/cblas_zgemm_b_fortran.o $(BUILD_DIR)/cblas_zgemm_bv_fortran.o $(BUILD_DIR)/cblas_zgemm_d_fortran.o $(BUILD_DIR)/cblas_zgemm_dv_fortran.o $(BUILD_DIR)/cblas_zgemv_b_fortran.o $(BUILD_DIR)/cblas_zgemv_bv_fortran.o $(BUILD_DIR)/cblas_zgemv_d_fortran.o $(BUILD_DIR)/cblas_zgemv_dv_fortran.o $(BUILD_DIR)/cblas_zgerc_b_fortran.o $(BUILD_DIR)/cblas_zgerc_bv_fortran.o $(BUILD_DIR)/cblas_zgerc_d_fortran.o $(BUILD_DIR)/cblas_zgerc_dv_fortran.o $(BUILD_DIR)/cblas_zgeru_b_fortran.o $(BUILD_DIR)/cblas_zgeru_bv_fortran.o $(BUILD_DIR)/cblas_zgeru_d_fortran.o $(BUILD_DIR)/cblas_zgeru_dv_fortran.o $(BUILD_DIR)/cblas_zhbmv_b_fortran.o $(BUILD_DIR)/cblas_zhbmv_bv_fortran.o $(BUILD_DIR)/cblas_zhbmv_d_fortran.o $(BUILD_DIR)/cblas_zhbmv_dv_fortran.o $(BUILD_DIR)/cblas_zhemm_b_fortran.o $(BUILD_DIR)/cblas_zhemm_bv_fortran.o $(BUILD_DIR)/cblas_zhemm_d_fortran.o $(BUILD_DIR)/cblas_zhemm_dv_fortran.o $(BUILD_DIR)/cblas_zhemv_b_fortran.o $(BUILD_DIR)/cblas_zhemv_bv_fortran.o $(BUILD_DIR)/cblas_zhemv_d_fortran.o $(BUILD_DIR)/cblas_zhemv_dv_fortran.o $(BUILD_DIR)/cblas_zscal_b_fortran.o $(BUILD_DIR)/cblas_zscal_bv_fortran.o $(BUILD_DIR)/cblas_zscal_d_fortran.o $(BUILD_DIR)/cblas_zscal_dv_fortran.o $(BUILD_DIR)/cblas_zswap_b_fortran.o $(BUILD_DIR)/cblas_zswap_bv_fortran.o $(BUILD_DIR)/cblas_zswap_d_fortran.o $(BUILD_DIR)/cblas_zswap_dv_fortran.o $(BUILD_DIR)/cblas_zsymm_b_fortran.o $(BUILD_DIR)/cblas_zsymm_bv_fortran.o $(BUILD_DIR)/cblas_zsymm_d_fortran.o $(BUILD_DIR)/cblas_zsymm_dv_fortran.o $(BUILD_DIR)/cblas_zsyr2k_b_fortran.o $(BUILD_DIR)/cblas_zsyr2k_bv_fortran.o $(BUILD_DIR)/cblas_zsyr2k_d_fortran.o $(BUILD_DIR)/cblas_zsyr2k_dv_fortran.o $(BUILD_DIR)/cblas_zsyrk_b_fortran.o $(BUILD_DIR)/cblas_zsyrk_bv_fortran.o $(BUILD_DIR)/cblas_zsyrk_d_fortran.o $(BUILD_DIR)/cblas_zsyrk_dv_fortran.o $(BUILD_DIR)/cblas_ztbmv_b_fortran.o $(BUILD_DIR)/cblas_ztbmv_bv_fortran.o $(BUILD_DIR)/cblas_ztbmv_d_fortran.o $(BUILD_DIR)/cblas_ztbmv_dv_fortran.o $(BUILD_DIR)/cblas_ztpmv_b_fortran.o $(BUILD_DIR)/cblas_ztpmv_bv_fortran.o $(BUILD_DIR)/cblas_ztpmv_d_fortran.o $(BUILD_DIR)/cblas_ztpmv_dv_fortran.o $(BUILD_DIR)/cblas_ztrmm_b_fortran.o $(BUILD_DIR)/cblas_ztrmm_bv_fortran.o $(BUILD_DIR)/cblas_ztrmm_d_fortran.o $(BUILD_DIR)/cblas_ztrmm_dv_fortran.o $(BUILD_DIR)/cblas_ztrmv_b_fortran.o $(BUILD_DIR)/cblas_ztrmv_bv_fortran.o $(BUILD_DIR)/cblas_ztrmv_d_fortran.o $(BUILD_DIR)/cblas_ztrmv_dv_fortran.o $(BUILD_DIR)/cblas_ztrsm_b_fortran.o $(BUILD_DIR)/cblas_ztrsm_bv_fortran.o $(BUILD_DIR)/cblas_ztrsm_d_fortran.o $(BUILD_DIR)/cblas_ztrsm_dv_fortran.o $(BUILD_DIR)/cblas_ztrsv_b_fortran.o $(BUILD_DIR)/cblas_ztrsv_bv_fortran.o $(BUILD_DIR)/cblas_ztrsv_d_fortran.o $(BUILD_DIR)/cblas_ztrsv_dv_fortran.o
 	ranlib $(BUILD_DIR)/libcblas_diff.a
 
 # Build only test executables (and their deps); with MAKEFLAGS=-k, as many as possible are built

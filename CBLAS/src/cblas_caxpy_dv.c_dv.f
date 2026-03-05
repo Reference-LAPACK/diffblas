@@ -116,14 +116,19 @@ C
 C     .. Local Scalars ..
       INTEGER i, ix, iy
       EXTERNAL SCABS1
+      INTEGER ISIZE1OFCy
 C     ..
 C     .. External Functions ..
+      INTEGER get_ISIZE1OFCy
+      EXTERNAL get_ISIZE1OFCy
       REAL SCABS1
       REAL result1
       INTEGER nd
       INTEGER ii1
       INTEGER nbdirs
 C     ..
+      CALL check_ISIZE1OFCy_initialized()
+      ISIZE1OFCy = get_ISIZE1OFCy()
       IF (n .LE. 0) THEN
         DO ii1=1,ISIZE1OFcy
           DO nd=1,nbdirsmax

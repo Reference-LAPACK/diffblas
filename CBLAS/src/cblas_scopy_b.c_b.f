@@ -105,12 +105,17 @@ C  =====================================================================
 C
 C     .. Local Scalars ..
       INTEGER i, ix, iy, m, mp1
+      INTEGER ISIZE1OFSx
+      INTEGER get_ISIZE1OFSx
+      EXTERNAL get_ISIZE1OFSx
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC MOD
       INTEGER ii1
       INTEGER*4 branch
 C     ..
+      CALL check_ISIZE1OFSx_initialized()
+      ISIZE1OFSx = get_ISIZE1OFSx()
       IF (n .LE. 0) THEN
         DO ii1=1,ISIZE1OFsx
           sxb(ii1) = 0.0

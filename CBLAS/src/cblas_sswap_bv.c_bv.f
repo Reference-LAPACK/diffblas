@@ -94,7 +94,7 @@ C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
 C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
-      INTEGER incx, incy, n
+      INTEGER incx, incy, n, nbdirs
 C     ..
 C     .. Array Arguments ..
       REAL sx(*), sy(*)
@@ -112,7 +112,6 @@ C     .. Intrinsic Functions ..
       INTRINSIC MOD
       INTEGER nd
       INTEGER*4 branch
-      INTEGER nbdirs
 C     ..
       IF (n .GT. 0) THEN
         IF (incx .EQ. 1 .AND. incy .EQ. 1) THEN

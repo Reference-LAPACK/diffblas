@@ -182,12 +182,15 @@ C     .. Local Scalars ..
       DOUBLE PRECISION temp1b, temp2b
       INTEGER i, info, ix, iy, j, jx, jy, k, kk, kx, ky
       EXTERNAL LSAME
+      INTEGER ISIZE1OFAp, ISIZE1OFX
 C     ..
 C     .. External Functions ..
+      INTEGER get_ISIZE1OFAp, get_ISIZE1OFX
+      EXTERNAL get_ISIZE1OFAp, get_ISIZE1OFX
       LOGICAL LSAME
 C     ..
 C     .. External Subroutines ..
-      EXTERNAL XERBLA
+      EXTERNAL XERBLA, check_ISIZE1OFAp_initialized, check_ISIZE1OFX_initialized
       INTEGER ad_to
       INTEGER ad_from
       INTEGER ad_to0
@@ -200,6 +203,10 @@ C     ..
 C
 C     Test the input parameters.
 C
+      CALL check_ISIZE1OFAp_initialized()
+      CALL check_ISIZE1OFX_initialized()
+      ISIZE1OFAp = get_ISIZE1OFAp()
+      ISIZE1OFX = get_ISIZE1OFX()
       info = 0
       IF (.NOT.LSAME(uplo, 'U') .AND. (.NOT.LSAME(uplo, 'L'))) THEN
         CALL PUSHCONTROL2B(0)

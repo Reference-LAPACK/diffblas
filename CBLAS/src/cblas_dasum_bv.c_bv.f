@@ -83,7 +83,7 @@ C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
 C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
-      INTEGER incx, n
+      INTEGER incx, n, nbdirs
 C     ..
 C     .. Array Arguments ..
       DOUBLE PRECISION dx(*)
@@ -119,7 +119,6 @@ C     .. Intrinsic Functions ..
       INTEGER*4 branch
       DOUBLE PRECISION dasumb(nbdirsmax)
       DOUBLE PRECISION dasum
-      INTEGER nbdirs
 C     ..
       IF (.NOT.(n .LE. 0 .OR. incx .LE. 0)) THEN
         IF (incx .EQ. 1) THEN
@@ -327,11 +326,10 @@ C
       EXTERNAL DASUM_BV
       DOUBLE PRECISION DASUM, asum
       DOUBLE PRECISION asumb(nbdirsmax)
-      INTEGER n, incx
+      INTEGER n, incx, nbdirs
       DOUBLE PRECISION x(*)
       DOUBLE PRECISION xb(nbdirsmax, *)
 C
-      INTEGER nbdirs
       CALL DASUM_BV(n, x, xb, incx, asumb, nbdirs)
       END
 

@@ -94,7 +94,7 @@ C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
 C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
-      INTEGER incx, incy, n
+      INTEGER incx, incy, n, nbdirs
 C     ..
 C     .. Array Arguments ..
       REAL sx(*), sy(*)
@@ -114,7 +114,6 @@ C     .. Intrinsic Functions ..
       INTEGER*4 branch
       REAL sdot
       REAL sdotb(nbdirsmax)
-      INTEGER nbdirs
 C     ..
       IF (n .GT. 0) THEN
         IF (incx .EQ. 1 .AND. incy .EQ. 1) THEN
@@ -215,11 +214,10 @@ C
       EXTERNAL SDOT
       EXTERNAL SDOT_BV
       REAL SDOT
-      INTEGER n, incx, incy
+      INTEGER n, incx, incy, nbdirs
       REAL x(*), y(*), dot
       REAL xb(nbdirsmax, *), yb(nbdirsmax, *), dotb(nbdirsmax)
 C
-      INTEGER nbdirs
       CALL SDOT_BV(n, x, xb, incx, y, yb, incy, dotb, nbdirs)
       END
 

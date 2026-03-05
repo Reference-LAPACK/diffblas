@@ -17,9 +17,14 @@ extern void cblas_caxpy_d(const CBLAS_INT N, const void *alpha, void *alpha_d, c
 
 #define TEST_SIZE 4  /* Matrix/vector size for test */
 #define MAX_SIZE TEST_SIZE
+extern void set_isize1ofcy_(int *val);
 
 int main(void) {
     int i, j;
+    {
+        int diffblas_isize = MAX_SIZE;
+        set_isize1ofcy_(&diffblas_isize);
+    }
     int has_large_errors = 0;
     float h = 1.0e-3f;  /* Step size for finite differences (match Fortran BLAS tests) */
     float atol = 2.0e-3f, rtol = 2.0e-3f;  /* Pass when abs_error <= atol + rtol*|ad| */

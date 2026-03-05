@@ -163,9 +163,12 @@ C     .. Local Scalars ..
       REAL temp
       REAL tempb
       INTEGER i, info, ix, j, jy, kx
+      INTEGER ISIZE1OFX, ISIZE1OFY
+      INTEGER get_ISIZE1OFX, get_ISIZE1OFY
+      EXTERNAL get_ISIZE1OFX, get_ISIZE1OFY
 C     ..
 C     .. External Subroutines ..
-      EXTERNAL XERBLA
+      EXTERNAL XERBLA, check_ISIZE1OFX_initialized, check_ISIZE1OFY_initialized
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC MAX
@@ -176,6 +179,10 @@ C     ..
 C
 C     Test the input parameters.
 C
+      CALL check_ISIZE1OFX_initialized()
+      CALL check_ISIZE1OFY_initialized()
+      ISIZE1OFX = get_ISIZE1OFX()
+      ISIZE1OFY = get_ISIZE1OFY()
       info = 0
       IF (m .LT. 0) THEN
         CALL PUSHCONTROL3B(0)

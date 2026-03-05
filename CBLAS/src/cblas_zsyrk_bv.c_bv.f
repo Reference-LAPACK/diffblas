@@ -183,7 +183,7 @@ C
 C     .. Scalar Arguments ..
       COMPLEX*16 alpha, beta
       COMPLEX*16 alphab(nbdirsmax), betab(nbdirsmax)
-      INTEGER k, lda, ldc, n
+      INTEGER k, lda, ldc, n, nbdirs
       CHARACTER trans, uplo
 C     ..
 C     .. Array Arguments ..
@@ -195,10 +195,12 @@ C
 C  =====================================================================
 C
 C     .. External Functions ..
+      INTEGER get_ISIZE2OFA
+      EXTERNAL get_ISIZE2OFA
       LOGICAL LSAME
 C     ..
 C     .. External Subroutines ..
-      EXTERNAL XERBLA
+      EXTERNAL XERBLA, check_ISIZE2OFA_initialized
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC MAX
@@ -208,6 +210,7 @@ C     .. Local Scalars ..
       COMPLEX*16 tempb(nbdirsmax)
       INTEGER i, info, j, l, nrowa
       LOGICAL upper
+      INTEGER ISIZE2OFA
 C     ..
 C     .. Parameters ..
       COMPLEX*16 one
@@ -232,11 +235,12 @@ C     .. Parameters ..
       INTEGER ad_from4
       INTEGER ii2
       INTEGER ii1
-      INTEGER nbdirs
 C     ..
 C
 C     Test the input parameters.
 C
+      CALL check_ISIZE2OFA_initialized()
+      ISIZE2OFA = get_ISIZE2OFA()
       IF (LSAME(trans, 'N')) THEN
         nrowa = n
       ELSE

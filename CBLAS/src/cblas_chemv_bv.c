@@ -16,7 +16,7 @@
 #include "cblas_f77_bv.h"
 
 /* Declaration for differentiated Fortran routine */
-/* void F77_chemv_bv_base(...); */
+/* void F77_chemv_bv_base(..., (size_t)1); */
 /* Note: This should match the signature of chemv_bv in Fortran */
 
 /* F77_ macros for differentiated Fortran routines */
@@ -223,12 +223,12 @@ void cblas_chemv_bv(const CBLAS_LAYOUT layout, const CBLAS_UPLO Uplo, const
     popControl1b(&branch);
     if (branch == 0) {
         F77_chemv_bv(&UL, &F77_N, alpha, alphab, A, Ab, &F77_lda, X, Xb, &
-                  F77_incX, beta, betab, Y, Yb, &F77_incY, &nbdirs);
+                  F77_incX, beta, betab, Y, Yb, &F77_incY, &nbdirs, (size_t)1);
         popControl1b(&branch);
         goto label110;
     } else {
         F77_chemv_bv(&UL, &F77_N, ALPHA, ALPHAb, A, Ab, &F77_lda, x, xb, &
-                  F77_incX, BETA, BETAb, Y, Yb, &F77_incY, &nbdirs);
+                  F77_incX, BETA, BETAb, Y, Yb, &F77_incY, &nbdirs, (size_t)1);
         popControl1b(&branch);
     }
   label100:

@@ -148,7 +148,7 @@ C
 C     .. Scalar Arguments ..
       REAL alpha
       REAL alphab(nbdirsmax)
-      INTEGER incx, lda, n
+      INTEGER incx, lda, n, nbdirs
       CHARACTER uplo
 C     ..
 C     .. Array Arguments ..
@@ -167,12 +167,15 @@ C     .. Local Scalars ..
       REAL tempb(nbdirsmax)
       INTEGER i, info, ix, j, jx, kx
       EXTERNAL LSAME
+      INTEGER ISIZE1OFX
 C     ..
 C     .. External Functions ..
+      INTEGER get_ISIZE1OFX
+      EXTERNAL get_ISIZE1OFX
       LOGICAL LSAME
 C     ..
 C     .. External Subroutines ..
-      EXTERNAL XERBLA
+      EXTERNAL XERBLA, check_ISIZE1OFX_initialized
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC MAX
@@ -184,11 +187,12 @@ C     .. Intrinsic Functions ..
       INTEGER ad_from
       INTEGER ad_from0
       INTEGER ii1
-      INTEGER nbdirs
 C     ..
 C
 C     Test the input parameters.
 C
+      CALL check_ISIZE1OFX_initialized()
+      ISIZE1OFX = get_ISIZE1OFX()
       info = 0
       IF (.NOT.LSAME(uplo, 'U') .AND. (.NOT.LSAME(uplo, 'L'))) THEN
         CALL PUSHCONTROL2B(0)

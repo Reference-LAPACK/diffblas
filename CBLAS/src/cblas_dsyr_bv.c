@@ -12,7 +12,7 @@
 #include "cblas_f77_bv.h"
 
 /* Declaration for differentiated Fortran routine */
-/* void F77_dsyr_bv_base(...); */
+/* void F77_dsyr_bv_base(..., (size_t)1); */
 /* Note: This should match the signature of dsyr_bv in Fortran */
 
 /* F77_ macros for differentiated Fortran routines */
@@ -58,7 +58,7 @@ void cblas_dsyr_bv(const CBLAS_LAYOUT layout, const CBLAS_UPLO Uplo, const
             goto label100;
         }
         F77_dsyr_bv(&UL, &F77_N, &alpha, &(*alphab), X, Xb, &F77_incX, A, Ab, &
-                 F77_lda, &nbdirs);
+                 F77_lda, &nbdirs, (size_t)1);
         popControl1b(&branch);
     } else if (layout == CblasRowMajor) {
         if (Uplo == CblasLower) {
@@ -75,7 +75,7 @@ void cblas_dsyr_bv(const CBLAS_LAYOUT layout, const CBLAS_UPLO Uplo, const
             goto label100;
         }
         F77_dsyr_bv(&UL, &F77_N, &alpha, &(*alphab), X, Xb, &F77_incX, A, Ab, &
-                 F77_lda, &nbdirs);
+                 F77_lda, &nbdirs, (size_t)1);
         popControl1b(&branch);
     } else {
         for (nd = 0; nd < NBDirsMax; ++nd)

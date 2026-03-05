@@ -201,7 +201,7 @@ C
 C     .. Scalar Arguments ..
       DOUBLE PRECISION alpha, beta
       DOUBLE PRECISION alphab(nbdirsmax), betab(nbdirsmax)
-      INTEGER incx, incy, k, lda, n
+      INTEGER incx, incy, k, lda, n, nbdirs
       CHARACTER uplo
 C     ..
 C     .. Array Arguments ..
@@ -221,12 +221,15 @@ C     .. Local Scalars ..
       DOUBLE PRECISION temp1b(nbdirsmax), temp2b(nbdirsmax)
       INTEGER i, info, ix, iy, j, jx, jy, kplus1, kx, ky, l
       EXTERNAL LSAME
+      INTEGER ISIZE1OFX, ISIZE2OFA
 C     ..
 C     .. External Functions ..
+      INTEGER get_ISIZE1OFX, get_ISIZE2OFA
+      EXTERNAL get_ISIZE1OFX, get_ISIZE2OFA
       LOGICAL LSAME
 C     ..
 C     .. External Subroutines ..
-      EXTERNAL XERBLA
+      EXTERNAL XERBLA, check_ISIZE1OFX_initialized, check_ISIZE2OFA_initialized
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC MAX, MIN
@@ -246,11 +249,14 @@ C     .. Intrinsic Functions ..
       INTEGER ad_to2
       INTEGER ii2
       INTEGER ii1
-      INTEGER nbdirs
 C     ..
 C
 C     Test the input parameters.
 C
+      CALL check_ISIZE1OFX_initialized()
+      CALL check_ISIZE2OFA_initialized()
+      ISIZE1OFX = get_ISIZE1OFX()
+      ISIZE2OFA = get_ISIZE2OFA()
       info = 0
       IF (.NOT.LSAME(uplo, 'U') .AND. (.NOT.LSAME(uplo, 'L'))) THEN
         CALL PUSHCONTROL3B(0)

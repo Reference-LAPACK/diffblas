@@ -12,7 +12,7 @@
 #include "cblas_f77_b.h"
 
 /* Declaration for differentiated Fortran routine */
-/* void F77_dspr_b_base(...); */
+/* void F77_dspr_b_base(..., (size_t)1); */
 /* Note: This should match the signature of dspr_b in Fortran */
 
 /* F77_ macros for differentiated Fortran routines */
@@ -46,7 +46,7 @@ void cblas_dspr_b(const CBLAS_LAYOUT layout, const CBLAS_UPLO Uplo, const
             UL = 'U';
         } else
             goto label100;
-        F77_dspr_b(&UL, &F77_N, &alpha, &(*alphab), X, Xb, &F77_incX, Ap, Apb);
+        F77_dspr_b(&UL, &F77_N, &alpha, &(*alphab), X, Xb, &F77_incX, Ap, Apb, (size_t)1);
         popControl1b(&branch);
     } else if (layout == CblasRowMajor) {
         if (Uplo == CblasLower) {
@@ -57,7 +57,7 @@ void cblas_dspr_b(const CBLAS_LAYOUT layout, const CBLAS_UPLO Uplo, const
             UL = 'L';
         } else
             goto label100;
-        F77_dspr_b(&UL, &F77_N, &alpha, &(*alphab), X, Xb, &F77_incX, Ap, Apb);
+        F77_dspr_b(&UL, &F77_N, &alpha, &(*alphab), X, Xb, &F77_incX, Ap, Apb, (size_t)1);
         popControl1b(&branch);
     }
   label100:

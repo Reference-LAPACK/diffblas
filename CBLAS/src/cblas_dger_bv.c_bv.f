@@ -147,7 +147,7 @@ C
 C     .. Scalar Arguments ..
       DOUBLE PRECISION alpha
       DOUBLE PRECISION alphab(nbdirsmax)
-      INTEGER incx, incy, lda, m, n
+      INTEGER incx, incy, lda, m, n, nbdirs
 C     ..
 C     .. Array Arguments ..
       DOUBLE PRECISION a(lda, *), x(*), y(*)
@@ -165,9 +165,12 @@ C     .. Local Scalars ..
       DOUBLE PRECISION temp
       DOUBLE PRECISION tempb(nbdirsmax)
       INTEGER i, info, ix, j, jy, kx
+      INTEGER ISIZE1OFX, ISIZE1OFY
+      INTEGER get_ISIZE1OFX, get_ISIZE1OFY
+      EXTERNAL get_ISIZE1OFX, get_ISIZE1OFY
 C     ..
 C     .. External Subroutines ..
-      EXTERNAL XERBLA
+      EXTERNAL XERBLA, check_ISIZE1OFX_initialized, check_ISIZE1OFY_initialized
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC MAX
@@ -175,11 +178,14 @@ C     .. Intrinsic Functions ..
       INTEGER nd
       INTEGER*4 branch
       INTEGER ii1
-      INTEGER nbdirs
 C     ..
 C
 C     Test the input parameters.
 C
+      CALL check_ISIZE1OFX_initialized()
+      CALL check_ISIZE1OFY_initialized()
+      ISIZE1OFX = get_ISIZE1OFX()
+      ISIZE1OFY = get_ISIZE1OFY()
       info = 0
       IF (m .LT. 0) THEN
         CALL PUSHCONTROL3B(0)

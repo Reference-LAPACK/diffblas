@@ -223,10 +223,12 @@ C
 C  =====================================================================
 C
 C     .. External Functions ..
+      INTEGER get_ISIZE2OFA, get_ISIZE2OFB
+      EXTERNAL get_ISIZE2OFA, get_ISIZE2OFB
       LOGICAL LSAME
 C     ..
 C     .. External Subroutines ..
-      EXTERNAL XERBLA
+      EXTERNAL XERBLA, check_ISIZE2OFA_initialized, check_ISIZE2OFB_initialized
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC MAX
@@ -236,6 +238,7 @@ C     .. Local Scalars ..
       REAL temp1b(nbdirsmax), temp2b(nbdirsmax)
       INTEGER i, info, j, l, nrowa
       LOGICAL upper
+      INTEGER ISIZE2OFA, ISIZE2OFB
 C     ..
 C     .. Parameters ..
       REAL one, zero
@@ -264,6 +267,10 @@ C     ..
 C
 C     Test the input parameters.
 C
+      CALL check_ISIZE2OFA_initialized()
+      CALL check_ISIZE2OFB_initialized()
+      ISIZE2OFA = get_ISIZE2OFA()
+      ISIZE2OFB = get_ISIZE2OFB()
       IF (LSAME(trans, 'N')) THEN
         nrowa = n
       ELSE

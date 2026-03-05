@@ -92,7 +92,7 @@ C
 C     .. Scalar Arguments ..
       COMPLEX*16 za
       COMPLEX*16 zab(nbdirsmax)
-      INTEGER incx, n
+      INTEGER incx, n, nbdirs
 C     ..
 C     .. Array Arguments ..
       COMPLEX*16 zx(*)
@@ -108,7 +108,6 @@ C     .. Parameters ..
       COMPLEX*16 one
       PARAMETER (one=(1.0d+0,0.0d+0))
       INTEGER nd
-      INTEGER nbdirs
 C     ..
       IF (.NOT.((n .LE. 0 .OR. incx .LE. 0) .OR. za .EQ. one)) THEN
         IF (incx .EQ. 1) THEN

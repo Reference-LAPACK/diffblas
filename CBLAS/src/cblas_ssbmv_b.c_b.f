@@ -219,12 +219,15 @@ C     .. Local Scalars ..
       REAL temp1b, temp2b
       INTEGER i, info, ix, iy, j, jx, jy, kplus1, kx, ky, l
       EXTERNAL LSAME
+      INTEGER ISIZE1OFX, ISIZE2OFA
 C     ..
 C     .. External Functions ..
+      INTEGER get_ISIZE1OFX, get_ISIZE2OFA
+      EXTERNAL get_ISIZE1OFX, get_ISIZE2OFA
       LOGICAL LSAME
 C     ..
 C     .. External Subroutines ..
-      EXTERNAL XERBLA
+      EXTERNAL XERBLA, check_ISIZE1OFX_initialized, check_ISIZE2OFA_initialized
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC MAX, MIN
@@ -247,6 +250,10 @@ C     ..
 C
 C     Test the input parameters.
 C
+      CALL check_ISIZE1OFX_initialized()
+      CALL check_ISIZE2OFA_initialized()
+      ISIZE1OFX = get_ISIZE1OFX()
+      ISIZE2OFA = get_ISIZE2OFA()
       info = 0
       IF (.NOT.LSAME(uplo, 'U') .AND. (.NOT.LSAME(uplo, 'L'))) THEN
         CALL PUSHCONTROL3B(0)

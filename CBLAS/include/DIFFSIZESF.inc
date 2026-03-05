@@ -1,28 +1,3 @@
       integer nbdirsmax
       parameter (nbdirsmax=4)
-      integer ISIZE1OFsx
-      parameter (ISIZE1OFsx=4)
-      integer ISIZE1OFcx
-      parameter (ISIZE1OFcx=4)
-      integer ISIZE1OFap
-      parameter (ISIZE1OFap=4)
-      integer ISIZE1OFzy
-      parameter (ISIZE1OFzy=4)
-      integer ISIZE1OFsy
-      parameter (ISIZE1OFsy=4)
-      integer ISIZE1OFdy
-      parameter (ISIZE1OFdy=4)
-      integer ISIZE1OFzx
-      parameter (ISIZE1OFzx=4)
-      integer ISIZE1OFcy
-      parameter (ISIZE1OFcy=4)
-      integer ISIZE1OFdx
-      parameter (ISIZE1OFdx=4)
-      integer ISIZE2OFa
-      parameter (ISIZE2OFa=4)
-      integer ISIZE1OFx
-      parameter (ISIZE1OFx=4)
-      integer ISIZE2OFb
-      parameter (ISIZE2OFb=4)
-      integer ISIZE1OFy
-      parameter (ISIZE1OFy=4)
+!     ISIZE* are globals: set via set_ISIZE*(), read via get_ISIZE*() (see DIFFSIZES_access.f)

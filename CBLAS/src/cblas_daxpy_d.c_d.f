@@ -114,11 +114,16 @@ C  =====================================================================
 C
 C     .. Local Scalars ..
       INTEGER i, ix, iy, m, mp1
+      INTEGER ISIZE1OFDy
+      INTEGER get_ISIZE1OFDy
+      EXTERNAL get_ISIZE1OFDy
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC MOD
       INTEGER ii1
 C     ..
+      CALL check_ISIZE1OFDy_initialized()
+      ISIZE1OFDy = get_ISIZE1OFDy()
       IF (n .LE. 0) THEN
         DO ii1=1,ISIZE1OFdy
 C     FIXED: Removed zeroing of dyd - should accumulate from input seed

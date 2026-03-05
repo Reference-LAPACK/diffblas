@@ -94,7 +94,7 @@ C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
 C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
-      INTEGER incx, incy, n
+      INTEGER incx, incy, n, nbdirs
 C     ..
 C     .. Array Arguments ..
       DOUBLE PRECISION dx(*), dy(*)
@@ -114,7 +114,6 @@ C     .. Intrinsic Functions ..
       INTEGER*4 branch
       DOUBLE PRECISION ddot
       DOUBLE PRECISION ddotb(nbdirsmax)
-      INTEGER nbdirs
 C     ..
       IF (n .GT. 0) THEN
         IF (incx .EQ. 1 .AND. incy .EQ. 1) THEN
@@ -215,12 +214,11 @@ C
       EXTERNAL DDOT
       EXTERNAL DDOT_BV
       DOUBLE PRECISION DDOT
-      INTEGER n, incx, incy
+      INTEGER n, incx, incy, nbdirs
       DOUBLE PRECISION x(*), y(*), dot
       DOUBLE PRECISION xb(nbdirsmax, *), yb(nbdirsmax, *), dotb(
      +                 nbdirsmax)
 C
-      INTEGER nbdirs
       CALL DDOT_BV(n, x, xb, incx, y, yb, incy, dotb, nbdirs)
       END
 

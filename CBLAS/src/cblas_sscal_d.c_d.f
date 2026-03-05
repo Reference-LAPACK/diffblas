@@ -104,6 +104,9 @@ C  =====================================================================
 C
 C     .. Local Scalars ..
       INTEGER i, m, mp1, nincx
+      INTEGER ISIZE1OFSx
+      INTEGER get_ISIZE1OFSx
+      EXTERNAL get_ISIZE1OFSx
 C     ..
 C     .. Parameters ..
       REAL one
@@ -113,6 +116,8 @@ C     .. Intrinsic Functions ..
       INTRINSIC MOD
       INTEGER ii1
 C     ..
+      CALL check_ISIZE1OFSx_initialized()
+      ISIZE1OFSx = get_ISIZE1OFSx()
       IF ((n .LE. 0 .OR. incx .LE. 0) .OR. sa .EQ. one) THEN
         DO ii1=1,ISIZE1OFsx
 C     FIXED: Removed zeroing of sxd - should accumulate from input seed

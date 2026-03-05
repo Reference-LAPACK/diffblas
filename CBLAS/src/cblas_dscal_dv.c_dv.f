@@ -105,6 +105,9 @@ C  =====================================================================
 C
 C     .. Local Scalars ..
       INTEGER i, m, mp1, nincx
+      INTEGER ISIZE1OFDx
+      INTEGER get_ISIZE1OFDx
+      EXTERNAL get_ISIZE1OFDx
 C     .. Parameters ..
       DOUBLE PRECISION one
       PARAMETER (one=1.0d+0)
@@ -115,6 +118,8 @@ C     .. Intrinsic Functions ..
       INTEGER ii1
       INTEGER nbdirs
 C     ..
+      CALL check_ISIZE1OFDx_initialized()
+      ISIZE1OFDx = get_ISIZE1OFDx()
       IF ((n .LE. 0 .OR. incx .LE. 0) .OR. da .EQ. one) THEN
         DO ii1=1,ISIZE1OFdx
           DO nd=1,nbdirsmax

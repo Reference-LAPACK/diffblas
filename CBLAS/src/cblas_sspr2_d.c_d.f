@@ -176,17 +176,22 @@ C     .. Local Scalars ..
       REAL temp1d, temp2d
       INTEGER i, info, ix, iy, j, jx, jy, k, kk, kx, ky
       EXTERNAL LSAME
+      INTEGER ISIZE1OFAp
 C     ..
 C     .. External Functions ..
+      INTEGER get_ISIZE1OFAp
+      EXTERNAL get_ISIZE1OFAp
       LOGICAL LSAME
 C     ..
 C     .. External Subroutines ..
-      EXTERNAL XERBLA
+      EXTERNAL XERBLA, check_ISIZE1OFAp_initialized
       INTEGER ii1
 C     ..
 C
 C     Test the input parameters.
 C
+      CALL check_ISIZE1OFAp_initialized()
+      ISIZE1OFAp = get_ISIZE1OFAp()
       info = 0
       IF (.NOT.LSAME(uplo, 'U') .AND. (.NOT.LSAME(uplo, 'L'))) THEN
         info = 1

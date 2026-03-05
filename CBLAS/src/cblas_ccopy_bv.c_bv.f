@@ -94,7 +94,7 @@ C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
 C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
-      INTEGER incx, incy, n
+      INTEGER incx, incy, n, nbdirs
 C     ..
 C     .. Array Arguments ..
       COMPLEX cx(*), cy(*)
@@ -107,8 +107,12 @@ C     .. Local Scalars ..
       INTEGER i, ix, iy
       INTEGER nd
       INTEGER ii1
-      INTEGER nbdirs
+      INTEGER ISIZE1OFCx
+      INTEGER get_ISIZE1OFCx
+      EXTERNAL get_ISIZE1OFCx
 C     ..
+      CALL check_ISIZE1OFCx_initialized()
+      ISIZE1OFCx = get_ISIZE1OFCx()
       IF (n .LE. 0) THEN
         DO ii1=1,ISIZE1OFcx
           DO nd=1,nbdirsmax

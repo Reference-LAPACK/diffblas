@@ -103,12 +103,17 @@ C  =====================================================================
 C
 C     .. Local Scalars ..
       INTEGER i, nincx
+      INTEGER ISIZE1OFZx
+      INTEGER get_ISIZE1OFZx
+      EXTERNAL get_ISIZE1OFZx
 C     ..
 C     .. Parameters ..
       COMPLEX*16 one
       PARAMETER (one=(1.0d+0,0.0d+0))
       INTEGER ii1
 C     ..
+      CALL check_ISIZE1OFZx_initialized()
+      ISIZE1OFZx = get_ISIZE1OFZx()
       IF ((n .LE. 0 .OR. incx .LE. 0) .OR. za .EQ. one) THEN
         DO ii1=1,ISIZE1OFzx
 C     FIXED: Removed zeroing of zxd - should accumulate from input seed

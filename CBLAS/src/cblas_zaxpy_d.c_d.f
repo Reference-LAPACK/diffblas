@@ -114,12 +114,17 @@ C
 C     .. Local Scalars ..
       INTEGER i, ix, iy
       EXTERNAL DCABS1
+      INTEGER ISIZE1OFZy
 C     ..
 C     .. External Functions ..
+      INTEGER get_ISIZE1OFZy
+      EXTERNAL get_ISIZE1OFZy
       DOUBLE PRECISION DCABS1
       DOUBLE PRECISION result1
       INTEGER ii1
 C     ..
+      CALL check_ISIZE1OFZy_initialized()
+      ISIZE1OFZy = get_ISIZE1OFZy()
       IF (n .LE. 0) THEN
         DO ii1=1,ISIZE1OFzy
 C     FIXED: Removed zeroing of zyd - should accumulate from input seed

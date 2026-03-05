@@ -98,7 +98,7 @@ C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
 C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
-      INTEGER incx, incy, n
+      INTEGER incx, incy, n, nbdirs
 C     ..
 C     .. Array Arguments ..
       COMPLEX*16 zx(*), zy(*)
@@ -116,8 +116,14 @@ C     .. Local Scalars ..
       INTEGER*4 branch
       COMPLEX*16 zdotub(nbdirsmax)
       COMPLEX*16 zdotu
-      INTEGER nbdirs
+      INTEGER ISIZE1OFZx, ISIZE1OFZy
+      INTEGER get_ISIZE1OFZx, get_ISIZE1OFZy
+      EXTERNAL get_ISIZE1OFZx, get_ISIZE1OFZy
 C     ..
+      CALL check_ISIZE1OFZx_initialized()
+      CALL check_ISIZE1OFZy_initialized()
+      ISIZE1OFZx = get_ISIZE1OFZx()
+      ISIZE1OFZy = get_ISIZE1OFZy()
       IF (n .LE. 0) THEN
         DO ii1=1,ISIZE1OFzx
           DO nd=1,nbdirsmax
@@ -211,11 +217,10 @@ C
       EXTERNAL ZDOTU_BV
       DOUBLE COMPLEX ZDOTU, dotu
       DOUBLE COMPLEX dotub(nbdirsmax)
-      INTEGER n, incx, incy
+      INTEGER n, incx, incy, nbdirs
       DOUBLE COMPLEX x(*), y(*)
       DOUBLE COMPLEX xb(nbdirsmax, *), yb(nbdirsmax, *)
 C
-      INTEGER nbdirs
       CALL ZDOTU_BV(n, x, xb, incx, y, yb, incy, dotub, nbdirs)
       END
 

@@ -92,7 +92,7 @@ C
 C     .. Scalar Arguments ..
       COMPLEX ca
       COMPLEX cab(nbdirsmax)
-      INTEGER incx, n
+      INTEGER incx, n, nbdirs
 C     ..
 C     .. Array Arguments ..
       COMPLEX cx(*)
@@ -108,7 +108,6 @@ C     .. Parameters ..
       COMPLEX one
       PARAMETER (one=(1.0e+0,0.0e+0))
       INTEGER nd
-      INTEGER nbdirs
 C     ..
       IF (.NOT.((n .LE. 0 .OR. incx .LE. 0) .OR. ca .EQ. one)) THEN
         IF (incx .EQ. 1) THEN

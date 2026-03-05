@@ -15,6 +15,7 @@
 #define TEST_SIZE 4
 #define MAX_SIZE TEST_SIZE
 #define PACKED_SIZE ((MAX_SIZE) * ((MAX_SIZE) + 1) / 2)
+extern void set_isize1ofap_(int *val);
 
 static int compare_abs_f(const void *a, const void *b) { float x = fabsf(*(const float*)a), y = fabsf(*(const float*)b); return (x > y) - (x < y); }
 
@@ -23,6 +24,10 @@ extern void cblas_stpmv(const CBLAS_LAYOUT layout, const CBLAS_UPLO Uplo, const 
 
 int main(void) {
     int i, j, idx, idir, nbdirs = NBDirsMax, n_products;
+    {
+        int diffblas_isize = MAX_SIZE;
+        set_isize1ofap_(&diffblas_isize);
+    }
     int has_large_errors = 0;
     float h = 1.0e-3f;
     float atol = 1.0e-2f, rtol = 1.0e-2f;

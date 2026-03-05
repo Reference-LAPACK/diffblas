@@ -15,12 +15,12 @@
 #include "cblas_f77_dv.h"
 
 /* Declaration for differentiated Fortran routine */
-/* void F77_cgerc_dv_base(...); */
-/* Note: This should match the signature of cgerc_dv in Fortran */
-
-/* Declaration for differentiated Fortran routine */
 /* void F77_cgeru_dv_base(...); */
 /* Note: This should match the signature of cgeru_dv in Fortran */
+
+/* Declaration for differentiated Fortran routine */
+/* void F77_cgerc_dv_base(...); */
+/* Note: This should match the signature of cgerc_dv in Fortran */
 
 
 /*

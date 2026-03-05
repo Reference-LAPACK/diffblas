@@ -13,7 +13,7 @@
 #include "cblas_f77_bv.h"
 
 /* Declaration for differentiated Fortran routine */
-/* void F77_ztpmv_bv_base(...); */
+/* void F77_ztpmv_bv_base(..., (size_t)1, (size_t)1, (size_t)1); */
 /* Note: This should match the signature of ztpmv_bv in Fortran */
 
 /* F77_ macros for differentiated Fortran routines */
@@ -95,7 +95,7 @@ void cblas_ztpmv_bv(const CBLAS_LAYOUT layout, const CBLAS_UPLO Uplo, const
                 ((double complex *)Apb)[nd] = 0.0;
             goto label100;
         }
-        F77_ztpmv_bv(&UL, &TA, &DI, &F77_N, Ap, Apb, X, Xb, &F77_incX, &nbdirs);
+        F77_ztpmv_bv(&UL, &TA, &DI, &F77_N, Ap, Apb, X, Xb, &F77_incX, &nbdirs, (size_t)1, (size_t)1, (size_t)1);
         popControl1b(&branch);
       label100:
         popControl2b(&branch);
@@ -180,7 +180,7 @@ void cblas_ztpmv_bv(const CBLAS_LAYOUT layout, const CBLAS_UPLO Uplo, const
                         ((double *)xb)[nd] = -((double *)xb)[nd];
                 }
             }
-        F77_ztpmv_bv(&UL, &TA, &DI, &F77_N, Ap, Apb, X, Xb, &F77_incX, &nbdirs);
+        F77_ztpmv_bv(&UL, &TA, &DI, &F77_N, Ap, Apb, X, Xb, &F77_incX, &nbdirs, (size_t)1, (size_t)1, (size_t)1);
         popControl1b(&branch);
       label120:
         popControl2b(&branch);

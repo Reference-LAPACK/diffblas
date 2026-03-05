@@ -15,11 +15,16 @@
 #define TEST_SIZE 4
 #define MAX_SIZE TEST_SIZE
 #define PACKED_SIZE ((MAX_SIZE) * ((MAX_SIZE) + 1) / 2)  /* n*(n+1)/2 for packed storage (match BLAS/test) */
+extern void set_isize1ofcy_(int *val);
 
 extern void cblas_caxpy_dv(CBLAS_INT N, const void *alpha, const void *alphad, const void *X, void *Xd, CBLAS_INT incX, void *Y, void *Yd, CBLAS_INT incY, int nbdirs);
 
 int main(void) {
     int i, j, idir, nbdirs = NBDirsMax;
+    {
+        int diffblas_isize = MAX_SIZE;
+        set_isize1ofcy_(&diffblas_isize);
+    }
     int has_large_errors = 0;
     float h = 1.0e-3f;  /* Step size for finite differences (match _d test) */
     float atol = 5.0e-3f, rtol = 5.0e-3f;  /* Pass when abs_error <= atol + rtol*|ad| (slightly looser than _d for multi-direction FD) */

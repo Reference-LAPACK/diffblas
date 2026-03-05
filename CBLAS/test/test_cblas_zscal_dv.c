@@ -15,11 +15,16 @@
 #define TEST_SIZE 4
 #define MAX_SIZE TEST_SIZE
 #define PACKED_SIZE ((MAX_SIZE) * ((MAX_SIZE) + 1) / 2)  /* n*(n+1)/2 for packed storage (match BLAS/test) */
+extern void set_isize1ofzx_(int *val);
 
 extern void cblas_zscal_dv(CBLAS_INT N, const void *alpha, const void *alphad, void *X, void *Xd, CBLAS_INT incX, int nbdirs);
 
 int main(void) {
     int i, j, idir, nbdirs = NBDirsMax;
+    {
+        int diffblas_isize = MAX_SIZE;
+        set_isize1ofzx_(&diffblas_isize);
+    }
     int has_large_errors = 0;
     double h = 1.0e-6;  /* Step size for finite differences (match _d test) */
     double atol = 1.0e-5, rtol = 1.0e-5;  /* Pass when abs_error <= atol + rtol*|ad| (same as _d) */

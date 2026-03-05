@@ -98,7 +98,7 @@ C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
 C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
-      INTEGER incx, incy, n
+      INTEGER incx, incy, n, nbdirs
 C     ..
 C     .. Array Arguments ..
       COMPLEX cx(*), cy(*)
@@ -111,6 +111,9 @@ C     .. Local Scalars ..
       COMPLEX ctemp
       COMPLEX ctempb(nbdirsmax)
       INTEGER i, ix, iy
+      INTEGER ISIZE1OFCx, ISIZE1OFCy
+      INTEGER get_ISIZE1OFCx, get_ISIZE1OFCy
+      EXTERNAL get_ISIZE1OFCx, get_ISIZE1OFCy
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC CONJG
@@ -119,8 +122,11 @@ C     .. Intrinsic Functions ..
       INTEGER*4 branch
       COMPLEX cdotc
       COMPLEX cdotcb(nbdirsmax)
-      INTEGER nbdirs
 C     ..
+      CALL check_ISIZE1OFCx_initialized()
+      CALL check_ISIZE1OFCy_initialized()
+      ISIZE1OFCx = get_ISIZE1OFCx()
+      ISIZE1OFCy = get_ISIZE1OFCy()
       IF (n .LE. 0) THEN
         DO ii1=1,ISIZE1OFcx
           DO nd=1,nbdirsmax
@@ -216,11 +222,10 @@ C
       EXTERNAL CDOTC_BV
       COMPLEX CDOTC, dotc
       COMPLEX dotcb(nbdirsmax)
-      INTEGER n, incx, incy
+      INTEGER n, incx, incy, nbdirs
       COMPLEX x(*), y(*)
       COMPLEX xb(nbdirsmax, *), yb(nbdirsmax, *)
 C
-      INTEGER nbdirs
       CALL CDOTC_BV(n, x, xb, incx, y, yb, incy, dotcb, nbdirs)
       END
 

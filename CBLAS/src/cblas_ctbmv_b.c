@@ -13,7 +13,7 @@
 #include "cblas_f77_b.h"
 
 /* Declaration for differentiated Fortran routine */
-/* void F77_ctbmv_b_base(...); */
+/* void F77_ctbmv_b_base(..., (size_t)1, (size_t)1, (size_t)1); */
 /* Note: This should match the signature of ctbmv_b in Fortran */
 
 /* F77_ macros for differentiated Fortran routines */
@@ -91,7 +91,7 @@ void cblas_ctbmv_b(const CBLAS_LAYOUT layout, const CBLAS_UPLO Uplo, const
             goto label100;
         }
         F77_ctbmv_b(&UL, &TA, &DI, &F77_N, &F77_K, A, Ab, &F77_lda, X, Xb, &
-                 F77_incX);
+                 F77_incX, (size_t)1, (size_t)1, (size_t)1);
         popControl1b(&branch);
       label100:
         popControl2b(&branch);
@@ -176,7 +176,7 @@ void cblas_ctbmv_b(const CBLAS_LAYOUT layout, const CBLAS_UPLO Uplo, const
                 }
             }
         F77_ctbmv_b(&UL, &TA, &DI, &F77_N, &F77_K, A, Ab, &F77_lda, X, Xb, &
-                 F77_incX);
+                 F77_incX, (size_t)1, (size_t)1, (size_t)1);
         popControl1b(&branch);
       label120:
         popControl2b(&branch);

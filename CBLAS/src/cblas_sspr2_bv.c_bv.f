@@ -157,7 +157,7 @@ C
 C     .. Scalar Arguments ..
       REAL alpha
       REAL alphab(nbdirsmax)
-      INTEGER incx, incy, n
+      INTEGER incx, incy, n, nbdirs
       CHARACTER uplo
 C     ..
 C     .. Array Arguments ..
@@ -190,7 +190,6 @@ C     .. External Subroutines ..
       INTEGER ad_from0
       INTEGER ad_from1
       INTEGER ad_to1
-      INTEGER nbdirs
 C     ..
 C
 C     Test the input parameters.

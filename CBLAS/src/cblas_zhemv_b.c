@@ -15,7 +15,7 @@
 #include "cblas_f77_b.h"
 
 /* Declaration for differentiated Fortran routine */
-/* void F77_zhemv_b_base(...); */
+/* void F77_zhemv_b_base(..., (size_t)1); */
 /* Note: This should match the signature of zhemv_b in Fortran */
 
 /* F77_ macros for differentiated Fortran routines */
@@ -209,12 +209,12 @@ void cblas_zhemv_b(const CBLAS_LAYOUT layout, const CBLAS_UPLO Uplo, const
     popControl1b(&branch);
     if (branch == 0) {
         F77_zhemv_b(&UL, &F77_N, alpha, alphab, A, Ab, &F77_lda, X, Xb, &F77_incX
-                 , beta, betab, Y, Yb, &F77_incY);
+                 , beta, betab, Y, Yb, &F77_incY, (size_t)1);
         popControl1b(&branch);
         goto label110;
     } else {
         F77_zhemv_b(&UL, &F77_N, ALPHA, ALPHAb, A, Ab, &F77_lda, x, xb, &F77_incX
-                 , BETA, BETAb, Y, Yb, &F77_incY);
+                 , BETA, BETAb, Y, Yb, &F77_incY, (size_t)1);
         popControl1b(&branch);
     }
   label100:

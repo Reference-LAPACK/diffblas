@@ -13,12 +13,12 @@
 #include "cblas_f77_d.h"
 
 /* Declaration for differentiated Fortran routine */
-/* void F77_zgerc_d_base(...); */
-/* Note: This should match the signature of zgerc_d in Fortran */
-
-/* Declaration for differentiated Fortran routine */
 /* void F77_zgeru_d_base(...); */
 /* Note: This should match the signature of zgeru_d in Fortran */
+
+/* Declaration for differentiated Fortran routine */
+/* void F77_zgerc_d_base(...); */
+/* Note: This should match the signature of zgerc_d in Fortran */
 
 
 /*

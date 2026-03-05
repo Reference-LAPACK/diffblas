@@ -22,7 +22,6 @@ C
       DOUBLE PRECISION x(*)
       DOUBLE PRECISION xb(nbdirsmax, *)
 C
-      INTEGER nbdirs
       CALL DNRM2_BV(n, x, xb, incx, nrm2b, nbdirs)
       END
 

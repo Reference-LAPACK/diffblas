@@ -204,10 +204,12 @@ C
 C  =====================================================================
 C
 C     .. External Functions ..
+      INTEGER get_ISIZE2OFA
+      EXTERNAL get_ISIZE2OFA
       LOGICAL LSAME
 C     ..
 C     .. External Subroutines ..
-      EXTERNAL XERBLA
+      EXTERNAL XERBLA, check_ISIZE2OFA_initialized
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC MAX
@@ -217,6 +219,7 @@ C     .. Local Scalars ..
       DOUBLE PRECISION tempb
       INTEGER i, info, j, k, nrowa
       LOGICAL lside, nounit, upper
+      INTEGER ISIZE2OFA
 C     ..
 C     .. Parameters ..
       DOUBLE PRECISION one, zero
@@ -246,6 +249,8 @@ C     ..
 C
 C     Test the input parameters.
 C
+      CALL check_ISIZE2OFA_initialized()
+      ISIZE2OFA = get_ISIZE2OFA()
       lside = LSAME(side, 'L')
       IF (lside) THEN
         nrowa = m

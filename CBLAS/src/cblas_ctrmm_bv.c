@@ -13,7 +13,7 @@
 #include "cblas_f77_bv.h"
 
 /* Declaration for differentiated Fortran routine */
-/* void F77_ctrmm_bv_base(...); */
+/* void F77_ctrmm_bv_base(..., (size_t)1, (size_t)1, (size_t)1, (size_t)1); */
 /* Note: This should match the signature of ctrmm_bv in Fortran */
 
 /* F77_ macros for differentiated Fortran routines */
@@ -99,7 +99,7 @@ void cblas_ctrmm_bv(const CBLAS_LAYOUT layout, const CBLAS_SIDE Side, const
         } else
             pushControl1b(1);
         F77_ctrmm_bv(&SD, &UL, &TA, &DI, &F77_M, &F77_N, alpha, alphab, A, Ab, &
-                  F77_lda, B, Bb, &F77_ldb, &nbdirs);
+                  F77_lda, B, Bb, &F77_ldb, &nbdirs, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
         popControl1b(&branch);
         popControl2b(&branch);
       label100:
@@ -163,7 +163,7 @@ void cblas_ctrmm_bv(const CBLAS_LAYOUT layout, const CBLAS_SIDE Side, const
             goto label120;
         }
         F77_ctrmm_bv(&SD, &UL, &TA, &DI, &F77_N, &F77_M, alpha, alphab, A, Ab, &
-                  F77_lda, B, Bb, &F77_ldb, &nbdirs);
+                  F77_lda, B, Bb, &F77_ldb, &nbdirs, (size_t)1, (size_t)1, (size_t)1, (size_t)1);
         popControl1b(&branch);
       label120:
         popControl2b(&branch);

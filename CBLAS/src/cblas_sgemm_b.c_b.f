@@ -215,10 +215,12 @@ C
 C  =====================================================================
 C
 C     .. External Functions ..
+      INTEGER get_ISIZE2OFA, get_ISIZE2OFB
+      EXTERNAL get_ISIZE2OFA, get_ISIZE2OFB
       LOGICAL LSAME
 C     ..
 C     .. External Subroutines ..
-      EXTERNAL XERBLA
+      EXTERNAL XERBLA, check_ISIZE2OFA_initialized, check_ISIZE2OFB_initialized
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC MAX
@@ -228,6 +230,7 @@ C     .. Local Scalars ..
       REAL tempb
       INTEGER i, info, j, l, nrowa, nrowb
       LOGICAL nota, notb
+      INTEGER ISIZE2OFA, ISIZE2OFB
 C     ..
 C     .. Parameters ..
       REAL one, zero
@@ -244,6 +247,10 @@ C     Set  NOTA  and  NOTB  as  true if  A  and  B  respectively are not
 C     transposed and set  NROWA and NROWB  as the number of rows of  A
 C     and  B  respectively.
 C
+      CALL check_ISIZE2OFA_initialized()
+      CALL check_ISIZE2OFB_initialized()
+      ISIZE2OFA = get_ISIZE2OFA()
+      ISIZE2OFB = get_ISIZE2OFB()
       nota = LSAME(transa, 'N')
       notb = LSAME(transb, 'N')
       IF (nota) THEN

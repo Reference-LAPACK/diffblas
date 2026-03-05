@@ -19,11 +19,21 @@ import subprocess
 import sys
 from pathlib import Path
 
-# Import Fortran parsing from run_tapenade_blas for \param[in,out] so inout matches BLAS
+# Import Fortran parsing and DIFFSIZES/ISIZE logic from run_tapenade_blas
 try:
-    from run_tapenade_blas import parse_fortran_function
+    from run_tapenade_blas import (
+        parse_fortran_function,
+        inject_isize_global_access,
+        _write_diffsizes_access_f77,
+        _isize_var_to_f77_name,
+        _collect_isize_vars_from_file,
+    )
 except ImportError:
     parse_fortran_function = None
+    inject_isize_global_access = None
+    _write_diffsizes_access_f77 = None
+    _isize_var_to_f77_name = None
+    _collect_isize_vars_from_file = None
 
 try:
     from fix_complex_bv_void_casts import fix_complex_bv_void_casts_in_dir, fix_real_bv_array_type_in_dir
@@ -3011,11 +3021,61 @@ def _generate_generic_bv_vjp_test_content(func_name, c_file_path, inputs, output
     return "\n".join(test_lines) + "\n"
 
 
-def generate_c_test_main(func_name, c_file_path, inputs, outputs, inout_vars, parameters, param_types, mode="d", return_type="void", bv_src_dir=None):
+def _inject_c_test_isize_setters(content, isize_vars):
+    """
+    Inject Fortran ISIZE setter prototypes and a call block into generated C test content.
+    isize_vars: list of F77-style names from _collect_isize_vars_from_file (e.g. ['ISIZE2OFA', 'ISIZE2OFB']).
+    """
+    if not isize_vars:
+        return content
+    lines = content.splitlines()
+    # Insert extern void set_<name>_(int *val); after the last #define
+    insert_proto_idx = None
+    for i, line in enumerate(lines):
+        if line.strip().startswith("#define "):
+            insert_proto_idx = i
+    if insert_proto_idx is None:
+        for i, line in enumerate(lines):
+            if line.strip().startswith("#include "):
+                insert_proto_idx = i
+    if insert_proto_idx is None:
+        insert_proto_idx = 0
+    insert_proto_idx += 1
+    proto_lines = [f"extern void set_{v.lower()}_(int *val);" for v in isize_vars]
+    for j, pl in enumerate(proto_lines):
+        lines.insert(insert_proto_idx + j, pl)
+    # Insert setter block at start of main: after first declaration line inside main
+    main_idx = None
+    for i, line in enumerate(lines):
+        if re.match(r"\s*int\s+main\s*\(", line):
+            main_idx = i
+            break
+    if main_idx is None:
+        return "\n".join(lines) + "\n"
+    insert_block_idx = None
+    for i in range(main_idx + 1, len(lines)):
+        if re.match(r"\s+int\s+", lines[i]) or "has_large_errors" in lines[i]:
+            insert_block_idx = i
+            break
+    if insert_block_idx is None:
+        insert_block_idx = main_idx + 1
+    insert_block_idx += 1
+    body_lines = ["    {", "        int diffblas_isize = MAX_SIZE;"]
+    for v in isize_vars:
+        body_lines.append(f"        set_{v.lower()}_(&diffblas_isize);")
+    body_lines.append("    }")
+    for k, bl in enumerate(body_lines):
+        lines.insert(insert_block_idx + k, bl)
+    return "\n".join(lines) + "\n"
+
+
+def generate_c_test_main(func_name, c_file_path, inputs, outputs, inout_vars, parameters, param_types, mode="d", return_type="void", bv_src_dir=None, fortran_src_dir=None):
     """
     Generate a C test main program for the differentiated CBLAS function.
     Returns the test program content as a string.
     When mode is 'bv', bv_src_dir can be the directory containing cblas_*_bv.c so generated call args match source types.
+    When mode is 'b' or 'bv' or 'r', fortran_src_dir can be the directory containing .c_b.f / .c_bv.f stubs;
+    if set, ISIZE setter prototypes and calls are injected so the test sets globals before calling differentiated routines.
     """
     src_stem = Path(c_file_path).stem
 
@@ -3050,29 +3110,48 @@ def generate_c_test_main(func_name, c_file_path, inputs, outputs, inout_vars, pa
 
     # Forward vector (dv) mode: same setup as _d (real test that calls _dv and links diff + fortran)
     if mode == "dv":
-        return _generate_dv_test_content(
+        content = _generate_dv_test_content(
             func_name, c_file_path, inputs, outputs, inout_vars,
             parameters, param_types, precision_type, complex_type, precision_suffix, is_complex_func
         )
+        if fortran_src_dir is not None and _collect_isize_vars_from_file is not None:
+            stub_path = fortran_src_dir / f"{src_stem}_dv.c_dv.f"
+            if not stub_path.exists():
+                stub_path = fortran_src_dir / f"{src_stem}_dv.c_dv.f90"
+            if stub_path.exists():
+                isize_vars = _collect_isize_vars_from_file(stub_path)
+                if isize_vars:
+                    content = _inject_c_test_isize_setters(content, isize_vars)
+        return content
 
     # Vector reverse (bv) mode: full VJP test for gemm-like, generic VJP for all others, scalar-result for dasum/ddot/sasum/sdot
     if mode == "bv":
         param_set = set(p.upper() for p in parameters)
         if ("LDA" in param_set and "LDB" in param_set and "K" in param_set
                 and ("TRANSA" in param_set or "TRANSB" in param_set)):
-            return _generate_bv_vjp_test_content(
+            content = _generate_bv_vjp_test_content(
                 func_name, c_file_path, inputs, outputs, inout_vars, parameters, param_types,
                 precision_type, complex_type, precision_suffix, is_complex_func
             )
-        if func_name in SCALAR_RESULT_DV:
-            return _generate_bv_vjp_test_content_scalar_result(
+        elif func_name in SCALAR_RESULT_DV:
+            content = _generate_bv_vjp_test_content_scalar_result(
                 func_name, parameters, param_types, inputs, precision_type, precision_suffix, return_type=return_type
             )
-        return _generate_generic_bv_vjp_test_content(
-            func_name, c_file_path, inputs, outputs, inout_vars, parameters, param_types,
-            precision_type, complex_type, precision_suffix, is_complex_func, return_type=return_type,
-            bv_src_dir=bv_src_dir
-        )
+        else:
+            content = _generate_generic_bv_vjp_test_content(
+                func_name, c_file_path, inputs, outputs, inout_vars, parameters, param_types,
+                precision_type, complex_type, precision_suffix, is_complex_func, return_type=return_type,
+                bv_src_dir=bv_src_dir
+            )
+        if fortran_src_dir is not None and _collect_isize_vars_from_file is not None:
+            stub_path = fortran_src_dir / f"{src_stem}_bv.c_bv.f"
+            if not stub_path.exists():
+                stub_path = fortran_src_dir / f"{src_stem}_bv.c_bv.f90"
+            if stub_path.exists():
+                isize_vars = _collect_isize_vars_from_file(stub_path)
+                if isize_vars:
+                    content = _inject_c_test_isize_setters(content, isize_vars)
+        return content
 
     # Reverse (b) mode: route by routine shape (gemm only for full test, nrm2 only for nrm2) or stub
     if mode == "b" or mode == "r":
@@ -3080,21 +3159,29 @@ def generate_c_test_main(func_name, c_file_path, inputs, outputs, inout_vars, pa
         # Full VJP test only for actual gemm (has K, TRANSA, TRANSB; symm/hemm have Side/Uplo, no K)
         if ("LDA" in param_set and "LDB" in param_set and "K" in param_set
                 and ("TRANSA" in param_set or "TRANSB" in param_set)):
-            return _generate_reverse_test_content(
+            content = _generate_reverse_test_content(
                 func_name, c_file_path, inputs, outputs, inout_vars, parameters, param_types,
                 precision_type, complex_type, precision_suffix, is_complex_func
             )
-        # nrm2: return-value cotangent, single-array active
-        if "nrm2" in func_name.lower() and "INCX" in param_set and "X" in param_set and "LDA" not in param_set:
-            return _generate_nrm2_reverse_test_content(
+        elif "nrm2" in func_name.lower() and "INCX" in param_set and "X" in param_set and "LDA" not in param_set:
+            content = _generate_nrm2_reverse_test_content(
                 func_name, c_file_path, parameters, param_types,
                 precision_type, precision_suffix, return_type=return_type
             )
-        # All other routines: generic parameter-driven VJP test (mirrors run_tapenade_blas.py generate_test_main_reverse)
-        return _generate_generic_reverse_test_content(
-            func_name, c_file_path, inputs, outputs, inout_vars, parameters, param_types,
-            precision_type, complex_type, precision_suffix, is_complex_func, return_type=return_type
-        )
+        else:
+            content = _generate_generic_reverse_test_content(
+                func_name, c_file_path, inputs, outputs, inout_vars, parameters, param_types,
+                precision_type, complex_type, precision_suffix, is_complex_func, return_type=return_type
+            )
+        if fortran_src_dir is not None and _collect_isize_vars_from_file is not None:
+            stub_path = fortran_src_dir / f"{src_stem}_b.c_b.f"
+            if not stub_path.exists():
+                stub_path = fortran_src_dir / f"{src_stem}_b.c_b.f90"
+            if stub_path.exists():
+                isize_vars = _collect_isize_vars_from_file(stub_path)
+                if isize_vars:
+                    content = _inject_c_test_isize_setters(content, isize_vars)
+        return content
 
     test_lines = []
     test_lines.append(f"/* Test program for {func_name} differentiation */")
@@ -3946,7 +4033,17 @@ def generate_c_test_main(func_name, c_file_path, inputs, outputs, inout_vars, pa
     test_lines.append("    }")
     test_lines.append("}")
     
-    return "\n".join(test_lines)
+    content = "\n".join(test_lines) + "\n"
+    # Forward (d) mode: inject set_ISIZE* if Fortran stub uses them
+    if mode == "d" and fortran_src_dir is not None and _collect_isize_vars_from_file is not None:
+        stub_path = fortran_src_dir / f"{src_stem}_d.c_d.f"
+        if not stub_path.exists():
+            stub_path = fortran_src_dir / f"{src_stem}_d.c_d.f90"
+        if stub_path.exists():
+            isize_vars = _collect_isize_vars_from_file(stub_path)
+            if isize_vars:
+                content = _inject_c_test_isize_setters(content, isize_vars)
+    return content
 
 def generate_makefile_cblas(func_name, c_file_path, out_dir, c_deps, fortran_deps, mode="d", 
                             include_dirs=None, fortran_diff_dir=None, c_compiler="gcc", 
@@ -4641,6 +4738,13 @@ def generate_flat_combined_makefile_cblas_blas_layout(out_dir, include_dirs=None
     fortran_objs = [f"$(BUILD_DIR)/{stem}_fortran.o" for stem in sorted(fortran_d | fortran_b | fortran_dv | fortran_bv)]
     if has_f90:
         fortran_objs = [f"$(BUILD_DIR)/DIFFSIZES.o"] + fortran_objs
+    # DIFFSIZES_access.o provides set_ISIZE* / get_ISIZE* / check_ISIZE* (required when using dynamic ISIZE)
+    # When using .f90 module, wrappers provide external symbols (set_isize*_, etc.) for C and .f callers
+    use_diffsizes_f90 = (src_dir / "DIFFSIZES_access.f90").exists()
+    if fortran_objs:
+        fortran_objs = [f"$(BUILD_DIR)/DIFFSIZES_access.o"] + fortran_objs
+        if use_diffsizes_f90 and (src_dir / "DIFFSIZES_access_wrappers.f").exists():
+            fortran_objs = [f"$(BUILD_DIR)/DIFFSIZES_access_wrappers.o"] + fortran_objs
     all_objs = objs_d + objs_b + objs_dv + objs_bv + fortran_objs
     lib_target = "$(BUILD_DIR)/libcblas_diff.a"
     test_exe_list = tests_d + tests_b + tests_dv + tests_bv
@@ -4676,6 +4780,20 @@ def generate_flat_combined_makefile_cblas_blas_layout(out_dir, include_dirs=None
         lines.append("$(BUILD_DIR)/DIFFSIZES.o: $(INC_DIR)/DIFFSIZES.f90 | $(BUILD_DIR)")
         lines.append("\t$(FC) $(FFLAGS) -c $(INC_DIR)/DIFFSIZES.f90 -o $(BUILD_DIR)/DIFFSIZES.o")
         lines.append("")
+    # DIFFSIZES_access: .f90 module when many ISIZE vars (avoids COMMON size mismatch), else .f
+    if (src_dir / "DIFFSIZES_access.f90").exists():
+        lines.append("# DIFFSIZES_access.f90 - module storage for ISIZE (many vars, no COMMON)")
+        lines.append("$(BUILD_DIR)/DIFFSIZES_access.o: $(SRC_DIR)/DIFFSIZES_access.f90 | $(BUILD_DIR)")
+        lines.append("\t$(FC) $(FFLAGS) -c $(SRC_DIR)/DIFFSIZES_access.f90 -o $(BUILD_DIR)/DIFFSIZES_access.o")
+        if (src_dir / "DIFFSIZES_access_wrappers.f").exists():
+            lines.append("# DIFFSIZES_access_wrappers.f - external symbols for C/F77 callers (set_isize*_, etc.)")
+            lines.append("$(BUILD_DIR)/DIFFSIZES_access_wrappers.o: $(SRC_DIR)/DIFFSIZES_access_wrappers.f $(BUILD_DIR)/DIFFSIZES_access.o | $(BUILD_DIR)")
+            lines.append("\t$(FC) $(FFLAGS) -c $(SRC_DIR)/DIFFSIZES_access_wrappers.f -o $(BUILD_DIR)/DIFFSIZES_access_wrappers.o")
+    else:
+        lines.append("# DIFFSIZES_access.f - global ISIZE set/get/check (created by run_tapenade_cblas.py --flat)")
+        lines.append("$(BUILD_DIR)/DIFFSIZES_access.o: $(SRC_DIR)/DIFFSIZES_access.f | $(BUILD_DIR)")
+        lines.append("\t$(FC) $(FFLAGS) -c $(SRC_DIR)/DIFFSIZES_access.f -o $(BUILD_DIR)/DIFFSIZES_access.o")
+    lines.append("")
 
     for s in srcs_d:
         lines.append(f"$(BUILD_DIR)/{s.stem}.o: $(SRC_DIR)/{s.name} | $(BUILD_DIR)")
@@ -4754,6 +4872,9 @@ def generate_flat_combined_makefile_cblas_blas_layout(out_dir, include_dirs=None
         objs_for_link = [f"$(BUILD_DIR)/{t}.o", f"$(BUILD_DIR)/{stem}.o"]
         if stem in fortran_d:
             objs_for_link.append(f"$(BUILD_DIR)/{stem}_fortran.o")
+            objs_for_link.append("$(BUILD_DIR)/DIFFSIZES_access.o")
+            if use_diffsizes_f90 and (src_dir / "DIFFSIZES_access_wrappers.f").exists():
+                objs_for_link.append("$(BUILD_DIR)/DIFFSIZES_access_wrappers.o")
         if stem in fortran_d_f90:
             objs_for_link.append(f"$(BUILD_DIR)/DIFFSIZES.o")
         lines.append(f"\t$(CC) " + " ".join(objs_for_link) + " $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/" + t)
@@ -4771,6 +4892,9 @@ def generate_flat_combined_makefile_cblas_blas_layout(out_dir, include_dirs=None
         objs_for_link = [f"$(BUILD_DIR)/{t}.o", f"$(BUILD_DIR)/{stem}.o"]
         if stem in fortran_b:
             objs_for_link.append(f"$(BUILD_DIR)/{stem}_fortran.o")
+            objs_for_link.append("$(BUILD_DIR)/DIFFSIZES_access.o")
+            if use_diffsizes_f90 and (src_dir / "DIFFSIZES_access_wrappers.f").exists():
+                objs_for_link.append("$(BUILD_DIR)/DIFFSIZES_access_wrappers.o")
         if stem in fortran_b_f90:
             objs_for_link.append(f"$(BUILD_DIR)/DIFFSIZES.o")
         objs_for_link.append("$(BUILD_DIR)/adStack.o")
@@ -4789,6 +4913,9 @@ def generate_flat_combined_makefile_cblas_blas_layout(out_dir, include_dirs=None
         objs_for_link = [f"$(BUILD_DIR)/{t}.o", f"$(BUILD_DIR)/{stem}.o"]
         if stem in fortran_dv:
             objs_for_link.append(f"$(BUILD_DIR)/{stem}_fortran.o")
+            objs_for_link.append("$(BUILD_DIR)/DIFFSIZES_access.o")
+            if use_diffsizes_f90 and (src_dir / "DIFFSIZES_access_wrappers.f").exists():
+                objs_for_link.append("$(BUILD_DIR)/DIFFSIZES_access_wrappers.o")
         if stem in fortran_dv_f90:
             objs_for_link.append(f"$(BUILD_DIR)/DIFFSIZES.o")
         lines.append(f"\t$(CC) " + " ".join(objs_for_link) + " $(LDFLAGS) $(LIBS) -o $(BUILD_DIR)/" + t)
@@ -4806,6 +4933,9 @@ def generate_flat_combined_makefile_cblas_blas_layout(out_dir, include_dirs=None
         objs_for_link = [f"$(BUILD_DIR)/{t}.o", f"$(BUILD_DIR)/{stem}.o"]
         if stem in fortran_bv:
             objs_for_link.append(f"$(BUILD_DIR)/{stem}_fortran.o")
+            objs_for_link.append("$(BUILD_DIR)/DIFFSIZES_access.o")
+            if use_diffsizes_f90 and (src_dir / "DIFFSIZES_access_wrappers.f").exists():
+                objs_for_link.append("$(BUILD_DIR)/DIFFSIZES_access_wrappers.o")
         if stem in fortran_bv_f90:
             objs_for_link.append(f"$(BUILD_DIR)/DIFFSIZES.o")
         objs_for_link.append("$(BUILD_DIR)/adStack.o")
@@ -5045,6 +5175,69 @@ def fix_fortran_parameter_intrinsics(fortran_file_path):
     
     return False
 
+
+def fix_fortran_gerc_second_subroutine_isize(fortran_file_path):
+    """
+    Fix cgerc_b/zgerc_b and cgerc_bv/zgerc_bv Fortran files that contain two subroutines
+    (CGERU_B/CGERU_BV and CGERC_B/ZGERC_B). Each may use ISIZE1OFx/ISIZE1OFy but
+    Tapenade does not add the INTEGER/EXTERNAL and get/check calls there, causing
+    "Symbol 'isize1ofx' has no IMPLICIT type" at compile. Find every subroutine that
+    has DO ii1=1,ISIZE1OFx but no get_ISIZE1OFX and inject the missing declarations.
+    """
+    path = Path(fortran_file_path)
+    if not path.exists():
+        return False
+    name = path.name
+    if name not in ("cblas_cgerc_b.c_b.f", "cblas_cgerc_bv.c_bv.f", "cblas_zgerc_b.c_b.f", "cblas_zgerc_bv.c_bv.f"):
+        return False
+    try:
+        content = path.read_text(encoding="utf-8", errors="ignore")
+    except Exception:
+        return False
+    # _b: INTEGER i, info, ix, j, jy, kx (no nbdirs); _bv: INTEGER i, info, ix, j, jy, kx, nbdirs
+    old_local_b = "      INTEGER i, info, ix, j, jy, kx\nC     ..\nC     .. External Subroutines ..\n      EXTERNAL XERBLA"
+    old_local_bv = "      INTEGER i, info, ix, j, jy, kx, nbdirs\nC     ..\nC     .. External Subroutines ..\n      EXTERNAL XERBLA"
+    new_local = "      INTEGER i, info, ix, j, jy, kx\n      INTEGER ISIZE1OFX, ISIZE1OFY\n      INTEGER get_ISIZE1OFX, get_ISIZE1OFY\nC     ..\nC     .. External Subroutines ..\n      EXTERNAL XERBLA\n      EXTERNAL get_ISIZE1OFX, get_ISIZE1OFY, check_ISIZE1OFX_initialized, check_ISIZE1OFY_initialized"
+    old_info = "      info = 0\n      IF (m .LT. 0) THEN"
+    new_info = "      info = 0\n      CALL check_ISIZE1OFX_initialized()\n      CALL check_ISIZE1OFY_initialized()\n      ISIZE1OFX = get_ISIZE1OFX()\n      ISIZE1OFY = get_ISIZE1OFY()\n      IF (m .LT. 0) THEN"
+    modified = False
+    while True:
+        # Find the next subroutine that needs the fix
+        sub_starts = [m.start() for m in re.finditer(r"^\s+SUBROUTINE\s+\w+\s*\(", content, re.MULTILINE | re.IGNORECASE)]
+        target_start = None
+        for i, start in enumerate(sub_starts):
+            end = sub_starts[i + 1] if i + 1 < len(sub_starts) else len(content)
+            chunk = content[start:end]
+            if "DO ii1=1,ISIZE1OFx" not in chunk and "DO ii1=1,ISIZE1OFy" not in chunk:
+                continue
+            do_pos = chunk.find("DO ii1=1,ISIZE1OFx") if "DO ii1=1,ISIZE1OFx" in chunk else chunk.find("DO ii1=1,ISIZE1OFy")
+            before_do = chunk[:do_pos]
+            if "get_ISIZE1OFX" in before_do or "ISIZE1OFX = get_" in before_do:
+                continue
+            target_start = start
+            break
+        if target_start is None:
+            break
+        before = content[:target_start]
+        after = content[target_start:]
+        old_local = old_local_bv if old_local_bv in after else old_local_b
+        if old_local not in after or new_local in after:
+            break
+        after = after.replace(old_local, new_local, 1)
+        if old_info not in after or new_info in after:
+            break
+        after = after.replace(old_info, new_info, 1)
+        content = before + after
+        modified = True
+    if not modified:
+        return False
+    try:
+        path.write_text(content, encoding="utf-8")
+        return True
+    except Exception:
+        return False
+
+
 def fix_fortran_write_statements(fortran_file_path):
     """
     Comment out WRITE statements in generated Fortran code to avoid linking issues.
@@ -5090,6 +5283,105 @@ def fix_fortran_write_statements(fortran_file_path):
             return False
     
     return False
+
+
+def fix_fortran_bv_remove_nbdirs_local(fortran_file_path):
+    """
+    Tapenade-generated _bv Fortran stubs have nbdirs as a dummy argument but either
+    (1) declare 'INTEGER nbdirs' only in Local Scalars (shadowing the argument with
+    an uninitialized local -> segfault), or (2) omit it from Scalar Arguments so
+    with IMPLICIT NONE the compiler errors. Fix by: add nbdirs to Scalar Arguments
+    INTEGER line if missing, and remove any local 'INTEGER nbdirs' line.
+    """
+    path = Path(fortran_file_path)
+    if not path.exists():
+        return False
+    name = path.name
+    if not (name.endswith(".c_bv.f") or name.endswith(".c_bv.f90")):
+        return False
+    try:
+        text = path.read_text(encoding="utf-8", errors="ignore")
+    except Exception:
+        return False
+    if "nbdirs)" not in text:
+        return False
+    lines = text.splitlines(keepends=True)
+    new_lines = []
+    modified = False
+    in_scalar_args = False
+    for i, line in enumerate(lines):
+        # Add nbdirs to first INTEGER line in each Scalar Arguments block if missing
+        if "C     .. Scalar Arguments .." in line:
+            in_scalar_args = True
+            new_lines.append(line)
+            continue
+        if in_scalar_args and re.match(r"^\s+INTEGER\s+", line):
+            in_scalar_args = False
+            if "nbdirs" not in line:
+                stripped = line.rstrip()
+                terminator = line[len(stripped):]
+                if stripped.endswith(","):
+                    new_lines.append(stripped + " nbdirs" + terminator)
+                else:
+                    new_lines.append(stripped.rstrip(",").rstrip() + ", nbdirs" + terminator)
+                modified = True
+            else:
+                new_lines.append(line)
+            continue
+        # Leave scalar-args region when we hit the next section header
+        if re.match(r"^\s+C\s+\.\.\s+\w", line):
+            in_scalar_args = False
+        # Remove local "INTEGER nbdirs" so it doesn't shadow the argument
+        if re.match(r"^\s+INTEGER\s+nbdirs\s*$", line.rstrip()):
+            modified = True
+            continue
+        # Remove ", nbdirs" or "nbdirs, " from INTEGER lines outside Scalar Arguments (nbdirs is a dummy arg)
+        # Use lookahead so we don't consume newline and concatenate with next line
+        if not in_scalar_args and re.match(r"^\s+INTEGER\s+", line) and "nbdirs" in line:
+            new_line = re.sub(r",\s*nbdirs(?=[ \t\r\n]|$)", " ", line)
+            new_line = re.sub(r"nbdirs\s*,\s*", "", new_line)
+            new_line = re.sub(r"\s+nbdirs(?=[ \t\r\n]|$)", "", new_line)
+            if new_line != line:
+                modified = True
+                line = new_line
+        new_lines.append(line)
+    # Second pass: subroutines without "C     .. Scalar Arguments .." (e.g. DASUMSUB_BV, CDOTCSUB_BV)
+    # have INTEGER n, incx etc. but no nbdirs. Only fix subs that appear *after* the first END (i.e.
+    # the second and later subroutines in the file); the first sub was already fixed in the first pass.
+    # Do NOT add nbdirs when the subroutine has "C     .. Scalar Arguments .." - in that case nbdirs
+    # is already in Scalar Args, and adding it to Local Scalars would duplicate it (first pass removed it).
+    lines = new_lines
+    new_lines = []
+    in_sub_with_nbdirs = False
+    added_in_this_sub = False
+    seen_first_end = False
+    has_scalar_args_in_sub = False
+    for line in lines:
+        if re.match(r"^\s*END\s*$", line.strip()):
+            in_sub_with_nbdirs = False
+            seen_first_end = True
+        if seen_first_end and (re.search(r"^\s+SUBROUTINE\s+\w+.*nbdirs\s*\)", line, re.IGNORECASE) or (
+                line.strip().startswith("+") and "nbdirs)" in line)):
+            in_sub_with_nbdirs = True
+            added_in_this_sub = False
+            has_scalar_args_in_sub = False
+        if "C     .. Scalar Arguments .." in line:
+            has_scalar_args_in_sub = True
+        if in_sub_with_nbdirs and not added_in_this_sub and not has_scalar_args_in_sub and re.match(r"^\s+INTEGER\s+", line) and "nbdirs" not in line:
+            stripped = line.rstrip()
+            terminator = line[len(stripped):]
+            new_lines.append(stripped.rstrip(",").rstrip() + ", nbdirs" + terminator)
+            added_in_this_sub = True
+            modified = True
+            continue
+        new_lines.append(line)
+    if not modified:
+        return False
+    try:
+        path.write_text("".join(new_lines), encoding="utf-8")
+        return True
+    except Exception:
+        return False
 
 
 def fix_dv_fortran_cd_explicit_dimension(fortran_file_path):
@@ -5487,6 +5779,144 @@ def fix_cgemv_b_complex_scalar_assignments(diff_file_path):
     except Exception as e:
         print(f"Error writing fixed C file {path}: {e}", file=sys.stderr)
         return False
+
+
+def _count_fortran_character_args(fortran_path):
+    """
+    Count dummy arguments of CHARACTER type in the first SUBROUTINE in a Fortran file.
+    Used to inject hidden length arguments when C calls Fortran (gfortran ABI).
+    """
+    path = Path(fortran_path)
+    if not path.exists():
+        return 0
+    try:
+        text = path.read_text(encoding='utf-8', errors='ignore')
+    except Exception:
+        return 0
+    n = 0
+    in_decl = False
+    for line in text.splitlines():
+        # Start of subroutine: begin counting declarations
+        if re.match(r'^\s+SUBROUTINE\s+\w+\s*\(', line, re.IGNORECASE):
+            in_decl = True
+            continue
+        if not in_decl:
+            continue
+        # End of declaration block: stop after first executable or non-declaration
+        # DO must be word-boundary so "DOUBLE PRECISION" does not match
+        if re.match(r'^\s+(CALL|IF|DO\s|END\s|EXTERNAL|INTRINSIC|GO\s*TO|ASSIGN)', line, re.IGNORECASE):
+            break
+        if re.match(r'^\s+C\s', line):
+            continue
+        # CHARACTER line: count comma-separated names
+        m = re.match(r'^\s+CHARACTER\s*(?:\*\d+)?\s*(.*)$', line, re.IGNORECASE)
+        if m:
+            rest = m.group(1).strip()
+            if rest:
+                n += len([x.strip() for x in rest.split(',') if x.strip()])
+    return n
+
+
+def _inject_f77_character_hidden_lengths(c_path, fortran_path):
+    """
+    Append gfortran hidden CHARACTER length arguments to every F77_* call in the C file.
+    C calling Fortran with CHARACTER dummies must pass length(s) at the end of the arg list.
+    """
+    c_path = Path(c_path)
+    fortran_path = Path(fortran_path)
+    n_char = _count_fortran_character_args(fortran_path)
+    if n_char <= 0:
+        return False
+    try:
+        content = c_path.read_text(encoding='utf-8', errors='ignore')
+    except Exception:
+        return False
+    # Already patched? (only if (size_t)1 appears at a call site, not just in corrupted #define lines)
+    if "(size_t)1" in content:
+        for line in content.splitlines():
+            s = line.lstrip()
+            if s.startswith('#'):
+                continue
+            if "(size_t)1" in line and "F77_" in line:
+                return False
+    suffix = ", " + ", ".join(["(size_t)1"] * n_char)
+    # Find closing paren position for each F77_xxx( ... ) (call may span lines).
+    # Only modify actual call sites: skip preprocessor lines (#define, #if, etc.) to avoid
+    # corrupting F77_xxx macros (which would break the build).
+    pattern = re.compile(r'F77_\w+\s*\(')
+    insert_positions = []
+    for m in pattern.finditer(content):
+        line_start = content.rfind('\n', 0, m.start()) + 1
+        line = content[line_start:line_start + 80].lstrip()
+        if line.startswith('#'):
+            continue
+        start = m.end()
+        depth = 1
+        i = start
+        while i < len(content) and depth > 0:
+            if content[i] == '(':
+                depth += 1
+            elif content[i] == ')':
+                depth -= 1
+                if depth == 0:
+                    insert_positions.append(i)
+                    break
+            i += 1
+    # Insert from end so positions stay valid.
+    for pos in sorted(insert_positions, reverse=True):
+        content = content[:pos] + suffix + content[pos:]
+    try:
+        c_path.write_text(content, encoding='utf-8')
+        return True
+    except Exception:
+        return False
+
+
+def inject_f77_character_hidden_lengths_in_tree(root):
+    """
+    Safety-net pass: walk a generated output tree and ensure that every
+    differentiated C wrapper (*_b.c, *_bv.c) that calls a Fortran stub with
+    CHARACTER dummy arguments has the corresponding gfortran hidden length
+    arguments appended at each F77_* call site.
+
+    This complements the per-file injection in the main Tapenade loop and
+    guards against any cases where the earlier logic failed to find the
+    correct Fortran stub.
+    """
+    root = Path(root)
+    # In --flat CBLAS layout, all generated sources live under out_root/src.
+    src_dir = root / "src"
+    if not src_dir.exists():
+        src_dir = root
+
+    for c_path in sorted(list(src_dir.glob("*_b.c")) + list(src_dir.glob("*_bv.c"))):
+        # Match the differentiated Fortran stub emitted by Tapenade:
+        #   *_b.c   -> *_b.c_b.f   or *_b.c_b.f90
+        #   *_bv.c  -> *_bv.c_bv.f or *_bv.c_bv.f90
+        stem = c_path.stem
+        if stem.endswith("_b"):
+            candidates = [
+                src_dir / f"{stem}.c_b.f",
+                src_dir / f"{stem}.c_b.f90",
+            ]
+        else:
+            candidates = [
+                src_dir / f"{stem}.c_bv.f",
+                src_dir / f"{stem}.c_bv.f90",
+            ]
+        fortran_path = next((p for p in candidates if p.exists()), None)
+        if not fortran_path:
+            continue
+        if _count_fortran_character_args(fortran_path) <= 0:
+            continue
+        try:
+            content = c_path.read_text(encoding="utf-8", errors="ignore")
+        except Exception:
+            continue
+        # Already has at least one call-site length injection; skip.
+        if "(size_t)" in content:
+            continue
+        _inject_f77_character_hidden_lengths(c_path, fortran_path)
 
 
 def _split_call_args(arg_string):
@@ -7531,22 +7961,22 @@ def run_tapenade(c_file_path, out_dir, tapenade_bin, mode="d", extra_args=None, 
         print(f"Error running Tapenade: {e}", file=sys.stderr)
         return False, None, None
 
-def create_diffsizes_file(out_dir, nbdirsmax=4, src_file=None, func_name=None, max_size=4, mode=None, scan_dir=None):
+def create_diffsizes_file(out_dir, nbdirsmax=4, src_file=None, func_name=None, max_size=4, mode=None, scan_dir=None, access_file_dir=None):
     """
     Create DIFFSIZES file required for vector mode differentiation.
-    For Fortran 77 (.f, .for, .F), creates DIFFSIZES.inc (include file)
-    For Fortran 90 (.f90, .F90), creates DIFFSIZES.f90 (module file)
-    
-    For CBLAS, Tapenade generates Fortran 77 files (.c_d.f or .c_b.f), so we create DIFFSIZES.inc
+    For Fortran 77 (.f, .for, .F), creates DIFFSIZESF.inc (include file) with only nbdirsmax;
+    ISIZE* are provided by DIFFSIZES_access.f (set/get/check) like BLAS.
+    For Fortran 90 (.f90, .F90), creates DIFFSIZES.f90 (module) with only nbdirsmax.
     
     Args:
         out_dir: Directory where DIFFSIZES file will be created
         nbdirsmax: Maximum number of derivative directions (default: 4)
         src_file: Source file path to determine Fortran version (optional)
         func_name: Function name to determine size parameters for reverse mode
-        max_size: Maximum array dimension for size parameters (default: 4)
+        max_size: Unused (kept for API compatibility; ISIZE* are now dynamic)
         mode: Differentiation mode ("d" for forward, "r" for reverse) to find the correct Fortran file
         scan_dir: If set, directory to scan for *.c_d.f etc. (used when out_dir is include/ and sources are in src/)
+        access_file_dir: If set, write DIFFSIZES_access.f here (e.g. src/ when out_dir is include/). Required for dynamic ISIZE.
     
     Returns:
         Tuple of (diffsizes_path, is_fortran90)
@@ -7627,85 +8057,57 @@ def create_diffsizes_file(out_dir, nbdirsmax=4, src_file=None, func_name=None, m
         if any(f.suffix == '.f90' for f in fortran_files):
             is_fortran90 = True
     
-    # Scan all found Fortran files for ISIZE patterns
+    # Scan all found Fortran files for ISIZE patterns; build sorted_vars for DIFFSIZES_access (dynamic ISIZE like BLAS)
+    isize_var_seen = set()
+    sorted_vars = []
     for fortran_file in fortran_files:
         try:
             with open(fortran_file, 'r') as f:
                 content = f.read()
-                
-                # Look for ISIZE patterns in the generated code
-                import re
-                isize_patterns = re.findall(r'ISIZE(\d+)OF(\w+)', content)
-                
-                for dim, array_name in isize_patterns:
-                    size_params.append(f"      integer ISIZE{dim}OF{array_name.lower()}")
-                    size_params.append(f"      parameter (ISIZE{dim}OF{array_name.lower()}={max_size})")
+            isize_patterns = re.findall(r'ISIZE(\d+)OF(\w+)', content, re.IGNORECASE)
+            for dim, array_name in isize_patterns:
+                if array_name.lower().endswith('_initialized'):
+                    continue
+                name = f"isize{dim}of{array_name.lower()}"
+                if name not in isize_var_seen:
+                    isize_var_seen.add(name)
+                    sorted_vars.append(name)
         except Exception as e:
             print(f"Warning: Could not read {fortran_file} to detect ISIZE parameters: {e}", file=sys.stderr)
-    
-    # Remove duplicates while preserving order
-    seen = set()
-    unique_size_params = []
-    for param in size_params:
-        if param not in seen:
-            unique_size_params.append(param)
-            seen.add(param)
-    size_params = unique_size_params
-    
-    # Create appropriate DIFFSIZES file based on Fortran version
+    sorted_vars.sort()
+
+    # Create appropriate DIFFSIZES file based on Fortran version (only nbdirsmax; ISIZE* are in DIFFSIZES_access.f)
     if is_fortran90:
-        # Fortran 90: Create module file
+        # Fortran 90: Create module with only nbdirsmax (like BLAS)
         diffsizes_content = f"""MODULE DIFFSIZES
 Implicit None
       integer, parameter :: nbdirsmax={nbdirsmax}
+END MODULE DIFFSIZES
 """
-        if size_params:
-            # Convert Fortran 77 style parameters to Fortran 90 style
-            # Fortran 77 format: "      integer ISIZE1OFa" and "      parameter (ISIZE1OFa=4)"
-            # Fortran 90 format: "      integer, parameter :: ISIZE1OFa=4"
-            param_dict = {}  # Store parameter values by name
-            param_names = []  # Store parameter names in order
-            
-            # First pass: collect parameter names and values
-            for param in size_params:
-                if "parameter" in param:
-                    # Extract the parameter name and value
-                    # Pattern: "      parameter (ISIZE1OFa=4)"
-                    import re
-                    param_match = re.search(r'parameter\s*\(\s*(\w+)\s*=\s*(\d+)\s*\)', param)
-                    if param_match:
-                        param_name = param_match.group(1)
-                        param_value = param_match.group(2)
-                        param_dict[param_name] = param_value
-                        if param_name not in param_names:
-                            param_names.append(param_name)
-            
-            # Second pass: output Fortran 90 style declarations
-            for param_name in param_names:
-                if param_name in param_dict:
-                    diffsizes_content += f"      integer, parameter :: {param_name}={param_dict[param_name]}\n"
-        diffsizes_content += "END MODULE DIFFSIZES\n"
         diffsizes_path = out_dir / "DIFFSIZES.f90"
         with open(diffsizes_path, 'w') as f:
             f.write(diffsizes_content)
-        # When we have .f90 we also have .f files that need ISIZE* via include; create DIFFSIZESF.inc for them
+        # F77 include for .f files: only nbdirsmax; ISIZE* are globals (set/get via DIFFSIZES_access.f)
         diffsizes_f77_content = f"      integer nbdirsmax\n      parameter (nbdirsmax={nbdirsmax})\n"
-        if size_params:
-            diffsizes_f77_content += "\n".join(size_params) + "\n"
+        diffsizes_f77_content += "!     ISIZE* are globals: set via set_ISIZE*(), read via get_ISIZE*() (see DIFFSIZES_access.f)\n"
         diffsizes_f77_path = out_dir / "DIFFSIZESF.inc"
         with open(diffsizes_f77_path, 'w') as f:
             f.write(diffsizes_f77_content)
-        print(f"Created {diffsizes_f77_path} (for .f files that need ISIZE*)", file=sys.stderr)
+        print(f"Created {diffsizes_f77_path} (for .f files; ISIZE* via DIFFSIZES_access.f)", file=sys.stderr)
     else:
-        # Fortran 77: Create include file
-        # For CBLAS, Tapenade generates code that includes DIFFSIZESF.inc (with 'F')
-        # Create DIFFSIZESF.inc instead of DIFFSIZES.inc
+        # Fortran 77: Create include file with only nbdirsmax; ISIZE* are globals
         diffsizes_content = f"      integer nbdirsmax\n      parameter (nbdirsmax={nbdirsmax})\n"
-        if size_params:
-            diffsizes_content += "\n".join(size_params) + "\n"
+        diffsizes_content += "!     ISIZE* are globals: set via set_ISIZE*(), read via get_ISIZE*() (see DIFFSIZES_access.f)\n"
         diffsizes_path = out_dir / "DIFFSIZESF.inc"
         with open(diffsizes_path, 'w') as f:
             f.write(diffsizes_content)
+
+    # Write DIFFSIZES_access.f when we have ISIZE variables (caller must pass access_file_dir, e.g. src_dir in flat mode)
+    access_dir = Path(access_file_dir) if access_file_dir else out_path
+    if sorted_vars and _write_diffsizes_access_f77 is not None:
+        access_path = _write_diffsizes_access_f77(access_dir, sorted_vars)
+        if access_path is not None:
+            print(f"Created {access_path} (set/get/check for ISIZE*)", file=sys.stderr)
     
     # CBLAS: Tapenade C code includes DIFFSIZESC.inc for NBDirsMax; create it in include/ whenever we write DIFFSIZES(F) there
     diffsizes_c_path = out_dir / "DIFFSIZESC.inc"
@@ -8231,8 +8633,29 @@ def main():
                         fix_dv_complex_void_pointer_derivative_arrays(diff_file)
                 
                 # Fix inout derivative zeroing in Fortran file (if it exists)
-                # Tapenade incorrectly zeros out derivative arrays for inout parameters
-                # Check for both .f and .f90 files (d -> _d.c_d.f, dv -> _dv.c_d.f, r -> _b.c_b.f, bv -> _bv.c_bv.f)
+                # Tapenade incorrectly zeros out derivative arrays for inout parameters.
+                # Map a differentiated C wrapper like cblas_dgemm_b.c or cblas_dgemm_bv.c
+                # back to its corresponding differentiated Fortran source:
+                #   d  -> cblas_foo_d.c_d.f
+                #   dv -> cblas_foo_dv.c_d.f
+                #   r  -> cblas_foo_b.c_b.f
+                #   bv -> cblas_foo_bv.c_bv.f
+                #
+                # Here c_file.stem already includes the mode suffix (_d/_dv/_b/_bv),
+                # so strip that suffix before appending the Tapenade-generated one.
+                c_stem = c_file.stem
+                if c_stem.endswith("_d"):
+                    base_stem = c_stem[:-2]
+                elif c_stem.endswith("_dv"):
+                    base_stem = c_stem[:-3]
+                elif c_stem.endswith("_bv"):
+                    base_stem = c_stem[:-3]
+                elif c_stem.endswith("_b"):
+                    base_stem = c_stem[:-2]
+                else:
+                    base_stem = c_stem
+
+                # Check for both .f and .f90 files
                 if mode == "d":
                     fortran_suffix_f, fortran_suffix_f90 = "_d.c_d.f", "_d.c_d.f90"
                 elif mode == "dv":
@@ -8240,30 +8663,32 @@ def main():
                 elif mode == "bv":
                     fortran_suffix_f, fortran_suffix_f90 = "_bv.c_bv.f", "_bv.c_bv.f90"
                 else:
+                    # Reverse scalar (b)
                     fortran_suffix_f, fortran_suffix_f90 = "_b.c_b.f", "_b.c_b.f90"
-                fortran_diff_file = mode_output_dir / f"{c_file.stem}{fortran_suffix_f}"
+
+                fortran_diff_file = mode_output_dir / f"{base_stem}{fortran_suffix_f}"
                 if not fortran_diff_file.exists():
-                    fortran_diff_file = mode_output_dir / f"{c_file.stem}{fortran_suffix_f90}"
+                    fortran_diff_file = mode_output_dir / f"{base_stem}{fortran_suffix_f90}"
                 if not fortran_diff_file.exists() and mode == "d":
-                    fortran_diff_file = mode_output_dir / f"{c_file.stem}_d.c_d.f"
+                    fortran_diff_file = mode_output_dir / f"{base_stem}_d.c_d.f"
                 if not fortran_diff_file.exists() and mode == "d":
-                    fortran_diff_file = mode_output_dir / f"{c_file.stem}_d.c_d.f90"
+                    fortran_diff_file = mode_output_dir / f"{base_stem}_d.c_d.f90"
                 if not fortran_diff_file.exists() and mode == "r":
-                    fortran_diff_file = mode_output_dir / f"{c_file.stem}_b.c_b.f"
+                    fortran_diff_file = mode_output_dir / f"{base_stem}_b.c_b.f"
                 if not fortran_diff_file.exists() and mode == "r":
-                    fortran_diff_file = mode_output_dir / f"{c_file.stem}_b.c_b.f90"
+                    fortran_diff_file = mode_output_dir / f"{base_stem}_b.c_b.f90"
                 if not fortran_diff_file.exists() and mode == "dv":
-                    fortran_diff_file = mode_output_dir / f"{c_file.stem}_dv.c_dv.f"
+                    fortran_diff_file = mode_output_dir / f"{base_stem}_dv.c_dv.f"
                 if not fortran_diff_file.exists() and mode == "dv":
-                    fortran_diff_file = mode_output_dir / f"{c_file.stem}_dv.c_dv.f90"
+                    fortran_diff_file = mode_output_dir / f"{base_stem}_dv.c_dv.f90"
                 if not fortran_diff_file.exists() and mode == "dv":
-                    fortran_diff_file = mode_output_dir / f"{c_file.stem}_dv.c_d.f"
+                    fortran_diff_file = mode_output_dir / f"{base_stem}_dv.c_d.f"
                 if not fortran_diff_file.exists() and mode == "dv":
-                    fortran_diff_file = mode_output_dir / f"{c_file.stem}_dv.c_d.f90"
+                    fortran_diff_file = mode_output_dir / f"{base_stem}_dv.c_d.f90"
                 if not fortran_diff_file.exists() and mode == "bv":
-                    fortran_diff_file = mode_output_dir / f"{c_file.stem}_bv.c_bv.f"
+                    fortran_diff_file = mode_output_dir / f"{base_stem}_bv.c_bv.f"
                 if not fortran_diff_file.exists() and mode == "bv":
-                    fortran_diff_file = mode_output_dir / f"{c_file.stem}_bv.c_bv.f90"
+                    fortran_diff_file = mode_output_dir / f"{base_stem}_bv.c_bv.f90"
                 if fortran_calls and not fortran_diff_file.exists():
                     print(f"⚠️  WARNING: {c_file.name} calls Fortran ({', '.join(sorted(fortran_calls))}) but no differentiated Fortran file was produced.", file=sys.stderr)
                     print(f"    The test executable will fail to link (undefined reference to ..._d_).", file=sys.stderr)
@@ -8282,6 +8707,13 @@ def main():
                     fix_fortran_write_statements(fortran_diff_file)
                     print(f"Fixing PARAMETER declarations with intrinsics in Fortran file...", file=sys.stderr)
                     fix_fortran_parameter_intrinsics(fortran_diff_file)
+                    if fix_fortran_gerc_second_subroutine_isize(fortran_diff_file):
+                        print(f"✅ Fixed gerc second subroutine ISIZE in {fortran_diff_file.name}", file=sys.stderr)
+                    if mode == "bv" and fix_fortran_bv_remove_nbdirs_local(fortran_diff_file):
+                        print(f"✅ Removed shadowing INTEGER nbdirs in {fortran_diff_file.name}", file=sys.stderr)
+                    # gfortran ABI: C calling Fortran with CHARACTER dummies needs hidden length args at end of arg list
+                    if mode in ("r", "bv") and diff_file and _inject_f77_character_hidden_lengths(diff_file, fortran_diff_file):
+                        print(f"✅ Injected F77 CHARACTER hidden length args in {diff_file}", file=sys.stderr)
                     if mode == "dv":
                         print(f"Fixing dv Fortran cd assumed-size -> explicit n...", file=sys.stderr)
                         fix_dv_fortran_cd_explicit_dimension(fortran_diff_file)
@@ -8447,10 +8879,13 @@ def main():
                     parsed_func_name, parsed_inputs, parsed_outputs, parsed_inout, parsed_params, parsed_param_types, parsed_return_type = parse_c_function_signature(c_file)
                     if parsed_func_name:
                         bv_src_dir = mode_output_dir if mode == "bv" else None
+                        # Pass Fortran stub dir so generator can inject set_ISIZE* calls for d/dv/b/bv tests
+                        fortran_src_dir = mode_output_dir if (args.flat and mode in ("d", "dv", "b", "r", "bv")) else None
                         test_program = generate_c_test_main(
                             parsed_func_name, c_file, parsed_inputs, parsed_outputs,
                             parsed_inout, parsed_params, parsed_param_types, mode=mode,
-                            return_type=parsed_return_type, bv_src_dir=bv_src_dir
+                            return_type=parsed_return_type, bv_src_dir=bv_src_dir,
+                            fortran_src_dir=fortran_src_dir
                         )
                         test_dir = (out_root / "test") if args.flat else mode_output_dir
                         # Flat Makefile expects test_cblas_dgemm_b.c for reverse (executable test_cblas_dgemm_b); test_cblas_*_bv.c for bv
@@ -8553,13 +8988,53 @@ def main():
     print(f"✅ Processing complete!", file=sys.stderr)
     print(f"{'='*60}", file=sys.stderr)
     
-    # When flat (BLAS-like layout): create DIFFSIZESF.inc in include/, copy headers to include/, generate BLAS-layout Makefile
+    # When flat (BLAS-like layout): create DIFFSIZESF.inc in include/, DIFFSIZES_access.f in src/, inject get/check into .c_*.f, copy headers, generate Makefile
     if args.flat:
         include_dir = out_root / "include"
         src_dir = out_root / "src"
-        print("\nCreating DIFFSIZESF.inc in include/ (scanning src/)...", file=sys.stderr)
-        create_diffsizes_file(include_dir, nbdirsmax=4, src_file=None, max_size=4, mode=args.mode_single if args.mode_single in ("d", "r", "dv", "bv") else "d", scan_dir=src_dir)
+        # Final safety-net: ensure every *_b.c / *_bv.c wrapper that calls a Fortran
+        # routine with CHARACTER dummies has the required hidden length args.
+        print("\nEnsuring F77 CHARACTER hidden lengths for all reverse wrappers in src/...", file=sys.stderr)
+        try:
+            inject_f77_character_hidden_lengths_in_tree(out_root)
+        except Exception as e:
+            print(f"Warning: CHARACTER hidden-length post-pass failed: {e}", file=sys.stderr)
+        print("\nCreating DIFFSIZESF.inc and DIFFSIZES_access.f (scanning src/)...", file=sys.stderr)
+        create_diffsizes_file(
+            include_dir,
+            nbdirsmax=4,
+            src_file=None,
+            max_size=4,
+            mode=args.mode_single if args.mode_single in ("d", "r", "dv", "bv") else "d",
+            scan_dir=src_dir,
+            access_file_dir=src_dir,
+        )
         print("Created DIFFSIZESF.inc in " + str(include_dir), file=sys.stderr)
+        # Inject ISIZE get/check into Tapenade-generated Fortran so they use runtime set/get (like BLAS)
+        if inject_isize_global_access is not None:
+            for fortran_file in sorted(src_dir.glob("*.c_d.f")) + sorted(src_dir.glob("*.c_dv.f")) + sorted(src_dir.glob("*.c_b.f")) + sorted(src_dir.glob("*.c_bv.f")):
+                try:
+                    if "ISIZE" in fortran_file.read_text(encoding="utf-8", errors="ignore"):
+                        if inject_isize_global_access(fortran_file):
+                            print(f"Injected ISIZE get/check into {fortran_file.name}", file=sys.stderr)
+                except Exception as e:
+                    print(f"Warning: could not inject ISIZE into {fortran_file}: {e}", file=sys.stderr)
+            for fortran_file in sorted(src_dir.glob("*.c_d.f90")) + sorted(src_dir.glob("*.c_dv.f90")) + sorted(src_dir.glob("*.c_b.f90")) + sorted(src_dir.glob("*.c_bv.f90")):
+                try:
+                    if "ISIZE" in fortran_file.read_text(encoding="utf-8", errors="ignore"):
+                        if inject_isize_global_access(fortran_file):
+                            print(f"Injected ISIZE get/check into {fortran_file.name}", file=sys.stderr)
+                except Exception as e:
+                    print(f"Warning: could not inject ISIZE into {fortran_file}: {e}", file=sys.stderr)
+        # Post-pass: fix cgerc/zgerc second subroutine (inner CGERU_B/CGERU_BV) that uses ISIZE1OFx/ISIZE1OFy without get/check
+        for fortran_file in sorted(src_dir.glob("cblas_cgerc_*.f")) + sorted(src_dir.glob("cblas_zgerc_*.f")):
+            try:
+                if fix_fortran_gerc_second_subroutine_isize(fortran_file):
+                    print(f"✅ Fixed gerc second subroutine ISIZE in {fortran_file.name}", file=sys.stderr)
+                if fortran_file.name.endswith(".c_bv.f") and fix_fortran_bv_remove_nbdirs_local(fortran_file):
+                    print(f"✅ Removed shadowing INTEGER nbdirs in {fortran_file.name}", file=sys.stderr)
+            except Exception as e:
+                print(f"Warning: could not fix gerc in {fortran_file}: {e}", file=sys.stderr)
         # Post-pass: ensure every *.c_dv.f90 that defines DNRM2_DV/SNRM2_DV gets the SUB wrapper (so C finds dnrm2sub_dv_/snrm2sub_dv_)
         for f90 in sorted(src_dir.glob("*.c_dv.f90")):
             fix_dv_nrm2_sub_wrapper(f90)
@@ -8827,8 +9302,17 @@ def generate_top_level_test_script_cblas(out_dir, mode="d", flat=False, modes=No
                 lines.append('echo ""')
         per_mode_summary_block = "\n    ".join(lines)
     else:
-        mode_name_cap = mode_name.capitalize()
-        per_mode_summary_block = f'echo -e "${{GREEN}}{mode_name_cap} Mode: ${{success}}/${{TOTAL_TESTS}} successful${{NC}}"'
+        # Single-mode summary: derive a human-readable mode name from primary_mode.
+        # Use primary_mode instead of mode_name here so we don't depend on ordering below.
+        if primary_mode == "d":
+            mode_label = "Forward"
+        elif primary_mode == "dv":
+            mode_label = "Forward vector"
+        elif primary_mode == "bv":
+            mode_label = "Reverse vector"
+        else:
+            mode_label = "Reverse"
+        per_mode_summary_block = f'echo -e "${{GREEN}}{mode_label} Mode: ${{success}}/${{TOTAL_TESTS}} successful${{NC}}"'
     
     if primary_mode == "d":
         mode_dir = "d"

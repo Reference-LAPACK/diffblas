@@ -92,7 +92,7 @@ C
 C     .. Scalar Arguments ..
       DOUBLE PRECISION da
       DOUBLE PRECISION dab(nbdirsmax)
-      INTEGER incx, n
+      INTEGER incx, n, nbdirs
 C     ..
 C     .. Array Arguments ..
       COMPLEX*16 zx(*)
@@ -110,7 +110,6 @@ C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC DBLE, DCMPLX, DIMAG
       INTEGER nd
-      INTEGER nbdirs
 C     ..
       IF (.NOT.((n .LE. 0 .OR. incx .LE. 0) .OR. da .EQ. one)) THEN
         IF (incx .EQ. 1) THEN

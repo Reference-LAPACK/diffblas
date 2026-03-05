@@ -116,6 +116,9 @@ C  =====================================================================
 C
 C     .. Local Scalars ..
       INTEGER i, ix, iy, m, mp1
+      INTEGER ISIZE1OFDy
+      INTEGER get_ISIZE1OFDy
+      EXTERNAL get_ISIZE1OFDy
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC MOD
@@ -123,6 +126,8 @@ C     .. Intrinsic Functions ..
       INTEGER ii1
       INTEGER nbdirs
 C     ..
+      CALL check_ISIZE1OFDy_initialized()
+      ISIZE1OFDy = get_ISIZE1OFDy()
       IF (n .LE. 0) THEN
         DO ii1=1,ISIZE1OFdy
           DO nd=1,nbdirsmax

@@ -104,7 +104,7 @@ C
 C     .. Scalar Arguments ..
       REAL sa
       REAL sab(nbdirsmax)
-      INTEGER incx, incy, n
+      INTEGER incx, incy, n, nbdirs
 C     ..
 C     .. Array Arguments ..
       REAL sx(*), sy(*)
@@ -120,7 +120,6 @@ C     .. Intrinsic Functions ..
       INTRINSIC MOD
       INTEGER nd
       INTEGER*4 branch
-      INTEGER nbdirs
 C     ..
       IF (n .GT. 0) THEN
         IF (sa .NE. 0.0) THEN
