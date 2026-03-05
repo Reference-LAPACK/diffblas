@@ -34,10 +34,10 @@ program test_sspmv
   real(4), dimension(max_size) :: y_output
 
   ! Array restoration variables for numerical differentiation
-  real(4) :: alpha_orig
-  real(4) :: beta_orig
-  real(4), dimension((n*(n+1))/2) :: ap_orig
   real(4), dimension(max_size) :: x_orig
+  real(4) :: beta_orig
+  real(4) :: alpha_orig
+  real(4), dimension((n*(n+1))/2) :: ap_orig
   real(4), dimension(max_size) :: y_orig
 
   ! Variables for central difference computation
@@ -47,10 +47,10 @@ program test_sspmv
   logical :: has_large_errors
 
   ! Variables for storing original derivative values
-  real(4) :: alpha_d_orig
-  real(4) :: beta_d_orig
-  real(4), dimension((n*(n+1))/2) :: ap_d_orig
   real(4), dimension(max_size) :: x_d_orig
+  real(4) :: beta_d_orig
+  real(4) :: alpha_d_orig
+  real(4), dimension((n*(n+1))/2) :: ap_d_orig
   real(4), dimension(max_size) :: y_d_orig
 
   ! Temporary variables for matrix initialization
@@ -79,29 +79,29 @@ program test_sspmv
   incy_val = 1  ! INCY 1
 
   ! Initialize input derivatives to random values
-  call random_number(alpha_d)
-  alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-  call random_number(beta_d)
-  beta_d = beta_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-  call random_number(ap_d)
-  ap_d = ap_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(x_d)
   x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+  call random_number(beta_d)
+  beta_d = beta_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+  call random_number(alpha_d)
+  alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+  call random_number(ap_d)
+  ap_d = ap_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(y_d)
   y_d = y_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
   ! Store initial derivative values after random initialization
-  alpha_d_orig = alpha_d
-  beta_d_orig = beta_d
-  ap_d_orig = ap_d
   x_d_orig = x_d
+  beta_d_orig = beta_d
+  alpha_d_orig = alpha_d
+  ap_d_orig = ap_d
   y_d_orig = y_d
 
   ! Store original values for central difference computation
-  alpha_orig = alpha
-  beta_orig = beta
-  ap_orig = ap
   x_orig = x
+  beta_orig = beta
+  alpha_orig = alpha
+  ap_orig = ap
   y_orig = y
 
   write(*,*) 'Testing SSPMV'
@@ -155,20 +155,20 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    alpha = alpha_orig + h * alpha_d_orig
-    beta = beta_orig + h * beta_d_orig
-    ap = ap_orig + h * ap_d_orig
     x = x_orig + h * x_d_orig
+    beta = beta_orig + h * beta_d_orig
+    alpha = alpha_orig + h * alpha_d_orig
+    ap = ap_orig + h * ap_d_orig
     y = y_orig + h * y_d_orig
     call sspmv(uplo, nsize, alpha, ap, x, incx_val, beta, y, incy_val)
     ! Store forward perturbation results
     y_forward = y
     
     ! Backward perturbation: f(x - h)
-    alpha = alpha_orig - h * alpha_d_orig
-    beta = beta_orig - h * beta_d_orig
-    ap = ap_orig - h * ap_d_orig
     x = x_orig - h * x_d_orig
+    beta = beta_orig - h * beta_d_orig
+    alpha = alpha_orig - h * alpha_d_orig
+    ap = ap_orig - h * ap_d_orig
     y = y_orig - h * y_d_orig
     call sspmv(uplo, nsize, alpha, ap, x, incx_val, beta, y, incy_val)
     ! Store backward perturbation results

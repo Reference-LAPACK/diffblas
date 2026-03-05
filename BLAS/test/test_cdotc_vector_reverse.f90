@@ -156,19 +156,19 @@ contains
       ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
       ! For pure inputs: use adjoint directly
       vjp_ad = 0.0
-      ! Compute and sort products for cx
+      ! Compute and sort products for cy
       n_products = n
       do i = 1, n
-        temp_products(i) = real(conjg(cx_dir(i)) * cxb(k,i))
+        temp_products(i) = real(conjg(cy_dir(i)) * cyb(k,i))
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
-      ! Compute and sort products for cy
+      ! Compute and sort products for cx
       n_products = n
       do i = 1, n
-        temp_products(i) = real(conjg(cy_dir(i)) * cyb(k,i))
+        temp_products(i) = real(conjg(cx_dir(i)) * cxb(k,i))
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products

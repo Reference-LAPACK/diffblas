@@ -152,13 +152,6 @@ SUBROUTINE SNRM2_BV(n, x, xb, incx, snrm2b, nbdirs)
 !
 !  Quick return if possible
 !
-! Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-  IF (nbdirs <= 0 .OR. nbdirs > nbdirsmax) THEN
-    WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs, &
-      ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-    STOP 1
-  END IF
-!
   IF (n .LE. 0) THEN
     xb(1:nbdirsmax, 1:1+(n-1)*abs(incx)) = 0.0_4
   ELSE
@@ -171,6 +164,13 @@ SUBROUTINE SNRM2_BV(n, x, xb, incx, snrm2b, nbdirs)
 !  The thresholds and multipliers are
 !     tbig -- values bigger than this are scaled down by sbig
 !     tsml -- values smaller than this are scaled up by ssml
+!
+! Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
+  IF (nbdirs <= 0 .OR. nbdirs > nbdirsmax) THEN
+    WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs, &
+      ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
+    STOP 1
+  END IF
 !
     notbig = .true.
     asml = zero

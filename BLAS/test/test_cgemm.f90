@@ -38,11 +38,11 @@ program test_cgemm
   complex(4), dimension(max_size,max_size) :: c_output
 
   ! Array restoration variables for numerical differentiation
-  complex(4) :: alpha_orig
   complex(4) :: beta_orig
-  complex(4), dimension(max_size,max_size) :: a_orig
+  complex(4) :: alpha_orig
   complex(4), dimension(max_size,max_size) :: c_orig
   complex(4), dimension(max_size,max_size) :: b_orig
+  complex(4), dimension(max_size,max_size) :: a_orig
 
   ! Variables for central difference computation
   complex(4), dimension(max_size,max_size) :: c_forward, c_backward
@@ -51,11 +51,11 @@ program test_cgemm
   logical :: has_large_errors
 
   ! Variables for storing original derivative values
-  complex(4) :: alpha_d_orig
   complex(4) :: beta_d_orig
-  complex(4), dimension(max_size,max_size) :: a_d_orig
+  complex(4) :: alpha_d_orig
   complex(4), dimension(max_size,max_size) :: c_d_orig
   complex(4), dimension(max_size,max_size) :: b_d_orig
+  complex(4), dimension(max_size,max_size) :: a_d_orig
 
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
@@ -106,17 +106,10 @@ program test_cgemm
   ! Initialize input derivatives to random values
   call random_number(temp_real)
   call random_number(temp_imag)
-  alpha_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+  beta_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
   call random_number(temp_real)
   call random_number(temp_imag)
-  beta_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  do i = 1, lda
-    do j = 1, lda
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      a_d(i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-  end do
+  alpha_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
   do i = 1, lda
     do j = 1, lda
       call random_number(temp_real)
@@ -131,20 +124,27 @@ program test_cgemm
       b_d(i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
     end do
   end do
+  do i = 1, lda
+    do j = 1, lda
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      a_d(i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end do
+  end do
 
   ! Store initial derivative values after random initialization
-  alpha_d_orig = alpha_d
   beta_d_orig = beta_d
-  a_d_orig = a_d
+  alpha_d_orig = alpha_d
   c_d_orig = c_d
   b_d_orig = b_d
+  a_d_orig = a_d
 
   ! Store original values for central difference computation
-  alpha_orig = alpha
   beta_orig = beta
-  a_orig = a
+  alpha_orig = alpha
   c_orig = c
   b_orig = b
+  a_orig = a
 
   write(*,*) 'Testing CGEMM'
   ! Store input values of inout parameters before first function call
@@ -201,21 +201,21 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    alpha = alpha_orig + cmplx(h, 0.0) * alpha_d_orig
     beta = beta_orig + cmplx(h, 0.0) * beta_d_orig
-    a = a_orig + cmplx(h, 0.0) * a_d_orig
+    alpha = alpha_orig + cmplx(h, 0.0) * alpha_d_orig
     c = c_orig + cmplx(h, 0.0) * c_d_orig
     b = b_orig + cmplx(h, 0.0) * b_d_orig
+    a = a_orig + cmplx(h, 0.0) * a_d_orig
     call cgemm(transa, transb, msize, nsize, ksize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)
     ! Store forward perturbation results
     c_forward = c
     
     ! Backward perturbation: f(x - h)
-    alpha = alpha_orig - cmplx(h, 0.0) * alpha_d_orig
     beta = beta_orig - cmplx(h, 0.0) * beta_d_orig
-    a = a_orig - cmplx(h, 0.0) * a_d_orig
+    alpha = alpha_orig - cmplx(h, 0.0) * alpha_d_orig
     c = c_orig - cmplx(h, 0.0) * c_d_orig
     b = b_orig - cmplx(h, 0.0) * b_d_orig
+    a = a_orig - cmplx(h, 0.0) * a_d_orig
     call cgemm(transa, transb, msize, nsize, ksize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)
     ! Store backward perturbation results
     c_backward = c

@@ -153,6 +153,7 @@ SUBROUTINE DNRM2_DV(n, x, xd, incx, dnrm2, dnrm2d, nbdirs)
 !  Quick return if possible
 !
   dnrm2 = zero
+  IF (n .LE. 0) THEN
 ! Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
   IF (nbdirs <= 0 .OR. nbdirs > nbdirsmax) THEN
     WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs, &
@@ -160,7 +161,6 @@ SUBROUTINE DNRM2_DV(n, x, xd, incx, dnrm2, dnrm2d, nbdirs)
     STOP 1
   END IF
 !
-  IF (n .LE. 0) THEN
     dnrm2d = 0.0_8
     RETURN
   ELSE

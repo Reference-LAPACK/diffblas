@@ -26,8 +26,8 @@ program test_zscal
   complex(8), dimension(max_size) :: zx_output
 
   ! Array restoration variables for numerical differentiation
-  complex(8), dimension(max_size) :: zx_orig
   complex(8) :: za_orig
+  complex(8), dimension(max_size) :: zx_orig
 
   ! Variables for central difference computation
   complex(8), dimension(max_size) :: zx_forward, zx_backward
@@ -36,8 +36,8 @@ program test_zscal
   logical :: has_large_errors
 
   ! Variables for storing original derivative values
-  complex(8), dimension(max_size) :: zx_d_orig
   complex(8) :: za_d_orig
+  complex(8), dimension(max_size) :: zx_d_orig
 
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
@@ -63,18 +63,18 @@ program test_zscal
   ! Initialize input derivatives to random values
   call random_number(temp_real)
   call random_number(temp_imag)
-  zx_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+  za_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
   call random_number(temp_real)
   call random_number(temp_imag)
-  za_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+  zx_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
 
   ! Store initial derivative values after random initialization
-  zx_d_orig = zx_d
   za_d_orig = za_d
+  zx_d_orig = zx_d
 
   ! Store original values for central difference computation
-  zx_orig = zx
   za_orig = za
+  zx_orig = zx
 
   write(*,*) 'Testing ZSCAL'
   ! Store input values of inout parameters before first function call
@@ -122,14 +122,14 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    zx = zx_orig + cmplx(h, 0.0) * zx_d_orig
     za = za_orig + cmplx(h, 0.0) * za_d_orig
+    zx = zx_orig + cmplx(h, 0.0) * zx_d_orig
     call zscal(nsize, za, zx, incx_val)
     ! Store forward perturbation results
     
     ! Backward perturbation: f(x - h)
-    zx = zx_orig - cmplx(h, 0.0) * zx_d_orig
     za = za_orig - cmplx(h, 0.0) * za_d_orig
+    zx = zx_orig - cmplx(h, 0.0) * zx_d_orig
     call zscal(nsize, za, zx, incx_val)
     ! Store backward perturbation results
     

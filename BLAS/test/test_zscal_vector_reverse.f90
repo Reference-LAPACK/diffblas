@@ -155,6 +155,7 @@ contains
       ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
       ! For pure inputs: use adjoint directly
       vjp_ad = 0.0d0
+      vjp_ad = vjp_ad + real(conjg(za_dir) * zab(k))
       ! Compute and sort products for zx
       n_products = n
       do i = 1, n
@@ -164,7 +165,6 @@ contains
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
-      vjp_ad = vjp_ad + real(conjg(za_dir) * zab(k))
       
       ! Error check: |vjp_fd - vjp_ad| > atol + rtol * |vjp_ad|
       abs_error = abs(vjp_fd - vjp_ad)

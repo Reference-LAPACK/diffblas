@@ -91,8 +91,8 @@ program test_zaxpy_reverse
   zyb_orig = zyb
 
   ! Initialize input adjoints to zero (they will be computed)
-  zxb = 0.0d0
   zab = 0.0d0
+  zxb = 0.0d0
 
   ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
   ! Differentiated code checks they are set via check_ISIZE*_initialized.

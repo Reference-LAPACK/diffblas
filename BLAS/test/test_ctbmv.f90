@@ -31,8 +31,8 @@ program test_ctbmv
   complex(4), dimension(max_size) :: x_output
 
   ! Array restoration variables for numerical differentiation
-  complex(4), dimension(max_size,n) :: a_orig  ! Band storage
   complex(4), dimension(max_size) :: x_orig
+  complex(4), dimension(max_size,n) :: a_orig  ! Band storage
 
   ! Variables for central difference computation
   complex(4), dimension(max_size) :: x_forward, x_backward
@@ -76,6 +76,11 @@ program test_ctbmv
   incx_val = 1  ! INCX 1
 
   ! Initialize input derivatives to random values
+  do i = 1, n
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    x_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+  end do
   ! Initialize a_d as triangular band matrix (upper band storage)
   do j = 1, n
     do band_row = max(1, ksize+2-j), ksize+1
@@ -84,19 +89,14 @@ program test_ctbmv
       a_d(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
     end do
   end do
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    x_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
 
   ! Store initial derivative values after random initialization
   a_d_orig = a_d
   x_d_orig = x_d
 
   ! Store original values for central difference computation
-  a_orig = a
   x_orig = x
+  a_orig = a
 
   write(*,*) 'Testing CTBMV'
   ! Store input values of inout parameters before first function call
@@ -149,15 +149,15 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    a = a_orig + cmplx(h, 0.0) * a_d_orig
     x = x_orig + cmplx(h, 0.0) * x_d_orig
+    a = a_orig + cmplx(h, 0.0) * a_d_orig
     call ctbmv(uplo, trans, diag, nsize, ksize, a, lda_val, x, incx_val)
     ! Store forward perturbation results
     x_forward = x
     
     ! Backward perturbation: f(x - h)
-    a = a_orig - cmplx(h, 0.0) * a_d_orig
     x = x_orig - cmplx(h, 0.0) * x_d_orig
+    a = a_orig - cmplx(h, 0.0) * a_d_orig
     call ctbmv(uplo, trans, diag, nsize, ksize, a, lda_val, x, incx_val)
     ! Store backward perturbation results
     x_backward = x

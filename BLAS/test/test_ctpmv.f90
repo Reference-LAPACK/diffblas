@@ -29,8 +29,8 @@ program test_ctpmv
   complex(4), dimension(max_size) :: x_output
 
   ! Array restoration variables for numerical differentiation
-  complex(4), dimension((n*(n+1))/2) :: ap_orig
   complex(4), dimension(max_size) :: x_orig
+  complex(4), dimension((n*(n+1))/2) :: ap_orig
 
   ! Variables for central difference computation
   complex(4), dimension(max_size) :: x_forward, x_backward
@@ -69,15 +69,15 @@ program test_ctpmv
   incx_val = 1  ! INCX 1
 
   ! Initialize input derivatives to random values
-  do i = 1, (n*(n+1))/2
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    ap_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
   do i = 1, n
     call random_number(temp_real)
     call random_number(temp_imag)
     x_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+  end do
+  do i = 1, (n*(n+1))/2
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    ap_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
   end do
 
   ! Store initial derivative values after random initialization
@@ -85,8 +85,8 @@ program test_ctpmv
   x_d_orig = x_d
 
   ! Store original values for central difference computation
-  ap_orig = ap
   x_orig = x
+  ap_orig = ap
 
   write(*,*) 'Testing CTPMV'
   ! Store input values of inout parameters before first function call
@@ -137,15 +137,15 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    ap = ap_orig + cmplx(h, 0.0) * ap_d_orig
     x = x_orig + cmplx(h, 0.0) * x_d_orig
+    ap = ap_orig + cmplx(h, 0.0) * ap_d_orig
     call ctpmv(uplo, trans, diag, nsize, ap, x, incx_val)
     ! Store forward perturbation results
     x_forward = x
     
     ! Backward perturbation: f(x - h)
-    ap = ap_orig - cmplx(h, 0.0) * ap_d_orig
     x = x_orig - cmplx(h, 0.0) * x_d_orig
+    ap = ap_orig - cmplx(h, 0.0) * ap_d_orig
     call ctpmv(uplo, trans, diag, nsize, ap, x, incx_val)
     ! Store backward perturbation results
     x_backward = x

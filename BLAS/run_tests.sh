@@ -24,6 +24,7 @@ FWD_SCALAR_MACHINE_PRECISION=0
 FWD_SCALAR_ACCEPTABLE=0
 FWD_SCALAR_OUTSIDE_TOLERANCE=0
 FWD_SCALAR_EXECUTION_FAILED=0
+FWD_SCALAR_TIMEOUT=0
 FWD_SCALAR_SKIPPED=0
 
 # Counters for Forward Mode tests (vector)
@@ -32,6 +33,7 @@ FWD_VECTOR_MACHINE_PRECISION=0
 FWD_VECTOR_ACCEPTABLE=0
 FWD_VECTOR_OUTSIDE_TOLERANCE=0
 FWD_VECTOR_EXECUTION_FAILED=0
+FWD_VECTOR_TIMEOUT=0
 FWD_VECTOR_SKIPPED=0
 
 # Legacy combined counters for backward compatibility
@@ -40,6 +42,7 @@ FWD_MACHINE_PRECISION=0
 FWD_ACCEPTABLE=0
 FWD_OUTSIDE_TOLERANCE=0
 FWD_EXECUTION_FAILED=0
+FWD_TIMEOUT=0
 FWD_SKIPPED=0
 
 # Counters for Reverse Mode tests (scalar)
@@ -48,6 +51,7 @@ REV_SCALAR_MACHINE_PRECISION=0
 REV_SCALAR_ACCEPTABLE=0
 REV_SCALAR_OUTSIDE_TOLERANCE=0
 REV_SCALAR_EXECUTION_FAILED=0
+REV_SCALAR_TIMEOUT=0
 REV_SCALAR_SKIPPED=0
 
 # Counters for Reverse Mode tests (vector)
@@ -56,6 +60,7 @@ REV_VECTOR_MACHINE_PRECISION=0
 REV_VECTOR_ACCEPTABLE=0
 REV_VECTOR_OUTSIDE_TOLERANCE=0
 REV_VECTOR_EXECUTION_FAILED=0
+REV_VECTOR_TIMEOUT=0
 REV_VECTOR_SKIPPED=0
 
 # Legacy combined counters for backward compatibility
@@ -64,6 +69,7 @@ REV_MACHINE_PRECISION=0
 REV_ACCEPTABLE=0
 REV_OUTSIDE_TOLERANCE=0
 REV_EXECUTION_FAILED=0
+REV_TIMEOUT=0
 REV_SKIPPED=0
 
 # Overall counters
@@ -76,6 +82,7 @@ FWD_SCALAR_MACHINE_PRECISION_LIST=()
 FWD_SCALAR_ACCEPTABLE_LIST=()
 FWD_SCALAR_OUTSIDE_TOLERANCE_LIST=()
 FWD_SCALAR_EXECUTION_FAILED_LIST=()
+FWD_SCALAR_TIMEOUT_LIST=()
 FWD_SCALAR_SKIPPED_LIST=()
 
 # Arrays to store results by mode (vector forward)
@@ -83,6 +90,7 @@ FWD_VECTOR_MACHINE_PRECISION_LIST=()
 FWD_VECTOR_ACCEPTABLE_LIST=()
 FWD_VECTOR_OUTSIDE_TOLERANCE_LIST=()
 FWD_VECTOR_EXECUTION_FAILED_LIST=()
+FWD_VECTOR_TIMEOUT_LIST=()
 FWD_VECTOR_SKIPPED_LIST=()
 
 # Arrays to store results by mode (scalar reverse)
@@ -90,6 +98,7 @@ REV_SCALAR_MACHINE_PRECISION_LIST=()
 REV_SCALAR_ACCEPTABLE_LIST=()
 REV_SCALAR_OUTSIDE_TOLERANCE_LIST=()
 REV_SCALAR_EXECUTION_FAILED_LIST=()
+REV_SCALAR_TIMEOUT_LIST=()
 REV_SCALAR_SKIPPED_LIST=()
 
 # Arrays to store results by mode (vector reverse)
@@ -97,6 +106,7 @@ REV_VECTOR_MACHINE_PRECISION_LIST=()
 REV_VECTOR_ACCEPTABLE_LIST=()
 REV_VECTOR_OUTSIDE_TOLERANCE_LIST=()
 REV_VECTOR_EXECUTION_FAILED_LIST=()
+REV_VECTOR_TIMEOUT_LIST=()
 REV_VECTOR_SKIPPED_LIST=()
 
 # Legacy combined arrays for backward compatibility
@@ -104,12 +114,14 @@ FWD_MACHINE_PRECISION_LIST=()
 FWD_ACCEPTABLE_LIST=()
 FWD_OUTSIDE_TOLERANCE_LIST=()
 FWD_EXECUTION_FAILED_LIST=()
+FWD_TIMEOUT_LIST=()
 FWD_SKIPPED_LIST=()
 
 REV_MACHINE_PRECISION_LIST=()
 REV_ACCEPTABLE_LIST=()
 REV_OUTSIDE_TOLERANCE_LIST=()
 REV_EXECUTION_FAILED_LIST=()
+REV_TIMEOUT_LIST=()
 REV_SKIPPED_LIST=()
 
 TAPENADE_FAILED_LIST=()
@@ -131,6 +143,9 @@ print_status() {
             ;;
         "EXECUTION_FAILED")
             echo -e "${RED}[EXECUTION_FAILED]${NC} $message"
+            ;;
+        "TIMEOUT")
+            echo -e "${MAGENTA}[TIMEOUT]${NC} $message"
             ;;
         "SKIPPED")
             echo -e "${CYAN}[SKIPPED]${NC} $message"
@@ -154,14 +169,23 @@ print_status() {
 TEST_TIMEOUT=10
 
 # Function to safely run a test with timeout and signal handling
+# When test path contains a directory (e.g. build/test_foo), run from that directory
+# so behavior matches running the test manually from the build dir (avoids cwd-dependent failures).
 safe_run_test() {
     local test_executable=$1
     local output_file=$2
-    
-    # Use timeout to prevent hanging tests
-    timeout ${TEST_TIMEOUT}s ./"$test_executable" > "$output_file" 2>&1
-    local exit_code=$?
-    
+    local exit_code
+
+    if [[ "$test_executable" == */* ]]; then
+        local exe_dir="${test_executable%/*}"
+        local exe_name="${test_executable##*/}"
+        (cd "$exe_dir" && timeout ${TEST_TIMEOUT}s ./"$exe_name" > "../$output_file" 2>&1)
+        exit_code=$?
+    else
+        timeout ${TEST_TIMEOUT}s ./"$test_executable" > "$output_file" 2>&1
+        exit_code=$?
+    fi
+
     # Check if timeout killed the process (exit code 124)
     if [ $exit_code -eq 124 ]; then
         echo "Test timed out after ${TEST_TIMEOUT}s" >> "$output_file"
@@ -182,7 +206,8 @@ run_single_test() {
     local test_executable=$1
     local test_name=$2
     local mode=$3  # "FWD", "FWD_VEC", "REV", or "REV_VEC"
-    local output_file="test_${mode}_output.log"
+    # Per-test log so we can inspect output when a test fails (avoids overwrite)
+    local output_file="test_${mode}_${test_name}_output.log"
     
     # Determine if this is a forward or reverse mode for counter purposes
     local is_forward=false
@@ -267,9 +292,15 @@ run_single_test() {
     safe_run_test "$test_executable" "$output_file"
     local exit_code=$?
     
-    # Check for execution failure patterns
+    # Check for timeout specifically (exit code 124 from timeout command)
+    local has_timeout=false
+    if [ $exit_code -eq 124 ] || grep -q "Test timed out" "$output_file" 2>/dev/null; then
+        has_timeout=true
+    fi
+    
+    # Check for execution failure patterns (excluding timeout which is handled separately)
     local has_execution_failures=false
-    if grep -q "Segmentation fault\\|Aborted\\|Floating point exception\\|Test timed out\\|had an illegal value\\|error while loading shared libraries\\|cannot open shared object file" "$output_file" 2>/dev/null; then
+    if grep -q "Segmentation fault\\|Aborted\\|Floating point exception\\|had an illegal value\\|error while loading shared libraries\\|cannot open shared object file" "$output_file" 2>/dev/null; then
         has_execution_failures=true
     fi
     
@@ -287,6 +318,10 @@ run_single_test() {
     elif grep -q "PASS: Derivatives are reasonably accurate" "$output_file" 2>/dev/null; then
         has_acceptable=true
     elif grep -q "PASS: Vector derivatives are reasonably accurate" "$output_file" 2>/dev/null; then
+        has_acceptable=true
+    elif grep -q "PASS: Derivatives are within tolerance" "$output_file" 2>/dev/null; then
+        has_acceptable=true
+    elif grep -q "PASS: Vector derivatives are within tolerance" "$output_file" 2>/dev/null; then
         has_acceptable=true
     elif grep -q "WARNING: Derivatives may have significant errors" "$output_file" 2>/dev/null; then
         has_outside_tolerance=true
@@ -404,6 +439,33 @@ run_single_test() {
         fi
         echo "  Last line of output:"
         tail -1 "$output_file" | sed 's/^/    /'
+    elif [ "$has_timeout" = true ]; then
+        # Test timed out - separate category from execution failures
+        if [ "$is_forward_scalar" = "true" ]; then
+            FWD_SCALAR_TIMEOUT=$((FWD_SCALAR_TIMEOUT + 1))
+            FWD_SCALAR_TIMEOUT_LIST+=("$test_name")
+            FWD_TIMEOUT=$((FWD_TIMEOUT + 1))
+            FWD_TIMEOUT_LIST+=("$test_name")
+        elif [ "$is_forward_vector" = "true" ]; then
+            FWD_VECTOR_TIMEOUT=$((FWD_VECTOR_TIMEOUT + 1))
+            FWD_VECTOR_TIMEOUT_LIST+=("$test_name")
+            FWD_TIMEOUT=$((FWD_TIMEOUT + 1))
+            FWD_TIMEOUT_LIST+=("$test_name")
+        elif [ "$is_reverse_scalar" = "true" ]; then
+            REV_SCALAR_TIMEOUT=$((REV_SCALAR_TIMEOUT + 1))
+            REV_SCALAR_TIMEOUT_LIST+=("$test_name")
+            REV_TIMEOUT=$((REV_TIMEOUT + 1))
+            REV_TIMEOUT_LIST+=("$test_name")
+        elif [ "$is_reverse_vector" = "true" ]; then
+            REV_VECTOR_TIMEOUT=$((REV_VECTOR_TIMEOUT + 1))
+            REV_VECTOR_TIMEOUT_LIST+=("$test_name")
+            REV_TIMEOUT=$((REV_TIMEOUT + 1))
+            REV_TIMEOUT_LIST+=("$test_name")
+        else
+            REV_TIMEOUT=$((REV_TIMEOUT + 1))
+            REV_TIMEOUT_LIST+=("$test_name")
+        fi
+        print_status "TIMEOUT" "$test_name ($mode): Test timed out after ${TEST_TIMEOUT}s"
     elif [ "$has_execution_failures" = true ]; then
         if [ "$is_forward_scalar" = "true" ]; then
             FWD_SCALAR_EXECUTION_FAILED=$((FWD_SCALAR_EXECUTION_FAILED + 1))
@@ -512,29 +574,30 @@ run_test_for_func() {
         return
     fi
     
+    # Run only tests whose executables exist (skip missing tests without counting as SKIPPED)
     # Run scalar forward mode test (flat mode: test_funcname in build/ dir)
-    if [ "$RUN_D" = "true" ]; then
+    if [ "$RUN_D" = "true" ] && [ -f "build/test_$funcname" ] && [ -x "build/test_$funcname" ]; then
         FWD_SCALAR_TOTAL=$((FWD_SCALAR_TOTAL + 1))
         FWD_TOTAL=$((FWD_TOTAL + 1))
         run_single_test "build/test_$funcname" "$funcname" "FWD"
     fi
     
     # Run vector forward mode test  
-    if [ "$RUN_DV" = "true" ]; then
+    if [ "$RUN_DV" = "true" ] && [ -f "build/test_${funcname}_vector_forward" ] && [ -x "build/test_${funcname}_vector_forward" ]; then
         FWD_VECTOR_TOTAL=$((FWD_VECTOR_TOTAL + 1))
         FWD_TOTAL=$((FWD_TOTAL + 1))
         run_single_test "build/test_${funcname}_vector_forward" "$funcname" "FWD_VEC"
     fi
     
     # Run scalar reverse mode test
-    if [ "$RUN_B" = "true" ]; then
+    if [ "$RUN_B" = "true" ] && [ -f "build/test_${funcname}_reverse" ] && [ -x "build/test_${funcname}_reverse" ]; then
         REV_SCALAR_TOTAL=$((REV_SCALAR_TOTAL + 1))
         REV_TOTAL=$((REV_TOTAL + 1))
         run_single_test "build/test_${funcname}_reverse" "$funcname" "REV"
     fi
     
     # Run vector reverse mode test
-    if [ "$RUN_BV" = "true" ]; then
+    if [ "$RUN_BV" = "true" ] && [ -f "build/test_${funcname}_vector_reverse" ] && [ -x "build/test_${funcname}_vector_reverse" ]; then
         REV_VECTOR_TOTAL=$((REV_VECTOR_TOTAL + 1))
         REV_TOTAL=$((REV_TOTAL + 1))
         run_single_test "build/test_${funcname}_vector_reverse" "$funcname" "REV_VEC"
@@ -645,12 +708,19 @@ main() {
         fi
         
         # If no test executables, try to find differentiated sources in src/
+        # Only add a function if at least one test file exists in test/ (skip what does not exist)
         if [ ${#funcs[@]} -eq 0 ] && [ -d "src" ]; then
             for srcfile in $(ls src/*_d.f src/*_d.f90 src/*_b.f src/*_b.f90 2>/dev/null | sort); do
                 basename=$(basename "$srcfile")
                 # Extract function name: funcname_d.f -> funcname
                 funcname=$(echo "$basename" | sed -E 's/_(d|b|dv|bv)\.(f|f90)$//')
-                if [ -n "$funcname" ] && [[ ! " ${funcs[*]} " =~ " ${funcname} " ]]; then
+                if [ -z "$funcname" ] || [[ " ${funcs[*]} " =~ " ${funcname} " ]]; then
+                    continue
+                fi
+                # Only include if at least one test exists (test source or executable)
+                if [ -d "test" ] && ( [ -f "test/test_${funcname}.f90" ] || [ -f "test/test_${funcname}_reverse.f90" ] || [ -f "test/test_${funcname}_vector_forward.f90" ] || [ -f "test/test_${funcname}_vector_reverse.f90" ] ); then
+                    funcs+=("$funcname")
+                elif [ -d "build" ] && ( [ -f "build/test_${funcname}" ] || [ -f "build/test_${funcname}_reverse" ] || [ -f "build/test_${funcname}_vector_forward" ] || [ -f "build/test_${funcname}_vector_reverse" ] ); then
                     funcs+=("$funcname")
                 fi
             done
@@ -718,6 +788,7 @@ main() {
             echo -e "  Acceptable: ${GREEN}$FWD_SCALAR_ACCEPTABLE${NC}"
             echo -e "  Outside Tolerance: ${YELLOW}$FWD_SCALAR_OUTSIDE_TOLERANCE${NC}"
             echo -e "  Execution Failed: ${RED}$FWD_SCALAR_EXECUTION_FAILED${NC}"
+            echo -e "  Timeout: ${MAGENTA}$FWD_SCALAR_TIMEOUT${NC}"
             echo -e "  Skipped: ${CYAN}$FWD_SCALAR_SKIPPED${NC}"
             echo ""
             
@@ -733,6 +804,9 @@ main() {
             if [ ${#FWD_SCALAR_EXECUTION_FAILED_LIST[@]} -gt 0 ]; then
                 echo -e "${RED}FWD Scalar Execution Failed:${NC} ${FWD_SCALAR_EXECUTION_FAILED_LIST[*]}"
             fi
+            if [ ${#FWD_SCALAR_TIMEOUT_LIST[@]} -gt 0 ]; then
+                echo -e "${MAGENTA}FWD Scalar Timeout:${NC} ${FWD_SCALAR_TIMEOUT_LIST[*]}"
+            fi
             if [ ${#FWD_SCALAR_SKIPPED_LIST[@]} -gt 0 ]; then
                 echo -e "${CYAN}FWD Scalar Skipped:${NC} ${FWD_SCALAR_SKIPPED_LIST[*]}"
             fi
@@ -747,6 +821,7 @@ main() {
             echo -e "  Acceptable: ${GREEN}$FWD_VECTOR_ACCEPTABLE${NC}"
             echo -e "  Outside Tolerance: ${YELLOW}$FWD_VECTOR_OUTSIDE_TOLERANCE${NC}"
             echo -e "  Execution Failed: ${RED}$FWD_VECTOR_EXECUTION_FAILED${NC}"
+            echo -e "  Timeout: ${MAGENTA}$FWD_VECTOR_TIMEOUT${NC}"
             echo -e "  Skipped: ${CYAN}$FWD_VECTOR_SKIPPED${NC}"
             echo ""
             
@@ -762,6 +837,9 @@ main() {
             if [ ${#FWD_VECTOR_EXECUTION_FAILED_LIST[@]} -gt 0 ]; then
                 echo -e "${RED}FWD Vector Execution Failed:${NC} ${FWD_VECTOR_EXECUTION_FAILED_LIST[*]}"
             fi
+            if [ ${#FWD_VECTOR_TIMEOUT_LIST[@]} -gt 0 ]; then
+                echo -e "${MAGENTA}FWD Vector Timeout:${NC} ${FWD_VECTOR_TIMEOUT_LIST[*]}"
+            fi
             if [ ${#FWD_VECTOR_SKIPPED_LIST[@]} -gt 0 ]; then
                 echo -e "${CYAN}FWD Vector Skipped:${NC} ${FWD_VECTOR_SKIPPED_LIST[*]}"
             fi
@@ -774,6 +852,7 @@ main() {
         echo -e "  Acceptable: ${GREEN}$FWD_ACCEPTABLE${NC}"
         echo -e "  Outside Tolerance: ${YELLOW}$FWD_OUTSIDE_TOLERANCE${NC}"
         echo -e "  Execution Failed: ${RED}$FWD_EXECUTION_FAILED${NC}"
+        echo -e "  Timeout: ${MAGENTA}$FWD_TIMEOUT${NC}"
         echo -e "  Skipped: ${CYAN}$FWD_SKIPPED${NC}"
         echo ""
         
@@ -788,6 +867,9 @@ main() {
         fi
         if [ ${#FWD_EXECUTION_FAILED_LIST[@]} -gt 0 ]; then
             echo -e "${RED}FWD Execution Failed:${NC} ${FWD_EXECUTION_FAILED_LIST[*]}"
+        fi
+        if [ ${#FWD_TIMEOUT_LIST[@]} -gt 0 ]; then
+            echo -e "${MAGENTA}FWD Timeout:${NC} ${FWD_TIMEOUT_LIST[*]}"
         fi
         if [ ${#FWD_SKIPPED_LIST[@]} -gt 0 ]; then
             echo -e "${CYAN}FWD Skipped:${NC} ${FWD_SKIPPED_LIST[*]}"
@@ -812,6 +894,7 @@ main() {
             echo -e "  Acceptable: ${GREEN}$REV_SCALAR_ACCEPTABLE${NC}"
             echo -e "  Outside Tolerance: ${YELLOW}$REV_SCALAR_OUTSIDE_TOLERANCE${NC}"
             echo -e "  Execution Failed: ${RED}$REV_SCALAR_EXECUTION_FAILED${NC}"
+            echo -e "  Timeout: ${MAGENTA}$REV_SCALAR_TIMEOUT${NC}"
             echo -e "  Skipped: ${CYAN}$REV_SCALAR_SKIPPED${NC}"
             echo ""
             
@@ -827,6 +910,9 @@ main() {
             if [ ${#REV_SCALAR_EXECUTION_FAILED_LIST[@]} -gt 0 ]; then
                 echo -e "${RED}REV Scalar Execution Failed:${NC} ${REV_SCALAR_EXECUTION_FAILED_LIST[*]}"
             fi
+            if [ ${#REV_SCALAR_TIMEOUT_LIST[@]} -gt 0 ]; then
+                echo -e "${MAGENTA}REV Scalar Timeout:${NC} ${REV_SCALAR_TIMEOUT_LIST[*]}"
+            fi
             if [ ${#REV_SCALAR_SKIPPED_LIST[@]} -gt 0 ]; then
                 echo -e "${CYAN}REV Scalar Skipped:${NC} ${REV_SCALAR_SKIPPED_LIST[*]}"
             fi
@@ -841,6 +927,7 @@ main() {
             echo -e "  Acceptable: ${GREEN}$REV_VECTOR_ACCEPTABLE${NC}"
             echo -e "  Outside Tolerance: ${YELLOW}$REV_VECTOR_OUTSIDE_TOLERANCE${NC}"
             echo -e "  Execution Failed: ${RED}$REV_VECTOR_EXECUTION_FAILED${NC}"
+            echo -e "  Timeout: ${MAGENTA}$REV_VECTOR_TIMEOUT${NC}"
             echo -e "  Skipped: ${CYAN}$REV_VECTOR_SKIPPED${NC}"
             echo ""
             
@@ -856,6 +943,9 @@ main() {
             if [ ${#REV_VECTOR_EXECUTION_FAILED_LIST[@]} -gt 0 ]; then
                 echo -e "${RED}REV Vector Execution Failed:${NC} ${REV_VECTOR_EXECUTION_FAILED_LIST[*]}"
             fi
+            if [ ${#REV_VECTOR_TIMEOUT_LIST[@]} -gt 0 ]; then
+                echo -e "${MAGENTA}REV Vector Timeout:${NC} ${REV_VECTOR_TIMEOUT_LIST[*]}"
+            fi
             if [ ${#REV_VECTOR_SKIPPED_LIST[@]} -gt 0 ]; then
                 echo -e "${CYAN}REV Vector Skipped:${NC} ${REV_VECTOR_SKIPPED_LIST[*]}"
             fi
@@ -868,6 +958,7 @@ main() {
         echo -e "  Acceptable: ${GREEN}$REV_ACCEPTABLE${NC}"
         echo -e "  Outside Tolerance: ${YELLOW}$REV_OUTSIDE_TOLERANCE${NC}"
         echo -e "  Execution Failed: ${RED}$REV_EXECUTION_FAILED${NC}"
+        echo -e "  Timeout: ${MAGENTA}$REV_TIMEOUT${NC}"
         echo -e "  Skipped: ${CYAN}$REV_SKIPPED${NC}"
         echo ""
         
@@ -882,6 +973,9 @@ main() {
         fi
         if [ ${#REV_EXECUTION_FAILED_LIST[@]} -gt 0 ]; then
             echo -e "${RED}REV Execution Failed:${NC} ${REV_EXECUTION_FAILED_LIST[*]}"
+        fi
+        if [ ${#REV_TIMEOUT_LIST[@]} -gt 0 ]; then
+            echo -e "${MAGENTA}REV Timeout:${NC} ${REV_TIMEOUT_LIST[*]}"
         fi
         if [ ${#REV_SKIPPED_LIST[@]} -gt 0 ]; then
             echo -e "${CYAN}REV Skipped:${NC} ${REV_SKIPPED_LIST[*]}"

@@ -204,20 +204,6 @@ contains
       ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
       ! For pure inputs: use adjoint directly
       vjp_ad = 0.0d0
-      vjp_ad = vjp_ad + alpha_dir * alphab(k)
-      vjp_ad = vjp_ad + beta_dir * betab(k)
-      ! Compute and sort products for a (band storage)
-      n_products = 0
-      do j = 1, n
-        do band_row = max(1, ksize+2-j), ksize+1
-          n_products = n_products + 1
-          temp_products(n_products) = a_dir(band_row,j) * ab(k,band_row,j)
-        end do
-      end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_ad = vjp_ad + temp_products(i)
-      end do
       ! Compute and sort products for x
       n_products = n
       do i = 1, n
@@ -227,10 +213,24 @@ contains
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
+      vjp_ad = vjp_ad + beta_dir * betab(k)
+      vjp_ad = vjp_ad + alpha_dir * alphab(k)
       ! Compute and sort products for y
       n_products = n
       do i = 1, n
         temp_products(i) = y_dir(i) * yb(k,i)
+      end do
+      call sort_array(temp_products, n_products)
+      do i = 1, n_products
+        vjp_ad = vjp_ad + temp_products(i)
+      end do
+      ! Compute and sort products for a (band storage)
+      n_products = 0
+      do j = 1, n
+        do band_row = max(1, ksize+2-j), ksize+1
+          n_products = n_products + 1
+          temp_products(n_products) = a_dir(band_row,j) * ab(k,band_row,j)
+        end do
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products

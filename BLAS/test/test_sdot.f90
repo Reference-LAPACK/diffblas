@@ -26,8 +26,8 @@ program test_sdot
   ! Storage variables for inout parameters
 
   ! Array restoration variables for numerical differentiation
-  real(4), dimension(4) :: sy_orig
   real(4), dimension(4) :: sx_orig
+  real(4), dimension(4) :: sy_orig
   real(4) :: sdot_orig
 
   ! Variables for central difference computation
@@ -38,8 +38,8 @@ program test_sdot
   real(4) :: sdot_forward, sdot_backward
 
   ! Variables for storing original derivative values
-  real(4), dimension(4) :: sy_d_orig
   real(4), dimension(4) :: sx_d_orig
+  real(4), dimension(4) :: sy_d_orig
 
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
@@ -60,18 +60,18 @@ program test_sdot
   incy_val = 1
 
   ! Initialize input derivatives to random values
-  call random_number(sy_d)
-  sy_d = sy_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(sx_d)
   sx_d = sx_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+  call random_number(sy_d)
+  sy_d = sy_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
   ! Store initial derivative values after random initialization
-  sy_d_orig = sy_d
   sx_d_orig = sx_d
+  sy_d_orig = sy_d
 
   ! Store original values for central difference computation
-  sy_orig = sy
   sx_orig = sx
+  sy_orig = sy
 
   write(*,*) 'Testing SDOT'
   ! Store input values of inout parameters before first function call
@@ -124,15 +124,15 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    sy = sy_orig + h * sy_d_orig
     sx = sx_orig + h * sx_d_orig
+    sy = sy_orig + h * sy_d_orig
     sdot_forward = sdot(nsize, sx, incx_val, sy, incy_val)
     ! Store forward perturbation results
     ! sdot_forward already captured above
     
     ! Backward perturbation: f(x - h)
-    sy = sy_orig - h * sy_d_orig
     sx = sx_orig - h * sx_d_orig
+    sy = sy_orig - h * sy_d_orig
     sdot_backward = sdot(nsize, sx, incx_val, sy, incy_val)
     ! Store backward perturbation results
     ! sdot_backward already captured above

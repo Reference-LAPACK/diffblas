@@ -29,8 +29,8 @@ program test_dtpmv
   real(8), dimension(max_size) :: x_output
 
   ! Array restoration variables for numerical differentiation
-  real(8), dimension((n*(n+1))/2) :: ap_orig
   real(8), dimension(max_size) :: x_orig
+  real(8), dimension((n*(n+1))/2) :: ap_orig
 
   ! Variables for central difference computation
   real(8), dimension(max_size) :: x_forward, x_backward
@@ -63,18 +63,18 @@ program test_dtpmv
   incx_val = 1  ! INCX 1
 
   ! Initialize input derivatives to random values
-  call random_number(ap_d)
-  ap_d = ap_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(x_d)
   x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+  call random_number(ap_d)
+  ap_d = ap_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
   ! Store initial derivative values after random initialization
   ap_d_orig = ap_d
   x_d_orig = x_d
 
   ! Store original values for central difference computation
-  ap_orig = ap
   x_orig = x
+  ap_orig = ap
 
   write(*,*) 'Testing DTPMV'
   ! Store input values of inout parameters before first function call
@@ -125,15 +125,15 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    ap = ap_orig + h * ap_d_orig
     x = x_orig + h * x_d_orig
+    ap = ap_orig + h * ap_d_orig
     call dtpmv(uplo, trans, diag, nsize, ap, x, incx_val)
     ! Store forward perturbation results
     x_forward = x
     
     ! Backward perturbation: f(x - h)
-    ap = ap_orig - h * ap_d_orig
     x = x_orig - h * x_d_orig
+    ap = ap_orig - h * ap_d_orig
     call dtpmv(uplo, trans, diag, nsize, ap, x, incx_val)
     ! Store backward perturbation results
     x_backward = x

@@ -170,7 +170,6 @@ contains
       ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
       ! For pure inputs: use adjoint directly
       vjp_ad = 0.0d0
-      vjp_ad = vjp_ad + alpha_dir * alphab(k)
       ! Compute and sort products for a
       n_products = 0
       do j = 1, n
@@ -183,6 +182,7 @@ contains
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
+      vjp_ad = vjp_ad + alpha_dir * alphab(k)
       ! Compute and sort products for x
       n_products = n
       do i = 1, n

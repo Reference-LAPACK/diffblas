@@ -29,9 +29,9 @@ program test_zaxpy
   complex(8), dimension(max_size) :: zy_output
 
   ! Array restoration variables for numerical differentiation
+  complex(8) :: za_orig
   complex(8), dimension(4) :: zx_orig
   complex(8), dimension(max_size) :: zy_orig
-  complex(8) :: za_orig
 
   ! Variables for central difference computation
   complex(8), dimension(max_size) :: zy_forward, zy_backward
@@ -40,9 +40,9 @@ program test_zaxpy
   logical :: has_large_errors
 
   ! Variables for storing original derivative values
+  complex(8) :: za_d_orig
   complex(8), dimension(4) :: zx_d_orig
   complex(8), dimension(max_size) :: zy_d_orig
-  complex(8) :: za_d_orig
 
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
@@ -74,23 +74,23 @@ program test_zaxpy
   ! Initialize input derivatives to random values
   call random_number(temp_real)
   call random_number(temp_imag)
+  za_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+  call random_number(temp_real)
+  call random_number(temp_imag)
   zx_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
   call random_number(temp_real)
   call random_number(temp_imag)
   zy_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  za_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
 
   ! Store initial derivative values after random initialization
+  za_d_orig = za_d
   zx_d_orig = zx_d
   zy_d_orig = zy_d
-  za_d_orig = za_d
 
   ! Store original values for central difference computation
+  za_orig = za
   zx_orig = zx
   zy_orig = zy
-  za_orig = za
 
   write(*,*) 'Testing ZAXPY'
   ! Store input values of inout parameters before first function call
@@ -140,16 +140,16 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
+    za = za_orig + cmplx(h, 0.0) * za_d_orig
     zx = zx_orig + cmplx(h, 0.0) * zx_d_orig
     zy = zy_orig + cmplx(h, 0.0) * zy_d_orig
-    za = za_orig + cmplx(h, 0.0) * za_d_orig
     call zaxpy(nsize, za, zx, incx_val, zy, incy_val)
     ! Store forward perturbation results
     
     ! Backward perturbation: f(x - h)
+    za = za_orig - cmplx(h, 0.0) * za_d_orig
     zx = zx_orig - cmplx(h, 0.0) * zx_d_orig
     zy = zy_orig - cmplx(h, 0.0) * zy_d_orig
-    za = za_orig - cmplx(h, 0.0) * za_d_orig
     call zaxpy(nsize, za, zx, incx_val, zy, incy_val)
     ! Store backward perturbation results
     
