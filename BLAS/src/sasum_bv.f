@@ -79,7 +79,7 @@ C  =====================================================================
       IMPLICIT NONE
       INCLUDE 'DIFFSIZES.inc'
 C  Hint: ISIZE1OFsx should be the size of dimension 1 of array sx
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level1 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -90,14 +90,14 @@ C     .. Scalar Arguments ..
 C     ..
 C     .. Array Arguments ..
       REAL sx(*)
-      REAL sxb(nbdirsmax, *)
+      REAL sxb(nbdirs, *)
 C     ..
 C
 C  =====================================================================
 C
 C     .. Local Scalars ..
       REAL stemp
-      REAL stempb(nbdirsmax)
+      REAL stempb(nbdirs)
       INTEGER i, m, mp1, nincx
       INTEGER ISIZE1OFSx
       INTEGER get_ISIZE1OFSx
@@ -106,40 +106,33 @@ C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC ABS, MOD
       REAL abs0
-      REAL abs0b(nbdirsmax)
+      REAL abs0b(nbdirs)
       REAL abs1
-      REAL abs1b(nbdirsmax)
+      REAL abs1b(nbdirs)
       REAL abs2
-      REAL abs2b(nbdirsmax)
+      REAL abs2b(nbdirs)
       REAL abs3
-      REAL abs3b(nbdirsmax)
+      REAL abs3b(nbdirs)
       REAL abs4
-      REAL abs4b(nbdirsmax)
+      REAL abs4b(nbdirs)
       REAL abs5
-      REAL abs5b(nbdirsmax)
+      REAL abs5b(nbdirs)
       REAL abs6
-      REAL abs6b(nbdirsmax)
+      REAL abs6b(nbdirs)
       REAL abs7
-      REAL abs7b(nbdirsmax)
+      REAL abs7b(nbdirs)
       INTEGER nd
       INTEGER*4 branch
       INTEGER ii1
-      REAL sasumb(nbdirsmax)
+      REAL sasumb(nbdirs)
       REAL sasum
       INTEGER nbdirs
 C     ..
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
       CALL check_ISIZE1OFSx_initialized()
       ISIZE1OFSx = get_ISIZE1OFSx()
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       IF (n .LE. 0 .OR. incx .LE. 0) THEN
         DO ii1=1,ISIZE1OFsx
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             sxb(nd, ii1) = 0.0
           ENDDO
         ENDDO
@@ -164,7 +157,7 @@ C
                 stempb(nd) = sasumb(nd)
               ENDDO
               DO ii1=1,ISIZE1OFsx
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   sxb(nd, ii1) = 0.0
                 ENDDO
               ENDDO
@@ -229,7 +222,7 @@ C
         CALL POPCONTROL1B(branch)
         IF (branch .EQ. 0) THEN
           DO ii1=1,ISIZE1OFsx
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               sxb(nd, ii1) = 0.0
             ENDDO
           ENDDO
@@ -307,7 +300,7 @@ C
           IF (branch .NE. 0) GOTO 110
         ELSE
           DO ii1=1,ISIZE1OFsx
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               sxb(nd, ii1) = 0.0
             ENDDO
           ENDDO

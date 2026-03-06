@@ -1,10 +1,10 @@
 ! Test program for CTBMV vector reverse mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirsmax=4
+! Using REAL*4 precision with nbdirs=4
 
 program test_ctbmv_vector_reverse
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   external :: ctbmv
   external :: ctbmv_bv
@@ -30,11 +30,11 @@ program test_ctbmv_vector_reverse
   ! Adjoint variables (reverse vector mode)
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
-  complex(4), dimension(nbdirsmax,max_size,n) :: ab  ! Band storage
-  complex(4), dimension(nbdirsmax,max_size) :: xb
+  complex(4), dimension(nbdirs,max_size,n) :: ab  ! Band storage
+  complex(4), dimension(nbdirs,max_size) :: xb
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  complex(4), dimension(nbdirsmax,max_size) :: xb_orig
+  complex(4), dimension(nbdirs,max_size) :: xb_orig
 
   ! Storage for original values (for VJP verification)
   complex(4), dimension(max_size,max_size) :: a_orig
@@ -78,7 +78,7 @@ program test_ctbmv_vector_reverse
 
   ! Initialize output adjoints (cotangents) with random values for each direction
   ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirsmax
+  do k = 1, nbdirs
     do i = 1, n
       call random_number(temp_real)
       call random_number(temp_imag)
@@ -98,7 +98,7 @@ program test_ctbmv_vector_reverse
   call set_ISIZE2OFA(max_size)
 
   ! Call reverse vector mode differentiated function
-  call ctbmv_bv(uplo, trans, diag, nsize, ksize, a, ab, lda_val, x, xb, incx_val, nbdirsmax)
+  call ctbmv_bv(uplo, trans, diag, nsize, ksize, a, ab, lda_val, x, xb, incx_val, nbdirs)
 
   ! Reset ISIZE globals to uninitialized (-1) for completeness
   call set_ISIZE2OFA(-1)
@@ -130,7 +130,7 @@ contains
     write(*,*) 'Step size h =', h
     
     ! Test each differentiation direction separately
-    do k = 1, nbdirsmax
+    do k = 1, nbdirs
       
       ! Initialize random direction vectors for all inputs
       ! Keep direction consistent with triangular band: only band entries used

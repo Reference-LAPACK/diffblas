@@ -1,10 +1,10 @@
 ! Test program for SSWAP vector reverse mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirsmax=4
+! Using REAL*4 precision with nbdirs=4
 
 program test_sswap_vector_reverse
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   external :: sswap
   external :: sswap_bv
@@ -26,12 +26,12 @@ program test_sswap_vector_reverse
   ! Adjoint variables (reverse vector mode)
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
-  real(4), dimension(nbdirsmax,max_size) :: sxb
-  real(4), dimension(nbdirsmax,max_size) :: syb
+  real(4), dimension(nbdirs,max_size) :: sxb
+  real(4), dimension(nbdirs,max_size) :: syb
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  real(4), dimension(nbdirsmax,max_size) :: sxb_orig
-  real(4), dimension(nbdirsmax,max_size) :: syb_orig
+  real(4), dimension(nbdirs,max_size) :: syb_orig
+  real(4), dimension(nbdirs,max_size) :: sxb_orig
 
   ! Storage for original values (for VJP verification)
   real(4), dimension(max_size) :: sx_orig
@@ -63,11 +63,11 @@ program test_sswap_vector_reverse
 
   ! Initialize output adjoints (cotangents) with random values for each direction
   ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirsmax
+  do k = 1, nbdirs
     call random_number(sxb(k,:))
     sxb(k,:) = sxb(k,:) * 2.0 - 1.0
   end do
-  do k = 1, nbdirsmax
+  do k = 1, nbdirs
     call random_number(syb(k,:))
     syb(k,:) = syb(k,:) * 2.0 - 1.0
   end do
@@ -76,11 +76,11 @@ program test_sswap_vector_reverse
   ! Note: Inout parameters are skipped - they already have output adjoints initialized
 
   ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
-  sxb_orig = sxb
   syb_orig = syb
+  sxb_orig = sxb
 
   ! Call reverse vector mode differentiated function
-  call sswap_bv(nsize, sx, sxb, incx_val, sy, syb, incy_val, nbdirsmax)
+  call sswap_bv(nsize, sx, sxb, incx_val, sy, syb, incy_val, nbdirs)
 
   ! VJP Verification using finite differences
   call check_vjp_numerically()
@@ -96,8 +96,8 @@ contains
     ! Direction vectors for VJP testing
     real(4), dimension(max_size) :: sx_dir
     real(4), dimension(max_size) :: sy_dir
-    real(4), dimension(max_size) :: sx_plus, sx_minus, sx_central_diff
     real(4), dimension(max_size) :: sy_plus, sy_minus, sy_central_diff
+    real(4), dimension(max_size) :: sx_plus, sx_minus, sx_central_diff
     
     max_error = 0.0d0
     has_large_errors = .false.
@@ -108,7 +108,7 @@ contains
     write(*,*) 'Step size h =', h
     
     ! Test each differentiation direction separately
-    do k = 1, nbdirsmax
+    do k = 1, nbdirs
       
       ! Initialize random direction vectors for all inputs
       call random_number(sx_dir)
@@ -120,40 +120,40 @@ contains
       sx = sx_orig + h * sx_dir
       sy = sy_orig + h * sy_dir
       call sswap(nsize, sx, incx_val, sy, incy_val)
-      sx_plus = sx
       sy_plus = sy
+      sx_plus = sx
       
       ! Backward perturbation: f(x - h*dir)
       sx = sx_orig - h * sx_dir
       sy = sy_orig - h * sy_dir
       call sswap(nsize, sx, incx_val, sy, incy_val)
-      sx_minus = sx
       sy_minus = sy
+      sx_minus = sx
       
       ! Compute central differences and VJP verification
       ! VJP check: direction^T @ adjoint should equal finite difference
       
       ! Compute central differences: (f(x+h*dir) - f(x-h*dir)) / (2h)
-      sx_central_diff = (sx_plus - sx_minus) / (2.0 * h)
       sy_central_diff = (sy_plus - sy_minus) / (2.0 * h)
+      sx_central_diff = (sx_plus - sx_minus) / (2.0 * h)
       
       ! VJP verification:
       ! cotangent^T @ central_diff should equal direction^T @ computed_adjoint
       ! Left side: cotangent^T @ Jacobian @ direction (via finite differences, with sorted summation)
       vjp_fd = 0.0
-      ! Compute and sort products for sx (FD)
+      ! Compute and sort products for sy (FD)
       n_products = n
       do i = 1, n
-        temp_products(i) = sxb_orig(k,i) * sx_central_diff(i)
+        temp_products(i) = syb_orig(k,i) * sy_central_diff(i)
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products
         vjp_fd = vjp_fd + temp_products(i)
       end do
-      ! Compute and sort products for sy (FD)
+      ! Compute and sort products for sx (FD)
       n_products = n
       do i = 1, n
-        temp_products(i) = syb_orig(k,i) * sy_central_diff(i)
+        temp_products(i) = sxb_orig(k,i) * sx_central_diff(i)
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products
@@ -164,19 +164,19 @@ contains
       ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
       ! For pure inputs: use adjoint directly
       vjp_ad = 0.0
-      ! Compute and sort products for sx
+      ! Compute and sort products for sy
       n_products = n
       do i = 1, n
-        temp_products(i) = sx_dir(i) * sxb(k,i)
+        temp_products(i) = sy_dir(i) * syb(k,i)
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
-      ! Compute and sort products for sy
+      ! Compute and sort products for sx
       n_products = n
       do i = 1, n
-        temp_products(i) = sy_dir(i) * syb(k,i)
+        temp_products(i) = sx_dir(i) * sxb(k,i)
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products

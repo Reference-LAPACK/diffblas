@@ -1,10 +1,10 @@
 ! Test program for SSCAL vector reverse mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirsmax=4
+! Using REAL*4 precision with nbdirs=4
 
 program test_sscal_vector_reverse
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   external :: sscal
   external :: sscal_bv
@@ -25,11 +25,11 @@ program test_sscal_vector_reverse
   ! Adjoint variables (reverse vector mode)
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
-  real(4), dimension(nbdirsmax) :: sab
-  real(4), dimension(nbdirsmax,max_size) :: sxb
+  real(4), dimension(nbdirs) :: sab
+  real(4), dimension(nbdirs,max_size) :: sxb
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  real(4), dimension(nbdirsmax,max_size) :: sxb_orig
+  real(4), dimension(nbdirs,max_size) :: sxb_orig
 
   ! Storage for original values (for VJP verification)
   real(4) :: sa_orig
@@ -60,7 +60,7 @@ program test_sscal_vector_reverse
 
   ! Initialize output adjoints (cotangents) with random values for each direction
   ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirsmax
+  do k = 1, nbdirs
     call random_number(sxb(k,:))
     sxb(k,:) = sxb(k,:) * 2.0 - 1.0
   end do
@@ -73,7 +73,7 @@ program test_sscal_vector_reverse
   sxb_orig = sxb
 
   ! Call reverse vector mode differentiated function
-  call sscal_bv(nsize, sa, sab, sx, sxb, incx_val, nbdirsmax)
+  call sscal_bv(nsize, sa, sab, sx, sxb, incx_val, nbdirs)
 
   ! VJP Verification using finite differences
   call check_vjp_numerically()
@@ -100,7 +100,7 @@ contains
     write(*,*) 'Step size h =', h
     
     ! Test each differentiation direction separately
-    do k = 1, nbdirsmax
+    do k = 1, nbdirs
       
       ! Initialize random direction vectors for all inputs
       call random_number(sa_dir)
@@ -144,6 +144,7 @@ contains
       ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
       ! For pure inputs: use adjoint directly
       vjp_ad = 0.0
+      vjp_ad = vjp_ad + sa_dir * sab(k)
       ! Compute and sort products for sx
       n_products = n
       do i = 1, n
@@ -153,7 +154,6 @@ contains
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
-      vjp_ad = vjp_ad + sa_dir * sab(k)
       
       ! Error check: |vjp_fd - vjp_ad| > atol + rtol * |vjp_ad|
       abs_error = abs(vjp_fd - vjp_ad)

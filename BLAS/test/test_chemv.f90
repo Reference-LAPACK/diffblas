@@ -37,9 +37,9 @@ program test_chemv
   ! Array restoration variables for numerical differentiation
   complex(4), dimension(max_size) :: x_orig
   complex(4) :: beta_orig
-  complex(4) :: alpha_orig
-  complex(4), dimension(max_size) :: y_orig
   complex(4), dimension(max_size,max_size) :: a_orig
+  complex(4), dimension(max_size) :: y_orig
+  complex(4) :: alpha_orig
 
   ! Variables for central difference computation
   complex(4), dimension(max_size) :: y_forward, y_backward
@@ -50,9 +50,9 @@ program test_chemv
   ! Variables for storing original derivative values
   complex(4), dimension(max_size) :: x_d_orig
   complex(4) :: beta_d_orig
-  complex(4) :: alpha_d_orig
-  complex(4), dimension(max_size) :: y_d_orig
   complex(4), dimension(max_size,max_size) :: a_d_orig
+  complex(4), dimension(max_size) :: y_d_orig
+  complex(4) :: alpha_d_orig
 
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
@@ -117,14 +117,6 @@ program test_chemv
   call random_number(temp_real)
   call random_number(temp_imag)
   beta_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  alpha_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    y_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
   ! Initialize a_d as Hermitian matrix
   ! Fill diagonal with real numbers
   do i = 1, lda
@@ -147,20 +139,28 @@ program test_chemv
       a_d(i,j) = conjg(a_d(j,i))  ! A(i,j) = conj(A(j,i))
     end do
   end do
+  do i = 1, n
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    y_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+  end do
+  call random_number(temp_real)
+  call random_number(temp_imag)
+  alpha_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
 
   ! Store initial derivative values after random initialization
   x_d_orig = x_d
   beta_d_orig = beta_d
-  alpha_d_orig = alpha_d
-  y_d_orig = y_d
   a_d_orig = a_d
+  y_d_orig = y_d
+  alpha_d_orig = alpha_d
 
   ! Store original values for central difference computation
   x_orig = x
   beta_orig = beta
-  alpha_orig = alpha
-  y_orig = y
   a_orig = a
+  y_orig = y
+  alpha_orig = alpha
 
   write(*,*) 'Testing CHEMV'
   ! Store input values of inout parameters before first function call
@@ -216,9 +216,9 @@ contains
     ! Forward perturbation: f(x + h)
     x = x_orig + cmplx(h, 0.0) * x_d_orig
     beta = beta_orig + cmplx(h, 0.0) * beta_d_orig
-    alpha = alpha_orig + cmplx(h, 0.0) * alpha_d_orig
-    y = y_orig + cmplx(h, 0.0) * y_d_orig
     a = a_orig + cmplx(h, 0.0) * a_d_orig
+    y = y_orig + cmplx(h, 0.0) * y_d_orig
+    alpha = alpha_orig + cmplx(h, 0.0) * alpha_d_orig
     call chemv(uplo, nsize, alpha, a, lda_val, x, incx_val, beta, y, incy_val)
     ! Store forward perturbation results
     y_forward = y
@@ -226,9 +226,9 @@ contains
     ! Backward perturbation: f(x - h)
     x = x_orig - cmplx(h, 0.0) * x_d_orig
     beta = beta_orig - cmplx(h, 0.0) * beta_d_orig
-    alpha = alpha_orig - cmplx(h, 0.0) * alpha_d_orig
-    y = y_orig - cmplx(h, 0.0) * y_d_orig
     a = a_orig - cmplx(h, 0.0) * a_d_orig
+    y = y_orig - cmplx(h, 0.0) * y_d_orig
+    alpha = alpha_orig - cmplx(h, 0.0) * alpha_d_orig
     call chemv(uplo, nsize, alpha, a, lda_val, x, incx_val, beta, y, incy_val)
     ! Store backward perturbation results
     y_backward = y

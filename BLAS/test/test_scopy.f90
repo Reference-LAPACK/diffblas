@@ -36,8 +36,8 @@ program test_scopy
   logical :: has_large_errors
 
   ! Variables for storing original derivative values
-  real(4), dimension(4) :: sx_d_orig
   real(4), dimension(max_size) :: sy_d_orig
+  real(4), dimension(4) :: sx_d_orig
 
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
@@ -62,8 +62,8 @@ program test_scopy
   sx_d = sx_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
   ! Store initial derivative values after random initialization
-  sx_d_orig = sx_d
   sy_d_orig = sy_d
+  sx_d_orig = sx_d
 
   ! Store original values for central difference computation
   sx_orig = sx

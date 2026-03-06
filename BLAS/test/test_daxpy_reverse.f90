@@ -78,8 +78,8 @@ program test_daxpy_reverse
   dyb_orig = dyb
 
   ! Initialize input adjoints to zero (they will be computed)
-  dxb = 0.0d0
   dab = 0.0d0
+  dxb = 0.0d0
 
   ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
   ! Differentiated code checks they are set via check_ISIZE*_initialized.

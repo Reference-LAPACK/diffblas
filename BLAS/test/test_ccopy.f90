@@ -36,8 +36,8 @@ program test_ccopy
   logical :: has_large_errors
 
   ! Variables for storing original derivative values
-  complex(4), dimension(max_size) :: cy_d_orig
   complex(4), dimension(4) :: cx_d_orig
+  complex(4), dimension(max_size) :: cy_d_orig
 
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
@@ -71,8 +71,8 @@ program test_ccopy
   end do
 
   ! Store initial derivative values after random initialization
-  cy_d_orig = cy_d
   cx_d_orig = cx_d
+  cy_d_orig = cy_d
 
   ! Store original values for central difference computation
   cx_orig = cx

@@ -195,8 +195,8 @@ C  =====================================================================
      +                     , b, bd, ldb, beta, betad, c, cd, ldc, nbdirs
      +)
       IMPLICIT NONE
-      INCLUDE 'DIFFSIZES.inc'
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C      INCLUDE 'DIFFSIZES.inc'
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level3 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -204,13 +204,13 @@ C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
       COMPLEX alpha, beta
-      COMPLEX alphad(nbdirsmax), betad(nbdirsmax)
+      COMPLEX alphad(nbdirs), betad(nbdirs)
       INTEGER k, lda, ldb, ldc, n
       CHARACTER trans, uplo
 C     ..
 C     .. Array Arguments ..
       COMPLEX a(lda, *), b(ldb, *), c(ldc, *)
-      COMPLEX ad(nbdirsmax, lda, *), bd(nbdirsmax, ldb, *), cd(nbdirsmax
+      COMPLEX ad(nbdirs, lda, *), bd(nbdirs, ldb, *), cd(nbdirs
      +        , ldc, *)
       EXTERNAL LSAME
 C     ..
@@ -228,7 +228,7 @@ C     .. Intrinsic Functions ..
 C     ..
 C     .. Local Scalars ..
       COMPLEX temp1, temp2
-      COMPLEX temp1d(nbdirsmax), temp2d(nbdirsmax)
+      COMPLEX temp1d(nbdirs), temp2d(nbdirs)
       INTEGER i, info, j, l, nrowa
       LOGICAL upper
 C     ..
@@ -245,13 +245,6 @@ C     .. Parameters ..
 C     ..
 C
 C     Test the input parameters.
-C
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
 C
       IF (LSAME(trans, 'N')) THEN
         nrowa = n
@@ -438,10 +431,10 @@ C
             DO i=1,j
               temp1 = zero
               temp2 = zero
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 temp1d(nd) = (0.0,0.0)
               ENDDO
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 temp2d(nd) = (0.0,0.0)
               ENDDO
               DO l=1,k
@@ -475,10 +468,10 @@ C
             DO i=j,n
               temp1 = zero
               temp2 = zero
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 temp1d(nd) = (0.0,0.0)
               ENDDO
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 temp2d(nd) = (0.0,0.0)
               ENDDO
               DO l=1,k

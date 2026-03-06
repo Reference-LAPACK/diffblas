@@ -91,8 +91,8 @@ program test_ssyrk_reverse
 
   ! Initialize input adjoints to zero (they will be computed)
   betab = 0.0
-  alphab = 0.0
   ab = 0.0
+  alphab = 0.0
 
   ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
   ! Differentiated code checks they are set via check_ISIZE*_initialized.

@@ -1,10 +1,10 @@
 ! Test program for SSYR vector reverse mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirsmax=4
+! Using REAL*4 precision with nbdirs=4
 
 program test_ssyr_vector_reverse
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   external :: ssyr
   external :: ssyr_bv
@@ -28,12 +28,12 @@ program test_ssyr_vector_reverse
   ! Adjoint variables (reverse vector mode)
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
-  real(4), dimension(nbdirsmax) :: alphab
-  real(4), dimension(nbdirsmax,max_size) :: xb
-  real(4), dimension(nbdirsmax,max_size,max_size) :: ab
+  real(4), dimension(nbdirs) :: alphab
+  real(4), dimension(nbdirs,max_size) :: xb
+  real(4), dimension(nbdirs,max_size,max_size) :: ab
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  real(4), dimension(nbdirsmax,max_size,max_size) :: ab_orig
+  real(4), dimension(nbdirs,max_size,max_size) :: ab_orig
 
   ! Storage for original values (for VJP verification)
   real(4) :: alpha_orig
@@ -70,7 +70,7 @@ program test_ssyr_vector_reverse
 
   ! Initialize output adjoints (cotangents) with random values for each direction
   ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirsmax
+  do k = 1, nbdirs
     call random_number(ab(k,:,:))
     ab(k,:,:) = ab(k,:,:) * 2.0 - 1.0
   end do
@@ -88,7 +88,7 @@ program test_ssyr_vector_reverse
   call set_ISIZE1OFX(max_size)
 
   ! Call reverse vector mode differentiated function
-  call ssyr_bv(uplo, nsize, alpha, alphab, x, xb, incx_val, a, ab, lda_val, nbdirsmax)
+  call ssyr_bv(uplo, nsize, alpha, alphab, x, xb, incx_val, a, ab, lda_val, nbdirs)
 
   ! Reset ISIZE globals to uninitialized (-1) for completeness
   call set_ISIZE1OFX(-1)
@@ -119,7 +119,7 @@ contains
     write(*,*) 'Step size h =', h
     
     ! Test each differentiation direction separately
-    do k = 1, nbdirsmax
+    do k = 1, nbdirs
       
       ! Initialize random direction vectors for all inputs
       call random_number(alpha_dir)

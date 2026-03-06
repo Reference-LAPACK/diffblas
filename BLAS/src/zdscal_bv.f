@@ -84,7 +84,7 @@ C  =====================================================================
       SUBROUTINE ZDSCAL_BV(n, da, dab, zx, zxb, incx, nbdirs)
       IMPLICIT NONE
       INCLUDE 'DIFFSIZES.inc'
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level1 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -92,12 +92,12 @@ C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
       DOUBLE PRECISION da
-      DOUBLE PRECISION dab(nbdirsmax)
+      DOUBLE PRECISION dab(nbdirs)
       INTEGER incx, n
 C     ..
 C     .. Array Arguments ..
       COMPLEX*16 zx(*)
-      COMPLEX*16 zxb(nbdirsmax, *)
+      COMPLEX*16 zxb(nbdirs, *)
 C     ..
 C
 C  =====================================================================
@@ -113,19 +113,12 @@ C     .. Intrinsic Functions ..
       INTEGER nd
       INTEGER nbdirs
 C     ..
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       IF ((n .LE. 0 .OR. incx .LE. 0) .OR. da .EQ. one) THEN
-        DO nd=1,nbdirsmax
+        DO nd=1,nbdirs
           dab(nd) = 0.D0
         ENDDO
       ELSE IF (incx .EQ. 1) THEN
-        DO nd=1,nbdirsmax
+        DO nd=1,nbdirs
           dab(nd) = 0.D0
         ENDDO
         DO i=n,1,-1
@@ -141,7 +134,7 @@ C
 C        code for increment not equal to 1
 C
         nincx = n*incx
-        DO nd=1,nbdirsmax
+        DO nd=1,nbdirs
           dab(nd) = 0.D0
         ENDDO
         DO i=nincx-MOD(nincx-1, incx),1,-incx

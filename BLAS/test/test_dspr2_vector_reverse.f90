@@ -1,10 +1,10 @@
 ! Test program for DSPR2 vector reverse mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*8 precision with nbdirsmax=4
+! Using REAL*8 precision with nbdirs=4
 
 program test_dspr2_vector_reverse
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   external :: dspr2
   external :: dspr2_bv
@@ -29,13 +29,13 @@ program test_dspr2_vector_reverse
   ! Adjoint variables (reverse vector mode)
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
-  real(8), dimension(nbdirsmax) :: alphab
-  real(8), dimension(nbdirsmax,max_size) :: xb
-  real(8), dimension(nbdirsmax,max_size) :: yb
-  real(8), dimension(nbdirsmax,(n*(n+1))/2) :: apb
+  real(8), dimension(nbdirs) :: alphab
+  real(8), dimension(nbdirs,max_size) :: xb
+  real(8), dimension(nbdirs,max_size) :: yb
+  real(8), dimension(nbdirs,(n*(n+1))/2) :: apb
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  real(8), dimension(nbdirsmax,(n*(n+1))/2) :: apb_orig
+  real(8), dimension(nbdirs,(n*(n+1))/2) :: apb_orig
 
   ! Storage for original values (for VJP verification)
   real(8) :: alpha_orig
@@ -74,7 +74,7 @@ program test_dspr2_vector_reverse
 
   ! Initialize output adjoints (cotangents) with random values for each direction
   ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirsmax
+  do k = 1, nbdirs
     call random_number(apb(k,:))
     apb(k,:) = apb(k,:) * 2.0 - 1.0
   end do
@@ -94,7 +94,7 @@ program test_dspr2_vector_reverse
   call set_ISIZE1OFY(max_size)
 
   ! Call reverse vector mode differentiated function
-  call dspr2_bv(uplo, nsize, alpha, alphab, x, xb, incx_val, y, yb, incy_val, ap, apb, nbdirsmax)
+  call dspr2_bv(uplo, nsize, alpha, alphab, x, xb, incx_val, y, yb, incy_val, ap, apb, nbdirs)
 
   ! Reset ISIZE globals to uninitialized (-1) for completeness
   call set_ISIZE1OFX(-1)
@@ -127,7 +127,7 @@ contains
     write(*,*) 'Step size h =', h
     
     ! Test each differentiation direction separately
-    do k = 1, nbdirsmax
+    do k = 1, nbdirs
       
       ! Initialize random direction vectors for all inputs
       call random_number(alpha_dir)
@@ -188,16 +188,6 @@ contains
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
-      vjp_ad = vjp_ad + alpha_dir * alphab(k)
-      ! Compute and sort products for ap
-      n_products = (n*(n+1))/2
-      do i = 1, (n*(n+1))/2
-        temp_products(i) = ap_dir(i) * apb(k,i)
-      end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_ad = vjp_ad + temp_products(i)
-      end do
       ! Compute and sort products for y
       n_products = n
       do i = 1, n
@@ -207,6 +197,16 @@ contains
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
+      ! Compute and sort products for ap
+      n_products = (n*(n+1))/2
+      do i = 1, (n*(n+1))/2
+        temp_products(i) = ap_dir(i) * apb(k,i)
+      end do
+      call sort_array(temp_products, n_products)
+      do i = 1, n_products
+        vjp_ad = vjp_ad + temp_products(i)
+      end do
+      vjp_ad = vjp_ad + alpha_dir * alphab(k)
       
       ! Error check: |vjp_fd - vjp_ad| > atol + rtol * |vjp_ad|
       abs_error = abs(vjp_fd - vjp_ad)

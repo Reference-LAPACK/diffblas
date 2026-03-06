@@ -1,10 +1,10 @@
 ! Test program for SSCAL vector forward mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirsmax=4
+! Using REAL*4 precision with nbdirs=4
 
 program test_sscal_vector_forward
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   external :: sscal
   external :: sscal_dv
@@ -23,14 +23,14 @@ program test_sscal_vector_forward
   integer :: incx_val
 
   ! Vector mode derivative variables (type-promoted)
-  ! Scalars become arrays(nbdirsmax), arrays gain extra dimension
-  real(4), dimension(nbdirsmax) :: sa_dv
-  real(4), dimension(nbdirsmax,max_size) :: sx_dv
+  ! Scalars become arrays(nbdirs), arrays gain extra dimension
+  real(4), dimension(nbdirs) :: sa_dv
+  real(4), dimension(nbdirs,max_size) :: sx_dv
   ! Declare variables for storing original values
   real(4) :: sa_orig
-  real(4), dimension(nbdirsmax) :: sa_dv_orig
+  real(4), dimension(nbdirs) :: sa_dv_orig
   real(4), dimension(max_size) :: sx_orig
-  real(4), dimension(nbdirsmax,max_size) :: sx_dv_orig
+  real(4), dimension(nbdirs,max_size) :: sx_dv_orig
 
   ! Initialize test parameters
   nsize = n
@@ -47,11 +47,11 @@ program test_sscal_vector_forward
   sx = sx * 2.0 - 1.0  ! Scale to [-1,1]
 
   ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     call random_number(temp_real)
     sa_dv(idir) = temp_real * 2.0 - 1.0
   end do
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     call random_number(sx_dv(idir,:))
     sx_dv(idir,:) = sx_dv(idir,:) * 2.0 - 1.0
   end do
@@ -65,7 +65,7 @@ program test_sscal_vector_forward
 
   ! Call the vector mode differentiated function
 
-  call sscal_dv(nsize, sa, sa_dv, sx, sx_dv, incx_val, nbdirsmax)
+  call sscal_dv(nsize, sa, sa_dv, sx, sx_dv, incx_val, nbdirs)
 
   ! Print results and compare
   write(*,*) 'Function calls completed successfully'
@@ -92,10 +92,10 @@ contains
     
     write(*,*) 'Checking vector derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirsmax
+    write(*,*) 'Number of directions:', nbdirs
     
     ! Test each derivative direction separately
-    do idir = 1, nbdirsmax
+    do idir = 1, nbdirs
       
       ! Forward perturbation: f(x + h * direction)
       sa = sa_orig + h * sa_dv_orig(idir)

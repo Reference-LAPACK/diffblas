@@ -1,10 +1,10 @@
 ! Test program for DSWAP vector reverse mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*8 precision with nbdirsmax=4
+! Using REAL*8 precision with nbdirs=4
 
 program test_dswap_vector_reverse
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   external :: dswap
   external :: dswap_bv
@@ -26,12 +26,12 @@ program test_dswap_vector_reverse
   ! Adjoint variables (reverse vector mode)
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
-  real(8), dimension(nbdirsmax,max_size) :: dxb
-  real(8), dimension(nbdirsmax,max_size) :: dyb
+  real(8), dimension(nbdirs,max_size) :: dxb
+  real(8), dimension(nbdirs,max_size) :: dyb
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  real(8), dimension(nbdirsmax,max_size) :: dyb_orig
-  real(8), dimension(nbdirsmax,max_size) :: dxb_orig
+  real(8), dimension(nbdirs,max_size) :: dyb_orig
+  real(8), dimension(nbdirs,max_size) :: dxb_orig
 
   ! Storage for original values (for VJP verification)
   real(8), dimension(max_size) :: dx_orig
@@ -63,11 +63,11 @@ program test_dswap_vector_reverse
 
   ! Initialize output adjoints (cotangents) with random values for each direction
   ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirsmax
+  do k = 1, nbdirs
     call random_number(dxb(k,:))
     dxb(k,:) = dxb(k,:) * 2.0 - 1.0
   end do
-  do k = 1, nbdirsmax
+  do k = 1, nbdirs
     call random_number(dyb(k,:))
     dyb(k,:) = dyb(k,:) * 2.0 - 1.0
   end do
@@ -80,7 +80,7 @@ program test_dswap_vector_reverse
   dxb_orig = dxb
 
   ! Call reverse vector mode differentiated function
-  call dswap_bv(nsize, dx, dxb, incx_val, dy, dyb, incy_val, nbdirsmax)
+  call dswap_bv(nsize, dx, dxb, incx_val, dy, dyb, incy_val, nbdirs)
 
   ! VJP Verification using finite differences
   call check_vjp_numerically()
@@ -108,7 +108,7 @@ contains
     write(*,*) 'Step size h =', h
     
     ! Test each differentiation direction separately
-    do k = 1, nbdirsmax
+    do k = 1, nbdirs
       
       ! Initialize random direction vectors for all inputs
       call random_number(dx_dir)

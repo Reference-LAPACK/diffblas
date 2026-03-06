@@ -1,10 +1,10 @@
 ! Test program for CDOTU vector reverse mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirsmax=4
+! Using REAL*4 precision with nbdirs=4
 
 program test_cdotu_vector_reverse
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   complex(4), external :: cdotu
   external :: cdotu_bv
@@ -26,12 +26,12 @@ program test_cdotu_vector_reverse
   ! Adjoint variables (reverse vector mode)
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
-  complex(4), dimension(nbdirsmax,4) :: cxb
-  complex(4), dimension(nbdirsmax,4) :: cyb
-  complex(4), dimension(nbdirsmax) :: cdotub
+  complex(4), dimension(nbdirs,4) :: cxb
+  complex(4), dimension(nbdirs,4) :: cyb
+  complex(4), dimension(nbdirs) :: cdotub
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  complex(4), dimension(nbdirsmax) :: cdotub_orig
+  complex(4), dimension(nbdirs) :: cdotub_orig
 
   ! Storage for original values (for VJP verification)
   complex(4), dimension(4) :: cx_orig
@@ -70,7 +70,7 @@ program test_cdotu_vector_reverse
   ! Initialize output adjoints (cotangents) with random values for each direction
   ! These are the 'seeds' for reverse mode
   ! Initialize function result adjoint (output cotangent)
-  do k = 1, nbdirsmax
+  do k = 1, nbdirs
     call random_number(temp_real)
     call random_number(temp_imag)
     cdotub(k) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
@@ -90,7 +90,7 @@ program test_cdotu_vector_reverse
   call set_ISIZE1OFCy(max_size)
 
   ! Call reverse vector mode differentiated function
-  call cdotu_bv(nsize, cx, cxb, incx_val, cy, cyb, incy_val, cdotub, nbdirsmax)
+  call cdotu_bv(nsize, cx, cxb, incx_val, cy, cyb, incy_val, cdotub, nbdirs)
 
   ! Reset ISIZE globals to uninitialized (-1) for completeness
   call set_ISIZE1OFCx(-1)
@@ -121,7 +121,7 @@ contains
     write(*,*) 'Step size h =', h
     
     ! Test each differentiation direction separately
-    do k = 1, nbdirsmax
+    do k = 1, nbdirs
       
       ! Initialize random direction vectors for all inputs
       do i = 1, n
@@ -156,19 +156,19 @@ contains
       ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
       ! For pure inputs: use adjoint directly
       vjp_ad = 0.0
-      ! Compute and sort products for cy
+      ! Compute and sort products for cx
       n_products = n
       do i = 1, n
-        temp_products(i) = real(conjg(cy_dir(i)) * cyb(k,i))
+        temp_products(i) = real(conjg(cx_dir(i)) * cxb(k,i))
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
-      ! Compute and sort products for cx
+      ! Compute and sort products for cy
       n_products = n
       do i = 1, n
-        temp_products(i) = real(conjg(cx_dir(i)) * cxb(k,i))
+        temp_products(i) = real(conjg(cy_dir(i)) * cyb(k,i))
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products

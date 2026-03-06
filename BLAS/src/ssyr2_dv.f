@@ -153,8 +153,8 @@ C  =====================================================================
       SUBROUTINE SSYR2_DV(uplo, n, alpha, alphad, x, xd, incx, y, yd, 
      +                    incy, a, ad, lda, nbdirs)
       IMPLICIT NONE
-      INCLUDE 'DIFFSIZES.inc'
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C      INCLUDE 'DIFFSIZES.inc'
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level2 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -162,13 +162,13 @@ C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
       REAL alpha
-      REAL alphad(nbdirsmax)
+      REAL alphad(nbdirs)
       INTEGER incx, incy, lda, n
       CHARACTER uplo
 C     ..
 C     .. Array Arguments ..
       REAL a(lda, *), x(*), y(*)
-      REAL ad(nbdirsmax, lda, *), xd(nbdirsmax, *), yd(nbdirsmax, *)
+      REAL ad(nbdirs, lda, *), xd(nbdirs, *), yd(nbdirs, *)
 C     ..
 C
 C  =====================================================================
@@ -179,7 +179,7 @@ C     .. Parameters ..
 C     ..
 C     .. Local Scalars ..
       REAL temp1, temp2
-      REAL temp1d(nbdirsmax), temp2d(nbdirsmax)
+      REAL temp1d(nbdirs), temp2d(nbdirs)
       INTEGER i, info, ix, iy, j, jx, jy, kx, ky
       EXTERNAL LSAME
 C     ..
@@ -197,13 +197,6 @@ C     .. Intrinsic Functions ..
 C     ..
 C
 C     Test the input parameters.
-C
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
 C
       info = 0
       IF (.NOT.LSAME(uplo, 'U') .AND. (.NOT.LSAME(uplo, 'L'))) THEN

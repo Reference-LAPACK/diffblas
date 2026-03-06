@@ -1,10 +1,10 @@
 ! Test program for SASUM vector forward mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirsmax=4
+! Using REAL*4 precision with nbdirs=4
 
 program test_sasum_vector_forward
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   real(4), external :: sasum
   external :: sasum_dv
@@ -22,15 +22,15 @@ program test_sasum_vector_forward
   integer :: incx_val
 
   ! Vector mode derivative variables (type-promoted)
-  ! Scalars become arrays(nbdirsmax), arrays gain extra dimension
-  real(4), dimension(nbdirsmax,4) :: sx_dv
+  ! Scalars become arrays(nbdirs), arrays gain extra dimension
+  real(4), dimension(nbdirs,4) :: sx_dv
   ! Declare variables for storing original values
   real(4), dimension(4) :: sx_orig
-  real(4), dimension(nbdirsmax,4) :: sx_dv_orig
+  real(4), dimension(nbdirs,4) :: sx_dv_orig
 
   ! Function result variables
   real(4) :: sasum_result
-  real(4), dimension(nbdirsmax) :: sasum_dv_result
+  real(4), dimension(nbdirs) :: sasum_dv_result
 
   ! Initialize test parameters
   nsize = n
@@ -45,7 +45,7 @@ program test_sasum_vector_forward
   sx = sx * 2.0 - 1.0  ! Scale to [-1,1]
 
   ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     call random_number(sx_dv(idir,:))
     sx_dv(idir,:) = sx_dv(idir,:) * 2.0 - 1.0
   end do
@@ -57,7 +57,7 @@ program test_sasum_vector_forward
 
   ! Call the vector mode differentiated function
 
-  call sasum_dv(nsize, sx, sx_dv, incx_val, sasum_result, sasum_dv_result, nbdirsmax)
+  call sasum_dv(nsize, sx, sx_dv, incx_val, sasum_result, sasum_dv_result, nbdirs)
 
   ! Print results and compare
   write(*,*) 'Function calls completed successfully'
@@ -84,10 +84,10 @@ contains
     
     write(*,*) 'Checking vector derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirsmax
+    write(*,*) 'Number of directions:', nbdirs
     
     ! Test each derivative direction separately
-    do idir = 1, nbdirsmax
+    do idir = 1, nbdirs
       
       ! Forward perturbation: f(x + h * direction)
       sx = sx_orig + h * sx_dv_orig(idir,:)

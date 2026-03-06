@@ -29,9 +29,9 @@ program test_daxpy
   real(8), dimension(max_size) :: dy_output
 
   ! Array restoration variables for numerical differentiation
+  real(8) :: da_orig
   real(8), dimension(max_size) :: dy_orig
   real(8), dimension(4) :: dx_orig
-  real(8) :: da_orig
 
   ! Variables for central difference computation
   real(8), dimension(max_size) :: dy_forward, dy_backward
@@ -40,9 +40,9 @@ program test_daxpy
   logical :: has_large_errors
 
   ! Variables for storing original derivative values
+  real(8) :: da_d_orig
   real(8), dimension(max_size) :: dy_d_orig
   real(8), dimension(4) :: dx_d_orig
-  real(8) :: da_d_orig
 
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
@@ -65,22 +65,22 @@ program test_daxpy
   incy_val = 1
 
   ! Initialize input derivatives to random values
+  call random_number(da_d)
+  da_d = da_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(dy_d)
   dy_d = dy_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(dx_d)
   dx_d = dx_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-  call random_number(da_d)
-  da_d = da_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
   ! Store initial derivative values after random initialization
+  da_d_orig = da_d
   dy_d_orig = dy_d
   dx_d_orig = dx_d
-  da_d_orig = da_d
 
   ! Store original values for central difference computation
+  da_orig = da
   dy_orig = dy
   dx_orig = dx
-  da_orig = da
 
   write(*,*) 'Testing DAXPY'
   ! Store input values of inout parameters before first function call
@@ -130,17 +130,17 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
+    da = da_orig + h * da_d_orig
     dy = dy_orig + h * dy_d_orig
     dx = dx_orig + h * dx_d_orig
-    da = da_orig + h * da_d_orig
     call daxpy(nsize, da, dx, incx_val, dy, incy_val)
     ! Store forward perturbation results
     dy_forward = dy
     
     ! Backward perturbation: f(x - h)
+    da = da_orig - h * da_d_orig
     dy = dy_orig - h * dy_d_orig
     dx = dx_orig - h * dx_d_orig
-    da = da_orig - h * da_d_orig
     call daxpy(nsize, da, dx, incx_val, dy, incy_val)
     ! Store backward perturbation results
     dy_backward = dy

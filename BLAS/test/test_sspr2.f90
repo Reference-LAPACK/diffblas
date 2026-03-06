@@ -33,9 +33,9 @@ program test_sspr2
 
   ! Array restoration variables for numerical differentiation
   real(4), dimension(max_size) :: x_orig
-  real(4) :: alpha_orig
-  real(4), dimension((n*(n+1))/2) :: ap_orig
   real(4), dimension(max_size) :: y_orig
+  real(4), dimension((n*(n+1))/2) :: ap_orig
+  real(4) :: alpha_orig
 
   ! Variables for central difference computation
   ! Scalar variables for central difference computation
@@ -43,10 +43,10 @@ program test_sspr2
   logical :: has_large_errors
 
   ! Variables for storing original derivative values
-  real(4) :: alpha_d_orig
-  real(4), dimension((n*(n+1))/2) :: ap_d_orig
-  real(4), dimension(max_size) :: x_d_orig
   real(4), dimension(max_size) :: y_d_orig
+  real(4), dimension((n*(n+1))/2) :: ap_d_orig
+  real(4) :: alpha_d_orig
+  real(4), dimension(max_size) :: x_d_orig
 
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
@@ -74,24 +74,24 @@ program test_sspr2
   ! Initialize input derivatives to random values
   call random_number(x_d)
   x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-  call random_number(alpha_d)
-  alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-  call random_number(ap_d)
-  ap_d = ap_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(y_d)
   y_d = y_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+  call random_number(ap_d)
+  ap_d = ap_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+  call random_number(alpha_d)
+  alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
   ! Store initial derivative values after random initialization
-  alpha_d_orig = alpha_d
-  ap_d_orig = ap_d
-  x_d_orig = x_d
   y_d_orig = y_d
+  ap_d_orig = ap_d
+  alpha_d_orig = alpha_d
+  x_d_orig = x_d
 
   ! Store original values for central difference computation
   x_orig = x
-  alpha_orig = alpha
-  ap_orig = ap
   y_orig = y
+  ap_orig = ap
+  alpha_orig = alpha
 
   write(*,*) 'Testing SSPR2'
   ! Store input values of inout parameters before first function call
@@ -144,17 +144,17 @@ contains
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
     x = x_orig + h * x_d_orig
-    alpha = alpha_orig + h * alpha_d_orig
-    ap = ap_orig + h * ap_d_orig
     y = y_orig + h * y_d_orig
+    ap = ap_orig + h * ap_d_orig
+    alpha = alpha_orig + h * alpha_d_orig
     call sspr2(uplo, nsize, alpha, x, incx_val, y, incy_val, ap)
     ! Store forward perturbation results
     
     ! Backward perturbation: f(x - h)
     x = x_orig - h * x_d_orig
-    alpha = alpha_orig - h * alpha_d_orig
-    ap = ap_orig - h * ap_d_orig
     y = y_orig - h * y_d_orig
+    ap = ap_orig - h * ap_d_orig
+    alpha = alpha_orig - h * alpha_d_orig
     call sspr2(uplo, nsize, alpha, x, incx_val, y, incy_val, ap)
     ! Store backward perturbation results
     

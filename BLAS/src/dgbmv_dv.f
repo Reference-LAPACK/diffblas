@@ -195,8 +195,8 @@ C  =====================================================================
      +                    , x, xd, incx, beta, betad, y, yd, incy, 
      +                    nbdirs)
       IMPLICIT NONE
-      INCLUDE 'DIFFSIZES.inc'
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C      INCLUDE 'DIFFSIZES.inc'
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level2 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -204,14 +204,14 @@ C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
       DOUBLE PRECISION alpha, beta
-      DOUBLE PRECISION alphad(nbdirsmax), betad(nbdirsmax)
+      DOUBLE PRECISION alphad(nbdirs), betad(nbdirs)
       INTEGER incx, incy, kl, ku, lda, m, n
       CHARACTER trans
 C     ..
 C     .. Array Arguments ..
       DOUBLE PRECISION a(lda, *), x(*), y(*)
-      DOUBLE PRECISION ad(nbdirsmax, lda, *), xd(nbdirsmax, *), yd(
-     +                 nbdirsmax, *)
+      DOUBLE PRECISION ad(nbdirs, lda, *), xd(nbdirs, *), yd(
+     +                 nbdirs, *)
 C     ..
 C
 C  =====================================================================
@@ -222,7 +222,7 @@ C     .. Parameters ..
 C     ..
 C     .. Local Scalars ..
       DOUBLE PRECISION temp
-      DOUBLE PRECISION tempd(nbdirsmax)
+      DOUBLE PRECISION tempd(nbdirs)
       INTEGER i, info, ix, iy, j, jx, jy, k, kup1, kx, ky, lenx, leny
       EXTERNAL LSAME
 C     ..
@@ -247,13 +247,6 @@ C     .. Intrinsic Functions ..
 C     ..
 C
 C     Test the input parameters.
-C
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
 C
       info = 0
       IF (.NOT.LSAME(trans, 'N') .AND. (.NOT.LSAME(trans, 'T')) .AND. (
@@ -430,12 +423,12 @@ C
                 END IF
                 IF (m .GT. j + kl) THEN
                   min3 = j + kl
-                  DO nd=1,nbdirsmax
+                  DO nd=1,nbdirs
                     tempd(nd) = 0.D0
                   ENDDO
                 ELSE
                   min3 = m
-                  DO nd=1,nbdirsmax
+                  DO nd=1,nbdirs
                     tempd(nd) = 0.D0
                   ENDDO
                 END IF
@@ -465,12 +458,12 @@ C
                 END IF
                 IF (m .GT. j + kl) THEN
                   min4 = j + kl
-                  DO nd=1,nbdirsmax
+                  DO nd=1,nbdirs
                     tempd(nd) = 0.D0
                   ENDDO
                 ELSE
                   min4 = m
-                  DO nd=1,nbdirsmax
+                  DO nd=1,nbdirs
                     tempd(nd) = 0.D0
                   ENDDO
                 END IF

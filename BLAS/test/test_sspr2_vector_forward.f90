@@ -1,10 +1,10 @@
 ! Test program for SSPR2 vector forward mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirsmax=4
+! Using REAL*4 precision with nbdirs=4
 
 program test_sspr2_vector_forward
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   external :: sspr2
   external :: sspr2_dv
@@ -27,20 +27,20 @@ program test_sspr2_vector_forward
   real(4), dimension((n*(n+1))/2) :: ap
 
   ! Vector mode derivative variables (type-promoted)
-  ! Scalars become arrays(nbdirsmax), arrays gain extra dimension
-  real(4), dimension(nbdirsmax) :: alpha_dv
-  real(4), dimension(nbdirsmax,max_size) :: x_dv
-  real(4), dimension(nbdirsmax,max_size) :: y_dv
-  real(4), dimension(nbdirsmax,(n*(n+1))/2) :: ap_dv
+  ! Scalars become arrays(nbdirs), arrays gain extra dimension
+  real(4), dimension(nbdirs) :: alpha_dv
+  real(4), dimension(nbdirs,max_size) :: x_dv
+  real(4), dimension(nbdirs,max_size) :: y_dv
+  real(4), dimension(nbdirs,(n*(n+1))/2) :: ap_dv
   ! Declare variables for storing original values
   real(4) :: alpha_orig
-  real(4), dimension(nbdirsmax) :: alpha_dv_orig
+  real(4), dimension(nbdirs) :: alpha_dv_orig
   real(4), dimension(max_size) :: x_orig
-  real(4), dimension(nbdirsmax,max_size) :: x_dv_orig
+  real(4), dimension(nbdirs,max_size) :: x_dv_orig
   real(4), dimension(max_size) :: y_orig
-  real(4), dimension(nbdirsmax,max_size) :: y_dv_orig
+  real(4), dimension(nbdirs,max_size) :: y_dv_orig
   real(4), dimension((n*(n+1))/2) :: ap_orig
-  real(4), dimension(nbdirsmax,(n*(n+1))/2) :: ap_dv_orig
+  real(4), dimension(nbdirs,(n*(n+1))/2) :: ap_dv_orig
 
   ! Initialize test parameters
   nsize = n
@@ -63,19 +63,19 @@ program test_sspr2_vector_forward
   ap = ap * 2.0 - 1.0  ! Scale to [-1,1]
 
   ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     call random_number(temp_real)
     alpha_dv(idir) = temp_real * 2.0 - 1.0
   end do
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     call random_number(x_dv(idir,:))
     x_dv(idir,:) = x_dv(idir,:) * 2.0 - 1.0
   end do
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     call random_number(y_dv(idir,:))
     y_dv(idir,:) = y_dv(idir,:) * 2.0 - 1.0
   end do
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     call random_number(ap_dv(idir,:))
     ap_dv(idir,:) = ap_dv(idir,:) * 2.0d0 - 1.0d0
   end do
@@ -93,7 +93,7 @@ program test_sspr2_vector_forward
 
   ! Call the vector mode differentiated function
 
-  call sspr2_dv(uplo, nsize, alpha, alpha_dv, x, x_dv, incx_val, y, y_dv, incy_val, ap, ap_dv, nbdirsmax)
+  call sspr2_dv(uplo, nsize, alpha, alpha_dv, x, x_dv, incx_val, y, y_dv, incy_val, ap, ap_dv, nbdirs)
 
   ! Print results and compare
   write(*,*) 'Function calls completed successfully'
@@ -120,10 +120,10 @@ contains
     
     write(*,*) 'Checking vector derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirsmax
+    write(*,*) 'Number of directions:', nbdirs
     
     ! Test each derivative direction separately
-    do idir = 1, nbdirsmax
+    do idir = 1, nbdirs
       
       ! Forward perturbation: f(x + h * direction)
       alpha = alpha_orig + h * alpha_dv_orig(idir)

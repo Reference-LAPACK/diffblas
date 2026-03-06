@@ -1,10 +1,10 @@
 ! Test program for DSYMM vector forward mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*8 precision with nbdirsmax=4
+! Using REAL*8 precision with nbdirs=4
 
 program test_dsymm_vector_forward
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   external :: dsymm
   external :: dsymm_dv
@@ -31,23 +31,23 @@ program test_dsymm_vector_forward
   integer :: ldc_val
 
   ! Vector mode derivative variables (type-promoted)
-  ! Scalars become arrays(nbdirsmax), arrays gain extra dimension
-  real(8), dimension(nbdirsmax) :: alpha_dv
-  real(8), dimension(nbdirsmax,max_size,max_size) :: a_dv
-  real(8), dimension(nbdirsmax,max_size,max_size) :: b_dv
-  real(8), dimension(nbdirsmax) :: beta_dv
-  real(8), dimension(nbdirsmax,max_size,max_size) :: c_dv
+  ! Scalars become arrays(nbdirs), arrays gain extra dimension
+  real(8), dimension(nbdirs) :: alpha_dv
+  real(8), dimension(nbdirs,max_size,max_size) :: a_dv
+  real(8), dimension(nbdirs,max_size,max_size) :: b_dv
+  real(8), dimension(nbdirs) :: beta_dv
+  real(8), dimension(nbdirs,max_size,max_size) :: c_dv
   ! Declare variables for storing original values
   real(8) :: alpha_orig
-  real(8), dimension(nbdirsmax) :: alpha_dv_orig
+  real(8), dimension(nbdirs) :: alpha_dv_orig
   real(8), dimension(max_size,max_size) :: a_orig
-  real(8), dimension(nbdirsmax,max_size,max_size) :: a_dv_orig
+  real(8), dimension(nbdirs,max_size,max_size) :: a_dv_orig
   real(8), dimension(max_size,max_size) :: b_orig
-  real(8), dimension(nbdirsmax,max_size,max_size) :: b_dv_orig
+  real(8), dimension(nbdirs,max_size,max_size) :: b_dv_orig
   real(8) :: beta_orig
-  real(8), dimension(nbdirsmax) :: beta_dv_orig
+  real(8), dimension(nbdirs) :: beta_dv_orig
   real(8), dimension(max_size,max_size) :: c_orig
-  real(8), dimension(nbdirsmax,max_size,max_size) :: c_dv_orig
+  real(8), dimension(nbdirs,max_size,max_size) :: c_dv_orig
 
   ! Initialize test parameters
   msize = n
@@ -75,23 +75,23 @@ program test_dsymm_vector_forward
   c = c * 2.0d0 - 1.0d0  ! Scale to [-1,1]
 
   ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     call random_number(temp_real)
     alpha_dv(idir) = temp_real * 2.0d0 - 1.0d0
   end do
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     call random_number(a_dv(idir,:,:))
     a_dv(idir,:,:) = a_dv(idir,:,:) * 2.0d0 - 1.0d0
   end do
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     call random_number(b_dv(idir,:,:))
     b_dv(idir,:,:) = b_dv(idir,:,:) * 2.0d0 - 1.0d0
   end do
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     call random_number(temp_real)
     beta_dv(idir) = temp_real * 2.0d0 - 1.0d0
   end do
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     call random_number(c_dv(idir,:,:))
     c_dv(idir,:,:) = c_dv(idir,:,:) * 2.0d0 - 1.0d0
   end do
@@ -111,7 +111,7 @@ program test_dsymm_vector_forward
 
   ! Call the vector mode differentiated function
 
-  call dsymm_dv(side, uplo, msize, nsize, alpha, alpha_dv, a, a_dv, lda_val, b, b_dv, ldb_val, beta, beta_dv, c, c_dv, ldc_val, nbdirsmax)
+  call dsymm_dv(side, uplo, msize, nsize, alpha, alpha_dv, a, a_dv, lda_val, b, b_dv, ldb_val, beta, beta_dv, c, c_dv, ldc_val, nbdirs)
 
   ! Print results and compare
   write(*,*) 'Function calls completed successfully'
@@ -138,10 +138,10 @@ contains
     
     write(*,*) 'Checking vector derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirsmax
+    write(*,*) 'Number of directions:', nbdirs
     
     ! Test each derivative direction separately
-    do idir = 1, nbdirsmax
+    do idir = 1, nbdirs
       
       ! Forward perturbation: f(x + h * direction)
       alpha = alpha_orig + h * alpha_dv_orig(idir)

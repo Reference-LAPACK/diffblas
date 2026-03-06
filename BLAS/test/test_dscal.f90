@@ -26,8 +26,8 @@ program test_dscal
   real(8), dimension(max_size) :: dx_output
 
   ! Array restoration variables for numerical differentiation
-  real(8), dimension(max_size) :: dx_orig
   real(8) :: da_orig
+  real(8), dimension(max_size) :: dx_orig
 
   ! Variables for central difference computation
   real(8), dimension(max_size) :: dx_forward, dx_backward
@@ -36,8 +36,8 @@ program test_dscal
   logical :: has_large_errors
 
   ! Variables for storing original derivative values
-  real(8), dimension(max_size) :: dx_d_orig
   real(8) :: da_d_orig
+  real(8), dimension(max_size) :: dx_d_orig
 
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
@@ -57,18 +57,18 @@ program test_dscal
   incx_val = 1
 
   ! Initialize input derivatives to random values
-  call random_number(dx_d)
-  dx_d = dx_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(da_d)
   da_d = da_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+  call random_number(dx_d)
+  dx_d = dx_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
   ! Store initial derivative values after random initialization
-  dx_d_orig = dx_d
   da_d_orig = da_d
+  dx_d_orig = dx_d
 
   ! Store original values for central difference computation
-  dx_orig = dx
   da_orig = da
+  dx_orig = dx
 
   write(*,*) 'Testing DSCAL'
   ! Store input values of inout parameters before first function call
@@ -116,15 +116,15 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    dx = dx_orig + h * dx_d_orig
     da = da_orig + h * da_d_orig
+    dx = dx_orig + h * dx_d_orig
     call dscal(nsize, da, dx, incx_val)
     ! Store forward perturbation results
     dx_forward = dx
     
     ! Backward perturbation: f(x - h)
-    dx = dx_orig - h * dx_d_orig
     da = da_orig - h * da_d_orig
+    dx = dx_orig - h * dx_d_orig
     call dscal(nsize, da, dx, incx_val)
     ! Store backward perturbation results
     dx_backward = dx

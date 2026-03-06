@@ -139,7 +139,7 @@ C  =====================================================================
       INCLUDE 'DIFFSIZES.inc'
 C  Hint: ISIZE1OFy should be the size of dimension 1 of array y
 C  Hint: ISIZE1OFx should be the size of dimension 1 of array x
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level2 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -147,13 +147,13 @@ C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
       DOUBLE PRECISION alpha
-      DOUBLE PRECISION alphab(nbdirsmax)
+      DOUBLE PRECISION alphab(nbdirs)
       INTEGER incx, incy, lda, m, n
 C     ..
 C     .. Array Arguments ..
       DOUBLE PRECISION a(lda, *), x(*), y(*)
-      DOUBLE PRECISION ab(nbdirsmax, lda, *), xb(nbdirsmax, *), yb(
-     +                 nbdirsmax, *)
+      DOUBLE PRECISION ab(nbdirs, lda, *), xb(nbdirs, *), yb(
+     +                 nbdirs, *)
 C     ..
 C
 C  =====================================================================
@@ -164,7 +164,7 @@ C     .. Parameters ..
 C     ..
 C     .. Local Scalars ..
       DOUBLE PRECISION temp
-      DOUBLE PRECISION tempb(nbdirsmax)
+      DOUBLE PRECISION tempb(nbdirs)
       INTEGER i, info, ix, j, jy, kx
       INTEGER ISIZE1OFX, ISIZE1OFY
       INTEGER get_ISIZE1OFX, get_ISIZE1OFY
@@ -184,17 +184,10 @@ C     ..
 C
 C     Test the input parameters.
 C
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
       CALL check_ISIZE1OFX_initialized()
       CALL check_ISIZE1OFY_initialized()
       ISIZE1OFX = get_ISIZE1OFX()
       ISIZE1OFY = get_ISIZE1OFY()
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       info = 0
       IF (m .LT. 0) THEN
         CALL PUSHCONTROL3B(0)
@@ -226,16 +219,16 @@ C
 C     Quick return if possible.
 C
         IF ((m .EQ. 0 .OR. n .EQ. 0) .OR. alpha .EQ. zero) THEN
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             alphab(nd) = 0.D0
           ENDDO
           DO ii1=1,ISIZE1OFx
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               xb(nd, ii1) = 0.D0
             ENDDO
           ENDDO
           DO ii1=1,ISIZE1OFy
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               yb(nd, ii1) = 0.D0
             ENDDO
           ENDDO
@@ -261,16 +254,16 @@ C
               CALL PUSHINTEGER4(jy)
               jy = jy + incy
             ENDDO
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               alphab(nd) = 0.D0
             ENDDO
             DO ii1=1,ISIZE1OFx
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 xb(nd, ii1) = 0.D0
               ENDDO
             ENDDO
             DO ii1=1,ISIZE1OFy
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 yb(nd, ii1) = 0.D0
               ENDDO
             ENDDO
@@ -278,7 +271,7 @@ C
               CALL POPINTEGER4(jy)
               CALL POPCONTROL1B(branch)
               IF (branch .EQ. 0) THEN
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   tempb(nd) = 0.D0
                 ENDDO
                 DO i=m,1,-1
@@ -316,16 +309,16 @@ C
               CALL PUSHINTEGER4(jy)
               jy = jy + incy
             ENDDO
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               alphab(nd) = 0.D0
             ENDDO
             DO ii1=1,ISIZE1OFx
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 xb(nd, ii1) = 0.D0
               ENDDO
             ENDDO
             DO ii1=1,ISIZE1OFy
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 yb(nd, ii1) = 0.D0
               ENDDO
             ENDDO
@@ -333,7 +326,7 @@ C
               CALL POPINTEGER4(jy)
               CALL POPCONTROL1B(branch)
               IF (branch .EQ. 0) THEN
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   tempb(nd) = 0.D0
                 ENDDO
                 DO i=m,1,-1

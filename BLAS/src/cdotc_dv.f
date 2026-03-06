@@ -89,8 +89,8 @@ C  =====================================================================
       SUBROUTINE CDOTC_DV(n, cx, cxd, incx, cy, cyd, incy, cdotc, cdotcd
      +                    , nbdirs)
       IMPLICIT NONE
-      INCLUDE 'DIFFSIZES.inc'
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C      INCLUDE 'DIFFSIZES.inc'
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level1 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -101,14 +101,14 @@ C     .. Scalar Arguments ..
 C     ..
 C     .. Array Arguments ..
       COMPLEX cx(*), cy(*)
-      COMPLEX cxd(nbdirsmax, *), cyd(nbdirsmax, *)
+      COMPLEX cxd(nbdirs, *), cyd(nbdirs, *)
 C     ..
 C
 C  =====================================================================
 C
 C     .. Local Scalars ..
       COMPLEX ctemp
-      COMPLEX ctempd(nbdirsmax)
+      COMPLEX ctempd(nbdirs)
       INTEGER i, ix, iy
 C     ..
 C     .. Intrinsic Functions ..
@@ -116,26 +116,19 @@ C     .. Intrinsic Functions ..
       INTEGER nd
       COMPLEX temp
       COMPLEX cdotc
-      COMPLEX cdotcd(nbdirsmax)
+      COMPLEX cdotcd(nbdirs)
       INTEGER nbdirs
 C     ..
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       ctemp = (0.0,0.0)
       cdotc = (0.0,0.0)
       IF (n .LE. 0) THEN
-        DO nd=1,nbdirsmax
+        DO nd=1,nbdirs
           cdotcd(nd) = (0.0,0.0)
         ENDDO
         RETURN
       ELSE
         IF (incx .EQ. 1 .AND. incy .EQ. 1) THEN
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             ctempd(nd) = (0.0,0.0)
           ENDDO
 C
@@ -159,11 +152,11 @@ C
           IF (incx .LT. 0) ix = (-n+1)*incx + 1
           IF (incy .LT. 0) THEN
             iy = (-n+1)*incy + 1
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               ctempd(nd) = (0.0,0.0)
             ENDDO
           ELSE
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               ctempd(nd) = (0.0,0.0)
             ENDDO
           END IF

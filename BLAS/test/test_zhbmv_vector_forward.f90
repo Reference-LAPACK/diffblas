@@ -1,10 +1,10 @@
 ! Test program for ZHBMV vector forward mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*8 precision with nbdirsmax=4
+! Using REAL*8 precision with nbdirs=4
 
 program test_zhbmv_vector_forward
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   external :: zhbmv
   external :: zhbmv_dv
@@ -30,23 +30,23 @@ program test_zhbmv_vector_forward
   integer :: incy_val
 
   ! Vector mode derivative variables (type-promoted)
-  ! Scalars become arrays(nbdirsmax), arrays gain extra dimension
-  complex(8), dimension(nbdirsmax) :: alpha_dv
-  complex(8), dimension(nbdirsmax,max_size,max_size) :: a_dv
-  complex(8), dimension(nbdirsmax,max_size) :: x_dv
-  complex(8), dimension(nbdirsmax) :: beta_dv
-  complex(8), dimension(nbdirsmax,max_size) :: y_dv
+  ! Scalars become arrays(nbdirs), arrays gain extra dimension
+  complex(8), dimension(nbdirs) :: alpha_dv
+  complex(8), dimension(nbdirs,max_size,max_size) :: a_dv
+  complex(8), dimension(nbdirs,max_size) :: x_dv
+  complex(8), dimension(nbdirs) :: beta_dv
+  complex(8), dimension(nbdirs,max_size) :: y_dv
   ! Declare variables for storing original values
   complex(8) :: alpha_orig
-  complex(8), dimension(nbdirsmax) :: alpha_dv_orig
+  complex(8), dimension(nbdirs) :: alpha_dv_orig
   complex(8), dimension(max_size,max_size) :: a_orig
-  complex(8), dimension(nbdirsmax,max_size,max_size) :: a_dv_orig
+  complex(8), dimension(nbdirs,max_size,max_size) :: a_dv_orig
   complex(8), dimension(max_size) :: x_orig
-  complex(8), dimension(nbdirsmax,max_size) :: x_dv_orig
+  complex(8), dimension(nbdirs,max_size) :: x_dv_orig
   complex(8) :: beta_orig
-  complex(8), dimension(nbdirsmax) :: beta_dv_orig
+  complex(8), dimension(nbdirs) :: beta_dv_orig
   complex(8), dimension(max_size) :: y_orig
-  complex(8), dimension(nbdirsmax,max_size) :: y_dv_orig
+  complex(8), dimension(nbdirs,max_size) :: y_dv_orig
 
   ! Initialize test parameters
   nsize = n
@@ -92,12 +92,12 @@ program test_zhbmv_vector_forward
   end do
 
   ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     call random_number(temp_real)
     call random_number(temp_imag)
     alpha_dv(idir) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
   end do
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     do i = 1, max_size
       do j = 1, max_size
         call random_number(temp_real)
@@ -106,19 +106,19 @@ program test_zhbmv_vector_forward
       end do
     end do
   end do
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     do i = 1, max_size
       call random_number(temp_real)
       call random_number(temp_imag)
       x_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
     end do
   end do
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     call random_number(temp_real)
     call random_number(temp_imag)
     beta_dv(idir) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
   end do
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     do i = 1, max_size
       call random_number(temp_real)
       call random_number(temp_imag)
@@ -141,7 +141,7 @@ program test_zhbmv_vector_forward
 
   ! Call the vector mode differentiated function
 
-  call zhbmv_dv(uplo, nsize, ksize, alpha, alpha_dv, a, a_dv, lda_val, x, x_dv, incx_val, beta, beta_dv, y, y_dv, incy_val, nbdirsmax)
+  call zhbmv_dv(uplo, nsize, ksize, alpha, alpha_dv, a, a_dv, lda_val, x, x_dv, incx_val, beta, beta_dv, y, y_dv, incy_val, nbdirs)
 
   ! Print results and compare
   write(*,*) 'Function calls completed successfully'
@@ -168,10 +168,10 @@ contains
     
     write(*,*) 'Checking vector derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirsmax
+    write(*,*) 'Number of directions:', nbdirs
     
     ! Test each derivative direction separately
-    do idir = 1, nbdirsmax
+    do idir = 1, nbdirs
       
       ! Forward perturbation: f(x + h * direction)
       alpha = alpha_orig + cmplx(h, 0.0) * alpha_dv_orig(idir)

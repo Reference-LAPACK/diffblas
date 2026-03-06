@@ -87,8 +87,8 @@ C>
 C  =====================================================================
       SUBROUTINE SSWAP_DV(n, sx, sxd, incx, sy, syd, incy, nbdirs)
       IMPLICIT NONE
-      INCLUDE 'DIFFSIZES.inc'
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C      INCLUDE 'DIFFSIZES.inc'
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level1 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -99,14 +99,14 @@ C     .. Scalar Arguments ..
 C     ..
 C     .. Array Arguments ..
       REAL sx(*), sy(*)
-      REAL sxd(nbdirsmax, *), syd(nbdirsmax, *)
+      REAL sxd(nbdirs, *), syd(nbdirs, *)
 C     ..
 C
 C  =====================================================================
 C
 C     .. Local Scalars ..
       REAL stemp
-      REAL stempd(nbdirsmax)
+      REAL stempd(nbdirs)
       INTEGER i, ix, iy, m, mp1
 C     ..
 C     .. Intrinsic Functions ..
@@ -114,13 +114,6 @@ C     .. Intrinsic Functions ..
       INTEGER nd
       INTEGER nbdirs
 C     ..
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       IF (n .LE. 0) THEN
         RETURN
       ELSE

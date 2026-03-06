@@ -1,10 +1,10 @@
 ! Test program for ZDOTU vector forward mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*8 precision with nbdirsmax=4
+! Using REAL*8 precision with nbdirs=4
 
 program test_zdotu_vector_forward
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   complex(8), external :: zdotu
   external :: zdotu_dv
@@ -24,18 +24,18 @@ program test_zdotu_vector_forward
   integer :: incy_val
 
   ! Vector mode derivative variables (type-promoted)
-  ! Scalars become arrays(nbdirsmax), arrays gain extra dimension
-  complex(8), dimension(nbdirsmax,4) :: zx_dv
-  complex(8), dimension(nbdirsmax,4) :: zy_dv
+  ! Scalars become arrays(nbdirs), arrays gain extra dimension
+  complex(8), dimension(nbdirs,4) :: zx_dv
+  complex(8), dimension(nbdirs,4) :: zy_dv
   ! Declare variables for storing original values
   complex(8), dimension(4) :: zx_orig
-  complex(8), dimension(nbdirsmax,4) :: zx_dv_orig
+  complex(8), dimension(nbdirs,4) :: zx_dv_orig
   complex(8), dimension(4) :: zy_orig
-  complex(8), dimension(nbdirsmax,4) :: zy_dv_orig
+  complex(8), dimension(nbdirs,4) :: zy_dv_orig
 
   ! Function result variables
   complex(8) :: zdotu_result
-  complex(8), dimension(nbdirsmax) :: zdotu_dv_result
+  complex(8), dimension(nbdirs) :: zdotu_dv_result
 
   ! Initialize test parameters
   nsize = n
@@ -59,14 +59,14 @@ program test_zdotu_vector_forward
   end do
 
   ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     do i = 1, max_size
       call random_number(temp_real)
       call random_number(temp_imag)
       zx_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
     end do
   end do
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     do i = 1, max_size
       call random_number(temp_real)
       call random_number(temp_imag)
@@ -83,7 +83,7 @@ program test_zdotu_vector_forward
 
   ! Call the vector mode differentiated function
 
-  call zdotu_dv(nsize, zx, zx_dv, incx_val, zy, zy_dv, incy_val, zdotu_result, zdotu_dv_result, nbdirsmax)
+  call zdotu_dv(nsize, zx, zx_dv, incx_val, zy, zy_dv, incy_val, zdotu_result, zdotu_dv_result, nbdirs)
 
   ! Print results and compare
   write(*,*) 'Function calls completed successfully'
@@ -110,10 +110,10 @@ contains
     
     write(*,*) 'Checking vector derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirsmax
+    write(*,*) 'Number of directions:', nbdirs
     
     ! Test each derivative direction separately
-    do idir = 1, nbdirsmax
+    do idir = 1, nbdirs
       
       ! Forward perturbation: f(x + h * direction)
       zx = zx_orig + cmplx(h, 0.0) * zx_dv_orig(idir,:)

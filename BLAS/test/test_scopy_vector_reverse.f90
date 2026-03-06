@@ -1,10 +1,10 @@
 ! Test program for SCOPY vector reverse mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirsmax=4
+! Using REAL*4 precision with nbdirs=4
 
 program test_scopy_vector_reverse
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   external :: scopy
   external :: scopy_bv
@@ -26,11 +26,11 @@ program test_scopy_vector_reverse
   ! Adjoint variables (reverse vector mode)
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
-  real(4), dimension(nbdirsmax,4) :: sxb
-  real(4), dimension(nbdirsmax,max_size) :: syb
+  real(4), dimension(nbdirs,4) :: sxb
+  real(4), dimension(nbdirs,max_size) :: syb
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  real(4), dimension(nbdirsmax,max_size) :: syb_orig
+  real(4), dimension(nbdirs,max_size) :: syb_orig
 
   ! Storage for original values (for VJP verification)
   real(4), dimension(4) :: sx_orig
@@ -62,7 +62,7 @@ program test_scopy_vector_reverse
 
   ! Initialize output adjoints (cotangents) with random values for each direction
   ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirsmax
+  do k = 1, nbdirs
     call random_number(syb(k,:))
     syb(k,:) = syb(k,:) * 2.0 - 1.0
   end do
@@ -79,7 +79,7 @@ program test_scopy_vector_reverse
   call set_ISIZE1OFSx(max_size)
 
   ! Call reverse vector mode differentiated function
-  call scopy_bv(nsize, sx, sxb, incx_val, sy, syb, incy_val, nbdirsmax)
+  call scopy_bv(nsize, sx, sxb, incx_val, sy, syb, incy_val, nbdirs)
 
   ! Reset ISIZE globals to uninitialized (-1) for completeness
   call set_ISIZE1OFSx(-1)
@@ -109,7 +109,7 @@ contains
     write(*,*) 'Step size h =', h
     
     ! Test each differentiation direction separately
-    do k = 1, nbdirsmax
+    do k = 1, nbdirs
       
       ! Initialize random direction vectors for all inputs
       call random_number(sx_dir)

@@ -1,10 +1,10 @@
 ! Test program for ZTBMV vector forward mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*8 precision with nbdirsmax=4
+! Using REAL*8 precision with nbdirs=4
 
 program test_ztbmv_vector_forward
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   external :: ztbmv
   external :: ztbmv_dv
@@ -28,14 +28,14 @@ program test_ztbmv_vector_forward
   integer :: incx_val
 
   ! Vector mode derivative variables (type-promoted)
-  ! Scalars become arrays(nbdirsmax), arrays gain extra dimension
-  complex(8), dimension(nbdirsmax,max_size,max_size) :: a_dv
-  complex(8), dimension(nbdirsmax,max_size) :: x_dv
+  ! Scalars become arrays(nbdirs), arrays gain extra dimension
+  complex(8), dimension(nbdirs,max_size,max_size) :: a_dv
+  complex(8), dimension(nbdirs,max_size) :: x_dv
   ! Declare variables for storing original values
   complex(8), dimension(max_size,max_size) :: a_orig
-  complex(8), dimension(nbdirsmax,max_size,max_size) :: a_dv_orig
+  complex(8), dimension(nbdirs,max_size,max_size) :: a_dv_orig
   complex(8), dimension(max_size) :: x_orig
-  complex(8), dimension(nbdirsmax,max_size) :: x_dv_orig
+  complex(8), dimension(nbdirs,max_size) :: x_dv_orig
 
   ! Initialize test parameters
   nsize = n
@@ -66,7 +66,7 @@ program test_ztbmv_vector_forward
   end do
 
   ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     do i = 1, max_size
       do j = 1, max_size
         call random_number(temp_real)
@@ -75,7 +75,7 @@ program test_ztbmv_vector_forward
       end do
     end do
   end do
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     do i = 1, max_size
       call random_number(temp_real)
       call random_number(temp_imag)
@@ -92,7 +92,7 @@ program test_ztbmv_vector_forward
 
   ! Call the vector mode differentiated function
 
-  call ztbmv_dv(uplo, trans, diag, nsize, ksize, a, a_dv, lda_val, x, x_dv, incx_val, nbdirsmax)
+  call ztbmv_dv(uplo, trans, diag, nsize, ksize, a, a_dv, lda_val, x, x_dv, incx_val, nbdirs)
 
   ! Print results and compare
   write(*,*) 'Function calls completed successfully'
@@ -119,10 +119,10 @@ contains
     
     write(*,*) 'Checking vector derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirsmax
+    write(*,*) 'Number of directions:', nbdirs
     
     ! Test each derivative direction separately
-    do idir = 1, nbdirsmax
+    do idir = 1, nbdirs
       
       ! Forward perturbation: f(x + h * direction)
       a = a_orig + cmplx(h, 0.0) * a_dv_orig(idir,:,:)

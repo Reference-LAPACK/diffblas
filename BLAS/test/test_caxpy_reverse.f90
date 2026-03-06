@@ -91,8 +91,8 @@ program test_caxpy_reverse
   cyb_orig = cyb
 
   ! Initialize input adjoints to zero (they will be computed)
-  cab = 0.0
   cxb = 0.0
+  cab = 0.0
 
   ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
   ! Differentiated code checks they are set via check_ISIZE*_initialized.

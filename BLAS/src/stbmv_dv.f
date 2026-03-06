@@ -192,8 +192,8 @@ C  =====================================================================
       SUBROUTINE STBMV_DV(uplo, trans, diag, n, k, a, ad, lda, x, xd, 
      +                    incx, nbdirs)
       IMPLICIT NONE
-      INCLUDE 'DIFFSIZES.inc'
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C      INCLUDE 'DIFFSIZES.inc'
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level2 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -205,7 +205,7 @@ C     .. Scalar Arguments ..
 C     ..
 C     .. Array Arguments ..
       REAL a(lda, *), x(*)
-      REAL ad(nbdirsmax, lda, *), xd(nbdirsmax, *)
+      REAL ad(nbdirs, lda, *), xd(nbdirs, *)
 C     ..
 C
 C  =====================================================================
@@ -216,7 +216,7 @@ C     .. Parameters ..
 C     ..
 C     .. Local Scalars ..
       REAL temp
-      REAL tempd(nbdirsmax)
+      REAL tempd(nbdirs)
       INTEGER i, info, ix, j, jx, kplus1, kx, l
       LOGICAL nounit
       EXTERNAL LSAME
@@ -242,13 +242,6 @@ C     .. Intrinsic Functions ..
 C     ..
 C
 C     Test the input parameters.
-C
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
 C
       info = 0
       IF (.NOT.LSAME(uplo, 'U') .AND. (.NOT.LSAME(uplo, 'L'))) THEN

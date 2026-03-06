@@ -1,10 +1,10 @@
 ! Test program for SNRM2 vector reverse mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirsmax=4
+! Using REAL*4 precision with nbdirs=4
 
 program test_snrm2_vector_reverse
-  use DIFFSIZES
   implicit none
+  integer, parameter :: nbdirs = 4
 
   real(4), external :: snrm2
   external :: snrm2_bv
@@ -24,11 +24,11 @@ program test_snrm2_vector_reverse
   ! Adjoint variables (reverse vector mode)
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
-  real(4), dimension(nbdirsmax,4) :: xb
-  real(4), dimension(nbdirsmax) :: snrm2b
+  real(4), dimension(nbdirs,4) :: xb
+  real(4), dimension(nbdirs) :: snrm2b
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  real(4), dimension(nbdirsmax) :: snrm2b_orig
+  real(4), dimension(nbdirs) :: snrm2b_orig
 
   ! Storage for original values (for VJP verification)
   real(4), dimension(4) :: x_orig
@@ -56,7 +56,7 @@ program test_snrm2_vector_reverse
   ! Initialize output adjoints (cotangents) with random values for each direction
   ! These are the 'seeds' for reverse mode
   ! Initialize function result adjoint (output cotangent)
-  do k = 1, nbdirsmax
+  do k = 1, nbdirs
     call random_number(snrm2b(k))
     snrm2b(k) = snrm2b(k) * 2.0 - 1.0
   end do
@@ -69,7 +69,7 @@ program test_snrm2_vector_reverse
   snrm2b_orig = snrm2b
 
   ! Call reverse vector mode differentiated function
-  call snrm2_bv(nsize, x, xb, incx_val, snrm2b, nbdirsmax)
+  call snrm2_bv(nsize, x, xb, incx_val, snrm2b, nbdirs)
 
   ! VJP Verification using finite differences
   call check_vjp_numerically()
@@ -95,7 +95,7 @@ contains
     write(*,*) 'Step size h =', h
     
     ! Test each differentiation direction separately
-    do k = 1, nbdirsmax
+    do k = 1, nbdirs
       
       ! Initialize random direction vectors for all inputs
       call random_number(x_dir)

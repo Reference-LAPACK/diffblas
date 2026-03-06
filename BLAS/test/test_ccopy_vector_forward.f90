@@ -1,10 +1,10 @@
 ! Test program for CCOPY vector forward mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirsmax=4
+! Using REAL*4 precision with nbdirs=4
 
 program test_ccopy_vector_forward
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   external :: ccopy
   external :: ccopy_dv
@@ -24,14 +24,14 @@ program test_ccopy_vector_forward
   integer :: incy_val
 
   ! Vector mode derivative variables (type-promoted)
-  ! Scalars become arrays(nbdirsmax), arrays gain extra dimension
-  complex(4), dimension(nbdirsmax,4) :: cx_dv
-  complex(4), dimension(nbdirsmax,max_size) :: cy_dv
+  ! Scalars become arrays(nbdirs), arrays gain extra dimension
+  complex(4), dimension(nbdirs,4) :: cx_dv
+  complex(4), dimension(nbdirs,max_size) :: cy_dv
   ! Declare variables for storing original values
   complex(4), dimension(4) :: cx_orig
-  complex(4), dimension(nbdirsmax,4) :: cx_dv_orig
+  complex(4), dimension(nbdirs,4) :: cx_dv_orig
   complex(4), dimension(max_size) :: cy_orig
-  complex(4), dimension(nbdirsmax,max_size) :: cy_dv_orig
+  complex(4), dimension(nbdirs,max_size) :: cy_dv_orig
 
   ! Initialize test parameters
   nsize = n
@@ -55,14 +55,14 @@ program test_ccopy_vector_forward
   end do
 
   ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     do i = 1, max_size
       call random_number(temp_real)
       call random_number(temp_imag)
       cx_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
     end do
   end do
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     do i = 1, max_size
       call random_number(temp_real)
       call random_number(temp_imag)
@@ -82,7 +82,7 @@ program test_ccopy_vector_forward
   ! Set ISIZE globals required by differentiated routine
   call set_ISIZE1OFCy(max_size)
 
-  call ccopy_dv(nsize, cx, cx_dv, incx_val, cy, cy_dv, incy_val, nbdirsmax)
+  call ccopy_dv(nsize, cx, cx_dv, incx_val, cy, cy_dv, incy_val, nbdirs)
 
   ! Reset ISIZE globals to uninitialized (-1)
   call set_ISIZE1OFCy(-1)
@@ -112,10 +112,10 @@ contains
     
     write(*,*) 'Checking vector derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirsmax
+    write(*,*) 'Number of directions:', nbdirs
     
     ! Test each derivative direction separately
-    do idir = 1, nbdirsmax
+    do idir = 1, nbdirs
       
       ! Forward perturbation: f(x + h * direction)
       cx = cx_orig + cmplx(h, 0.0) * cx_dv_orig(idir,:)

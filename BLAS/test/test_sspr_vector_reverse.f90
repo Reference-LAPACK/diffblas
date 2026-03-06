@@ -1,10 +1,10 @@
 ! Test program for SSPR vector reverse mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirsmax=4
+! Using REAL*4 precision with nbdirs=4
 
 program test_sspr_vector_reverse
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   external :: sspr
   external :: sspr_bv
@@ -27,12 +27,12 @@ program test_sspr_vector_reverse
   ! Adjoint variables (reverse vector mode)
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
-  real(4), dimension(nbdirsmax) :: alphab
-  real(4), dimension(nbdirsmax,max_size) :: xb
-  real(4), dimension(nbdirsmax,(n*(n+1))/2) :: apb
+  real(4), dimension(nbdirs) :: alphab
+  real(4), dimension(nbdirs,max_size) :: xb
+  real(4), dimension(nbdirs,(n*(n+1))/2) :: apb
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  real(4), dimension(nbdirsmax,(n*(n+1))/2) :: apb_orig
+  real(4), dimension(nbdirs,(n*(n+1))/2) :: apb_orig
 
   ! Storage for original values (for VJP verification)
   real(4) :: alpha_orig
@@ -66,7 +66,7 @@ program test_sspr_vector_reverse
 
   ! Initialize output adjoints (cotangents) with random values for each direction
   ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirsmax
+  do k = 1, nbdirs
     call random_number(apb(k,:))
     apb(k,:) = apb(k,:) * 2.0 - 1.0
   end do
@@ -84,7 +84,7 @@ program test_sspr_vector_reverse
   call set_ISIZE1OFX(max_size)
 
   ! Call reverse vector mode differentiated function
-  call sspr_bv(uplo, nsize, alpha, alphab, x, xb, incx_val, ap, apb, nbdirsmax)
+  call sspr_bv(uplo, nsize, alpha, alphab, x, xb, incx_val, ap, apb, nbdirs)
 
   ! Reset ISIZE globals to uninitialized (-1) for completeness
   call set_ISIZE1OFX(-1)
@@ -115,7 +115,7 @@ contains
     write(*,*) 'Step size h =', h
     
     ! Test each differentiation direction separately
-    do k = 1, nbdirsmax
+    do k = 1, nbdirs
       
       ! Initialize random direction vectors for all inputs
       call random_number(alpha_dir)

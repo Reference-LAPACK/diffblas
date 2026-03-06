@@ -41,9 +41,9 @@ program test_dsyr
   logical :: has_large_errors
 
   ! Variables for storing original derivative values
-  real(8) :: alpha_d_orig
-  real(8), dimension(max_size,max_size) :: a_d_orig
   real(8), dimension(max_size) :: x_d_orig
+  real(8), dimension(max_size,max_size) :: a_d_orig
+  real(8) :: alpha_d_orig
 
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
@@ -75,9 +75,9 @@ program test_dsyr
   x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
   ! Store initial derivative values after random initialization
-  alpha_d_orig = alpha_d
-  a_d_orig = a_d
   x_d_orig = x_d
+  a_d_orig = a_d
+  alpha_d_orig = alpha_d
 
   ! Store original values for central difference computation
   a_orig = a

@@ -1,10 +1,10 @@
 ! Test program for ZDOTC vector reverse mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*8 precision with nbdirsmax=4
+! Using REAL*8 precision with nbdirs=4
 
 program test_zdotc_vector_reverse
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   complex(8), external :: zdotc
   external :: zdotc_bv
@@ -26,12 +26,12 @@ program test_zdotc_vector_reverse
   ! Adjoint variables (reverse vector mode)
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
-  complex(8), dimension(nbdirsmax,4) :: zxb
-  complex(8), dimension(nbdirsmax,4) :: zyb
-  complex(8), dimension(nbdirsmax) :: zdotcb
+  complex(8), dimension(nbdirs,4) :: zxb
+  complex(8), dimension(nbdirs,4) :: zyb
+  complex(8), dimension(nbdirs) :: zdotcb
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  complex(8), dimension(nbdirsmax) :: zdotcb_orig
+  complex(8), dimension(nbdirs) :: zdotcb_orig
 
   ! Storage for original values (for VJP verification)
   complex(8), dimension(4) :: zx_orig
@@ -70,7 +70,7 @@ program test_zdotc_vector_reverse
   ! Initialize output adjoints (cotangents) with random values for each direction
   ! These are the 'seeds' for reverse mode
   ! Initialize function result adjoint (output cotangent)
-  do k = 1, nbdirsmax
+  do k = 1, nbdirs
     call random_number(temp_real)
     call random_number(temp_imag)
     zdotcb(k) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
@@ -90,7 +90,7 @@ program test_zdotc_vector_reverse
   call set_ISIZE1OFZy(max_size)
 
   ! Call reverse vector mode differentiated function
-  call zdotc_bv(nsize, zx, zxb, incx_val, zy, zyb, incy_val, zdotcb, nbdirsmax)
+  call zdotc_bv(nsize, zx, zxb, incx_val, zy, zyb, incy_val, zdotcb, nbdirs)
 
   ! Reset ISIZE globals to uninitialized (-1) for completeness
   call set_ISIZE1OFZx(-1)
@@ -121,7 +121,7 @@ contains
     write(*,*) 'Step size h =', h
     
     ! Test each differentiation direction separately
-    do k = 1, nbdirsmax
+    do k = 1, nbdirs
       
       ! Initialize random direction vectors for all inputs
       do i = 1, n

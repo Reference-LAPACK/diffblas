@@ -1,10 +1,10 @@
 ! Test program for ZSCAL vector reverse mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*8 precision with nbdirsmax=4
+! Using REAL*8 precision with nbdirs=4
 
 program test_zscal_vector_reverse
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   external :: zscal
   external :: zscal_bv
@@ -25,11 +25,11 @@ program test_zscal_vector_reverse
   ! Adjoint variables (reverse vector mode)
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
-  complex(8), dimension(nbdirsmax) :: zab
-  complex(8), dimension(nbdirsmax,max_size) :: zxb
+  complex(8), dimension(nbdirs) :: zab
+  complex(8), dimension(nbdirs,max_size) :: zxb
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  complex(8), dimension(nbdirsmax,max_size) :: zxb_orig
+  complex(8), dimension(nbdirs,max_size) :: zxb_orig
 
   ! Storage for original values (for VJP verification)
   complex(8) :: za_orig
@@ -64,7 +64,7 @@ program test_zscal_vector_reverse
 
   ! Initialize output adjoints (cotangents) with random values for each direction
   ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirsmax
+  do k = 1, nbdirs
     do i = 1, n
       call random_number(temp_real)
       call random_number(temp_imag)
@@ -80,7 +80,7 @@ program test_zscal_vector_reverse
   zxb_orig = zxb
 
   ! Call reverse vector mode differentiated function
-  call zscal_bv(nsize, za, zab, zx, zxb, incx_val, nbdirsmax)
+  call zscal_bv(nsize, za, zab, zx, zxb, incx_val, nbdirs)
 
   ! VJP Verification using finite differences
   call check_vjp_numerically()
@@ -107,7 +107,7 @@ contains
     write(*,*) 'Step size h =', h
     
     ! Test each differentiation direction separately
-    do k = 1, nbdirsmax
+    do k = 1, nbdirs
       
       ! Initialize random direction vectors for all inputs
       call random_number(temp_real)

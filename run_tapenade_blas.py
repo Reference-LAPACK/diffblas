@@ -4346,7 +4346,7 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
 
     return program
 
-def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inout_vars, func_type="SUBROUTINE", compiler="gfortran", c_compiler="gcc", param_types=None, nbdirsmax=4, forward_src_dir=None):
+def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inout_vars, func_type="SUBROUTINE", compiler="gfortran", c_compiler="gcc", param_types=None, nbdirsmax=4, forward_src_dir=None, no_nbdirsmax=False):
     """
     Generate a test main program for vector forward mode differentiated function.
     In vector mode, derivative variables are type-promoted:
@@ -4418,18 +4418,19 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
     # Determine if source is Fortran 90 or Fortran 77
     is_fortran90 = src_file.suffix.lower() in ['.f90', '.f95', '.f03', '.f08']
     
-    # Generate the main program content
+    nd_var = "nbdirs" if no_nbdirsmax else "nbdirsmax"
     main_lines = []
     main_lines.append(f"! Test program for {func_name} vector forward mode differentiation")
     main_lines.append(f"! Generated automatically by run_tapenade_blas.py")
-    main_lines.append(f"! Using {precision_name} precision with nbdirsmax={nbdirsmax}")
+    main_lines.append(f"! Using {precision_name} precision with {nd_var}={nbdirsmax}")
     main_lines.append("")
     main_lines.append("program test_" + src_stem + "_vector_forward")
-    if is_fortran90:
+    if is_fortran90 and not no_nbdirsmax:
         main_lines.append("  use DIFFSIZES")
     main_lines.append("  implicit none")
-    if not is_fortran90:
-        # Fortran 77: use include statement after implicit none
+    if no_nbdirsmax:
+        main_lines.append(f"  integer, parameter :: nbdirs = {nbdirsmax}")
+    elif not is_fortran90:
         main_lines.append("  include 'DIFFSIZES.inc'")
     main_lines.append("")
     
@@ -4601,7 +4602,7 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
     # Declare VECTOR MODE derivative variables (type-promoted)
     main_lines.append("")
     main_lines.append("  ! Vector mode derivative variables (type-promoted)")
-    main_lines.append("  ! Scalars become arrays(nbdirsmax), arrays gain extra dimension")
+    main_lines.append(f"  ! Scalars become arrays({nd_var}), arrays gain extra dimension")
     for param in all_params:
         param_upper = param.upper()
         if param_upper in ['TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
@@ -4611,17 +4612,17 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
                 array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
                 if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                     complex_type = get_complex_type(func_name)
-                    main_lines.append(f"  {complex_type}, dimension(nbdirsmax,{array_size},{array_size}) :: {param.lower()}_dv")
+                    main_lines.append(f"  {complex_type}, dimension({nd_var},{array_size},{array_size}) :: {param.lower()}_dv")
                 else:
-                    main_lines.append(f"  {precision_type}, dimension(nbdirsmax,{array_size},{array_size}) :: {param.lower()}_dv")
+                    main_lines.append(f"  {precision_type}, dimension({nd_var},{array_size},{array_size}) :: {param.lower()}_dv")
             elif param_upper in ['AP', 'BP', 'CP']:
                 n_value = param_values.get('N', 'n')
                 packed_size = f"({n_value}*({n_value}+1))/2"
                 if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                     complex_type = get_complex_type(func_name)
-                    main_lines.append(f"  {complex_type}, dimension(nbdirsmax,{packed_size}) :: {param.lower()}_dv")
+                    main_lines.append(f"  {complex_type}, dimension({nd_var},{packed_size}) :: {param.lower()}_dv")
                 else:
-                    main_lines.append(f"  {precision_type}, dimension(nbdirsmax,{packed_size}) :: {param.lower()}_dv")
+                    main_lines.append(f"  {precision_type}, dimension({nd_var},{packed_size}) :: {param.lower()}_dv")
             elif param_upper in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
                 array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
                 # Check if parameter is complex (either function is complex or param is in complex_vars)
@@ -4630,24 +4631,24 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
                                    param_upper in complex_vars)
                 if is_complex_param:
                     complex_type = get_complex_type(func_name)
-                    main_lines.append(f"  {complex_type}, dimension(nbdirsmax,{array_size}) :: {param.lower()}_dv")
+                    main_lines.append(f"  {complex_type}, dimension({nd_var},{array_size}) :: {param.lower()}_dv")
                 else:
                     param_prec = get_param_precision(param_upper, func_name, param_types)
-                    main_lines.append(f"  {param_prec}, dimension(nbdirsmax,{array_size}) :: {param.lower()}_dv")
+                    main_lines.append(f"  {param_prec}, dimension({nd_var},{array_size}) :: {param.lower()}_dv")
             elif param_upper in ['DPARAM', 'SPARAM']:
                 # Parameter arrays for rotm/rotmg - 5 elements
-                main_lines.append(f"  {precision_type}, dimension(nbdirsmax,5) :: {param.lower()}_dv")
+                main_lines.append(f"  {precision_type}, dimension({nd_var},5) :: {param.lower()}_dv")
             else:
                 # Scalar becomes array(nbdirsmax)
                 complex_vars = param_types.get('complex_vars', set())
                 is_complex_scalar = (param_upper in complex_vars)
                 if param_upper in ['DA', 'DD1', 'DD2', 'SD1', 'SD2', 'DX1', 'DY1', 'SX1', 'SY1']:
-                    main_lines.append(f"  {precision_type}, dimension(nbdirsmax) :: {param.lower()}_dv")
+                    main_lines.append(f"  {precision_type}, dimension({nd_var}) :: {param.lower()}_dv")
                 elif is_complex_scalar:
                     complex_type = get_complex_type(func_name)
-                    main_lines.append(f"  {complex_type}, dimension(nbdirsmax) :: {param.lower()}_dv")
+                    main_lines.append(f"  {complex_type}, dimension({nd_var}) :: {param.lower()}_dv")
                 else:
-                    main_lines.append(f"  {precision_type}, dimension(nbdirsmax) :: {param.lower()}_dv")
+                    main_lines.append(f"  {precision_type}, dimension({nd_var}) :: {param.lower()}_dv")
     
     # Declare variables for storing original values
     main_lines.append("  ! Declare variables for storing original values")
@@ -4660,30 +4661,30 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
                 if param_upper in ['A', 'B', 'C']:
                     array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
                     main_lines.append(f"  {complex_type}, dimension({array_size},{array_size}) :: {param.lower()}_orig")
-                    main_lines.append(f"  {complex_type}, dimension(nbdirsmax,{array_size},{array_size}) :: {param.lower()}_dv_orig")
+                    main_lines.append(f"  {complex_type}, dimension({nd_var},{array_size},{array_size}) :: {param.lower()}_dv_orig")
                 elif param_upper in ['AP', 'BP', 'CP']:
                     n_value = param_values.get('N', 'n')
                     packed_size = f"({n_value}*({n_value}+1))/2"
                     main_lines.append(f"  {complex_type}, dimension({packed_size}) :: {param.lower()}_orig")
-                    main_lines.append(f"  {complex_type}, dimension(nbdirsmax,{packed_size}) :: {param.lower()}_dv_orig")
+                    main_lines.append(f"  {complex_type}, dimension({nd_var},{packed_size}) :: {param.lower()}_dv_orig")
                 elif param_upper in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
                     array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
                     main_lines.append(f"  {complex_type}, dimension({array_size}) :: {param.lower()}_orig")
-                    main_lines.append(f"  {complex_type}, dimension(nbdirsmax,{array_size}) :: {param.lower()}_dv_orig")
+                    main_lines.append(f"  {complex_type}, dimension({nd_var},{array_size}) :: {param.lower()}_dv_orig")
                 elif param_upper in ['DA']:
                     # DA is always real, even in complex functions
                     main_lines.append(f"  {precision_type} :: {param.lower()}_orig")
-                    main_lines.append(f"  {precision_type}, dimension(nbdirsmax) :: {param.lower()}_dv_orig")
+                    main_lines.append(f"  {precision_type}, dimension({nd_var}) :: {param.lower()}_dv_orig")
                 else:
                     main_lines.append(f"  {complex_type} :: {param.lower()}_orig")
-                    main_lines.append(f"  {complex_type}, dimension(nbdirsmax) :: {param.lower()}_dv_orig")
+                    main_lines.append(f"  {complex_type}, dimension({nd_var}) :: {param.lower()}_dv_orig")
             else:
                 # Real functions - use precision_type, but check if param is complex
                 complex_vars = param_types.get('complex_vars', set())
                 if param_upper in ['DPARAM', 'SPARAM']:
                     # rotm/rotmg parameter arrays (5 elements)
                     main_lines.append(f"  {precision_type}, dimension(5) :: {param.lower()}_orig")
-                    main_lines.append(f"  {precision_type}, dimension(nbdirsmax,5) :: {param.lower()}_dv_orig")
+                    main_lines.append(f"  {precision_type}, dimension({nd_var},5) :: {param.lower()}_dv_orig")
                     continue
                 if param_upper in ['A', 'B', 'C']:
                     array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
@@ -4691,10 +4692,10 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
                     if is_complex_param:
                         complex_type = get_complex_type(func_name)
                         main_lines.append(f"  {complex_type}, dimension({array_size},{array_size}) :: {param.lower()}_orig")
-                        main_lines.append(f"  {complex_type}, dimension(nbdirsmax,{array_size},{array_size}) :: {param.lower()}_dv_orig")
+                        main_lines.append(f"  {complex_type}, dimension({nd_var},{array_size},{array_size}) :: {param.lower()}_dv_orig")
                     else:
                         main_lines.append(f"  {precision_type}, dimension({array_size},{array_size}) :: {param.lower()}_orig")
-                        main_lines.append(f"  {precision_type}, dimension(nbdirsmax,{array_size},{array_size}) :: {param.lower()}_dv_orig")
+                        main_lines.append(f"  {precision_type}, dimension({nd_var},{array_size},{array_size}) :: {param.lower()}_dv_orig")
                 elif param_upper in ['AP', 'BP', 'CP']:
                     n_value = param_values.get('N', 'n')
                     packed_size = f"({n_value}*({n_value}+1))/2"
@@ -4702,30 +4703,30 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
                     if is_complex_param:
                         complex_type = get_complex_type(func_name)
                         main_lines.append(f"  {complex_type}, dimension({packed_size}) :: {param.lower()}_orig")
-                        main_lines.append(f"  {complex_type}, dimension(nbdirsmax,{packed_size}) :: {param.lower()}_dv_orig")
+                        main_lines.append(f"  {complex_type}, dimension({nd_var},{packed_size}) :: {param.lower()}_dv_orig")
                     else:
                         main_lines.append(f"  {precision_type}, dimension({packed_size}) :: {param.lower()}_orig")
-                        main_lines.append(f"  {precision_type}, dimension(nbdirsmax,{packed_size}) :: {param.lower()}_dv_orig")
+                        main_lines.append(f"  {precision_type}, dimension({nd_var},{packed_size}) :: {param.lower()}_dv_orig")
                 elif param_upper in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
                     array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
                     is_complex_param = param_upper in complex_vars
                     if is_complex_param:
                         complex_type = get_complex_type(func_name)
                         main_lines.append(f"  {complex_type}, dimension({array_size}) :: {param.lower()}_orig")
-                        main_lines.append(f"  {complex_type}, dimension(nbdirsmax,{array_size}) :: {param.lower()}_dv_orig")
+                        main_lines.append(f"  {complex_type}, dimension({nd_var},{array_size}) :: {param.lower()}_dv_orig")
                     else:
                         main_lines.append(f"  {precision_type}, dimension({array_size}) :: {param.lower()}_orig")
-                        main_lines.append(f"  {precision_type}, dimension(nbdirsmax,{array_size}) :: {param.lower()}_dv_orig")
+                        main_lines.append(f"  {precision_type}, dimension({nd_var},{array_size}) :: {param.lower()}_dv_orig")
                 else:
                     # Scalars: may still be complex (e.g., Z in DCABS1/SCABS1)
                     is_complex_param = param_upper in complex_vars
                     if is_complex_param:
                         complex_type = get_complex_type(func_name)
                         main_lines.append(f"  {complex_type} :: {param.lower()}_orig")
-                        main_lines.append(f"  {complex_type}, dimension(nbdirsmax) :: {param.lower()}_dv_orig")
+                        main_lines.append(f"  {complex_type}, dimension({nd_var}) :: {param.lower()}_dv_orig")
                     else:
                         main_lines.append(f"  {precision_type} :: {param.lower()}_orig")
-                        main_lines.append(f"  {precision_type}, dimension(nbdirsmax) :: {param.lower()}_dv_orig")
+                        main_lines.append(f"  {precision_type}, dimension({nd_var}) :: {param.lower()}_dv_orig")
     
     # For FUNCTIONs, declare result variables
     if func_type == 'FUNCTION':
@@ -4734,10 +4735,10 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
         if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
             complex_type = get_complex_type(func_name)
             main_lines.append(f"  {complex_type} :: {func_name.lower()}_result")
-            main_lines.append(f"  {complex_type}, dimension(nbdirsmax) :: {func_name.lower()}_dv_result")
+            main_lines.append(f"  {complex_type}, dimension({nd_var}) :: {func_name.lower()}_dv_result")
         else:
             main_lines.append(f"  {precision_type} :: {func_name.lower()}_result")
-            main_lines.append(f"  {precision_type}, dimension(nbdirsmax) :: {func_name.lower()}_dv_result")
+            main_lines.append(f"  {precision_type}, dimension({nd_var}) :: {func_name.lower()}_dv_result")
     
     main_lines.append("")
     main_lines.append("  ! Initialize test parameters")
@@ -4887,24 +4888,24 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
                 complex_vars = param_types.get('complex_vars', set())
                 is_complex_scalar = (param_upper in complex_vars)
                 if param_upper == 'DA':
-                    main_lines.append(f"  do idir = 1, nbdirsmax")
+                    main_lines.append(f"  do idir = 1, {nd_var}")
                     main_lines.append(f"    call random_number(temp_real)")
                     main_lines.append(f"    {param.lower()}_dv(idir) = temp_real * 2.0d0 - 1.0d0")
                     main_lines.append(f"  end do")
                 elif param_upper == 'ALPHA' and is_alpha_real_for_complex_function(func_name):
                     # ALPHA is real for certain Hermitian complex functions
-                    main_lines.append(f"  do idir = 1, nbdirsmax")
+                    main_lines.append(f"  do idir = 1, {nd_var}")
                     main_lines.append(f"    call random_number(temp_real)")
                     main_lines.append(f"    {param.lower()}_dv(idir) = temp_real * 2.0d0 - 1.0d0")
                     main_lines.append(f"  end do")
                 elif param_upper == 'BETA' and is_beta_real_for_complex_function(func_name):
                     # BETA is real for certain Hermitian complex functions
-                    main_lines.append(f"  do idir = 1, nbdirsmax")
+                    main_lines.append(f"  do idir = 1, {nd_var}")
                     main_lines.append(f"    call random_number(temp_real)")
                     main_lines.append(f"    {param.lower()}_dv(idir) = temp_real * 2.0d0 - 1.0d0")
                     main_lines.append(f"  end do")
                 elif is_complex_scalar:
-                    main_lines.append(f"  do idir = 1, nbdirsmax")
+                    main_lines.append(f"  do idir = 1, {nd_var}")
                     main_lines.append(f"    call random_number(temp_real)")
                     main_lines.append(f"    call random_number(temp_imag)")
                     main_lines.append(f"    {param.lower()}_dv(idir) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)")
@@ -4913,25 +4914,25 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
                     # Use parameter-specific precision for mixed-precision functions
                     param_prec = get_param_precision(param_upper, func_name, param_types)
                     suffix = get_literal_suffix(param_prec)
-                    main_lines.append(f"  do idir = 1, nbdirsmax")
+                    main_lines.append(f"  do idir = 1, {nd_var}")
                     main_lines.append(f"    call random_number(temp_real)")
                     main_lines.append(f"    {param.lower()}_dv(idir) = temp_real * 2.0{suffix} - 1.0{suffix}")
                     main_lines.append(f"  end do")
             elif param_upper in ['DPARAM', 'SPARAM']:
-                main_lines.append(f"  do idir = 1, nbdirsmax")
+                main_lines.append(f"  do idir = 1, {nd_var}")
                 main_lines.append(f"    call random_number({param.lower()}_dv(idir,:))")
                 main_lines.append(f"    {param.lower()}_dv(idir,:) = {param.lower()}_dv(idir,:) * 2.0d0 - 1.0d0")
                 main_lines.append(f"  end do")
             elif param_upper in ['DX1', 'DY1', 'SX1', 'SY1']:
                 param_prec = get_param_precision(param_upper, func_name, param_types)
                 suffix = get_literal_suffix(param_prec)
-                main_lines.append(f"  do idir = 1, nbdirsmax")
+                main_lines.append(f"  do idir = 1, {nd_var}")
                 main_lines.append(f"    call random_number(temp_real)")
                 main_lines.append(f"    {param.lower()}_dv(idir) = temp_real * 2.0{suffix} - 1.0{suffix}")
                 main_lines.append(f"  end do")
             elif param_upper in ['A', 'B', 'C']:
                 if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
-                    main_lines.append(f"  do idir = 1, nbdirsmax")
+                    main_lines.append(f"  do idir = 1, {nd_var}")
                     main_lines.append(f"    do i = 1, max_size")
                     main_lines.append(f"      do j = 1, max_size")
                     main_lines.append(f"        call random_number(temp_real)")
@@ -4943,7 +4944,7 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
                     # Enforce Hermitian structure for Hermitian matrix parameters
                     if is_hermitian_function(func_name) and param_upper == 'A':
                         main_lines.append(f"  ! Enforce Hermitian structure for A_dv")
-                        main_lines.append(f"  do idir = 1, nbdirsmax")
+                        main_lines.append(f"  do idir = 1, {nd_var}")
                         main_lines.append(f"    do i = 1, max_size")
                         main_lines.append(f"      {param.lower()}_dv(idir,i,i) = cmplx(real({param.lower()}_dv(idir,i,i)), 0.0d0)")
                         main_lines.append(f"    end do")
@@ -4957,7 +4958,7 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
                     # Use parameter-specific precision for mixed-precision functions
                     param_prec = get_param_precision(param_upper, func_name, param_types)
                     suffix = get_literal_suffix(param_prec)
-                    main_lines.append(f"  do idir = 1, nbdirsmax")
+                    main_lines.append(f"  do idir = 1, {nd_var}")
                     main_lines.append(f"    call random_number({param.lower()}_dv(idir,:,:))")
                     main_lines.append(f"    {param.lower()}_dv(idir,:,:) = {param.lower()}_dv(idir,:,:) * 2.0{suffix} - 1.0{suffix}")
                     main_lines.append(f"  end do")
@@ -4967,7 +4968,7 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
                 is_complex_param = (func_name.upper().startswith('C') or func_name.upper().startswith('Z') or 
                                    param_upper in complex_vars)
                 if is_complex_param:
-                    main_lines.append(f"  do idir = 1, nbdirsmax")
+                    main_lines.append(f"  do idir = 1, {nd_var}")
                     main_lines.append(f"    do i = 1, max_size")
                     main_lines.append(f"      call random_number(temp_real)")
                     main_lines.append(f"      call random_number(temp_imag)")
@@ -4978,13 +4979,13 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
                     # Use parameter-specific precision for mixed-precision functions
                     param_prec = get_param_precision(param_upper, func_name, param_types)
                     suffix = get_literal_suffix(param_prec)
-                    main_lines.append(f"  do idir = 1, nbdirsmax")
+                    main_lines.append(f"  do idir = 1, {nd_var}")
                     main_lines.append(f"    call random_number({param.lower()}_dv(idir,:))")
                     main_lines.append(f"    {param.lower()}_dv(idir,:) = {param.lower()}_dv(idir,:) * 2.0{suffix} - 1.0{suffix}")
                     main_lines.append(f"  end do")
             elif param_upper in ['AP', 'BP', 'CP']:
                 if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
-                    main_lines.append(f"  do idir = 1, nbdirsmax")
+                    main_lines.append(f"  do idir = 1, {nd_var}")
                     main_lines.append(f"    do i = 1, size({param.lower()})")
                     main_lines.append(f"      call random_number(temp_real)")
                     main_lines.append(f"      call random_number(temp_imag)")
@@ -4992,7 +4993,7 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
                     main_lines.append(f"    end do")
                     main_lines.append(f"  end do")
                 else:
-                    main_lines.append(f"  do idir = 1, nbdirsmax")
+                    main_lines.append(f"  do idir = 1, {nd_var}")
                     main_lines.append(f"    call random_number({param.lower()}_dv(idir,:))")
                     main_lines.append(f"    {param.lower()}_dv(idir,:) = {param.lower()}_dv(idir,:) * 2.0d0 - 1.0d0")
                     main_lines.append(f"  end do")
@@ -5057,9 +5058,9 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
     
     if func_type == 'FUNCTION':
         call_args_dv_with_result = call_args_dv + [f"{func_name.lower()}_result"]
-        main_lines.append(f"  call {func_name.lower()}_dv({', '.join(call_args_dv_with_result)}, {func_name.lower()}_dv_result, nbdirsmax)")
+        main_lines.append(f"  call {func_name.lower()}_dv({', '.join(call_args_dv_with_result)}, {func_name.lower()}_dv_result, {nd_var})")
     else:
-        main_lines.append(f"  call {func_name.lower()}_dv({', '.join(call_args_dv)}, nbdirsmax)")
+        main_lines.append(f"  call {func_name.lower()}_dv({', '.join(call_args_dv)}, {nd_var})")
     
     if isize_vars_dv:
         main_lines.append("")
@@ -5166,14 +5167,14 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
     main_lines.append("    ")
     main_lines.append("    write(*,*) 'Checking vector derivatives against numerical differentiation:'")
     main_lines.append("    write(*,*) 'Step size h =', h")
-    main_lines.append("    write(*,*) 'Number of directions:', nbdirsmax")
+    main_lines.append(f"    write(*,*) 'Number of directions:', {nd_var}")
     main_lines.append("    ")
     
     # Original values are already stored in main program before differentiated function call
     
     # Test each derivative direction separately
     main_lines.append("    ! Test each derivative direction separately")
-    main_lines.append("    do idir = 1, nbdirsmax")
+    main_lines.append(f"    do idir = 1, {nd_var}")
     main_lines.append("      ")
     
     # Forward perturbation
@@ -5419,7 +5420,7 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
     
     return "\n".join(main_lines)
 
-def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inout_vars, func_type="SUBROUTINE", compiler="gfortran", c_compiler="gcc", param_types=None, nbdirsmax=4, reverse_src_dir=None):
+def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inout_vars, func_type="SUBROUTINE", compiler="gfortran", c_compiler="gcc", param_types=None, nbdirsmax=4, reverse_src_dir=None, no_nbdirsmax=False):
     """
     Generate a test main program for vector reverse mode differentiated function.
     In vector mode, derivative variables are type-promoted:
@@ -5489,21 +5490,20 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
         rtol = "2.0e-3"
         atol = "2.0e-3"
     
-    # Determine if source is Fortran 90 or Fortran 77
     is_fortran90 = src_file.suffix.lower() in ['.f90', '.f95', '.f03', '.f08']
-    
-    # Generate the main program content
+    nd_var = "nbdirs" if no_nbdirsmax else "nbdirsmax"
     main_lines = []
     main_lines.append(f"! Test program for {func_name} vector reverse mode differentiation")
     main_lines.append(f"! Generated automatically by run_tapenade_blas.py")
-    main_lines.append(f"! Using {precision_name} precision with nbdirsmax={nbdirsmax}")
+    main_lines.append(f"! Using {precision_name} precision with {nd_var}={nbdirsmax}")
     main_lines.append("")
     main_lines.append("program test_" + src_stem + "_vector_reverse")
-    if is_fortran90:
+    if is_fortran90 and not no_nbdirsmax:
         main_lines.append("  use DIFFSIZES")
     main_lines.append("  implicit none")
-    if not is_fortran90:
-        # Fortran 77: use include statement after implicit none
+    if no_nbdirsmax:
+        main_lines.append(f"  integer, parameter :: nbdirs = {nbdirsmax}")
+    elif not is_fortran90:
         main_lines.append("  include 'DIFFSIZES.inc'")
     main_lines.append("")
     
@@ -5678,65 +5678,65 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 # Check if ALPHA/BETA should be real for this complex function (e.g., ZHER, ZHERK)
                 if param_upper == 'ALPHA' and is_alpha_real_for_complex_function(func_name):
-                    main_lines.append(f"  {precision_type}, dimension(nbdirsmax) :: {param.lower()}b")
+                    main_lines.append(f"  {precision_type}, dimension({nd_var}) :: {param.lower()}b")
                 elif param_upper == 'BETA' and is_beta_real_for_complex_function(func_name):
-                    main_lines.append(f"  {precision_type}, dimension(nbdirsmax) :: {param.lower()}b")
+                    main_lines.append(f"  {precision_type}, dimension({nd_var}) :: {param.lower()}b")
                 else:
                     complex_type = get_complex_type(func_name)
-                    main_lines.append(f"  {complex_type}, dimension(nbdirsmax) :: {param.lower()}b")
+                    main_lines.append(f"  {complex_type}, dimension({nd_var}) :: {param.lower()}b")
             else:
-                main_lines.append(f"  {precision_type}, dimension(nbdirsmax) :: {param.lower()}b")
+                main_lines.append(f"  {precision_type}, dimension({nd_var}) :: {param.lower()}b")
         elif param_upper in ['A', 'B', 'C']:
             array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
             # Band matrix A: adjoint in band storage (nbdirsmax, k+1, n)
             if param_upper == 'A' and (is_any_band_matrix_function(func_name)):
                 if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                     complex_type = get_complex_type(func_name)
-                    main_lines.append(f"  {complex_type}, dimension(nbdirsmax,{array_size},n) :: {param.lower()}b  ! Band storage")
+                    main_lines.append(f"  {complex_type}, dimension({nd_var},{array_size},n) :: {param.lower()}b  ! Band storage")
                 else:
-                    main_lines.append(f"  {precision_type}, dimension(nbdirsmax,{array_size},n) :: {param.lower()}b  ! Band storage")
+                    main_lines.append(f"  {precision_type}, dimension({nd_var},{array_size},n) :: {param.lower()}b  ! Band storage")
             elif func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
-                main_lines.append(f"  {complex_type}, dimension(nbdirsmax,{array_size},{array_size}) :: {param.lower()}b")
+                main_lines.append(f"  {complex_type}, dimension({nd_var},{array_size},{array_size}) :: {param.lower()}b")
             else:
-                main_lines.append(f"  {precision_type}, dimension(nbdirsmax,{array_size},{array_size}) :: {param.lower()}b")
+                main_lines.append(f"  {precision_type}, dimension({nd_var},{array_size},{array_size}) :: {param.lower()}b")
         elif param_upper in ['AP', 'BP', 'CP']:
             n_value = param_values.get('N', 'n')
             packed_size = f"({n_value}*({n_value}+1))/2"
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
-                main_lines.append(f"  {complex_type}, dimension(nbdirsmax,{packed_size}) :: {param.lower()}b")
+                main_lines.append(f"  {complex_type}, dimension({nd_var},{packed_size}) :: {param.lower()}b")
             else:
-                main_lines.append(f"  {precision_type}, dimension(nbdirsmax,{packed_size}) :: {param.lower()}b")
+                main_lines.append(f"  {precision_type}, dimension({nd_var},{packed_size}) :: {param.lower()}b")
         elif param_upper in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
             array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
-                main_lines.append(f"  {complex_type}, dimension(nbdirsmax,{array_size}) :: {param.lower()}b")
+                main_lines.append(f"  {complex_type}, dimension({nd_var},{array_size}) :: {param.lower()}b")
             else:
-                main_lines.append(f"  {precision_type}, dimension(nbdirsmax,{array_size}) :: {param.lower()}b")
+                main_lines.append(f"  {precision_type}, dimension({nd_var},{array_size}) :: {param.lower()}b")
         elif param_upper in ['DPARAM', 'SPARAM']:
             # Parameter arrays for rotm/rotmg - 5 elements
-            main_lines.append(f"  {precision_type}, dimension(nbdirsmax,5) :: {param.lower()}b")
+            main_lines.append(f"  {precision_type}, dimension({nd_var},5) :: {param.lower()}b")
         elif param_upper in ['DD1', 'DD2', 'SD1', 'SD2', 'DX1', 'DY1', 'SX1', 'SY1', 'DA']:
             # Scalar parameters - adjoints are arrays in vector mode
             # DA is always real, even in complex functions
-            main_lines.append(f"  {precision_type}, dimension(nbdirsmax) :: {param.lower()}b")
+            main_lines.append(f"  {precision_type}, dimension({nd_var}) :: {param.lower()}b")
         elif param_upper not in ['M', 'N', 'K', 'KL', 'KU', 'LDA', 'LDB', 'LDC', 'INCX', 'INCY', 'TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
             # Other scalar parameters (not integer or character) - adjoints are arrays in vector mode
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
-                main_lines.append(f"  {complex_type}, dimension(nbdirsmax) :: {param.lower()}b")
+                main_lines.append(f"  {complex_type}, dimension({nd_var}) :: {param.lower()}b")
             else:
-                main_lines.append(f"  {precision_type}, dimension(nbdirsmax) :: {param.lower()}b")
+                main_lines.append(f"  {precision_type}, dimension({nd_var}) :: {param.lower()}b")
     
     # For FUNCTIONs, declare the function result adjoint
     if func_type == 'FUNCTION':
         if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
             complex_type = get_complex_type(func_name)
-            main_lines.append(f"  {complex_type}, dimension(nbdirsmax) :: {func_name.lower()}b")
+            main_lines.append(f"  {complex_type}, dimension({nd_var}) :: {func_name.lower()}b")
         else:
-            main_lines.append(f"  {precision_type}, dimension(nbdirsmax) :: {func_name.lower()}b")
+            main_lines.append(f"  {precision_type}, dimension({nd_var}) :: {func_name.lower()}b")
     
     main_lines.append("")
     
@@ -5749,42 +5749,42 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 # Check if ALPHA/BETA should be real for this complex function
                 if param_upper == 'ALPHA' and is_alpha_real_for_complex_function(func_name):
-                    main_lines.append(f"  {precision_type}, dimension(nbdirsmax) :: {param.lower()}b_orig")
+                    main_lines.append(f"  {precision_type}, dimension({nd_var}) :: {param.lower()}b_orig")
                 elif param_upper == 'BETA' and is_beta_real_for_complex_function(func_name):
-                    main_lines.append(f"  {precision_type}, dimension(nbdirsmax) :: {param.lower()}b_orig")
+                    main_lines.append(f"  {precision_type}, dimension({nd_var}) :: {param.lower()}b_orig")
                 else:
                     complex_type = get_complex_type(func_name)
-                    main_lines.append(f"  {complex_type}, dimension(nbdirsmax) :: {param.lower()}b_orig")
+                    main_lines.append(f"  {complex_type}, dimension({nd_var}) :: {param.lower()}b_orig")
             else:
-                main_lines.append(f"  {precision_type}, dimension(nbdirsmax) :: {param.lower()}b_orig")
+                main_lines.append(f"  {precision_type}, dimension({nd_var}) :: {param.lower()}b_orig")
         elif param_upper in ['A', 'B', 'C']:
             array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
-                main_lines.append(f"  {complex_type}, dimension(nbdirsmax,{array_size},{array_size}) :: {param.lower()}b_orig")
+                main_lines.append(f"  {complex_type}, dimension({nd_var},{array_size},{array_size}) :: {param.lower()}b_orig")
             else:
-                main_lines.append(f"  {precision_type}, dimension(nbdirsmax,{array_size},{array_size}) :: {param.lower()}b_orig")
+                main_lines.append(f"  {precision_type}, dimension({nd_var},{array_size},{array_size}) :: {param.lower()}b_orig")
         elif param_upper in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
             array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
-                main_lines.append(f"  {complex_type}, dimension(nbdirsmax,{array_size}) :: {param.lower()}b_orig")
+                main_lines.append(f"  {complex_type}, dimension({nd_var},{array_size}) :: {param.lower()}b_orig")
             else:
-                main_lines.append(f"  {precision_type}, dimension(nbdirsmax,{array_size}) :: {param.lower()}b_orig")
+                main_lines.append(f"  {precision_type}, dimension({nd_var},{array_size}) :: {param.lower()}b_orig")
         elif param_upper in ['AP', 'BP', 'CP']:
             n_value = param_values.get('N', 'n')
             packed_size = f"({n_value}*({n_value}+1))/2"
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
-                main_lines.append(f"  {complex_type}, dimension(nbdirsmax,{packed_size}) :: {param.lower()}b_orig")
+                main_lines.append(f"  {complex_type}, dimension({nd_var},{packed_size}) :: {param.lower()}b_orig")
             else:
-                main_lines.append(f"  {precision_type}, dimension(nbdirsmax,{packed_size}) :: {param.lower()}b_orig")
+                main_lines.append(f"  {precision_type}, dimension({nd_var},{packed_size}) :: {param.lower()}b_orig")
         elif func_type == 'FUNCTION' and param_upper == func_name.upper():
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
-                main_lines.append(f"  {complex_type}, dimension(nbdirsmax) :: {param.lower()}b_orig")
+                main_lines.append(f"  {complex_type}, dimension({nd_var}) :: {param.lower()}b_orig")
             else:
-                main_lines.append(f"  {precision_type}, dimension(nbdirsmax) :: {param.lower()}b_orig")
+                main_lines.append(f"  {precision_type}, dimension({nd_var}) :: {param.lower()}b_orig")
     
     main_lines.append("")
     
@@ -5977,7 +5977,7 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
         if param_upper not in output_param_uppers:
             continue
         if param_upper in ['ALPHA', 'BETA']:
-            main_lines.append(f"  do k = 1, nbdirsmax")
+            main_lines.append(f"  do k = 1, {nd_var}")
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 main_lines.append(f"    call random_number(temp_real)")
                 main_lines.append(f"    call random_number(temp_imag)")
@@ -5987,7 +5987,7 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
                 main_lines.append(f"    {param.lower()}b(k) = {param.lower()}b(k) * 2.0 - 1.0")
             main_lines.append(f"  end do")
         elif param_upper in ['A', 'B', 'C']:
-            main_lines.append(f"  do k = 1, nbdirsmax")
+            main_lines.append(f"  do k = 1, {nd_var}")
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 main_lines.append(f"    do j = 1, n")
                 main_lines.append(f"      do i = 1, n")
@@ -6001,7 +6001,7 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
                 main_lines.append(f"    {param.lower()}b(k,:,:) = {param.lower()}b(k,:,:) * 2.0 - 1.0")
             main_lines.append(f"  end do")
         elif param_upper in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
-            main_lines.append(f"  do k = 1, nbdirsmax")
+            main_lines.append(f"  do k = 1, {nd_var}")
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 main_lines.append(f"    do i = 1, n")
                 main_lines.append(f"      call random_number(temp_real)")
@@ -6014,20 +6014,20 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
             main_lines.append(f"  end do")
         elif param_upper in ['AP', 'BP', 'CP']:
             # Packed symmetric/Hermitian arrays - size n*(n+1)/2
-            main_lines.append(f"  do k = 1, nbdirsmax")
+            main_lines.append(f"  do k = 1, {nd_var}")
             main_lines.append(f"    call random_number({param.lower()}b(k,:))")
             main_lines.append(f"    {param.lower()}b(k,:) = {param.lower()}b(k,:) * 2.0 - 1.0")
             main_lines.append(f"  end do")
         elif param_upper in ['DPARAM', 'SPARAM']:
             # Parameter arrays for rotm/rotmg - 5 elements
-            main_lines.append(f"  do k = 1, nbdirsmax")
+            main_lines.append(f"  do k = 1, {nd_var}")
             main_lines.append(f"    call random_number({param.lower()}b(k,:))")
             main_lines.append(f"    {param.lower()}b(k,:) = {param.lower()}b(k,:) * 2.0 - 1.0")
             main_lines.append(f"  end do")
         elif param_upper in ['DD1', 'DD2', 'SD1', 'SD2', 'DX1', 'DY1', 'SX1', 'SY1', 'DA']:
             # Scalar parameters - adjoints are arrays in vector mode
             # DA is always real, even in complex functions
-            main_lines.append(f"  do k = 1, nbdirsmax")
+            main_lines.append(f"  do k = 1, {nd_var}")
             main_lines.append(f"    call random_number({param.lower()}b(k))")
             main_lines.append(f"    {param.lower()}b(k) = {param.lower()}b(k) * 2.0 - 1.0")
             main_lines.append(f"  end do")
@@ -6035,7 +6035,7 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
     # For FUNCTIONs, initialize the function result adjoint (output adjoint/cotangent)
     if func_type == 'FUNCTION':
         main_lines.append(f"  ! Initialize function result adjoint (output cotangent)")
-        main_lines.append(f"  do k = 1, nbdirsmax")
+        main_lines.append(f"  do k = 1, {nd_var}")
         if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
             main_lines.append(f"    call random_number(temp_real)")
             main_lines.append(f"    call random_number(temp_imag)")
@@ -6154,7 +6154,7 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
     if func_result_adjoint:
         call_args.append(func_result_adjoint)
     
-    main_lines.append(f"  call {func_name.lower()}_bv({', '.join(call_args)}, nbdirsmax)")
+    main_lines.append(f"  call {func_name.lower()}_bv({', '.join(call_args)}, {nd_var})")
     if isize_vars_bv:
         main_lines.append("")
         main_lines.append("  ! Reset ISIZE globals to uninitialized (-1) for completeness")
@@ -6297,7 +6297,7 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
     main_lines.append("    write(*,*) 'Step size h =', h")
     main_lines.append("    ")
     main_lines.append("    ! Test each differentiation direction separately")
-    main_lines.append("    do k = 1, nbdirsmax")
+    main_lines.append(f"    do k = 1, {nd_var}")
     main_lines.append("      ")
     main_lines.append("      ! Initialize random direction vectors for all inputs")
     for param in all_params:
@@ -6999,6 +6999,98 @@ def inject_nbdirs_check_vector_mode(file_path):
     try:
         with open(file_path, 'w', encoding='utf-8', newline='') as f:
             f.writelines(new_lines)
+    except Exception as e:
+        print(f"Error writing {file_path}: {e}", file=sys.stderr)
+        return False
+    return True
+
+
+def remove_nbdirsmax_from_vector_file(file_path, mode=None):
+    """
+    Post-process Tapenade-generated vector/scalar reverse files to remove nbdirsmax:
+    - Replace nbdirsmax with nbdirs everywhere (use subroutine argument as dimension)
+    - Remove the nbdirs validation block (0 < nbdirs <= nbdirsmax check)
+    - For _dv and _b: comment out INCLUDE 'DIFFSIZES.inc'
+    - For _bv: update Hint comment (keep INCLUDE for ISIZE)
+    mode: 'dv', 'bv', or 'b' - inferred from filename if None
+    """
+    file_path = Path(file_path)
+    if not file_path.exists():
+        return False
+    stem = file_path.stem
+    if mode is None:
+        if stem.endswith('_dv'):
+            mode = 'dv'
+        elif stem.endswith('_bv'):
+            mode = 'bv'
+        elif stem.endswith('_b'):
+            mode = 'b'
+        else:
+            return False
+    try:
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            content = f.read()
+    except Exception as e:
+        print(f"Error reading {file_path}: {e}", file=sys.stderr)
+        return False
+    if 'nbdirsmax' not in content:
+        return True  # already processed or not applicable
+    # Remove nbdirs validation block FIRST (before replacing nbdirsmax)
+    # Case 1: Contiguous block (dv) - comment + IF block together
+    check_block = re.compile(
+        r"\nC\s+Check 0 < nbdirs <= nbdirsmax \(required by DIFFSIZES\.inc\)\s*\n"
+        r"\s+IF \(nbdirs\.LE\.0 \.OR\. nbdirs\.GT\.nbdirsmax\) THEN\s*\n"
+        r"\s+WRITE\(\*,'\(A,I0,A,I0,A\)'\) 'Error: nbdirs=', nbdirs,\s*\n"
+        r"\s+\+  ' must be in 1\.\.nbdirsmax=', nbdirsmax, '\. Stopping\.'\s*\n"
+        r"\s+STOP 1\s*\n"
+        r"\s+END IF\s*\n"
+        r"C\s*\n",
+        re.IGNORECASE
+    )
+    content = check_block.sub('\n', content)
+    # Case 2: For bv - comment and IF block are separated by check_ISIZE/get_ISIZE
+    # Remove standalone comment line
+    content = re.sub(
+        r"\nC\s+Check 0 < nbdirs <= nbdirsmax \(required by DIFFSIZES\.inc\)\s*\n",
+        '\n', content, flags=re.IGNORECASE
+    )
+    # Remove IF block (may have + continuation)
+    if_block = re.compile(
+        r"\n\s+IF \(nbdirs\.LE\.0 \.OR\. nbdirs\.GT\.nbdirsmax\) THEN\s*\n"
+        r"\s+WRITE\(\*,'\(A,I0,A,I0,A\)'\) 'Error: nbdirs=', nbdirs,\s*\n"
+        r"\s+\+  ' must be in 1\.\.nbdirsmax=', nbdirsmax, '\. Stopping\.'\s*\n"
+        r"\s+STOP 1\s*\n"
+        r"\s+END IF\s*\n",
+        re.IGNORECASE
+    )
+    content = if_block.sub('\n', content)
+    # Replace nbdirsmax with nbdirs (whole word)
+    content = re.sub(r'\bnbdirsmax\b', 'nbdirs', content, flags=re.IGNORECASE)
+    # Comment out INCLUDE for dv and b (C in column 1 for fixed-form Fortran)
+    if mode in ('dv', 'b'):
+        content = re.sub(
+            r"^\s*INCLUDE\s+'DIFFSIZES\.inc'",
+            r"C      INCLUDE 'DIFFSIZES.inc'",
+            content,
+            flags=re.IGNORECASE | re.MULTILINE
+        )
+        content = re.sub(
+            r"^\s*include\s+'DIFFSIZES\.inc'",
+            r"C      include 'DIFFSIZES.inc'",
+            content,
+            flags=re.MULTILINE
+        )
+    # For bv: update Hint comment
+    if mode == 'bv':
+        content = re.sub(
+            r"C\s+Hint: nbdirsmax should be the maximum number of differentiation directions",
+            "C  Hint: nbdirs should be the maximum number of differentiation directions",
+            content,
+            flags=re.IGNORECASE
+        )
+    try:
+        with open(file_path, 'w', encoding='utf-8', newline='') as f:
+            f.write(content)
     except Exception as e:
         print(f"Error writing {file_path}: {e}", file=sys.stderr)
         return False
@@ -8017,6 +8109,7 @@ def main():
     ap.add_argument("--mode", nargs="+", choices=["d", "dv", "b", "bv", "all"], default=["all"], 
                     help="AD modes to generate: d (forward scalar), dv (forward vector), b (reverse scalar), bv (reverse vector), all (all modes). Default: all")
     ap.add_argument("--nbdirsmax", type=int, default=4, help="Maximum number of derivative directions for vector mode (default: 4)")
+    ap.add_argument("--no-nbdirsmax", action="store_true", help="Remove nbdirsmax: use nbdirs (subroutine arg) as dimension, comment out DIFFSIZES.inc for dv/b")
     ap.add_argument("--flat", action="store_true", help="Use flat directory structure (all files in function directory, single DIFFSIZES.inc)")
     ap.add_argument("--extra", nargs=argparse.REMAINDER, help="Extra args passed to Tapenade after -d/-r", default=[])
     args = ap.parse_args()
@@ -8340,16 +8433,20 @@ def main():
                     proc = subprocess.run(cmd, cwd=mode_dirs['b'], stdout=logf, stderr=subprocess.STDOUT, check=False)
                     return_codes["reverse"] = proc.returncode
                     
-                    # Uncomment the INCLUDE statement in the reverse mode file if successful
                     if proc.returncode == 0:
                         reverse_file = mode_dirs['b'] / f"{src.stem}_b.f"
                         reverse_file_f90 = mode_dirs['b'] / f"{src.stem}_b.f90"
-                        # Check for both .f and .f90 extensions
+                        no_nb = getattr(args, 'no_nbdirsmax', False)
                         if reverse_file.exists():
                             try:
                                 fix_assumed_size_array_assignments(reverse_file, func_name, all_params)
                             except Exception as e:
                                 print(f"WARNING: Failed to fix assumed-size array assignments in {reverse_file}: {e}", file=sys.stderr)
+                            if no_nb:
+                                try:
+                                    remove_nbdirsmax_from_vector_file(reverse_file, 'b')
+                                except Exception as e:
+                                    print(f"WARNING: Failed to remove nbdirsmax from {reverse_file}: {e}", file=sys.stderr)
                             try:
                                 inject_isize_global_access(reverse_file)
                             except Exception as e:
@@ -8359,6 +8456,11 @@ def main():
                                 fix_assumed_size_array_assignments(reverse_file_f90, func_name, all_params)
                             except Exception as e:
                                 print(f"WARNING: Failed to fix assumed-size array assignments in {reverse_file_f90}: {e}", file=sys.stderr)
+                            if no_nb:
+                                try:
+                                    remove_nbdirsmax_from_vector_file(reverse_file_f90, 'b')
+                                except Exception as e:
+                                    print(f"WARNING: Failed to remove nbdirsmax from {reverse_file_f90}: {e}", file=sys.stderr)
                             try:
                                 inject_isize_global_access(reverse_file_f90)
                             except Exception as e:
@@ -8401,15 +8503,20 @@ def main():
                     
                     proc = subprocess.run(cmd, cwd=mode_dirs['dv'], stdout=logf, stderr=subprocess.STDOUT, check=False)
                     return_codes["forward_vector"] = proc.returncode
-                    # Inject nbdirs <= nbdirsmax runtime check into dv routine if successful
                     if proc.returncode == 0:
                         for ext in ('_dv.f', '_dv.f90'):
                             dv_file = mode_dirs['dv'] / f"{src.stem}{ext}"
                             if dv_file.exists():
-                                try:
-                                    inject_nbdirs_check_vector_mode(dv_file)
-                                except Exception as e:
-                                    print(f"WARNING: Failed to inject nbdirs check into {dv_file}: {e}", file=sys.stderr)
+                                if getattr(args, 'no_nbdirsmax', False):
+                                    try:
+                                        remove_nbdirsmax_from_vector_file(dv_file, 'dv')
+                                    except Exception as e:
+                                        print(f"WARNING: Failed to remove nbdirsmax from {dv_file}: {e}", file=sys.stderr)
+                                else:
+                                    try:
+                                        inject_nbdirs_check_vector_mode(dv_file)
+                                    except Exception as e:
+                                        print(f"WARNING: Failed to inject nbdirs check into {dv_file}: {e}", file=sys.stderr)
                                 break
             except Exception as e:
                 try:
@@ -8472,16 +8579,23 @@ def main():
                     if proc.returncode == 0:
                         reverse_file = mode_dirs['bv'] / f"{src.stem}_bv.f"
                         reverse_file_f90 = mode_dirs['bv'] / f"{src.stem}_bv.f90"
+                        no_nb = getattr(args, 'no_nbdirsmax', False)
                         # Check for both .f and .f90 extensions
                         if reverse_file.exists():
                             try:
                                 fix_assumed_size_array_assignments(reverse_file, func_name, all_params)
                             except Exception as e:
                                 print(f"WARNING: Failed to fix assumed-size array assignments in {reverse_file}: {e}", file=sys.stderr)
-                            try:
-                                inject_nbdirs_check_vector_mode(reverse_file)
-                            except Exception as e:
-                                print(f"WARNING: Failed to inject nbdirs check into {reverse_file}: {e}", file=sys.stderr)
+                            if no_nb:
+                                try:
+                                    remove_nbdirsmax_from_vector_file(reverse_file, 'bv')
+                                except Exception as e:
+                                    print(f"WARNING: Failed to remove nbdirsmax from {reverse_file}: {e}", file=sys.stderr)
+                            else:
+                                try:
+                                    inject_nbdirs_check_vector_mode(reverse_file)
+                                except Exception as e:
+                                    print(f"WARNING: Failed to inject nbdirs check into {reverse_file}: {e}", file=sys.stderr)
                             try:
                                 inject_isize_global_access(reverse_file)
                             except Exception as e:
@@ -8491,10 +8605,16 @@ def main():
                                 fix_assumed_size_array_assignments(reverse_file_f90, func_name, all_params)
                             except Exception as e:
                                 print(f"WARNING: Failed to fix assumed-size array assignments in {reverse_file_f90}: {e}", file=sys.stderr)
-                            try:
-                                inject_nbdirs_check_vector_mode(reverse_file_f90)
-                            except Exception as e:
-                                print(f"WARNING: Failed to inject nbdirs check into {reverse_file_f90}: {e}", file=sys.stderr)
+                            if no_nb:
+                                try:
+                                    remove_nbdirsmax_from_vector_file(reverse_file_f90, 'bv')
+                                except Exception as e:
+                                    print(f"WARNING: Failed to remove nbdirsmax from {reverse_file_f90}: {e}", file=sys.stderr)
+                            else:
+                                try:
+                                    inject_nbdirs_check_vector_mode(reverse_file_f90)
+                                except Exception as e:
+                                    print(f"WARNING: Failed to inject nbdirs check into {reverse_file_f90}: {e}", file=sys.stderr)
                             try:
                                 inject_isize_global_access(reverse_file_f90)
                             except Exception as e:
@@ -8627,7 +8747,7 @@ def main():
                 if dv_dir is not None:
                     try:
                         forward_src_dv = (src_dir_flat if flat_mode else mode_dirs.get('dv'))
-                        vector_program = generate_test_main_vector_forward(func_name, src, inputs, outputs, inout_vars, func_type, args.compiler, args.c_compiler, param_types, args.nbdirsmax, forward_src_dir=forward_src_dv)
+                        vector_program = generate_test_main_vector_forward(func_name, src, inputs, outputs, inout_vars, func_type, args.compiler, args.c_compiler, param_types, args.nbdirsmax, forward_src_dir=forward_src_dv, no_nbdirsmax=getattr(args, 'no_nbdirsmax', False))
                         vector_path = (test_out_dir if test_out_dir else dv_dir) / f"test_{src.stem}_vector_forward.f90"
                         with open(vector_path, "w") as vf:
                             vf.write(vector_program)
@@ -8639,7 +8759,7 @@ def main():
                 bv_src = mode_dirs.get('src', mode_dirs.get('bv', func_out_dir)) if flat_mode else mode_dirs.get('bv')
                 if bv_src is not None:
                     try:
-                        vector_reverse_program = generate_test_main_vector_reverse(func_name, src, inputs, outputs, inout_vars, func_type, args.compiler, args.c_compiler, param_types, args.nbdirsmax, reverse_src_dir=bv_src)
+                        vector_reverse_program = generate_test_main_vector_reverse(func_name, src, inputs, outputs, inout_vars, func_type, args.compiler, args.c_compiler, param_types, args.nbdirsmax, reverse_src_dir=bv_src, no_nbdirsmax=getattr(args, 'no_nbdirsmax', False))
                         vector_reverse_path = (test_out_dir if test_out_dir else bv_src) / f"test_{src.stem}_vector_reverse.f90"
                         with open(vector_reverse_path, "w") as vrf:
                             vrf.write(vector_reverse_program)

@@ -89,7 +89,7 @@ C  =====================================================================
       IMPLICIT NONE
       INCLUDE 'DIFFSIZES.inc'
 C  Hint: ISIZE1OFsx should be the size of dimension 1 of array sx
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level1 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -100,7 +100,7 @@ C     .. Scalar Arguments ..
 C     ..
 C     .. Array Arguments ..
       REAL sx(*), sy(*)
-      REAL sxb(nbdirsmax, *), syb(nbdirsmax, *)
+      REAL sxb(nbdirs, *), syb(nbdirs, *)
 C     ..
 C
 C  =====================================================================
@@ -118,18 +118,11 @@ C     .. Intrinsic Functions ..
       INTEGER*4 branch
       INTEGER nbdirs
 C     ..
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
       CALL check_ISIZE1OFSx_initialized()
       ISIZE1OFSx = get_ISIZE1OFSx()
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       IF (n .LE. 0) THEN
         DO ii1=1,ISIZE1OFsx
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             sxb(nd, ii1) = 0.0
           ENDDO
         ENDDO
@@ -144,7 +137,7 @@ C
         IF (m .NE. 0) THEN
           IF (n .LT. 7) THEN
             DO ii1=1,ISIZE1OFsx
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 sxb(nd, ii1) = 0.0
               ENDDO
             ENDDO
@@ -157,7 +150,7 @@ C
         END IF
         mp1 = m + 1
         DO ii1=1,ISIZE1OFsx
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             sxb(nd, ii1) = 0.0
           ENDDO
         ENDDO
@@ -203,7 +196,7 @@ C
           iy = iy + incy
         ENDDO
         DO ii1=1,ISIZE1OFsx
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             sxb(nd, ii1) = 0.0
           ENDDO
         ENDDO

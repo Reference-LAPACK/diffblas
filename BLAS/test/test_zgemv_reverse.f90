@@ -117,8 +117,8 @@ program test_zgemv_reverse
   ! Initialize input adjoints to zero (they will be computed)
   xb = 0.0d0
   betab = 0.0d0
-  alphab = 0.0d0
   ab = 0.0d0
+  alphab = 0.0d0
 
   ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
   ! Differentiated code checks they are set via check_ISIZE*_initialized.

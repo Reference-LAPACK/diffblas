@@ -84,8 +84,8 @@ C>
 C  =====================================================================
       SUBROUTINE DSCAL_DV(n, da, dad, dx, dxd, incx, nbdirs)
       IMPLICIT NONE
-      INCLUDE 'DIFFSIZES.inc'
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C      INCLUDE 'DIFFSIZES.inc'
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level1 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -93,12 +93,12 @@ C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
       DOUBLE PRECISION da
-      DOUBLE PRECISION dad(nbdirsmax)
+      DOUBLE PRECISION dad(nbdirs)
       INTEGER incx, n
 C     ..
 C     .. Array Arguments ..
       DOUBLE PRECISION dx(*)
-      DOUBLE PRECISION dxd(nbdirsmax, *)
+      DOUBLE PRECISION dxd(nbdirs, *)
 C     ..
 C
 C  =====================================================================
@@ -114,13 +114,6 @@ C     .. Intrinsic Functions ..
       INTEGER nd
       INTEGER nbdirs
 C     ..
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       IF ((n .LE. 0 .OR. incx .LE. 0) .OR. da .EQ. one) THEN
         RETURN
       ELSE

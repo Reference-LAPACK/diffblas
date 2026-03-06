@@ -1,10 +1,10 @@
 ! Test program for CDOTU vector forward mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirsmax=4
+! Using REAL*4 precision with nbdirs=4
 
 program test_cdotu_vector_forward
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   complex(4), external :: cdotu
   external :: cdotu_dv
@@ -24,18 +24,18 @@ program test_cdotu_vector_forward
   integer :: incy_val
 
   ! Vector mode derivative variables (type-promoted)
-  ! Scalars become arrays(nbdirsmax), arrays gain extra dimension
-  complex(4), dimension(nbdirsmax,4) :: cx_dv
-  complex(4), dimension(nbdirsmax,4) :: cy_dv
+  ! Scalars become arrays(nbdirs), arrays gain extra dimension
+  complex(4), dimension(nbdirs,4) :: cx_dv
+  complex(4), dimension(nbdirs,4) :: cy_dv
   ! Declare variables for storing original values
   complex(4), dimension(4) :: cx_orig
-  complex(4), dimension(nbdirsmax,4) :: cx_dv_orig
+  complex(4), dimension(nbdirs,4) :: cx_dv_orig
   complex(4), dimension(4) :: cy_orig
-  complex(4), dimension(nbdirsmax,4) :: cy_dv_orig
+  complex(4), dimension(nbdirs,4) :: cy_dv_orig
 
   ! Function result variables
   complex(4) :: cdotu_result
-  complex(4), dimension(nbdirsmax) :: cdotu_dv_result
+  complex(4), dimension(nbdirs) :: cdotu_dv_result
 
   ! Initialize test parameters
   nsize = n
@@ -59,14 +59,14 @@ program test_cdotu_vector_forward
   end do
 
   ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     do i = 1, max_size
       call random_number(temp_real)
       call random_number(temp_imag)
       cx_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
     end do
   end do
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     do i = 1, max_size
       call random_number(temp_real)
       call random_number(temp_imag)
@@ -83,7 +83,7 @@ program test_cdotu_vector_forward
 
   ! Call the vector mode differentiated function
 
-  call cdotu_dv(nsize, cx, cx_dv, incx_val, cy, cy_dv, incy_val, cdotu_result, cdotu_dv_result, nbdirsmax)
+  call cdotu_dv(nsize, cx, cx_dv, incx_val, cy, cy_dv, incy_val, cdotu_result, cdotu_dv_result, nbdirs)
 
   ! Print results and compare
   write(*,*) 'Function calls completed successfully'
@@ -110,10 +110,10 @@ contains
     
     write(*,*) 'Checking vector derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirsmax
+    write(*,*) 'Number of directions:', nbdirs
     
     ! Test each derivative direction separately
-    do idir = 1, nbdirsmax
+    do idir = 1, nbdirs
       
       ! Forward perturbation: f(x + h * direction)
       cx = cx_orig + cmplx(h, 0.0) * cx_dv_orig(idir,:)

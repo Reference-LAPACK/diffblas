@@ -1,10 +1,10 @@
 ! Test program for CSYRK vector forward mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirsmax=4
+! Using REAL*4 precision with nbdirs=4
 
 program test_csyrk_vector_forward
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   external :: csyrk
   external :: csyrk_dv
@@ -29,20 +29,20 @@ program test_csyrk_vector_forward
   integer :: ldc_val
 
   ! Vector mode derivative variables (type-promoted)
-  ! Scalars become arrays(nbdirsmax), arrays gain extra dimension
-  complex(4), dimension(nbdirsmax) :: alpha_dv
-  complex(4), dimension(nbdirsmax,max_size,max_size) :: a_dv
-  complex(4), dimension(nbdirsmax) :: beta_dv
-  complex(4), dimension(nbdirsmax,max_size,max_size) :: c_dv
+  ! Scalars become arrays(nbdirs), arrays gain extra dimension
+  complex(4), dimension(nbdirs) :: alpha_dv
+  complex(4), dimension(nbdirs,max_size,max_size) :: a_dv
+  complex(4), dimension(nbdirs) :: beta_dv
+  complex(4), dimension(nbdirs,max_size,max_size) :: c_dv
   ! Declare variables for storing original values
   complex(4) :: alpha_orig
-  complex(4), dimension(nbdirsmax) :: alpha_dv_orig
+  complex(4), dimension(nbdirs) :: alpha_dv_orig
   complex(4), dimension(max_size,max_size) :: a_orig
-  complex(4), dimension(nbdirsmax,max_size,max_size) :: a_dv_orig
+  complex(4), dimension(nbdirs,max_size,max_size) :: a_dv_orig
   complex(4) :: beta_orig
-  complex(4), dimension(nbdirsmax) :: beta_dv_orig
+  complex(4), dimension(nbdirs) :: beta_dv_orig
   complex(4), dimension(max_size,max_size) :: c_orig
-  complex(4), dimension(nbdirsmax,max_size,max_size) :: c_dv_orig
+  complex(4), dimension(nbdirs,max_size,max_size) :: c_dv_orig
 
   ! Initialize test parameters
   nsize = n
@@ -79,12 +79,12 @@ program test_csyrk_vector_forward
   end do
 
   ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     call random_number(temp_real)
     call random_number(temp_imag)
     alpha_dv(idir) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
   end do
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     do i = 1, max_size
       do j = 1, max_size
         call random_number(temp_real)
@@ -93,12 +93,12 @@ program test_csyrk_vector_forward
       end do
     end do
   end do
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     call random_number(temp_real)
     call random_number(temp_imag)
     beta_dv(idir) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
   end do
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     do i = 1, max_size
       do j = 1, max_size
         call random_number(temp_real)
@@ -121,7 +121,7 @@ program test_csyrk_vector_forward
 
   ! Call the vector mode differentiated function
 
-  call csyrk_dv(uplo, trans, nsize, ksize, alpha, alpha_dv, a, a_dv, lda_val, beta, beta_dv, c, c_dv, ldc_val, nbdirsmax)
+  call csyrk_dv(uplo, trans, nsize, ksize, alpha, alpha_dv, a, a_dv, lda_val, beta, beta_dv, c, c_dv, ldc_val, nbdirs)
 
   ! Print results and compare
   write(*,*) 'Function calls completed successfully'
@@ -148,10 +148,10 @@ contains
     
     write(*,*) 'Checking vector derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirsmax
+    write(*,*) 'Number of directions:', nbdirs
     
     ! Test each derivative direction separately
-    do idir = 1, nbdirsmax
+    do idir = 1, nbdirs
       
       ! Forward perturbation: f(x + h * direction)
       alpha = alpha_orig + cmplx(h, 0.0) * alpha_dv_orig(idir)

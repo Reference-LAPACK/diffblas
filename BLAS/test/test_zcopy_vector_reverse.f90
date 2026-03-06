@@ -1,10 +1,10 @@
 ! Test program for ZCOPY vector reverse mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*8 precision with nbdirsmax=4
+! Using REAL*8 precision with nbdirs=4
 
 program test_zcopy_vector_reverse
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   external :: zcopy
   external :: zcopy_bv
@@ -26,11 +26,11 @@ program test_zcopy_vector_reverse
   ! Adjoint variables (reverse vector mode)
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
-  complex(8), dimension(nbdirsmax,4) :: zxb
-  complex(8), dimension(nbdirsmax,max_size) :: zyb
+  complex(8), dimension(nbdirs,4) :: zxb
+  complex(8), dimension(nbdirs,max_size) :: zyb
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  complex(8), dimension(nbdirsmax,max_size) :: zyb_orig
+  complex(8), dimension(nbdirs,max_size) :: zyb_orig
 
   ! Storage for original values (for VJP verification)
   complex(8), dimension(4) :: zx_orig
@@ -68,7 +68,7 @@ program test_zcopy_vector_reverse
 
   ! Initialize output adjoints (cotangents) with random values for each direction
   ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirsmax
+  do k = 1, nbdirs
     do i = 1, n
       call random_number(temp_real)
       call random_number(temp_imag)
@@ -88,7 +88,7 @@ program test_zcopy_vector_reverse
   call set_ISIZE1OFZx(max_size)
 
   ! Call reverse vector mode differentiated function
-  call zcopy_bv(nsize, zx, zxb, incx_val, zy, zyb, incy_val, nbdirsmax)
+  call zcopy_bv(nsize, zx, zxb, incx_val, zy, zyb, incy_val, nbdirs)
 
   ! Reset ISIZE globals to uninitialized (-1) for completeness
   call set_ISIZE1OFZx(-1)
@@ -118,7 +118,7 @@ contains
     write(*,*) 'Step size h =', h
     
     ! Test each differentiation direction separately
-    do k = 1, nbdirsmax
+    do k = 1, nbdirs
       
       ! Initialize random direction vectors for all inputs
       do i = 1, n

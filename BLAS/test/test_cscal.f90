@@ -26,8 +26,8 @@ program test_cscal
   complex(4), dimension(max_size) :: cx_output
 
   ! Array restoration variables for numerical differentiation
-  complex(4) :: ca_orig
   complex(4), dimension(max_size) :: cx_orig
+  complex(4) :: ca_orig
 
   ! Variables for central difference computation
   complex(4), dimension(max_size) :: cx_forward, cx_backward
@@ -36,8 +36,8 @@ program test_cscal
   logical :: has_large_errors
 
   ! Variables for storing original derivative values
-  complex(4) :: ca_d_orig
   complex(4), dimension(max_size) :: cx_d_orig
+  complex(4) :: ca_d_orig
 
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
@@ -61,22 +61,22 @@ program test_cscal
   incx_val = 1
 
   ! Initialize input derivatives to random values
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  ca_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
   do i = 1, n
     call random_number(temp_real)
     call random_number(temp_imag)
     cx_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
   end do
+  call random_number(temp_real)
+  call random_number(temp_imag)
+  ca_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
 
   ! Store initial derivative values after random initialization
-  ca_d_orig = ca_d
   cx_d_orig = cx_d
+  ca_d_orig = ca_d
 
   ! Store original values for central difference computation
-  ca_orig = ca
   cx_orig = cx
+  ca_orig = ca
 
   write(*,*) 'Testing CSCAL'
   ! Store input values of inout parameters before first function call
@@ -124,15 +124,15 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    ca = ca_orig + cmplx(h, 0.0) * ca_d_orig
     cx = cx_orig + cmplx(h, 0.0) * cx_d_orig
+    ca = ca_orig + cmplx(h, 0.0) * ca_d_orig
     call cscal(nsize, ca, cx, incx_val)
     ! Store forward perturbation results
     cx_forward = cx
     
     ! Backward perturbation: f(x - h)
-    ca = ca_orig - cmplx(h, 0.0) * ca_d_orig
     cx = cx_orig - cmplx(h, 0.0) * cx_d_orig
+    ca = ca_orig - cmplx(h, 0.0) * ca_d_orig
     call cscal(nsize, ca, cx, incx_val)
     ! Store backward perturbation results
     cx_backward = cx

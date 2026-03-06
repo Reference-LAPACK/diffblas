@@ -1,10 +1,10 @@
 ! Test program for DASUM vector reverse mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*8 precision with nbdirsmax=4
+! Using REAL*8 precision with nbdirs=4
 
 program test_dasum_vector_reverse
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   real(8), external :: dasum
   external :: dasum_bv
@@ -24,11 +24,11 @@ program test_dasum_vector_reverse
   ! Adjoint variables (reverse vector mode)
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
-  real(8), dimension(nbdirsmax,4) :: dxb
-  real(8), dimension(nbdirsmax) :: dasumb
+  real(8), dimension(nbdirs,4) :: dxb
+  real(8), dimension(nbdirs) :: dasumb
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  real(8), dimension(nbdirsmax) :: dasumb_orig
+  real(8), dimension(nbdirs) :: dasumb_orig
 
   ! Storage for original values (for VJP verification)
   real(8), dimension(4) :: dx_orig
@@ -56,7 +56,7 @@ program test_dasum_vector_reverse
   ! Initialize output adjoints (cotangents) with random values for each direction
   ! These are the 'seeds' for reverse mode
   ! Initialize function result adjoint (output cotangent)
-  do k = 1, nbdirsmax
+  do k = 1, nbdirs
     call random_number(dasumb(k))
     dasumb(k) = dasumb(k) * 2.0 - 1.0
   end do
@@ -73,7 +73,7 @@ program test_dasum_vector_reverse
   call set_ISIZE1OFDx(max_size)
 
   ! Call reverse vector mode differentiated function
-  call dasum_bv(nsize, dx, dxb, incx_val, dasumb, nbdirsmax)
+  call dasum_bv(nsize, dx, dxb, incx_val, dasumb, nbdirs)
 
   ! Reset ISIZE globals to uninitialized (-1) for completeness
   call set_ISIZE1OFDx(-1)
@@ -102,7 +102,7 @@ contains
     write(*,*) 'Step size h =', h
     
     ! Test each differentiation direction separately
-    do k = 1, nbdirsmax
+    do k = 1, nbdirs
       
       ! Initialize random direction vectors for all inputs
       call random_number(dx_dir)

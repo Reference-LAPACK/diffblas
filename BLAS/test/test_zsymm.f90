@@ -37,11 +37,11 @@ program test_zsymm
   complex(8), dimension(max_size,max_size) :: c_output
 
   ! Array restoration variables for numerical differentiation
-  complex(8) :: beta_orig
-  complex(8) :: alpha_orig
   complex(8), dimension(max_size,max_size) :: c_orig
+  complex(8) :: beta_orig
   complex(8), dimension(max_size,max_size) :: b_orig
   complex(8), dimension(max_size,max_size) :: a_orig
+  complex(8) :: alpha_orig
 
   ! Variables for central difference computation
   complex(8), dimension(max_size,max_size) :: c_forward, c_backward
@@ -50,11 +50,11 @@ program test_zsymm
   logical :: has_large_errors
 
   ! Variables for storing original derivative values
-  complex(8) :: beta_d_orig
-  complex(8) :: alpha_d_orig
   complex(8), dimension(max_size,max_size) :: c_d_orig
+  complex(8) :: beta_d_orig
   complex(8), dimension(max_size,max_size) :: b_d_orig
   complex(8), dimension(max_size,max_size) :: a_d_orig
+  complex(8) :: alpha_d_orig
 
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
@@ -110,12 +110,6 @@ program test_zsymm
   ldc_val = ldc
 
   ! Initialize input derivatives to random values
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  beta_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  alpha_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
   do i = 1, lda
     do j = 1, lda
       call random_number(temp_real)
@@ -123,6 +117,9 @@ program test_zsymm
       c_d(i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
     end do
   end do
+  call random_number(temp_real)
+  call random_number(temp_imag)
+  beta_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
   do i = 1, lda
     do j = 1, lda
       call random_number(temp_real)
@@ -145,20 +142,23 @@ program test_zsymm
       a_d(i,j) = a_d(j,i)  ! A(i,j) = A(j,i)
     end do
   end do
+  call random_number(temp_real)
+  call random_number(temp_imag)
+  alpha_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
 
   ! Store initial derivative values after random initialization
-  beta_d_orig = beta_d
-  alpha_d_orig = alpha_d
   c_d_orig = c_d
+  beta_d_orig = beta_d
   b_d_orig = b_d
   a_d_orig = a_d
+  alpha_d_orig = alpha_d
 
   ! Store original values for central difference computation
-  beta_orig = beta
-  alpha_orig = alpha
   c_orig = c
+  beta_orig = beta
   b_orig = b
   a_orig = a
+  alpha_orig = alpha
 
   write(*,*) 'Testing ZSYMM'
   ! Store input values of inout parameters before first function call
@@ -214,21 +214,21 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    beta = beta_orig + cmplx(h, 0.0) * beta_d_orig
-    alpha = alpha_orig + cmplx(h, 0.0) * alpha_d_orig
     c = c_orig + cmplx(h, 0.0) * c_d_orig
+    beta = beta_orig + cmplx(h, 0.0) * beta_d_orig
     b = b_orig + cmplx(h, 0.0) * b_d_orig
     a = a_orig + cmplx(h, 0.0) * a_d_orig
+    alpha = alpha_orig + cmplx(h, 0.0) * alpha_d_orig
     call zsymm(side, uplo, msize, nsize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)
     ! Store forward perturbation results
     c_forward = c
     
     ! Backward perturbation: f(x - h)
-    beta = beta_orig - cmplx(h, 0.0) * beta_d_orig
-    alpha = alpha_orig - cmplx(h, 0.0) * alpha_d_orig
     c = c_orig - cmplx(h, 0.0) * c_d_orig
+    beta = beta_orig - cmplx(h, 0.0) * beta_d_orig
     b = b_orig - cmplx(h, 0.0) * b_d_orig
     a = a_orig - cmplx(h, 0.0) * a_d_orig
+    alpha = alpha_orig - cmplx(h, 0.0) * alpha_d_orig
     call zsymm(side, uplo, msize, nsize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)
     ! Store backward perturbation results
     c_backward = c

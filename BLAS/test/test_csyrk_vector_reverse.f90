@@ -1,10 +1,10 @@
 ! Test program for CSYRK vector reverse mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirsmax=4
+! Using REAL*4 precision with nbdirs=4
 
 program test_csyrk_vector_reverse
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   external :: csyrk
   external :: csyrk_bv
@@ -31,13 +31,13 @@ program test_csyrk_vector_reverse
   ! Adjoint variables (reverse vector mode)
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
-  complex(4), dimension(nbdirsmax) :: alphab
-  complex(4), dimension(nbdirsmax,max_size,max_size) :: ab
-  complex(4), dimension(nbdirsmax) :: betab
-  complex(4), dimension(nbdirsmax,max_size,max_size) :: cb
+  complex(4), dimension(nbdirs) :: alphab
+  complex(4), dimension(nbdirs,max_size,max_size) :: ab
+  complex(4), dimension(nbdirs) :: betab
+  complex(4), dimension(nbdirs,max_size,max_size) :: cb
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  complex(4), dimension(nbdirsmax,max_size,max_size) :: cb_orig
+  complex(4), dimension(nbdirs,max_size,max_size) :: cb_orig
 
   ! Storage for original values (for VJP verification)
   complex(4) :: alpha_orig
@@ -92,7 +92,7 @@ program test_csyrk_vector_reverse
 
   ! Initialize output adjoints (cotangents) with random values for each direction
   ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirsmax
+  do k = 1, nbdirs
     do j = 1, n
       do i = 1, n
         call random_number(temp_real)
@@ -116,7 +116,7 @@ program test_csyrk_vector_reverse
   call set_ISIZE2OFA(max_size)
 
   ! Call reverse vector mode differentiated function
-  call csyrk_bv(uplo, trans, nsize, ksize, alpha, alphab, a, ab, lda_val, beta, betab, c, cb, ldc_val, nbdirsmax)
+  call csyrk_bv(uplo, trans, nsize, ksize, alpha, alphab, a, ab, lda_val, beta, betab, c, cb, ldc_val, nbdirs)
 
   ! Reset ISIZE globals to uninitialized (-1) for completeness
   call set_ISIZE2OFA(-1)
@@ -148,7 +148,7 @@ contains
     write(*,*) 'Step size h =', h
     
     ! Test each differentiation direction separately
-    do k = 1, nbdirsmax
+    do k = 1, nbdirs
       
       ! Initialize random direction vectors for all inputs
       call random_number(temp_real)
@@ -215,8 +215,6 @@ contains
       ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
       ! For pure inputs: use adjoint directly
       vjp_ad = 0.0
-      vjp_ad = vjp_ad + real(conjg(beta_dir) * betab(k))
-      vjp_ad = vjp_ad + real(conjg(alpha_dir) * alphab(k))
       ! Compute and sort products for c
       n_products = 0
       do j = 1, n
@@ -229,6 +227,7 @@ contains
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
+      vjp_ad = vjp_ad + real(conjg(beta_dir) * betab(k))
       ! Compute and sort products for a
       n_products = 0
       do j = 1, n
@@ -241,6 +240,7 @@ contains
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
+      vjp_ad = vjp_ad + real(conjg(alpha_dir) * alphab(k))
       
       ! Error check: |vjp_fd - vjp_ad| > atol + rtol * |vjp_ad|
       abs_error = abs(vjp_fd - vjp_ad)

@@ -26,8 +26,8 @@ program test_sscal
   real(4), dimension(max_size) :: sx_output
 
   ! Array restoration variables for numerical differentiation
-  real(4), dimension(max_size) :: sx_orig
   real(4) :: sa_orig
+  real(4), dimension(max_size) :: sx_orig
 
   ! Variables for central difference computation
   real(4), dimension(max_size) :: sx_forward, sx_backward
@@ -36,8 +36,8 @@ program test_sscal
   logical :: has_large_errors
 
   ! Variables for storing original derivative values
-  real(4), dimension(max_size) :: sx_d_orig
   real(4) :: sa_d_orig
+  real(4), dimension(max_size) :: sx_d_orig
 
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
@@ -57,18 +57,18 @@ program test_sscal
   incx_val = 1
 
   ! Initialize input derivatives to random values
-  call random_number(sx_d)
-  sx_d = sx_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(sa_d)
   sa_d = sa_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+  call random_number(sx_d)
+  sx_d = sx_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
   ! Store initial derivative values after random initialization
-  sx_d_orig = sx_d
   sa_d_orig = sa_d
+  sx_d_orig = sx_d
 
   ! Store original values for central difference computation
-  sx_orig = sx
   sa_orig = sa
+  sx_orig = sx
 
   write(*,*) 'Testing SSCAL'
   ! Store input values of inout parameters before first function call
@@ -116,15 +116,15 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    sx = sx_orig + h * sx_d_orig
     sa = sa_orig + h * sa_d_orig
+    sx = sx_orig + h * sx_d_orig
     call sscal(nsize, sa, sx, incx_val)
     ! Store forward perturbation results
     sx_forward = sx
     
     ! Backward perturbation: f(x - h)
-    sx = sx_orig - h * sx_d_orig
     sa = sa_orig - h * sa_d_orig
+    sx = sx_orig - h * sx_d_orig
     call sscal(nsize, sa, sx, incx_val)
     ! Store backward perturbation results
     sx_backward = sx

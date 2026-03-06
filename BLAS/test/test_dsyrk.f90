@@ -34,10 +34,10 @@ program test_dsyrk
   real(8), dimension(max_size,max_size) :: c_output
 
   ! Array restoration variables for numerical differentiation
-  real(8) :: beta_orig
-  real(8) :: alpha_orig
   real(8), dimension(max_size,max_size) :: c_orig
+  real(8) :: beta_orig
   real(8), dimension(max_size,max_size) :: a_orig
+  real(8) :: alpha_orig
 
   ! Variables for central difference computation
   real(8), dimension(max_size,max_size) :: c_forward, c_backward
@@ -46,10 +46,10 @@ program test_dsyrk
   logical :: has_large_errors
 
   ! Variables for storing original derivative values
-  real(8) :: alpha_d_orig
   real(8), dimension(max_size,max_size) :: c_d_orig
-  real(8), dimension(max_size,max_size) :: a_d_orig
   real(8) :: beta_d_orig
+  real(8), dimension(max_size,max_size) :: a_d_orig
+  real(8) :: alpha_d_orig
 
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
@@ -77,26 +77,26 @@ program test_dsyrk
   ldc_val = ldc
 
   ! Initialize input derivatives to random values
-  call random_number(beta_d)
-  beta_d = beta_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-  call random_number(alpha_d)
-  alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(c_d)
   c_d = c_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+  call random_number(beta_d)
+  beta_d = beta_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(a_d)
   a_d = a_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+  call random_number(alpha_d)
+  alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
   ! Store initial derivative values after random initialization
-  alpha_d_orig = alpha_d
   c_d_orig = c_d
-  a_d_orig = a_d
   beta_d_orig = beta_d
+  a_d_orig = a_d
+  alpha_d_orig = alpha_d
 
   ! Store original values for central difference computation
-  beta_orig = beta
-  alpha_orig = alpha
   c_orig = c
+  beta_orig = beta
   a_orig = a
+  alpha_orig = alpha
 
   write(*,*) 'Testing DSYRK'
   ! Store input values of inout parameters before first function call
@@ -150,19 +150,19 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    beta = beta_orig + h * beta_d_orig
-    alpha = alpha_orig + h * alpha_d_orig
     c = c_orig + h * c_d_orig
+    beta = beta_orig + h * beta_d_orig
     a = a_orig + h * a_d_orig
+    alpha = alpha_orig + h * alpha_d_orig
     call dsyrk(uplo, trans, nsize, ksize, alpha, a, lda_val, beta, c, ldc_val)
     ! Store forward perturbation results
     c_forward = c
     
     ! Backward perturbation: f(x - h)
-    beta = beta_orig - h * beta_d_orig
-    alpha = alpha_orig - h * alpha_d_orig
     c = c_orig - h * c_d_orig
+    beta = beta_orig - h * beta_d_orig
     a = a_orig - h * a_d_orig
+    alpha = alpha_orig - h * alpha_d_orig
     call dsyrk(uplo, trans, nsize, ksize, alpha, a, lda_val, beta, c, ldc_val)
     ! Store backward perturbation results
     c_backward = c

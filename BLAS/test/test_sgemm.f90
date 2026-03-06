@@ -38,11 +38,11 @@ program test_sgemm
   real(4), dimension(max_size,max_size) :: c_output
 
   ! Array restoration variables for numerical differentiation
-  real(4) :: beta_orig
-  real(4) :: alpha_orig
   real(4), dimension(max_size,max_size) :: c_orig
+  real(4) :: beta_orig
   real(4), dimension(max_size,max_size) :: b_orig
   real(4), dimension(max_size,max_size) :: a_orig
+  real(4) :: alpha_orig
 
   ! Variables for central difference computation
   real(4), dimension(max_size,max_size) :: c_forward, c_backward
@@ -51,11 +51,11 @@ program test_sgemm
   logical :: has_large_errors
 
   ! Variables for storing original derivative values
-  real(4) :: beta_d_orig
-  real(4) :: alpha_d_orig
   real(4), dimension(max_size,max_size) :: c_d_orig
+  real(4) :: beta_d_orig
   real(4), dimension(max_size,max_size) :: b_d_orig
   real(4), dimension(max_size,max_size) :: a_d_orig
+  real(4) :: alpha_d_orig
 
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
@@ -87,30 +87,30 @@ program test_sgemm
   ldc_val = ldc
 
   ! Initialize input derivatives to random values
-  call random_number(beta_d)
-  beta_d = beta_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-  call random_number(alpha_d)
-  alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(c_d)
   c_d = c_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+  call random_number(beta_d)
+  beta_d = beta_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(b_d)
   b_d = b_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
   call random_number(a_d)
   a_d = a_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+  call random_number(alpha_d)
+  alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
   ! Store initial derivative values after random initialization
-  beta_d_orig = beta_d
-  alpha_d_orig = alpha_d
   c_d_orig = c_d
+  beta_d_orig = beta_d
   b_d_orig = b_d
   a_d_orig = a_d
+  alpha_d_orig = alpha_d
 
   ! Store original values for central difference computation
-  beta_orig = beta
-  alpha_orig = alpha
   c_orig = c
+  beta_orig = beta
   b_orig = b
   a_orig = a
+  alpha_orig = alpha
 
   write(*,*) 'Testing SGEMM'
   ! Store input values of inout parameters before first function call
@@ -167,21 +167,21 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    beta = beta_orig + h * beta_d_orig
-    alpha = alpha_orig + h * alpha_d_orig
     c = c_orig + h * c_d_orig
+    beta = beta_orig + h * beta_d_orig
     b = b_orig + h * b_d_orig
     a = a_orig + h * a_d_orig
+    alpha = alpha_orig + h * alpha_d_orig
     call sgemm(transa, transb, msize, nsize, ksize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)
     ! Store forward perturbation results
     c_forward = c
     
     ! Backward perturbation: f(x - h)
-    beta = beta_orig - h * beta_d_orig
-    alpha = alpha_orig - h * alpha_d_orig
     c = c_orig - h * c_d_orig
+    beta = beta_orig - h * beta_d_orig
     b = b_orig - h * b_d_orig
     a = a_orig - h * a_d_orig
+    alpha = alpha_orig - h * alpha_d_orig
     call sgemm(transa, transb, msize, nsize, ksize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)
     ! Store backward perturbation results
     c_backward = c

@@ -189,7 +189,7 @@ C  =====================================================================
       IMPLICIT NONE
       INCLUDE 'DIFFSIZES.inc'
 C  Hint: ISIZE2OFa should be the size of dimension 2 of array a
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level3 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -197,13 +197,13 @@ C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
       REAL alpha
-      REAL alphab(nbdirsmax)
+      REAL alphab(nbdirs)
       INTEGER lda, ldb, m, n
       CHARACTER diag, side, transa, uplo
 C     ..
 C     .. Array Arguments ..
       REAL a(lda, *), b(ldb, *)
-      REAL ab(nbdirsmax, lda, *), bb(nbdirsmax, ldb, *)
+      REAL ab(nbdirs, lda, *), bb(nbdirs, ldb, *)
       EXTERNAL LSAME
 C     ..
 C
@@ -222,7 +222,7 @@ C     .. Intrinsic Functions ..
 C     ..
 C     .. Local Scalars ..
       REAL temp
-      REAL tempb(nbdirsmax)
+      REAL tempb(nbdirs)
       INTEGER i, info, j, k, nrowa
       LOGICAL lside, nounit, upper
       INTEGER ISIZE2OFA
@@ -233,19 +233,19 @@ C     .. Parameters ..
       INTEGER max1
       INTEGER max2
       INTEGER nd
-      REAL tempb0(nbdirsmax)
+      REAL tempb0(nbdirs)
       REAL tmp
-      REAL tmpb(nbdirsmax)
+      REAL tmpb(nbdirs)
       REAL tmp0
-      REAL tmpb0(nbdirsmax)
+      REAL tmpb0(nbdirs)
       REAL tmp1
-      REAL tmpb1(nbdirsmax)
+      REAL tmpb1(nbdirs)
       REAL tmp2
-      REAL tmpb2(nbdirsmax)
+      REAL tmpb2(nbdirs)
       REAL tmp3
-      REAL tmpb3(nbdirsmax)
+      REAL tmpb3(nbdirs)
       REAL tmp4
-      REAL tmpb4(nbdirsmax)
+      REAL tmpb4(nbdirs)
       INTEGER ad_to
       INTEGER*4 branch
       INTEGER ad_from
@@ -262,15 +262,8 @@ C     ..
 C
 C     Test the input parameters.
 C
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
       CALL check_ISIZE2OFA_initialized()
       ISIZE2OFA = get_ISIZE2OFA()
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       lside = LSAME(side, 'L')
       IF (lside) THEN
         nrowa = m
@@ -328,12 +321,12 @@ C
 C     Quick return if possible.
 C
         IF (m .EQ. 0 .OR. n .EQ. 0) THEN
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             alphab(nd) = 0.0
           ENDDO
           DO ii1=1,ISIZE2OFa
             DO ii2=1,lda
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 ab(nd, ii2, ii1) = 0.0
               ENDDO
             ENDDO
@@ -349,12 +342,12 @@ C
               ENDDO
             ENDDO
           ENDDO
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             alphab(nd) = 0.0
           ENDDO
           DO ii1=1,ISIZE2OFa
             DO ii2=1,lda
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 ab(nd, ii2, ii1) = 0.0
               ENDDO
             ENDDO
@@ -399,12 +392,12 @@ C
                   END IF
                 ENDDO
               ENDDO
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 alphab(nd) = 0.0
               ENDDO
               DO ii1=1,ISIZE2OFa
                 DO ii2=1,lda
-                  DO nd=1,nbdirsmax
+                  DO nd=1,nbdirs
                     ab(nd, ii2, ii1) = 0.0
                   ENDDO
                 ENDDO
@@ -479,12 +472,12 @@ C
                   END IF
                 ENDDO
               ENDDO
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 alphab(nd) = 0.0
               ENDDO
               DO ii1=1,ISIZE2OFa
                 DO ii2=1,lda
-                  DO nd=1,nbdirsmax
+                  DO nd=1,nbdirs
                     ab(nd, ii2, ii1) = 0.0
                   ENDDO
                 ENDDO
@@ -549,12 +542,12 @@ C
                 b(i, j) = temp
               ENDDO
             ENDDO
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               alphab(nd) = 0.0
             ENDDO
             DO ii1=1,ISIZE2OFa
               DO ii2=1,lda
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   ab(nd, ii2, ii1) = 0.0
                 ENDDO
               ENDDO
@@ -608,12 +601,12 @@ C
                 b(i, j) = temp
               ENDDO
             ENDDO
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               alphab(nd) = 0.0
             ENDDO
             DO ii1=1,ISIZE2OFa
               DO ii2=1,lda
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   ab(nd, ii2, ii1) = 0.0
                 ENDDO
               ENDDO
@@ -688,12 +681,12 @@ C
                 CALL PUSHCONTROL1B(1)
               END IF
             ENDDO
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               alphab(nd) = 0.0
             ENDDO
             DO ii1=1,ISIZE2OFa
               DO ii2=1,lda
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   ab(nd, ii2, ii1) = 0.0
                 ENDDO
               ENDDO
@@ -701,7 +694,7 @@ C
             DO j=n,1,-1
               CALL POPCONTROL1B(branch)
               IF (branch .EQ. 0) THEN
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   tempb(nd) = 0.0
                 ENDDO
                 DO i=m,1,-1
@@ -779,12 +772,12 @@ C
                 CALL PUSHCONTROL1B(1)
               END IF
             ENDDO
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               alphab(nd) = 0.0
             ENDDO
             DO ii1=1,ISIZE2OFa
               DO ii2=1,lda
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   ab(nd, ii2, ii1) = 0.0
                 ENDDO
               ENDDO
@@ -792,7 +785,7 @@ C
             DO j=1,n,1
               CALL POPCONTROL1B(branch)
               IF (branch .EQ. 0) THEN
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   tempb(nd) = 0.0
                 ENDDO
                 DO i=m,1,-1
@@ -875,12 +868,12 @@ C
               CALL PUSHCONTROL1B(1)
             END IF
           ENDDO
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             alphab(nd) = 0.0
           ENDDO
           DO ii1=1,ISIZE2OFa
             DO ii2=1,lda
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 ab(nd, ii2, ii1) = 0.0
               ENDDO
             ENDDO
@@ -900,7 +893,7 @@ C
             DO j=ad_to2,1,-1
               CALL POPCONTROL1B(branch)
               IF (branch .EQ. 0) THEN
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   tempb(nd) = 0.0
                 ENDDO
                 DO i=m,1,-1
@@ -920,7 +913,7 @@ C
             ENDDO
             CALL POPCONTROL1B(branch)
             IF (branch .NE. 0) THEN
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 tempb(nd) = 0.0
               ENDDO
               DO i=m,1,-1
@@ -975,12 +968,12 @@ C
               CALL PUSHCONTROL1B(1)
             END IF
           ENDDO
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             alphab(nd) = 0.0
           ENDDO
           DO ii1=1,ISIZE2OFa
             DO ii2=1,lda
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 ab(nd, ii2, ii1) = 0.0
               ENDDO
             ENDDO
@@ -1000,7 +993,7 @@ C
             DO j=n,ad_from2,-1
               CALL POPCONTROL1B(branch)
               IF (branch .EQ. 0) THEN
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   tempb(nd) = 0.0
                 ENDDO
                 DO i=m,1,-1
@@ -1020,7 +1013,7 @@ C
             ENDDO
             CALL POPCONTROL1B(branch)
             IF (branch .NE. 0) THEN
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 tempb(nd) = 0.0
               ENDDO
               DO i=m,1,-1

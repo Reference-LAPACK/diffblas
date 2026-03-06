@@ -33,10 +33,10 @@ program test_zgerc
   complex(8), dimension(max_size,max_size) :: a_output
 
   ! Array restoration variables for numerical differentiation
-  complex(8) :: alpha_orig
-  complex(8), dimension(max_size,max_size) :: a_orig
-  complex(8), dimension(max_size) :: x_orig
   complex(8), dimension(max_size) :: y_orig
+  complex(8), dimension(max_size,max_size) :: a_orig
+  complex(8) :: alpha_orig
+  complex(8), dimension(max_size) :: x_orig
 
   ! Variables for central difference computation
   complex(8), dimension(max_size,max_size) :: a_forward, a_backward
@@ -45,10 +45,10 @@ program test_zgerc
   logical :: has_large_errors
 
   ! Variables for storing original derivative values
-  complex(8) :: alpha_d_orig
-  complex(8), dimension(max_size) :: y_d_orig
-  complex(8), dimension(max_size,max_size) :: a_d_orig
   complex(8), dimension(max_size) :: x_d_orig
+  complex(8) :: alpha_d_orig
+  complex(8), dimension(max_size,max_size) :: a_d_orig
+  complex(8), dimension(max_size) :: y_d_orig
 
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
@@ -87,9 +87,11 @@ program test_zgerc
   lda_val = lda  ! LDA must be at least max( 1
 
   ! Initialize input derivatives to random values
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  alpha_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+  do i = 1, n
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    y_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+  end do
   do i = 1, lda
     do j = 1, lda
       call random_number(temp_real)
@@ -97,28 +99,26 @@ program test_zgerc
       a_d(i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
     end do
   end do
+  call random_number(temp_real)
+  call random_number(temp_imag)
+  alpha_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
   do i = 1, n
     call random_number(temp_real)
     call random_number(temp_imag)
     x_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
   end do
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    y_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
 
   ! Store initial derivative values after random initialization
-  alpha_d_orig = alpha_d
-  y_d_orig = y_d
-  a_d_orig = a_d
   x_d_orig = x_d
+  alpha_d_orig = alpha_d
+  a_d_orig = a_d
+  y_d_orig = y_d
 
   ! Store original values for central difference computation
-  alpha_orig = alpha
-  a_orig = a
-  x_orig = x
   y_orig = y
+  a_orig = a
+  alpha_orig = alpha
+  x_orig = x
 
   write(*,*) 'Testing ZGERC'
   ! Store input values of inout parameters before first function call
@@ -171,19 +171,19 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    alpha = alpha_orig + cmplx(h, 0.0) * alpha_d_orig
-    a = a_orig + cmplx(h, 0.0) * a_d_orig
-    x = x_orig + cmplx(h, 0.0) * x_d_orig
     y = y_orig + cmplx(h, 0.0) * y_d_orig
+    a = a_orig + cmplx(h, 0.0) * a_d_orig
+    alpha = alpha_orig + cmplx(h, 0.0) * alpha_d_orig
+    x = x_orig + cmplx(h, 0.0) * x_d_orig
     call zgerc(msize, nsize, alpha, x, incx_val, y, incy_val, a, lda_val)
     ! Store forward perturbation results
     a_forward = a
     
     ! Backward perturbation: f(x - h)
-    alpha = alpha_orig - cmplx(h, 0.0) * alpha_d_orig
-    a = a_orig - cmplx(h, 0.0) * a_d_orig
-    x = x_orig - cmplx(h, 0.0) * x_d_orig
     y = y_orig - cmplx(h, 0.0) * y_d_orig
+    a = a_orig - cmplx(h, 0.0) * a_d_orig
+    alpha = alpha_orig - cmplx(h, 0.0) * alpha_d_orig
+    x = x_orig - cmplx(h, 0.0) * x_d_orig
     call zgerc(msize, nsize, alpha, x, incx_val, y, incy_val, a, lda_val)
     ! Store backward perturbation results
     a_backward = a

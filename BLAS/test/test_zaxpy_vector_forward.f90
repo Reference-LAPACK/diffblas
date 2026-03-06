@@ -1,10 +1,10 @@
 ! Test program for ZAXPY vector forward mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*8 precision with nbdirsmax=4
+! Using REAL*8 precision with nbdirs=4
 
 program test_zaxpy_vector_forward
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   external :: zaxpy
   external :: zaxpy_dv
@@ -25,17 +25,17 @@ program test_zaxpy_vector_forward
   integer :: incy_val
 
   ! Vector mode derivative variables (type-promoted)
-  ! Scalars become arrays(nbdirsmax), arrays gain extra dimension
-  complex(8), dimension(nbdirsmax) :: za_dv
-  complex(8), dimension(nbdirsmax,4) :: zx_dv
-  complex(8), dimension(nbdirsmax,max_size) :: zy_dv
+  ! Scalars become arrays(nbdirs), arrays gain extra dimension
+  complex(8), dimension(nbdirs) :: za_dv
+  complex(8), dimension(nbdirs,4) :: zx_dv
+  complex(8), dimension(nbdirs,max_size) :: zy_dv
   ! Declare variables for storing original values
   complex(8) :: za_orig
-  complex(8), dimension(nbdirsmax) :: za_dv_orig
+  complex(8), dimension(nbdirs) :: za_dv_orig
   complex(8), dimension(4) :: zx_orig
-  complex(8), dimension(nbdirsmax,4) :: zx_dv_orig
+  complex(8), dimension(nbdirs,4) :: zx_dv_orig
   complex(8), dimension(max_size) :: zy_orig
-  complex(8), dimension(nbdirsmax,max_size) :: zy_dv_orig
+  complex(8), dimension(nbdirs,max_size) :: zy_dv_orig
 
   ! Initialize test parameters
   nsize = n
@@ -62,19 +62,19 @@ program test_zaxpy_vector_forward
   end do
 
   ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     call random_number(temp_real)
     call random_number(temp_imag)
     za_dv(idir) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
   end do
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     do i = 1, max_size
       call random_number(temp_real)
       call random_number(temp_imag)
       zx_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
     end do
   end do
-  do idir = 1, nbdirsmax
+  do idir = 1, nbdirs
     do i = 1, max_size
       call random_number(temp_real)
       call random_number(temp_imag)
@@ -93,7 +93,7 @@ program test_zaxpy_vector_forward
 
   ! Call the vector mode differentiated function
 
-  call zaxpy_dv(nsize, za, za_dv, zx, zx_dv, incx_val, zy, zy_dv, incy_val, nbdirsmax)
+  call zaxpy_dv(nsize, za, za_dv, zx, zx_dv, incx_val, zy, zy_dv, incy_val, nbdirs)
 
   ! Print results and compare
   write(*,*) 'Function calls completed successfully'
@@ -120,10 +120,10 @@ contains
     
     write(*,*) 'Checking vector derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirsmax
+    write(*,*) 'Number of directions:', nbdirs
     
     ! Test each derivative direction separately
-    do idir = 1, nbdirsmax
+    do idir = 1, nbdirs
       
       ! Forward perturbation: f(x + h * direction)
       za = za_orig + cmplx(h, 0.0) * za_dv_orig(idir)

@@ -1,10 +1,10 @@
 ! Test program for CCOPY vector reverse mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirsmax=4
+! Using REAL*4 precision with nbdirs=4
 
 program test_ccopy_vector_reverse
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   external :: ccopy
   external :: ccopy_bv
@@ -26,11 +26,11 @@ program test_ccopy_vector_reverse
   ! Adjoint variables (reverse vector mode)
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
-  complex(4), dimension(nbdirsmax,4) :: cxb
-  complex(4), dimension(nbdirsmax,max_size) :: cyb
+  complex(4), dimension(nbdirs,4) :: cxb
+  complex(4), dimension(nbdirs,max_size) :: cyb
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  complex(4), dimension(nbdirsmax,max_size) :: cyb_orig
+  complex(4), dimension(nbdirs,max_size) :: cyb_orig
 
   ! Storage for original values (for VJP verification)
   complex(4), dimension(4) :: cx_orig
@@ -68,7 +68,7 @@ program test_ccopy_vector_reverse
 
   ! Initialize output adjoints (cotangents) with random values for each direction
   ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirsmax
+  do k = 1, nbdirs
     do i = 1, n
       call random_number(temp_real)
       call random_number(temp_imag)
@@ -88,7 +88,7 @@ program test_ccopy_vector_reverse
   call set_ISIZE1OFCx(max_size)
 
   ! Call reverse vector mode differentiated function
-  call ccopy_bv(nsize, cx, cxb, incx_val, cy, cyb, incy_val, nbdirsmax)
+  call ccopy_bv(nsize, cx, cxb, incx_val, cy, cyb, incy_val, nbdirs)
 
   ! Reset ISIZE globals to uninitialized (-1) for completeness
   call set_ISIZE1OFCx(-1)
@@ -118,7 +118,7 @@ contains
     write(*,*) 'Step size h =', h
     
     ! Test each differentiation direction separately
-    do k = 1, nbdirsmax
+    do k = 1, nbdirs
       
       ! Initialize random direction vectors for all inputs
       do i = 1, n

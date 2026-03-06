@@ -170,7 +170,7 @@ C  =====================================================================
       INCLUDE 'DIFFSIZES.inc'
 C  Hint: ISIZE2OFa should be the size of dimension 2 of array a
 C  Hint: ISIZE1OFx should be the size of dimension 1 of array x
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level2 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -178,13 +178,13 @@ C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
       COMPLEX alpha, beta
-      COMPLEX alphab(nbdirsmax), betab(nbdirsmax)
+      COMPLEX alphab(nbdirs), betab(nbdirs)
       INTEGER incx, incy, lda, m, n
       CHARACTER trans
 C     ..
 C     .. Array Arguments ..
       COMPLEX a(lda, *), x(*), y(*)
-      COMPLEX ab(nbdirsmax, lda, *), xb(nbdirsmax, *), yb(nbdirsmax, *)
+      COMPLEX ab(nbdirs, lda, *), xb(nbdirs, *), yb(nbdirs, *)
 C     ..
 C
 C  =====================================================================
@@ -197,7 +197,7 @@ C     .. Parameters ..
 C     ..
 C     .. Local Scalars ..
       COMPLEX temp
-      COMPLEX tempb(nbdirsmax)
+      COMPLEX tempb(nbdirs)
       INTEGER i, info, ix, iy, j, jx, jy, kx, ky, lenx, leny
       LOGICAL noconj
       EXTERNAL LSAME
@@ -223,17 +223,10 @@ C     ..
 C
 C     Test the input parameters.
 C
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
       CALL check_ISIZE1OFX_initialized()
       CALL check_ISIZE2OFA_initialized()
       ISIZE1OFX = get_ISIZE1OFX()
       ISIZE2OFA = get_ISIZE2OFA()
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       info = 0
       IF (.NOT.LSAME(trans, 'N') .AND. (.NOT.LSAME(trans, 'T')) .AND. (
      +    .NOT.LSAME(trans, 'C'))) THEN
@@ -270,20 +263,20 @@ C     Quick return if possible.
 C
         IF ((m .EQ. 0 .OR. n .EQ. 0) .OR. (alpha .EQ. zero .AND. beta 
      +      .EQ. one)) THEN
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             alphab(nd) = (0.0,0.0)
           ENDDO
           DO ii1=1,ISIZE1OFx
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               xb(nd, ii1) = (0.0,0.0)
             ENDDO
           ENDDO
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             betab(nd) = (0.0,0.0)
           ENDDO
           DO ii1=1,ISIZE2OFa
             DO ii2=1,lda
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 ab(nd, ii2, ii1) = (0.0,0.0)
               ENDDO
             ENDDO
@@ -347,17 +340,17 @@ C
             CALL PUSHCONTROL3B(4)
           END IF
           IF (alpha .EQ. zero) THEN
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               alphab(nd) = (0.0,0.0)
             ENDDO
             DO ii1=1,ISIZE1OFx
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 xb(nd, ii1) = (0.0,0.0)
               ENDDO
             ENDDO
             DO ii1=1,ISIZE2OFa
               DO ii2=1,lda
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   ab(nd, ii2, ii1) = (0.0,0.0)
                 ENDDO
               ENDDO
@@ -372,17 +365,17 @@ C
                 CALL PUSHINTEGER4(jx)
                 jx = jx + incx
               ENDDO
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 alphab(nd) = (0.0,0.0)
               ENDDO
               DO ii1=1,ISIZE1OFx
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   xb(nd, ii1) = (0.0,0.0)
                 ENDDO
               ENDDO
               DO ii1=1,ISIZE2OFa
                 DO ii2=1,lda
-                  DO nd=1,nbdirsmax
+                  DO nd=1,nbdirs
                     ab(nd, ii2, ii1) = (0.0,0.0)
                   ENDDO
                 ENDDO
@@ -390,7 +383,7 @@ C
               DO j=n,1,-1
                 CALL POPINTEGER4(jx)
                 temp = alpha*x(jx)
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   tempb(nd) = (0.0,0.0)
                 ENDDO
                 DO i=m,1,-1
@@ -414,17 +407,17 @@ C
                 CALL PUSHINTEGER4(jx)
                 jx = jx + incx
               ENDDO
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 alphab(nd) = (0.0,0.0)
               ENDDO
               DO ii1=1,ISIZE1OFx
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   xb(nd, ii1) = (0.0,0.0)
                 ENDDO
               ENDDO
               DO ii1=1,ISIZE2OFa
                 DO ii2=1,lda
-                  DO nd=1,nbdirsmax
+                  DO nd=1,nbdirs
                     ab(nd, ii2, ii1) = (0.0,0.0)
                   ENDDO
                 ENDDO
@@ -432,7 +425,7 @@ C
               DO j=n,1,-1
                 CALL POPINTEGER4(jx)
                 temp = alpha*x(jx)
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   tempb(nd) = (0.0,0.0)
                 ENDDO
                 DO i=m,1,-1
@@ -471,17 +464,17 @@ C
                 CALL PUSHINTEGER4(jy)
                 jy = jy + incy
               ENDDO
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 alphab(nd) = (0.0,0.0)
               ENDDO
               DO ii1=1,ISIZE1OFx
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   xb(nd, ii1) = (0.0,0.0)
                 ENDDO
               ENDDO
               DO ii1=1,ISIZE2OFa
                 DO ii2=1,lda
-                  DO nd=1,nbdirsmax
+                  DO nd=1,nbdirs
                     ab(nd, ii2, ii1) = (0.0,0.0)
                   ENDDO
                 ENDDO
@@ -536,17 +529,17 @@ C
                 CALL PUSHINTEGER4(jy)
                 jy = jy + incy
               ENDDO
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 alphab(nd) = (0.0,0.0)
               ENDDO
               DO ii1=1,ISIZE1OFx
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   xb(nd, ii1) = (0.0,0.0)
                 ENDDO
               ENDDO
               DO ii1=1,ISIZE2OFa
                 DO ii2=1,lda
-                  DO nd=1,nbdirsmax
+                  DO nd=1,nbdirs
                     ab(nd, ii2, ii1) = (0.0,0.0)
                   ENDDO
                 ENDDO
@@ -590,11 +583,11 @@ C
                   yb(nd, i) = (0.0,0.0)
                 ENDDO
               ENDDO
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 betab(nd) = (0.0,0.0)
               ENDDO
             ELSE
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 betab(nd) = (0.0,0.0)
               ENDDO
               DO i=leny,1,-1
@@ -611,11 +604,11 @@ C
                 yb(nd, iy) = (0.0,0.0)
               ENDDO
             ENDDO
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               betab(nd) = (0.0,0.0)
             ENDDO
           ELSE IF (branch .EQ. 3) THEN
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               betab(nd) = (0.0,0.0)
             ENDDO
             DO i=leny,1,-1
@@ -627,7 +620,7 @@ C
               ENDDO
             ENDDO
           ELSE
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               betab(nd) = (0.0,0.0)
             ENDDO
           END IF

@@ -1,10 +1,10 @@
 ! Test program for CSCAL vector reverse mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirsmax=4
+! Using REAL*4 precision with nbdirs=4
 
 program test_cscal_vector_reverse
   implicit none
-  include 'DIFFSIZES.inc'
+  integer, parameter :: nbdirs = 4
 
   external :: cscal
   external :: cscal_bv
@@ -25,11 +25,11 @@ program test_cscal_vector_reverse
   ! Adjoint variables (reverse vector mode)
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
-  complex(4), dimension(nbdirsmax) :: cab
-  complex(4), dimension(nbdirsmax,max_size) :: cxb
+  complex(4), dimension(nbdirs) :: cab
+  complex(4), dimension(nbdirs,max_size) :: cxb
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  complex(4), dimension(nbdirsmax,max_size) :: cxb_orig
+  complex(4), dimension(nbdirs,max_size) :: cxb_orig
 
   ! Storage for original values (for VJP verification)
   complex(4) :: ca_orig
@@ -64,7 +64,7 @@ program test_cscal_vector_reverse
 
   ! Initialize output adjoints (cotangents) with random values for each direction
   ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirsmax
+  do k = 1, nbdirs
     do i = 1, n
       call random_number(temp_real)
       call random_number(temp_imag)
@@ -80,7 +80,7 @@ program test_cscal_vector_reverse
   cxb_orig = cxb
 
   ! Call reverse vector mode differentiated function
-  call cscal_bv(nsize, ca, cab, cx, cxb, incx_val, nbdirsmax)
+  call cscal_bv(nsize, ca, cab, cx, cxb, incx_val, nbdirs)
 
   ! VJP Verification using finite differences
   call check_vjp_numerically()
@@ -107,7 +107,7 @@ contains
     write(*,*) 'Step size h =', h
     
     ! Test each differentiation direction separately
-    do k = 1, nbdirsmax
+    do k = 1, nbdirs
       
       ! Initialize random direction vectors for all inputs
       call random_number(temp_real)
@@ -155,7 +155,6 @@ contains
       ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
       ! For pure inputs: use adjoint directly
       vjp_ad = 0.0
-      vjp_ad = vjp_ad + real(conjg(ca_dir) * cab(k))
       ! Compute and sort products for cx
       n_products = n
       do i = 1, n
@@ -165,6 +164,7 @@ contains
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
+      vjp_ad = vjp_ad + real(conjg(ca_dir) * cab(k))
       
       ! Error check: |vjp_fd - vjp_ad| > atol + rtol * |vjp_ad|
       abs_error = abs(vjp_fd - vjp_ad)
