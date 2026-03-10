@@ -10,16 +10,18 @@ program test_caxpy_vector_reverse
   external :: caxpy_bv
 
   ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension
+  integer :: n  ! Current size (set in loop)
+  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
   integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
   integer :: i, j, k  ! Loop counters
+  integer :: test_sizes(1), itest
+  logical :: passed, all_passed
   integer :: seed_array(33)  ! Random seed
   real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
 
   integer :: nsize
   complex(4) :: ca
-  complex(4), dimension(4) :: cx
+  complex(4), dimension(max_size) :: cx
   integer :: incx_val
   complex(4), dimension(max_size) :: cy
   integer :: incy_val
@@ -28,7 +30,7 @@ program test_caxpy_vector_reverse
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
   complex(4), dimension(nbdirs) :: cab
-  complex(4), dimension(nbdirs,4) :: cxb
+  complex(4), dimension(nbdirs,max_size) :: cxb
   complex(4), dimension(nbdirs,max_size) :: cyb
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
@@ -36,7 +38,7 @@ program test_caxpy_vector_reverse
 
   ! Storage for original values (for VJP verification)
   complex(4) :: ca_orig
-  complex(4), dimension(4) :: cx_orig
+  complex(4), dimension(max_size) :: cx_orig
   complex(4), dimension(max_size) :: cy_orig
 
   ! Variables for VJP verification via finite differences
@@ -49,6 +51,13 @@ program test_caxpy_vector_reverse
   ! Initialize random seed for reproducibility
   seed_array = 42
   call random_seed(put=seed_array)
+
+  test_sizes = (/ 4 /)
+  write(*,*) 'Testing CAXPY (Vector Reverse, multi-size: n = 4)'
+  all_passed = .true.
+  do itest = 1, 1
+    n = test_sizes(itest)
+    write(*,*) 'Testing CAXPY (Vector Reverse, n =', n, ')'
 
   ! Initialize primal values
   nsize = n
@@ -92,8 +101,8 @@ program test_caxpy_vector_reverse
   cyb_orig = cyb
 
   ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! Differentiated code checks they are set via check_ISIZE*_initialized.
-  call set_ISIZE1OFCx(max_size)
+  ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
+  call set_ISIZE1OFCx(n)
 
   ! Call reverse vector mode differentiated function
   call caxpy_bv(nsize, ca, cab, cx, cxb, incx_val, cy, cyb, incy_val, nbdirs)
@@ -102,19 +111,24 @@ program test_caxpy_vector_reverse
   call set_ISIZE1OFCx(-1)
 
   ! VJP Verification using finite differences
-  call check_vjp_numerically()
-
-  write(*,*) ''
-  write(*,*) 'Test completed successfully'
+  call check_vjp_numerically(passed)
+  all_passed = all_passed .and. passed
+  end do
+  if (all_passed) then
+    write(*,*) 'PASS: Vector reverse mode - all sizes completed successfully'
+  else
+    write(*,*) 'FAIL: Vector reverse mode - one or more sizes had derivative errors'
+  end if
 
 contains
 
-  subroutine check_vjp_numerically()
+  subroutine check_vjp_numerically(passed)
     implicit none
+    logical, intent(out) :: passed
     
     ! Direction vectors for VJP testing
     complex(4) :: ca_dir
-    complex(4), dimension(4) :: cx_dir
+    complex(4), dimension(max_size) :: cx_dir
     complex(4), dimension(max_size) :: cy_dir
     complex(4), dimension(max_size) :: cy_plus, cy_minus, cy_central_diff
     
@@ -222,6 +236,7 @@ contains
     write(*,*) ''
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    passed = .not. has_large_errors
     if (has_large_errors) then
       write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
     else

@@ -63,7 +63,8 @@ else
 BLAS_LIB ?= -lrefblas
 endif
 
-# Optional: DIFFSIZES_access when using ISIZE globals (.f or .f90+wrappers when many vars)
+# Optional: DIFFSIZES_access when using ISIZE globals (run_tapenade_blas.py writes .f or .f90+wrappers)
+# When many ISIZE vars exceed F77 COMMON line limit, generator writes DIFFSIZES_access.f90 + wrappers instead of .f
 # Prefer .f90 when present (may have more vars than stale .f)
 # Must be defined before any rule that uses it as a prerequisite, so "make forward" (etc.) builds it first.
 ifneq ($(wildcard $(SRC_DIR)/DIFFSIZES_access.f90),)
@@ -169,15 +170,19 @@ $(BUILD_DIR)/%_dep2.o: $(SRC_DIR)/%_dep2.f
 	$(FC) $(FFLAGS_F77) -c $< -o $@
 
 # DIFFSIZES_access - F77 .f or F90 .f90 (generator picks based on COMMON line length)
-# When .f90 exists: compile to produce .o and .mod; wrappers need .mod (depend on it explicitly)
+# When .f90 exists: compile to produce .o and .mod; wrappers depend on .mod explicitly (avoids stale .o from .f)
 $(BUILD_DIR)/diffsizes_access.mod: $(SRC_DIR)/DIFFSIZES_access.f90
 	$(FC) $(FFLAGS) -J$(BUILD_DIR) -c $< -o $(BUILD_DIR)/DIFFSIZES_access.o
 
+# When .f90 exists: DIFFSIZES_access.o is produced as byproduct of diffsizes_access.mod (do not compile .f)
+ifeq ($(wildcard $(SRC_DIR)/DIFFSIZES_access.f90),)
 $(BUILD_DIR)/DIFFSIZES_access.o: $(SRC_DIR)/DIFFSIZES_access.f
 	$(FC) $(FFLAGS_F77) -c $< -o $@
+else
+$(BUILD_DIR)/DIFFSIZES_access.o: $(BUILD_DIR)/diffsizes_access.mod
+endif
 
 # DIFFSIZES_access_wrappers.f - external symbols for F90 module (set_*, get_*, check_*)
-# Depend on .mod so we always build from .f90 when using F90 path (avoids stale .o from .f)
 $(BUILD_DIR)/DIFFSIZES_access_wrappers.o: $(SRC_DIR)/DIFFSIZES_access_wrappers.f $(BUILD_DIR)/diffsizes_access.mod
 	$(FC) $(FFLAGS) -J$(BUILD_DIR) -c $(SRC_DIR)/DIFFSIZES_access_wrappers.f -o $@
 

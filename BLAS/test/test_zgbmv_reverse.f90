@@ -10,8 +10,8 @@ program test_zgbmv_reverse
   external :: zgbmv_b
 
   ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension (rows/cols of matrices)
+  integer :: n  ! Current size (set in loop)
+  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
   integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
 
   character :: trans
@@ -20,7 +20,7 @@ program test_zgbmv_reverse
   integer :: kl
   integer :: ku
   complex(8) :: alpha
-  complex(8), dimension(max_size,max_size) :: a
+  complex(8), dimension(max_size,max_size) :: a  ! Band storage (k+1) x n
   integer :: lda_val
   complex(8), dimension(max_size) :: x
   integer :: incx_val
@@ -32,14 +32,14 @@ program test_zgbmv_reverse
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
   complex(8) :: alphab
-  complex(8), dimension(max_size,max_size) :: ab
+  complex(8), dimension(max_size,max_size) :: ab  ! Band storage
   complex(8), dimension(max_size) :: xb
   complex(8) :: betab
   complex(8), dimension(max_size) :: yb
 
   ! Storage for original values (for VJP verification)
   complex(8) :: alpha_orig
-  complex(8), dimension(max_size,max_size) :: a_orig
+  complex(8), dimension(max_size,max_size) :: a_orig  ! Band storage
   complex(8), dimension(max_size) :: x_orig
   complex(8) :: beta_orig
   complex(8), dimension(max_size) :: y_orig
@@ -52,9 +52,12 @@ program test_zgbmv_reverse
   real(8), parameter :: h = 1.0e-7
   real(8) :: vjp_ad, vjp_fd, relative_error, max_error, abs_error, abs_reference, error_bound
   logical :: has_large_errors
-  integer :: i, j
+  integer :: i, j, band_row
+  real(4) :: temp_real, temp_imag  ! For band matrix initialization
   real(8), dimension(max_size*max_size) :: temp_products  ! For sorted summation
   integer :: n_products
+  integer :: test_sizes(1), itest
+  logical :: passed, all_passed
 
   ! Temporary variables for complex random initialization
   real(4) :: temp_real_init, temp_imag_init
@@ -63,6 +66,13 @@ program test_zgbmv_reverse
   integer :: seed_array(33)
   seed_array = 42
   call random_seed(put=seed_array)
+
+  test_sizes = (/ 4 /)
+  write(*,*) 'Testing ZGBMV (multi-size: n = 4)'
+  all_passed = .true.
+  do itest = 1, 1
+    n = test_sizes(itest)
+    write(*,*) 'Testing ZGBMV (n =', n, ')'
 
   ! Initialize primal values
   trans = 'N'
@@ -73,11 +83,12 @@ program test_zgbmv_reverse
   call random_number(temp_real_init)
   call random_number(temp_imag_init)
   alpha = cmplx(temp_real_init, temp_imag_init) * (2.0,2.0) - (1.0,1.0)
-  do j = 1, max_size
-    do i = 1, max_size
-      call random_number(temp_real_init)
-      call random_number(temp_imag_init)
-      a(i,j) = cmplx(temp_real_init, temp_imag_init) * (2.0,2.0) - (1.0,1.0)
+  ! Initialize a as general band matrix (kl, ku band storage)
+  do j = 1, n
+    do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      a(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
     end do
   end do
   lda_val = lda
@@ -104,8 +115,6 @@ program test_zgbmv_reverse
   beta_orig = beta
   y_orig = y
 
-  write(*,*) 'Testing ZGBMV'
-
   ! Initialize output adjoints (cotangents) with random values
   ! These are the 'seeds' for reverse mode
   do i = 1, max_size
@@ -119,10 +128,10 @@ program test_zgbmv_reverse
   yb_orig = yb
 
   ! Initialize input adjoints to zero (they will be computed)
-  xb = 0.0d0
-  betab = 0.0d0
   ab = 0.0d0
   alphab = 0.0d0
+  xb = 0.0d0
+  betab = 0.0d0
 
   ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
   ! Differentiated code checks they are set via check_ISIZE*_initialized.
@@ -139,22 +148,28 @@ program test_zgbmv_reverse
   ! VJP Verification using finite differences
   ! For reverse mode, we verify: cotangent^T @ J @ direction = direction^T @ adjoint
   ! Equivalently: cotangent^T @ (f(x+h*dir) - f(x-h*dir))/(2h) should equal dir^T @ computed_adjoint
-  call check_vjp_numerically()
-
-  write(*,*) ''
-  write(*,*) 'Test completed successfully'
+  call check_vjp_numerically(passed)
+  all_passed = all_passed .and. passed
+  end do
+  if (all_passed) then
+    write(*,*) 'PASS: All sizes completed successfully'
+  else
+    write(*,*) 'FAIL: One or more sizes had derivative errors'
+  end if
 
 contains
 
-  subroutine check_vjp_numerically()
+  subroutine check_vjp_numerically(passed)
     implicit none
+    logical, intent(out) :: passed
     
+    integer :: band_row  ! Loop variable for band storage
     ! Temporary variables for complex random number generation
     real(4) :: temp_real, temp_imag
     
     ! Direction vectors for VJP testing (like tangents in forward mode)
     complex(8) :: alpha_dir
-    complex(8), dimension(max_size,max_size) :: a_dir
+    complex(8), dimension(max_size,max_size) :: a_dir  ! Band storage
     complex(8), dimension(max_size) :: x_dir
     complex(8) :: beta_dir
     complex(8), dimension(max_size) :: y_dir
@@ -173,13 +188,14 @@ contains
     call random_number(temp_real)
     call random_number(temp_imag)
     alpha_dir = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    do j = 1, max_size
-      do i = 1, max_size
-        call random_number(temp_real)
-        call random_number(temp_imag)
-        a_dir(i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      ! Keep direction consistent with general band (kl, ku): only band entries used
+      do j = 1, n
+        do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)
+          call random_number(temp_real)
+          call random_number(temp_imag)
+          a_dir(band_row, j) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+        end do
       end do
-    end do
     do i = 1, max_size
       call random_number(temp_real)
       call random_number(temp_imag)
@@ -234,12 +250,12 @@ contains
     ! For pure inputs: use adjoint directly
     vjp_ad = 0.0d0
     vjp_ad = vjp_ad + real(conjg(alpha_dir) * alphab)
-    ! Compute and sort products for a
+    ! Compute and sort products for a (band storage)
     n_products = 0
     do j = 1, n
-      do i = 1, n
+      do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)
         n_products = n_products + 1
-        temp_products(n_products) = real(conjg(a_dir(i,j)) * ab(i,j))
+        temp_products(n_products) = real(conjg(a_dir(band_row,j)) * ab(band_row,j))
       end do
     end do
     call sort_array(temp_products, n_products)
@@ -285,6 +301,7 @@ contains
     write(*,*) ''
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
+    passed = .not. has_large_errors
     if (has_large_errors) then
       write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
     else

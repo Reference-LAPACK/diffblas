@@ -10,10 +10,12 @@ program test_cgeru_vector_reverse
   external :: cgeru_bv
 
   ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension
+  integer :: n  ! Current size (set in loop)
+  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
   integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
   integer :: i, j, k  ! Loop counters
+  integer :: test_sizes(1), itest
+  logical :: passed, all_passed
   integer :: seed_array(33)  ! Random seed
   real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
 
@@ -54,6 +56,13 @@ program test_cgeru_vector_reverse
   ! Initialize random seed for reproducibility
   seed_array = 42
   call random_seed(put=seed_array)
+
+  test_sizes = (/ 4 /)
+  write(*,*) 'Testing CGERU (Vector Reverse, multi-size: n = 4)'
+  all_passed = .true.
+  do itest = 1, 1
+    n = test_sizes(itest)
+    write(*,*) 'Testing CGERU (Vector Reverse, n =', n, ')'
 
   ! Initialize primal values
   msize = n
@@ -110,9 +119,9 @@ program test_cgeru_vector_reverse
   ab_orig = ab
 
   ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! Differentiated code checks they are set via check_ISIZE*_initialized.
-  call set_ISIZE1OFX(max_size)
-  call set_ISIZE1OFY(max_size)
+  ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
+  call set_ISIZE1OFX(n)
+  call set_ISIZE1OFY(n)
 
   ! Call reverse vector mode differentiated function
   call cgeru_bv(msize, nsize, alpha, alphab, x, xb, incx_val, y, yb, incy_val, a, ab, lda_val, nbdirs)
@@ -122,15 +131,20 @@ program test_cgeru_vector_reverse
   call set_ISIZE1OFY(-1)
 
   ! VJP Verification using finite differences
-  call check_vjp_numerically()
-
-  write(*,*) ''
-  write(*,*) 'Test completed successfully'
+  call check_vjp_numerically(passed)
+  all_passed = all_passed .and. passed
+  end do
+  if (all_passed) then
+    write(*,*) 'PASS: Vector reverse mode - all sizes completed successfully'
+  else
+    write(*,*) 'FAIL: Vector reverse mode - one or more sizes had derivative errors'
+  end if
 
 contains
 
-  subroutine check_vjp_numerically()
+  subroutine check_vjp_numerically(passed)
     implicit none
+    logical, intent(out) :: passed
     
     ! Direction vectors for VJP testing
     complex(4) :: alpha_dir
@@ -215,15 +229,6 @@ contains
       ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
       ! For pure inputs: use adjoint directly
       vjp_ad = 0.0
-      ! Compute and sort products for y
-      n_products = n
-      do i = 1, n
-        temp_products(i) = real(conjg(y_dir(i)) * yb(k,i))
-      end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_ad = vjp_ad + temp_products(i)
-      end do
       ! Compute and sort products for a
       n_products = 0
       do j = 1, n
@@ -231,6 +236,15 @@ contains
           n_products = n_products + 1
           temp_products(n_products) = real(conjg(a_dir(i,j)) * ab(k,i,j))
         end do
+      end do
+      call sort_array(temp_products, n_products)
+      do i = 1, n_products
+        vjp_ad = vjp_ad + temp_products(i)
+      end do
+      ! Compute and sort products for y
+      n_products = n
+      do i = 1, n
+        temp_products(i) = real(conjg(y_dir(i)) * yb(k,i))
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products
@@ -267,6 +281,7 @@ contains
     write(*,*) ''
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    passed = .not. has_large_errors
     if (has_large_errors) then
       write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
     else

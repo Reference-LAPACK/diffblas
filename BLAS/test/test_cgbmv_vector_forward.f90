@@ -10,10 +10,12 @@ program test_cgbmv_vector_forward
   external :: cgbmv_dv
 
   ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension
+  integer :: n  ! Current size (set in loop)
+  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
   integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-  integer :: i, j, idir  ! Loop counters
+  integer :: i, j, idir, band_row  ! Loop counters
+  integer :: test_sizes(1), itest
+  logical :: passed, all_passed
   integer :: seed_array(33)  ! Random seed
   real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
 
@@ -50,6 +52,13 @@ program test_cgbmv_vector_forward
   complex(4), dimension(max_size) :: y_orig
   complex(4), dimension(nbdirs,max_size) :: y_dv_orig
 
+  test_sizes = (/ 4 /)
+  write(*,*) 'Testing CGBMV (Vector Forward, multi-size: n = 4)'
+  all_passed = .true.
+  do itest = 1, 1
+    n = test_sizes(itest)
+    write(*,*) 'Testing CGBMV (Vector Forward, n =', n, ')'
+
   ! Initialize test parameters
   msize = n
   nsize = n
@@ -68,11 +77,12 @@ program test_cgbmv_vector_forward
   call random_number(temp_real)
   call random_number(temp_imag)
   alpha = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  do i = 1, max_size
-    do j = 1, max_size
+  ! Initialize a as general band matrix (kl, ku band storage)
+  do j = 1, n
+    do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)
       call random_number(temp_real)
       call random_number(temp_imag)
-      a(i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      a(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
     end do
   end do
   do i = 1, max_size
@@ -145,19 +155,25 @@ program test_cgbmv_vector_forward
   write(*,*) 'Function calls completed successfully'
 
   ! Numerical differentiation check
-  call check_derivatives_numerically()
-
-  write(*,*) 'Vector forward mode test completed successfully'
+  call check_derivatives_numerically(passed)
+  all_passed = all_passed .and. passed
+  end do
+  if (all_passed) then
+    write(*,*) 'PASS: Vector forward mode - all sizes completed successfully'
+  else
+    write(*,*) 'FAIL: Vector forward mode - one or more sizes had derivative errors'
+  end if
 
 contains
 
-  subroutine check_derivatives_numerically()
+  subroutine check_derivatives_numerically(passed)
     implicit none
+    logical, intent(out) :: passed
     real(4), parameter :: h = 1.0e-3  ! Step size for finite differences
     real(4) :: relative_error, max_error
     real(4) :: abs_error, abs_reference, error_bound
     complex(4) :: central_diff, ad_result
-    integer :: i, j, idir
+    integer :: i, j, idir, band_row
     logical :: has_large_errors
     complex(4), dimension(max_size) :: y_forward, y_backward
     
@@ -217,6 +233,7 @@ contains
     
     write(*,*) 'Maximum relative error across all directions:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    passed = .not. has_large_errors
     if (has_large_errors) then
       write(*,*) 'FAIL: Large errors detected in vector derivatives (outside tolerance)'
     else

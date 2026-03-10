@@ -10,8 +10,8 @@ program test_ssbmv_reverse
   external :: ssbmv_b
 
   ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = 5  ! Maximum array dimension (adjusted for LD constraints)
+  integer :: n  ! Current size (set in loop)
+  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
   integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
 
   character :: uplo
@@ -54,11 +54,20 @@ program test_ssbmv_reverse
   real(4) :: temp_real  ! For band matrix initialization
   real(4), dimension(max_size*max_size) :: temp_products  ! For sorted summation
   integer :: n_products
+  integer :: test_sizes(1), itest
+  logical :: passed, all_passed
 
   ! Initialize random seed for reproducibility
   integer :: seed_array(33)
   seed_array = 42
   call random_seed(put=seed_array)
+
+  test_sizes = (/ 4 /)
+  write(*,*) 'Testing SSBMV (multi-size: n = 4)'
+  all_passed = .true.
+  do itest = 1, 1
+    n = test_sizes(itest)
+    write(*,*) 'Testing SSBMV (n =', n, ')'
 
   ! Initialize primal values
   uplo = 'U'
@@ -91,8 +100,6 @@ program test_ssbmv_reverse
   beta_orig = beta
   y_orig = y
 
-  write(*,*) 'Testing SSBMV'
-
   ! Initialize output adjoints (cotangents) with random values
   ! These are the 'seeds' for reverse mode
   call random_number(yb)
@@ -103,10 +110,10 @@ program test_ssbmv_reverse
   yb_orig = yb
 
   ! Initialize input adjoints to zero (they will be computed)
-  xb = 0.0
-  betab = 0.0
   ab = 0.0
   alphab = 0.0
+  xb = 0.0
+  betab = 0.0
 
   ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
   ! Differentiated code checks they are set via check_ISIZE*_initialized.
@@ -123,15 +130,20 @@ program test_ssbmv_reverse
   ! VJP Verification using finite differences
   ! For reverse mode, we verify: cotangent^T @ J @ direction = direction^T @ adjoint
   ! Equivalently: cotangent^T @ (f(x+h*dir) - f(x-h*dir))/(2h) should equal dir^T @ computed_adjoint
-  call check_vjp_numerically()
-
-  write(*,*) ''
-  write(*,*) 'Test completed successfully'
+  call check_vjp_numerically(passed)
+  all_passed = all_passed .and. passed
+  end do
+  if (all_passed) then
+    write(*,*) 'PASS: All sizes completed successfully'
+  else
+    write(*,*) 'FAIL: One or more sizes had derivative errors'
+  end if
 
 contains
 
-  subroutine check_vjp_numerically()
+  subroutine check_vjp_numerically(passed)
     implicit none
+    logical, intent(out) :: passed
     
     integer :: band_row  ! Loop variable for band storage
     real(4) :: temp_real  ! For band direction initialization
@@ -261,6 +273,7 @@ contains
     write(*,*) ''
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
+    passed = .not. has_large_errors
     if (has_large_errors) then
       write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
     else

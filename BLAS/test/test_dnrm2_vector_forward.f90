@@ -10,27 +10,36 @@ program test_dnrm2_vector_forward
   external :: dnrm2_dv
 
   ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension
+  integer :: n  ! Current size (set in loop)
+  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
   integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
   integer :: i, j, idir  ! Loop counters
+  integer :: test_sizes(1), itest
+  logical :: passed, all_passed
   integer :: seed_array(33)  ! Random seed
   real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
 
   integer :: nsize
-  real(8), dimension(4) :: x
+  real(8), dimension(max_size) :: x
   integer :: incx_val
 
   ! Vector mode derivative variables (type-promoted)
   ! Scalars become arrays(nbdirs), arrays gain extra dimension
-  real(8), dimension(nbdirs,4) :: x_dv
+  real(8), dimension(nbdirs,max_size) :: x_dv
   ! Declare variables for storing original values
-  real(8), dimension(4) :: x_orig
-  real(8), dimension(nbdirs,4) :: x_dv_orig
+  real(8), dimension(max_size) :: x_orig
+  real(8), dimension(nbdirs,max_size) :: x_dv_orig
 
   ! Function result variables
   real(8) :: dnrm2_result
   real(8), dimension(nbdirs) :: dnrm2_dv_result
+
+  test_sizes = (/ 4 /)
+  write(*,*) 'Testing DNRM2 (Vector Forward, multi-size: n = 4)'
+  all_passed = .true.
+  do itest = 1, 1
+    n = test_sizes(itest)
+    write(*,*) 'Testing DNRM2 (Vector Forward, n =', n, ')'
 
   ! Initialize test parameters
   nsize = n
@@ -63,14 +72,20 @@ program test_dnrm2_vector_forward
   write(*,*) 'Function calls completed successfully'
 
   ! Numerical differentiation check
-  call check_derivatives_numerically()
-
-  write(*,*) 'Vector forward mode test completed successfully'
+  call check_derivatives_numerically(passed)
+  all_passed = all_passed .and. passed
+  end do
+  if (all_passed) then
+    write(*,*) 'PASS: Vector forward mode - all sizes completed successfully'
+  else
+    write(*,*) 'FAIL: Vector forward mode - one or more sizes had derivative errors'
+  end if
 
 contains
 
-  subroutine check_derivatives_numerically()
+  subroutine check_derivatives_numerically(passed)
     implicit none
+    logical, intent(out) :: passed
     real(8), parameter :: h = 1.0e-7  ! Step size for finite differences
     real(8) :: relative_error, max_error
     real(8) :: abs_error, abs_reference, error_bound
@@ -123,6 +138,7 @@ contains
     
     write(*,*) 'Maximum relative error across all directions:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
+    passed = .not. has_large_errors
     if (has_large_errors) then
       write(*,*) 'FAIL: Large errors detected in vector derivatives (outside tolerance)'
     else

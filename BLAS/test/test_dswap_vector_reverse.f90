@@ -10,10 +10,12 @@ program test_dswap_vector_reverse
   external :: dswap_bv
 
   ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension
+  integer :: n  ! Current size (set in loop)
+  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
   integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
   integer :: i, j, k  ! Loop counters
+  integer :: test_sizes(1), itest
+  logical :: passed, all_passed
   integer :: seed_array(33)  ! Random seed
   real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
 
@@ -30,8 +32,8 @@ program test_dswap_vector_reverse
   real(8), dimension(nbdirs,max_size) :: dyb
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  real(8), dimension(nbdirs,max_size) :: dyb_orig
   real(8), dimension(nbdirs,max_size) :: dxb_orig
+  real(8), dimension(nbdirs,max_size) :: dyb_orig
 
   ! Storage for original values (for VJP verification)
   real(8), dimension(max_size) :: dx_orig
@@ -47,6 +49,13 @@ program test_dswap_vector_reverse
   ! Initialize random seed for reproducibility
   seed_array = 42
   call random_seed(put=seed_array)
+
+  test_sizes = (/ 4 /)
+  write(*,*) 'Testing DSWAP (Vector Reverse, multi-size: n = 4)'
+  all_passed = .true.
+  do itest = 1, 1
+    n = test_sizes(itest)
+    write(*,*) 'Testing DSWAP (Vector Reverse, n =', n, ')'
 
   ! Initialize primal values
   nsize = n
@@ -76,28 +85,33 @@ program test_dswap_vector_reverse
   ! Note: Inout parameters are skipped - they already have output adjoints initialized
 
   ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
-  dyb_orig = dyb
   dxb_orig = dxb
+  dyb_orig = dyb
 
   ! Call reverse vector mode differentiated function
   call dswap_bv(nsize, dx, dxb, incx_val, dy, dyb, incy_val, nbdirs)
 
   ! VJP Verification using finite differences
-  call check_vjp_numerically()
-
-  write(*,*) ''
-  write(*,*) 'Test completed successfully'
+  call check_vjp_numerically(passed)
+  all_passed = all_passed .and. passed
+  end do
+  if (all_passed) then
+    write(*,*) 'PASS: Vector reverse mode - all sizes completed successfully'
+  else
+    write(*,*) 'FAIL: Vector reverse mode - one or more sizes had derivative errors'
+  end if
 
 contains
 
-  subroutine check_vjp_numerically()
+  subroutine check_vjp_numerically(passed)
     implicit none
+    logical, intent(out) :: passed
     
     ! Direction vectors for VJP testing
     real(8), dimension(max_size) :: dx_dir
     real(8), dimension(max_size) :: dy_dir
-    real(8), dimension(max_size) :: dy_plus, dy_minus, dy_central_diff
     real(8), dimension(max_size) :: dx_plus, dx_minus, dx_central_diff
+    real(8), dimension(max_size) :: dy_plus, dy_minus, dy_central_diff
     
     max_error = 0.0d0
     has_large_errors = .false.
@@ -120,40 +134,40 @@ contains
       dx = dx_orig + h * dx_dir
       dy = dy_orig + h * dy_dir
       call dswap(nsize, dx, incx_val, dy, incy_val)
-      dy_plus = dy
       dx_plus = dx
+      dy_plus = dy
       
       ! Backward perturbation: f(x - h*dir)
       dx = dx_orig - h * dx_dir
       dy = dy_orig - h * dy_dir
       call dswap(nsize, dx, incx_val, dy, incy_val)
-      dy_minus = dy
       dx_minus = dx
+      dy_minus = dy
       
       ! Compute central differences and VJP verification
       ! VJP check: direction^T @ adjoint should equal finite difference
       
       ! Compute central differences: (f(x+h*dir) - f(x-h*dir)) / (2h)
-      dy_central_diff = (dy_plus - dy_minus) / (2.0d0 * h)
       dx_central_diff = (dx_plus - dx_minus) / (2.0d0 * h)
+      dy_central_diff = (dy_plus - dy_minus) / (2.0d0 * h)
       
       ! VJP verification:
       ! cotangent^T @ central_diff should equal direction^T @ computed_adjoint
       ! Left side: cotangent^T @ Jacobian @ direction (via finite differences, with sorted summation)
       vjp_fd = 0.0d0
-      ! Compute and sort products for dy (FD)
+      ! Compute and sort products for dx (FD)
       n_products = n
       do i = 1, n
-        temp_products(i) = dyb_orig(k,i) * dy_central_diff(i)
+        temp_products(i) = dxb_orig(k,i) * dx_central_diff(i)
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products
         vjp_fd = vjp_fd + temp_products(i)
       end do
-      ! Compute and sort products for dx (FD)
+      ! Compute and sort products for dy (FD)
       n_products = n
       do i = 1, n
-        temp_products(i) = dxb_orig(k,i) * dx_central_diff(i)
+        temp_products(i) = dyb_orig(k,i) * dy_central_diff(i)
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products
@@ -164,19 +178,19 @@ contains
       ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
       ! For pure inputs: use adjoint directly
       vjp_ad = 0.0d0
-      ! Compute and sort products for dy
+      ! Compute and sort products for dx
       n_products = n
       do i = 1, n
-        temp_products(i) = dy_dir(i) * dyb(k,i)
+        temp_products(i) = dx_dir(i) * dxb(k,i)
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
-      ! Compute and sort products for dx
+      ! Compute and sort products for dy
       n_products = n
       do i = 1, n
-        temp_products(i) = dx_dir(i) * dxb(k,i)
+        temp_products(i) = dy_dir(i) * dyb(k,i)
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products
@@ -203,6 +217,7 @@ contains
     write(*,*) ''
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
+    passed = .not. has_large_errors
     if (has_large_errors) then
       write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
     else

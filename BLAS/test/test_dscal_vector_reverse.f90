@@ -10,10 +10,12 @@ program test_dscal_vector_reverse
   external :: dscal_bv
 
   ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension
+  integer :: n  ! Current size (set in loop)
+  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
   integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
   integer :: i, j, k  ! Loop counters
+  integer :: test_sizes(1), itest
+  logical :: passed, all_passed
   integer :: seed_array(33)  ! Random seed
   real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
 
@@ -46,6 +48,13 @@ program test_dscal_vector_reverse
   seed_array = 42
   call random_seed(put=seed_array)
 
+  test_sizes = (/ 4 /)
+  write(*,*) 'Testing DSCAL (Vector Reverse, multi-size: n = 4)'
+  all_passed = .true.
+  do itest = 1, 1
+    n = test_sizes(itest)
+    write(*,*) 'Testing DSCAL (Vector Reverse, n =', n, ')'
+
   ! Initialize primal values
   nsize = n
   call random_number(da)
@@ -76,15 +85,20 @@ program test_dscal_vector_reverse
   call dscal_bv(nsize, da, dab, dx, dxb, incx_val, nbdirs)
 
   ! VJP Verification using finite differences
-  call check_vjp_numerically()
-
-  write(*,*) ''
-  write(*,*) 'Test completed successfully'
+  call check_vjp_numerically(passed)
+  all_passed = all_passed .and. passed
+  end do
+  if (all_passed) then
+    write(*,*) 'PASS: Vector reverse mode - all sizes completed successfully'
+  else
+    write(*,*) 'FAIL: Vector reverse mode - one or more sizes had derivative errors'
+  end if
 
 contains
 
-  subroutine check_vjp_numerically()
+  subroutine check_vjp_numerically(passed)
     implicit none
+    logical, intent(out) :: passed
     
     ! Direction vectors for VJP testing
     real(8) :: da_dir
@@ -175,6 +189,7 @@ contains
     write(*,*) ''
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
+    passed = .not. has_large_errors
     if (has_large_errors) then
       write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
     else

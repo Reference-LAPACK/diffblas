@@ -10,10 +10,12 @@ program test_ctpmv_vector_reverse
   external :: ctpmv_bv
 
   ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension
+  integer :: n  ! Current size (set in loop)
+  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
   integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
   integer :: i, j, k  ! Loop counters
+  integer :: test_sizes(1), itest
+  logical :: passed, all_passed
   integer :: seed_array(33)  ! Random seed
   real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
 
@@ -21,21 +23,21 @@ program test_ctpmv_vector_reverse
   character :: trans
   character :: diag
   integer :: nsize
-  complex(4), dimension((n*(n+1))/2) :: ap
+  complex(4), dimension(max_size*(max_size+1)/2) :: ap
   complex(4), dimension(max_size) :: x
   integer :: incx_val
 
   ! Adjoint variables (reverse vector mode)
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
-  complex(4), dimension(nbdirs,(n*(n+1))/2) :: apb
+  complex(4), dimension(nbdirs,max_size*(max_size+1)/2) :: apb
   complex(4), dimension(nbdirs,max_size) :: xb
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
   complex(4), dimension(nbdirs,max_size) :: xb_orig
 
   ! Storage for original values (for VJP verification)
-  complex(4), dimension((n*(n+1))/2) :: ap_orig
+  complex(4), dimension((max_size*(max_size+1))/2) :: ap_orig
   complex(4), dimension(max_size) :: x_orig
 
   ! Variables for VJP verification via finite differences
@@ -49,11 +51,23 @@ program test_ctpmv_vector_reverse
   seed_array = 42
   call random_seed(put=seed_array)
 
+  test_sizes = (/ 4 /)
+  write(*,*) 'Testing CTPMV (Vector Reverse, multi-size: n = 4)'
+  all_passed = .true.
+  do itest = 1, 1
+    n = test_sizes(itest)
+    write(*,*) 'Testing CTPMV (Vector Reverse, n =', n, ')'
+
   ! Initialize primal values
   uplo = 'U'
   trans = 'N'
   diag = 'N'
   nsize = n
+  do i = 1, (n*(n+1))/2
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    ap(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+  end do
   do i = 1, n
     call random_number(temp_real)
     call random_number(temp_imag)
@@ -83,8 +97,8 @@ program test_ctpmv_vector_reverse
   xb_orig = xb
 
   ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! Differentiated code checks they are set via check_ISIZE*_initialized.
-  call set_ISIZE1OFAp(max_size)
+  ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
+  call set_ISIZE1OFAp(n)
 
   ! Call reverse vector mode differentiated function
   call ctpmv_bv(uplo, trans, diag, nsize, ap, apb, x, xb, incx_val, nbdirs)
@@ -93,18 +107,23 @@ program test_ctpmv_vector_reverse
   call set_ISIZE1OFAp(-1)
 
   ! VJP Verification using finite differences
-  call check_vjp_numerically()
-
-  write(*,*) ''
-  write(*,*) 'Test completed successfully'
+  call check_vjp_numerically(passed)
+  all_passed = all_passed .and. passed
+  end do
+  if (all_passed) then
+    write(*,*) 'PASS: Vector reverse mode - all sizes completed successfully'
+  else
+    write(*,*) 'FAIL: Vector reverse mode - one or more sizes had derivative errors'
+  end if
 
 contains
 
-  subroutine check_vjp_numerically()
+  subroutine check_vjp_numerically(passed)
     implicit none
+    logical, intent(out) :: passed
     
     ! Direction vectors for VJP testing
-    complex(4), dimension((n*(n+1))/2) :: ap_dir
+    complex(4), dimension(max_size*(max_size+1)/2) :: ap_dir
     complex(4), dimension(max_size) :: x_dir
     complex(4), dimension(max_size) :: x_plus, x_minus, x_central_diff
     
@@ -120,7 +139,7 @@ contains
     do k = 1, nbdirs
       
       ! Initialize random direction vectors for all inputs
-      do i = 1, (n*(n+1))/2
+      do i = 1, max_size*(max_size+1)/2
         call random_number(temp_real)
         call random_number(temp_imag)
         ap_dir(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
@@ -167,19 +186,19 @@ contains
       ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
       ! For pure inputs: use adjoint directly
       vjp_ad = 0.0
-      ! Compute and sort products for x
-      n_products = n
-      do i = 1, n
-        temp_products(i) = real(conjg(x_dir(i)) * xb(k,i))
+      ! Compute and sort products for ap
+      n_products = max_size*(max_size+1)/2
+      do i = 1, max_size*(max_size+1)/2
+        temp_products(i) = real(conjg(ap_dir(i)) * apb(k,i))
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
-      ! Compute and sort products for ap
-      n_products = (n*(n+1))/2
-      do i = 1, (n*(n+1))/2
-        temp_products(i) = real(conjg(ap_dir(i)) * apb(k,i))
+      ! Compute and sort products for x
+      n_products = n
+      do i = 1, n
+        temp_products(i) = real(conjg(x_dir(i)) * xb(k,i))
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products
@@ -206,6 +225,7 @@ contains
     write(*,*) ''
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    passed = .not. has_large_errors
     if (has_large_errors) then
       write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
     else

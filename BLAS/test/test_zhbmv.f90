@@ -9,15 +9,15 @@ program test_zhbmv
   external :: zhbmv_d
 
   ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension (rows/cols of matrices)
+  integer, parameter :: max_size = 8  ! Maximum array dimension (multi-size test)
+  integer :: n_test  ! Loop over n = 1, 2, 3, 4
   integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
 
   character :: uplo
   integer :: nsize
   integer :: ksize
   complex(8) :: alpha
-  complex(8), dimension(max_size,n) :: a  ! Band storage (k+1) x n
+  complex(8), dimension(max_size,max_size) :: a  ! Band storage (k+1) x n
   integer :: lda_val
   complex(8), dimension(max_size) :: x
   integer :: incx_val
@@ -36,11 +36,11 @@ program test_zhbmv
   complex(8), dimension(max_size) :: y_output
 
   ! Array restoration variables for numerical differentiation
+  complex(8), dimension(max_size,max_size) :: a_orig  ! Band storage
+  complex(8) :: alpha_orig
+  complex(8), dimension(max_size) :: y_orig
   complex(8), dimension(max_size) :: x_orig
   complex(8) :: beta_orig
-  complex(8), dimension(max_size,n) :: a_orig  ! Band storage
-  complex(8), dimension(max_size) :: y_orig
-  complex(8) :: alpha_orig
 
   ! Variables for central difference computation
   complex(8), dimension(max_size) :: y_forward, y_backward
@@ -49,15 +49,16 @@ program test_zhbmv
   logical :: has_large_errors
 
   ! Variables for storing original derivative values
+  complex(8), dimension(max_size,max_size) :: a_d_orig
+  complex(8) :: alpha_d_orig
+  complex(8), dimension(max_size) :: y_d_orig
   complex(8), dimension(max_size) :: x_d_orig
   complex(8) :: beta_d_orig
-  complex(8), dimension(max_size,max_size) :: a_d_orig
-  complex(8), dimension(max_size) :: y_d_orig
-  complex(8) :: alpha_d_orig
 
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
   integer :: i, j, band_row
+  integer :: n  ! Current size (set in loop)
 
   ! Initialize test data with random numbers
   ! Initialize random seed for reproducible results
@@ -65,116 +66,121 @@ program test_zhbmv
   seed_array = 42
   call random_seed(put=seed_array)
 
-  uplo = 'U'
-  nsize = n
-  ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  alpha = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  ! Initialize a as Hermitian band matrix (upper band storage, real diagonal)
-  do j = 1, n
-    do band_row = max(1, ksize+2-j), ksize+1
-      if (band_row .eq. ksize+1) then
-        call random_number(temp_real)
-        a(band_row, j) = cmplx(temp_real * 2.0 - 1.0, 0.0)  ! Real diagonal
-      else
-        call random_number(temp_real)
-        call random_number(temp_imag)
-        a(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-      end if
+  write(*,*) 'Testing ZHBMV (multi-size: n = 1, 2, 3, 4)'
+  do n_test = 1, 4
+    n = n_test
+
+    uplo = 'U'
+    nsize = n
+    ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    alpha = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    ! Initialize a as Hermitian band matrix (upper band storage, real diagonal)
+    do j = 1, n
+      do band_row = max(1, ksize+2-j), ksize+1
+        if (band_row .eq. ksize+1) then
+          call random_number(temp_real)
+          a(band_row, j) = cmplx(temp_real * 2.0 - 1.0, 0.0)  ! Real diagonal
+        else
+          call random_number(temp_real)
+          call random_number(temp_imag)
+          a(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+        end if
+      end do
     end do
-  end do
-  lda_val = lda  ! LDA must be at least ( k + 1 )
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    x(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-  incx_val = 1  ! INCX 1
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  beta = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    y(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-  incy_val = 1  ! INCY 1
-
-  ! Initialize input derivatives to random values
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    x_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  beta_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  ! Initialize a_d as Hermitian band matrix (upper band storage, real diagonal)
-  do j = 1, n
-    do band_row = max(1, ksize+2-j), ksize+1
-      if (band_row .eq. ksize+1) then
-        call random_number(temp_real)
-        a_d(band_row, j) = cmplx(temp_real * 2.0 - 1.0, 0.0)  ! Real diagonal
-      else
-        call random_number(temp_real)
-        call random_number(temp_imag)
-        a_d(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-      end if
+    lda_val = lda  ! LDA must be at least ( k + 1 )
+    do i = 1, n
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      x(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
     end do
-  end do
-  do i = 1, n
+    incx_val = 1  ! INCX 1
     call random_number(temp_real)
     call random_number(temp_imag)
-    y_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    beta = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    do i = 1, n
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      y(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end do
+    incy_val = 1  ! INCY 1
+  
+    ! Initialize input derivatives to random values
+    ! Initialize a_d as Hermitian band matrix (upper band storage, real diagonal)
+    do j = 1, n
+      do band_row = max(1, ksize+2-j), ksize+1
+        if (band_row .eq. ksize+1) then
+          call random_number(temp_real)
+          a_d(band_row, j) = cmplx(temp_real * 2.0 - 1.0, 0.0)  ! Real diagonal
+        else
+          call random_number(temp_real)
+          call random_number(temp_imag)
+          a_d(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+        end if
+      end do
+    end do
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    alpha_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    do i = 1, n
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      y_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end do
+    do i = 1, n
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      x_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end do
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    beta_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+  
+    ! Store initial derivative values after random initialization
+    a_d_orig = a_d
+    alpha_d_orig = alpha_d
+    y_d_orig = y_d
+    x_d_orig = x_d
+    beta_d_orig = beta_d
+  
+    ! Store original values for central difference computation
+    a_orig = a
+    alpha_orig = alpha
+    y_orig = y
+    x_orig = x
+    beta_orig = beta
+  
+    write(*,*) 'Testing ZHBMV'
+    ! Store input values of inout parameters before first function call
+    y_orig = y
+  
+    ! Re-initialize data for differentiated function
+    ! Only reinitialize inout parameters - keep input-only parameters unchanged
+  
+    ! uplo already has correct value from original call
+    nsize = n
+    ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
+    ! alpha already has correct value from original call
+    ! a already has correct value from original call
+    lda_val = lda  ! LDA must be at least ( k + 1 )
+    ! x already has correct value from original call
+    incx_val = 1  ! INCX 1
+    ! beta already has correct value from original call
+    y = y_orig
+    incy_val = 1  ! INCY 1
+  
+    ! Call the differentiated function
+    call zhbmv_d(uplo, nsize, ksize, alpha, alpha_d, a, a_d, lda_val, x, x_d, incx_val, beta, beta_d, y, y_d, incy_val)
+  
+    ! Print results and compare
+    write(*,*) 'Function calls completed successfully'
+  
+    ! Numerical differentiation check
+    call check_derivatives_numerically()
+
   end do
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  alpha_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-
-  ! Store initial derivative values after random initialization
-  x_d_orig = x_d
-  beta_d_orig = beta_d
-  a_d_orig = a_d
-  y_d_orig = y_d
-  alpha_d_orig = alpha_d
-
-  ! Store original values for central difference computation
-  x_orig = x
-  beta_orig = beta
-  a_orig = a
-  y_orig = y
-  alpha_orig = alpha
-
-  write(*,*) 'Testing ZHBMV'
-  ! Store input values of inout parameters before first function call
-  y_orig = y
-
-  ! Re-initialize data for differentiated function
-  ! Only reinitialize inout parameters - keep input-only parameters unchanged
-
-  ! uplo already has correct value from original call
-  nsize = n
-  ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
-  ! alpha already has correct value from original call
-  ! a already has correct value from original call
-  lda_val = lda  ! LDA must be at least ( k + 1 )
-  ! x already has correct value from original call
-  incx_val = 1  ! INCX 1
-  ! beta already has correct value from original call
-  y = y_orig
-  incy_val = 1  ! INCY 1
-
-  ! Call the differentiated function
-  call zhbmv_d(uplo, nsize, ksize, alpha, alpha_d, a, a_d, lda_val, x, x_d, incx_val, beta, beta_d, y, y_d, incy_val)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically()
-
-  write(*,*) 'Test completed successfully'
+  write(*,*) 'All sizes completed successfully'
 
 contains
 
@@ -199,21 +205,21 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
+    a = a_orig + cmplx(h, 0.0) * a_d_orig
+    alpha = alpha_orig + cmplx(h, 0.0) * alpha_d_orig
+    y = y_orig + cmplx(h, 0.0) * y_d_orig
     x = x_orig + cmplx(h, 0.0) * x_d_orig
     beta = beta_orig + cmplx(h, 0.0) * beta_d_orig
-    a = a_orig + cmplx(h, 0.0) * a_d_orig
-    y = y_orig + cmplx(h, 0.0) * y_d_orig
-    alpha = alpha_orig + cmplx(h, 0.0) * alpha_d_orig
     call zhbmv(uplo, nsize, ksize, alpha, a, lda_val, x, incx_val, beta, y, incy_val)
     ! Store forward perturbation results
     y_forward = y
     
     ! Backward perturbation: f(x - h)
+    a = a_orig - cmplx(h, 0.0) * a_d_orig
+    alpha = alpha_orig - cmplx(h, 0.0) * alpha_d_orig
+    y = y_orig - cmplx(h, 0.0) * y_d_orig
     x = x_orig - cmplx(h, 0.0) * x_d_orig
     beta = beta_orig - cmplx(h, 0.0) * beta_d_orig
-    a = a_orig - cmplx(h, 0.0) * a_d_orig
-    y = y_orig - cmplx(h, 0.0) * y_d_orig
-    alpha = alpha_orig - cmplx(h, 0.0) * alpha_d_orig
     call zhbmv(uplo, nsize, ksize, alpha, a, lda_val, x, incx_val, beta, y, incy_val)
     ! Store backward perturbation results
     y_backward = y

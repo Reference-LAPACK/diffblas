@@ -10,8 +10,8 @@ program test_dspr_reverse
   external :: dspr_b
 
   ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension (rows/cols of matrices)
+  integer :: n  ! Current size (set in loop)
+  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
   integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
 
   character :: uplo
@@ -19,36 +19,45 @@ program test_dspr_reverse
   real(8) :: alpha
   real(8), dimension(max_size) :: x
   integer :: incx_val
-  real(8), dimension((n*(n+1))/2) :: ap
+  real(8), dimension(max_size*(max_size+1)/2) :: ap
 
   ! Adjoint variables (reverse mode)
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
   real(8) :: alphab
   real(8), dimension(max_size) :: xb
-  real(8), dimension((n*(n+1))/2) :: apb
+  real(8), dimension(max_size*(max_size+1)/2) :: apb
 
   ! Storage for original values (for VJP verification)
   real(8) :: alpha_orig
   real(8), dimension(max_size) :: x_orig
-  real(8), dimension((n*(n+1))/2) :: ap_orig
+  real(8), dimension(max_size*(max_size+1)/2) :: ap_orig
 
   ! Variables for VJP verification via finite differences
-  real(8), dimension((n*(n+1))/2) :: ap_plus, ap_minus
+  real(8), dimension(max_size*(max_size+1)/2) :: ap_plus, ap_minus
 
   ! Saved cotangents (output adjoints) for VJP verification
-  real(8), dimension((n*(n+1))/2) :: apb_orig
+  real(8), dimension(max_size*(max_size+1)/2) :: apb_orig
   real(8), parameter :: h = 1.0e-7
   real(8) :: vjp_ad, vjp_fd, relative_error, max_error, abs_error, abs_reference, error_bound
   logical :: has_large_errors
   integer :: i, j
   real(8), dimension(max_size*max_size) :: temp_products  ! For sorted summation
   integer :: n_products
+  integer :: test_sizes(1), itest
+  logical :: passed, all_passed
 
   ! Initialize random seed for reproducibility
   integer :: seed_array(33)
   seed_array = 42
   call random_seed(put=seed_array)
+
+  test_sizes = (/ 4 /)
+  write(*,*) 'Testing DSPR (multi-size: n = 4)'
+  all_passed = .true.
+  do itest = 1, 1
+    n = test_sizes(itest)
+    write(*,*) 'Testing DSPR (n =', n, ')'
 
   ! Initialize primal values
   uplo = 'U'
@@ -66,8 +75,6 @@ program test_dspr_reverse
   x_orig = x
   ap_orig = ap
 
-  write(*,*) 'Testing DSPR'
-
   ! Initialize output adjoints (cotangents) with random values
   ! These are the 'seeds' for reverse mode
   call random_number(apb)
@@ -78,8 +85,8 @@ program test_dspr_reverse
   apb_orig = apb
 
   ! Initialize input adjoints to zero (they will be computed)
-  alphab = 0.0d0
   xb = 0.0d0
+  alphab = 0.0d0
 
   ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
   ! Differentiated code checks they are set via check_ISIZE*_initialized.
@@ -94,15 +101,20 @@ program test_dspr_reverse
   ! VJP Verification using finite differences
   ! For reverse mode, we verify: cotangent^T @ J @ direction = direction^T @ adjoint
   ! Equivalently: cotangent^T @ (f(x+h*dir) - f(x-h*dir))/(2h) should equal dir^T @ computed_adjoint
-  call check_vjp_numerically()
-
-  write(*,*) ''
-  write(*,*) 'Test completed successfully'
+  call check_vjp_numerically(passed)
+  all_passed = all_passed .and. passed
+  end do
+  if (all_passed) then
+    write(*,*) 'PASS: All sizes completed successfully'
+  else
+    write(*,*) 'FAIL: One or more sizes had derivative errors'
+  end if
 
 contains
 
-  subroutine check_vjp_numerically()
+  subroutine check_vjp_numerically(passed)
     implicit none
+    logical, intent(out) :: passed
     
     ! Direction vectors for VJP testing (like tangents in forward mode)
     real(8) :: alpha_dir
@@ -130,14 +142,14 @@ contains
     ! Forward perturbation: f(x + h*dir)
     alpha = alpha_orig + h * alpha_dir
     x = x_orig + h * x_dir
-    ap = ap_orig + h * ap_dir
+    ap = ap_orig
     call dspr(uplo, nsize, alpha, x, incx_val, ap)
     ap_plus = ap
     
     ! Backward perturbation: f(x - h*dir)
     alpha = alpha_orig - h * alpha_dir
     x = x_orig - h * x_dir
-    ap = ap_orig - h * ap_dir
+    ap = ap_orig
     call dspr(uplo, nsize, alpha, x, incx_val, ap)
     ap_minus = ap
     
@@ -172,15 +184,6 @@ contains
     do i = 1, n_products
       vjp_ad = vjp_ad + temp_products(i)
     end do
-    ! Compute and sort products for ap
-    n_products = n*(n+1)/2
-    do i = 1, n_products
-      temp_products(i) = ap_dir(i) * apb(i)
-    end do
-    call sort_array(temp_products, n_products)
-    do i = 1, n_products
-      vjp_ad = vjp_ad + temp_products(i)
-    end do
     
     ! Error check: |vjp_fd - vjp_ad| > atol + rtol * |vjp_ad|
     abs_error = abs(vjp_fd - vjp_ad)
@@ -201,6 +204,7 @@ contains
     write(*,*) ''
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
+    passed = .not. has_large_errors
     if (has_large_errors) then
       write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
     else

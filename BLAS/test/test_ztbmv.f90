@@ -9,8 +9,8 @@ program test_ztbmv
   external :: ztbmv_d
 
   ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension (rows/cols of matrices)
+  integer, parameter :: max_size = 8  ! Maximum array dimension (multi-size test)
+  integer :: n_test  ! Loop over n = 1, 2, 3, 4
   integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
 
   character :: uplo
@@ -18,7 +18,7 @@ program test_ztbmv
   character :: diag
   integer :: nsize
   integer :: ksize
-  complex(8), dimension(max_size,n) :: a  ! Band storage (k+1) x n
+  complex(8), dimension(max_size,max_size) :: a  ! Band storage (k+1) x n
   integer :: lda_val
   complex(8), dimension(max_size) :: x
   integer :: incx_val
@@ -31,8 +31,8 @@ program test_ztbmv
   complex(8), dimension(max_size) :: x_output
 
   ! Array restoration variables for numerical differentiation
+  complex(8), dimension(max_size,max_size) :: a_orig  ! Band storage
   complex(8), dimension(max_size) :: x_orig
-  complex(8), dimension(max_size,n) :: a_orig  ! Band storage
 
   ! Variables for central difference computation
   complex(8), dimension(max_size) :: x_forward, x_backward
@@ -47,6 +47,7 @@ program test_ztbmv
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
   integer :: i, j, band_row
+  integer :: n  ! Current size (set in loop)
 
   ! Initialize test data with random numbers
   ! Initialize random seed for reproducible results
@@ -54,77 +55,82 @@ program test_ztbmv
   seed_array = 42
   call random_seed(put=seed_array)
 
-  uplo = 'U'
-  trans = 'N'
-  diag = 'N'
-  nsize = n
-  ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
-  ! Initialize a as triangular band matrix (upper band storage)
-  do j = 1, n
-    do band_row = max(1, ksize+2-j), ksize+1
+  write(*,*) 'Testing ZTBMV (multi-size: n = 1, 2, 3, 4)'
+  do n_test = 1, 4
+    n = n_test
+
+    uplo = 'U'
+    trans = 'N'
+    diag = 'N'
+    nsize = n
+    ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
+    ! Initialize a as triangular band matrix (upper band storage)
+    do j = 1, n
+      do band_row = max(1, ksize+2-j), ksize+1
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        a(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      end do
+    end do
+    lda_val = lda  ! LDA must be at least ( k + 1 )
+    do i = 1, n
       call random_number(temp_real)
       call random_number(temp_imag)
-      a(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      x(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
     end do
-  end do
-  lda_val = lda  ! LDA must be at least ( k + 1 )
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    x(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-  incx_val = 1  ! INCX 1
-
-  ! Initialize input derivatives to random values
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    x_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-  ! Initialize a_d as triangular band matrix (upper band storage)
-  do j = 1, n
-    do band_row = max(1, ksize+2-j), ksize+1
+    incx_val = 1  ! INCX 1
+  
+    ! Initialize input derivatives to random values
+    ! Initialize a_d as triangular band matrix (upper band storage)
+    do j = 1, n
+      do band_row = max(1, ksize+2-j), ksize+1
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        a_d(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      end do
+    end do
+    do i = 1, n
       call random_number(temp_real)
       call random_number(temp_imag)
-      a_d(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      x_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
     end do
+  
+    ! Store initial derivative values after random initialization
+    a_d_orig = a_d
+    x_d_orig = x_d
+  
+    ! Store original values for central difference computation
+    a_orig = a
+    x_orig = x
+  
+    write(*,*) 'Testing ZTBMV'
+    ! Store input values of inout parameters before first function call
+    x_orig = x
+  
+    ! Re-initialize data for differentiated function
+    ! Only reinitialize inout parameters - keep input-only parameters unchanged
+  
+    ! uplo already has correct value from original call
+    ! trans already has correct value from original call
+    ! diag already has correct value from original call
+    nsize = n
+    ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
+    ! a already has correct value from original call
+    lda_val = lda  ! LDA must be at least ( k + 1 )
+    x = x_orig
+    incx_val = 1  ! INCX 1
+  
+    ! Call the differentiated function
+    call ztbmv_d(uplo, trans, diag, nsize, ksize, a, a_d, lda_val, x, x_d, incx_val)
+  
+    ! Print results and compare
+    write(*,*) 'Function calls completed successfully'
+  
+    ! Numerical differentiation check
+    call check_derivatives_numerically()
+
   end do
-
-  ! Store initial derivative values after random initialization
-  a_d_orig = a_d
-  x_d_orig = x_d
-
-  ! Store original values for central difference computation
-  x_orig = x
-  a_orig = a
-
-  write(*,*) 'Testing ZTBMV'
-  ! Store input values of inout parameters before first function call
-  x_orig = x
-
-  ! Re-initialize data for differentiated function
-  ! Only reinitialize inout parameters - keep input-only parameters unchanged
-
-  ! uplo already has correct value from original call
-  ! trans already has correct value from original call
-  ! diag already has correct value from original call
-  nsize = n
-  ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
-  ! a already has correct value from original call
-  lda_val = lda  ! LDA must be at least ( k + 1 )
-  x = x_orig
-  incx_val = 1  ! INCX 1
-
-  ! Call the differentiated function
-  call ztbmv_d(uplo, trans, diag, nsize, ksize, a, a_d, lda_val, x, x_d, incx_val)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically()
-
-  write(*,*) 'Test completed successfully'
+  write(*,*) 'All sizes completed successfully'
 
 contains
 
@@ -149,15 +155,15 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    x = x_orig + cmplx(h, 0.0) * x_d_orig
     a = a_orig + cmplx(h, 0.0) * a_d_orig
+    x = x_orig + cmplx(h, 0.0) * x_d_orig
     call ztbmv(uplo, trans, diag, nsize, ksize, a, lda_val, x, incx_val)
     ! Store forward perturbation results
     x_forward = x
     
     ! Backward perturbation: f(x - h)
-    x = x_orig - cmplx(h, 0.0) * x_d_orig
     a = a_orig - cmplx(h, 0.0) * a_d_orig
+    x = x_orig - cmplx(h, 0.0) * x_d_orig
     call ztbmv(uplo, trans, diag, nsize, ksize, a, lda_val, x, incx_val)
     ! Store backward perturbation results
     x_backward = x

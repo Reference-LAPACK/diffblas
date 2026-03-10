@@ -10,14 +10,14 @@ program test_dspmv_reverse
   external :: dspmv_b
 
   ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension (rows/cols of matrices)
+  integer :: n  ! Current size (set in loop)
+  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
   integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
 
   character :: uplo
   integer :: nsize
   real(8) :: alpha
-  real(8), dimension((n*(n+1))/2) :: ap
+  real(8), dimension(max_size*(max_size+1)/2) :: ap
   real(8), dimension(max_size) :: x
   integer :: incx_val
   real(8) :: beta
@@ -28,14 +28,14 @@ program test_dspmv_reverse
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
   real(8) :: alphab
-  real(8), dimension((n*(n+1))/2) :: apb
+  real(8), dimension(max_size*(max_size+1)/2) :: apb
   real(8), dimension(max_size) :: xb
   real(8) :: betab
   real(8), dimension(max_size) :: yb
 
   ! Storage for original values (for VJP verification)
   real(8) :: alpha_orig
-  real(8), dimension((n*(n+1))/2) :: ap_orig
+  real(8), dimension(max_size*(max_size+1)/2) :: ap_orig
   real(8), dimension(max_size) :: x_orig
   real(8) :: beta_orig
   real(8), dimension(max_size) :: y_orig
@@ -51,11 +51,20 @@ program test_dspmv_reverse
   integer :: i, j
   real(8), dimension(max_size*max_size) :: temp_products  ! For sorted summation
   integer :: n_products
+  integer :: test_sizes(1), itest
+  logical :: passed, all_passed
 
   ! Initialize random seed for reproducibility
   integer :: seed_array(33)
   seed_array = 42
   call random_seed(put=seed_array)
+
+  test_sizes = (/ 4 /)
+  write(*,*) 'Testing DSPMV (multi-size: n = 4)'
+  all_passed = .true.
+  do itest = 1, 1
+    n = test_sizes(itest)
+    write(*,*) 'Testing DSPMV (n =', n, ')'
 
   ! Initialize primal values
   uplo = 'U'
@@ -80,8 +89,6 @@ program test_dspmv_reverse
   beta_orig = beta
   y_orig = y
 
-  write(*,*) 'Testing DSPMV'
-
   ! Initialize output adjoints (cotangents) with random values
   ! These are the 'seeds' for reverse mode
   call random_number(yb)
@@ -92,10 +99,10 @@ program test_dspmv_reverse
   yb_orig = yb
 
   ! Initialize input adjoints to zero (they will be computed)
+  alphab = 0.0d0
+  apb = 0.0d0
   xb = 0.0d0
   betab = 0.0d0
-  apb = 0.0d0
-  alphab = 0.0d0
 
   ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
   ! Differentiated code checks they are set via check_ISIZE*_initialized.
@@ -112,15 +119,20 @@ program test_dspmv_reverse
   ! VJP Verification using finite differences
   ! For reverse mode, we verify: cotangent^T @ J @ direction = direction^T @ adjoint
   ! Equivalently: cotangent^T @ (f(x+h*dir) - f(x-h*dir))/(2h) should equal dir^T @ computed_adjoint
-  call check_vjp_numerically()
-
-  write(*,*) ''
-  write(*,*) 'Test completed successfully'
+  call check_vjp_numerically(passed)
+  all_passed = all_passed .and. passed
+  end do
+  if (all_passed) then
+    write(*,*) 'PASS: All sizes completed successfully'
+  else
+    write(*,*) 'FAIL: One or more sizes had derivative errors'
+  end if
 
 contains
 
-  subroutine check_vjp_numerically()
+  subroutine check_vjp_numerically(passed)
     implicit none
+    logical, intent(out) :: passed
     
     ! Direction vectors for VJP testing (like tangents in forward mode)
     real(8) :: alpha_dir
@@ -239,6 +251,7 @@ contains
     write(*,*) ''
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
+    passed = .not. has_large_errors
     if (has_large_errors) then
       write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
     else

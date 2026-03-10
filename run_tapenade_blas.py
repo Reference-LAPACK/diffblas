@@ -272,11 +272,16 @@ def is_band_triangular_function(func_name):
     func_upper = func_name.upper()
     return 'TBM' in func_upper or 'TBS' in func_upper
 
+def is_band_general_function(func_name):
+    """Check if a function uses general band matrix storage (e.g. CGBMV, DGBMV)."""
+    return 'GBMV' in func_name.upper()
+
 def is_any_band_matrix_function(func_name):
-    """Check if a function uses any type of band matrix storage (symmetric, Hermitian, or triangular)."""
+    """Check if a function uses any type of band matrix storage (symmetric, Hermitian, triangular, or general)."""
     return (is_band_symmetric_function(func_name) or 
             is_band_hermitian_function(func_name) or 
-            is_band_triangular_function(func_name))
+            is_band_triangular_function(func_name) or
+            is_band_general_function(func_name))
 
 def is_alpha_real_for_complex_function(func_name):
     """
@@ -333,29 +338,29 @@ def is_beta_real_for_complex_function(func_name):
     
     return False
 
-def generate_hermitian_matrix_init(func_name, matrix_name, precision_type):
-    """Generate Fortran code to initialize a Hermitian matrix."""
+def generate_hermitian_matrix_init(func_name, matrix_name, precision_type, size_var='lda', temp_re='temp_real', temp_im='temp_imag'):
+    """Generate Fortran code to initialize a Hermitian matrix. size_var is loop bound (e.g. 'n' or 'lda')."""
     if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
         # Complex Hermitian matrix
         lines = []
         lines.append(f"  ! Initialize {matrix_name} as Hermitian matrix")
         lines.append(f"  ! Fill diagonal with real numbers")
-        lines.append(f"  do i = 1, lda")
-        lines.append(f"    call random_number(temp_real)")
-        lines.append(f"    {matrix_name}(i,i) = cmplx(temp_real * 2.0 - 1.0, 0.0)  ! Real diagonal")
+        lines.append(f"  do i = 1, {size_var}")
+        lines.append(f"    call random_number({temp_re})")
+        lines.append(f"    {matrix_name}(i,i) = cmplx({temp_re} * 2.0 - 1.0, 0.0)  ! Real diagonal")
         lines.append(f"  end do")
         lines.append(f"  ")
         lines.append(f"  ! Fill upper triangle with complex numbers")
-        lines.append(f"  do i = 1, lda")
-        lines.append(f"    do j = i+1, lda")
-        lines.append(f"      call random_number(temp_real)")
-        lines.append(f"      call random_number(temp_imag)")
-        lines.append(f"      {matrix_name}(i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)")
+        lines.append(f"  do i = 1, {size_var}")
+        lines.append(f"    do j = i+1, {size_var}")
+        lines.append(f"      call random_number({temp_re})")
+        lines.append(f"      call random_number({temp_im})")
+        lines.append(f"      {matrix_name}(i,j) = cmplx({temp_re}, {temp_im}) * (2.0,2.0) - (1.0,1.0)")
         lines.append(f"    end do")
         lines.append(f"  end do")
         lines.append(f"  ")
         lines.append(f"  ! Fill lower triangle with complex conjugates")
-        lines.append(f"  do i = 2, lda")
+        lines.append(f"  do i = 2, {size_var}")
         lines.append(f"    do j = 1, i-1")
         lines.append(f"      {matrix_name}(i,j) = conjg({matrix_name}(j,i))  ! A(i,j) = conj(A(j,i))")
         lines.append(f"    end do")
@@ -383,6 +388,17 @@ def generate_symmetric_matrix_init(func_name, matrix_name, precision_type):
     lines.append(f"      {matrix_name}(i,j) = {matrix_name}(j,i)  ! A(i,j) = A(j,i)")
     lines.append(f"    end do")
     lines.append(f"  end do")
+    return lines
+
+def generate_symmetric_direction_init(matrix_name, size_var='n'):
+    """Generate Fortran code to enforce symmetric structure on a direction matrix after random initialization."""
+    lines = []
+    lines.append(f"      ! Keep perturbations consistent with symmetric {matrix_name}")
+    lines.append(f"      do j = 1, {size_var}")
+    lines.append(f"        do i = j+1, {size_var}")
+    lines.append(f"          {matrix_name}(i,j) = {matrix_name}(j,i)")
+    lines.append(f"        end do")
+    lines.append(f"      end do")
     return lines
 
 def generate_symmetric_band_matrix_init(func_name, matrix_name, precision_type):
@@ -453,6 +469,53 @@ def generate_hermitian_band_direction_init(func_name, matrix_name, size_var='n')
         return lines
     else:
         return generate_symmetric_band_direction_init(func_name, matrix_name, size_var)
+
+def generate_general_band_direction_init(func_name, matrix_name, size_var='n'):
+    """Generate Fortran code for general band matrix direction (GBMV: kl, ku).
+    Band storage: ab(ku+1+i-j, j) = full(i,j). Valid band_row for column j:
+    max(1, ku+2-j) to min(kl+ku+1, ku+m-j+1). Uses kl, ku, msize (not ksize)."""
+    lines = []
+    if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
+        lines.append(f"      ! Keep direction consistent with general band (kl, ku): only band entries used")
+        lines.append(f"      do j = 1, {size_var}")
+        lines.append(f"        do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)")
+        lines.append(f"          call random_number(temp_real)")
+        lines.append(f"          call random_number(temp_imag)")
+        lines.append(f"          {matrix_name}(band_row, j) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)")
+        lines.append(f"        end do")
+        lines.append(f"      end do")
+    else:
+        lines.append(f"      ! Keep direction consistent with general band (kl, ku): only band entries used")
+        lines.append(f"      do j = 1, {size_var}")
+        lines.append(f"        do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)")
+        lines.append(f"          call random_number(temp_real)")
+        lines.append(f"          {matrix_name}(band_row, j) = temp_real * 2.0 - 1.0")
+        lines.append(f"        end do")
+        lines.append(f"      end do")
+    return lines
+
+def generate_general_band_matrix_init(func_name, matrix_name, precision_type):
+    """Generate Fortran code to initialize general band matrix A (GBMV) in band storage.
+    ab(ku+1+i-j, j) = full(i,j). Uses kl, ku, msize."""
+    lines = []
+    if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
+        lines.append(f"  ! Initialize {matrix_name} as general band matrix (kl, ku band storage)")
+        lines.append(f"  do j = 1, n")
+        lines.append(f"    do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)")
+        lines.append(f"      call random_number(temp_real)")
+        lines.append(f"      call random_number(temp_imag)")
+        lines.append(f"      {matrix_name}(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)")
+        lines.append(f"    end do")
+        lines.append(f"  end do")
+    else:
+        lines.append(f"  ! Initialize {matrix_name} as general band matrix (kl, ku band storage)")
+        lines.append(f"  do j = 1, n")
+        lines.append(f"    do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)")
+        lines.append(f"      call random_number(temp_real)")
+        lines.append(f"      {matrix_name}(band_row, j) = temp_real * 2.0 - 1.0")
+        lines.append(f"    end do")
+        lines.append(f"  end do")
+    return lines
 
 def generate_triangular_band_matrix_init(func_name, matrix_name, precision_type):
     """Generate Fortran code to initialize triangular band matrix A in band storage (LDA x N).
@@ -540,12 +603,26 @@ def get_array_size_from_constraint(param_name, constraints, param_values):
             print(f"Warning: Could not evaluate array size constraint for {param_name}: {e}", file=sys.stderr)
     
     # Default sizes based on parameter type - use max_size parameter
-    if param_name in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'SX', 'SY']:
+    if param_name in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
         return 'max_size'  # Use max_size parameter for vectors
     elif param_name in ['A', 'B', 'C']:
         return 'max_size'  # Use max_size parameter for matrices
     else:
         return 'max_size'  # Default fallback
+
+def _get_array_size_expr(param_name, constraints, param_values, size_param):
+    """
+    Get array dimension expression. When size_param is 'n' (multi_size outlined),
+    use 'n' for dimensions. Otherwise use get_array_size_from_constraint.
+    """
+    if size_param == 'n':
+        if param_name in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
+            return 'n'
+        elif param_name in ['A', 'B', 'C']:
+            return 'n'
+        else:
+            return 'n'
+    return get_array_size_from_constraint(param_name, constraints, param_values)
 
 def evaluate_constraint(constraint_expr, param_values):
     """
@@ -676,7 +753,7 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
                         # Remove any remaining modifiers
                         var = re.sub(r'\*.*$', '', var)
                         if var and re.match(r'^[A-Za-z][A-Za-z0-9_]*$', var):
-                            real_vars.add(var)
+                            real_vars.add(var.upper())
             
             elif line_stripped.startswith('INTEGER'):
                 int_decl = re.search(r'INTEGER\s+(.+)', line_stripped, re.IGNORECASE)
@@ -688,7 +765,7 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
                         var = var.strip()
                         var = re.sub(r'\*.*$', '', var)
                         if var and re.match(r'^[A-Za-z][A-Za-z0-9_]*$', var):
-                            integer_vars.add(var)
+                            integer_vars.add(var.upper())
             
             elif line_stripped.startswith('CHARACTER'):
                 char_decl = re.search(r'CHARACTER\s+(.+)', line_stripped, re.IGNORECASE)
@@ -700,7 +777,7 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
                         var = var.strip()
                         var = re.sub(r'\*.*$', '', var)
                         if var and re.match(r'^[A-Za-z][A-Za-z0-9_]*$', var):
-                            char_vars.add(var)
+                            char_vars.add(var.upper())
             
             elif line_stripped.startswith('COMPLEX'):
                 # Extract variable names from COMPLEX declaration
@@ -715,7 +792,7 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
                         # Remove any remaining modifiers
                         var = re.sub(r'\*.*$', '', var)
                         if var and re.match(r'^[A-Za-z][A-Za-z0-9_]*$', var):
-                            complex_vars.add(var)  # Add complex variables to complex_vars
+                            complex_vars.add(var.upper())  # Add complex variables to complex_vars
     
     # For FUNCTIONs with explicit return types, add function name to appropriate variable set
     if func_type == 'FUNCTION':
@@ -723,11 +800,11 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
             # Fortran 77 style: type is in the function declaration line
             return_type_upper = return_type_spec.strip().upper()
             if 'REAL' in return_type_upper or 'DOUBLE' in return_type_upper or 'FLOAT' in return_type_upper:
-                real_vars.add(func_name)
+                real_vars.add(func_name.upper())
             elif 'COMPLEX' in return_type_upper:
-                complex_vars.add(func_name)
+                complex_vars.add(func_name.upper())
             elif 'INTEGER' in return_type_upper:
-                integer_vars.add(func_name)
+                integer_vars.add(func_name.upper())
         else:
             # Fortran 90 style: type is declared separately (e.g., "real(wp) :: func_name")
             # Look for type declaration after the function declaration
@@ -741,11 +818,11 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
                 type_decl = type_match.group(0)
                 type_decl_upper = type_decl.upper()
                 if 'REAL' in type_decl_upper:
-                    real_vars.add(func_name)
+                    real_vars.add(func_name.upper())
                 elif 'COMPLEX' in type_decl_upper:
-                    complex_vars.add(func_name)
+                    complex_vars.add(func_name.upper())
                 elif 'INTEGER' in type_decl_upper:
-                    integer_vars.add(func_name)
+                    integer_vars.add(func_name.upper())
     
     # Determine inputs and outputs based on parameter documentation
     # Parse \param[in], \param[out], \param[in,out] markers in comments
@@ -769,13 +846,13 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
         elif param_upper in complex_vars:
             # This parameter is declared as complex, so it's complex
             complex_params.append(param_upper)
-        elif param_upper in ['A', 'B', 'C', 'X', 'Y', 'DX', 'DY', 'ALPHA', 'BETA']:
-            # These are known complex parameter names
+        elif param_upper in ['A', 'B', 'C', 'X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'ALPHA', 'BETA', 'CA', 'CB', 'ZA', 'ZB']:
+            # These are known complex parameter names (CA, CB, ZA, ZB = scalar; CX, CY, ZX, ZY = vectors in C/Z BLAS)
             complex_params.append(param_upper)
     
-    # For complex functions, ensure ALPHA and BETA are always considered valid if they exist
+    # For complex functions, ensure ALPHA, BETA, CA, CB, ZA, ZB are always considered valid if they exist
     if func_name and (func_name.upper().startswith('C') or func_name.upper().startswith('Z')):
-        for param in ['ALPHA', 'BETA']:
+        for param in ['ALPHA', 'BETA', 'CA', 'CB', 'ZA', 'ZB']:
             if param in [p.upper() for p in params] and param not in complex_params:
                 complex_params.append(param)
     
@@ -784,7 +861,7 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
         # Consider real, complex, and character parameters for test generation
         if (param_name in real_vars or 
             param_name in complex_params or
-            param_name in [p.upper() for p in params if p.upper() in ['A', 'B', 'C', 'X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'ALPHA', 'BETA']] or
+            param_name in [p.upper() for p in params if p.upper() in ['A', 'B', 'C', 'X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'ALPHA', 'BETA', 'CA', 'CB', 'ZA', 'ZB']] or
             param_name in ['TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']):
             if param_type.lower() == 'in':
                 inputs.append(param_name)
@@ -795,14 +872,16 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
     
     # For FUNCTIONs, always add the function name itself as output if it's real or complex-valued
     if func_type == 'FUNCTION':
-        if func_name in real_vars or func_name in complex_vars:
-            if func_name not in outputs:
-                outputs.append(func_name)
+        func_upper = func_name.upper()
+        if func_upper in real_vars or func_upper in complex_vars:
+            if func_upper not in outputs:
+                outputs.append(func_upper)
     
     # Check if we have sufficient documentation
     # We have sufficient docs if we found at least one \param[in], \param[out], or \param[in,out] marker
     # OR if it's a FUNCTION (which has the function name as output)
-    has_sufficient_docs = len(param_matches) > 0 or (func_type == 'FUNCTION' and (func_name in real_vars or func_name in complex_vars))
+    func_upper = func_name.upper()
+    has_sufficient_docs = len(param_matches) > 0 or (func_type == 'FUNCTION' and (func_upper in real_vars or func_upper in complex_vars))
     
     # If no documentation found and it's not a FUNCTION with a real/complex return type, mark as insufficient
     if not has_sufficient_docs:
@@ -1074,11 +1153,2383 @@ def get_complex_type(func_name):
     else:
         return "complex(4)"  # Default fallback
 
-def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_type="SUBROUTINE", compiler="gfortran", c_compiler="gcc", param_types=None, forward_src_dir=None):
+def _base_function_name(name):
+    """Strip Tapenade suffixes (_d, _b, _dv, _bv) to get original function name."""
+    for suffix in ('_bv', '_dv', '_b', '_d'):
+        if name.upper().endswith(suffix.upper()):
+            return name[:-len(suffix)]
+    return name
+
+def _generate_multisize_outlined_test(func_name, src_file, inputs, outputs, inout_vars, func_type,
+        constraints, param_values, all_params, precision_type, precision_name,
+        h_precision, param_types, prog_name, src_stem, forward_src_dir):
+    """
+    Generate multi-size test with outlined run_test_for_size(n) - arrays declared to size n.
+    Supports SUBROUTINEs with A,B,C matrices and alpha,beta scalars (e.g. DGEMM).
+    """
+    base_func_name = _base_function_name(func_name)
+    h_val = "1.0e-6" if h_precision == "real(8)" else "1.0e-3"
+    rtol = "1.0e-5" if precision_type == "real(8)" else "2.0e-3"
+    atol = "1.0e-5" if precision_type == "real(8)" else "2.0e-3"
+    if func_name.upper().startswith('Z'):
+        rtol, atol = "1.0e-5", "1.0e-5"
+    elif func_name.upper().startswith('C'):
+        rtol, atol = "1.0e-3", "1.0e-3"
+
+    lines = []
+    lines.append(f"! Test program for {func_name} differentiation")
+    lines.append(f"! Generated automatically by run_tapenade_blas.py")
+    lines.append(f"! Using {precision_name} precision")
+    lines.append("! Multi-size test with outlined run_test_for_size(n) - arrays declared to size n")
+    lines.append("")
+    lines.append("program test_" + prog_name)
+    lines.append("  implicit none")
+    lines.append("")
+    if func_type == 'FUNCTION':
+        elem_type = get_complex_type(func_name) if func_name.upper().startswith('C') or func_name.upper().startswith('Z') else precision_type
+        lines.append(f"  {elem_type}, external :: {base_func_name.lower()}")
+        diff_name = src_stem.lower() if src_stem.lower().endswith('_d') else base_func_name.lower() + '_d'
+        lines.append(f"  {elem_type}, external :: {diff_name}")
+    else:
+        lines.append("  external :: " + func_name.lower())
+        lines.append("  external :: " + func_name.lower() + "_d")
+    lines.append("")
+    lines.append("  integer :: n_test")
+    lines.append("  integer :: seed_array(33)")
+    lines.append("  integer :: test_sizes(1)")
+    lines.append("  integer :: i")
+    lines.append("  logical :: passed, all_passed")
+    lines.append("")
+    lines.append("  seed_array = 42")
+    lines.append("  call random_seed(put=seed_array)")
+    lines.append("")
+    lines.append("  test_sizes = (/ 4 /)")
+    lines.append(f"  write(*,*) 'Testing {func_name} (multi-size: n = 4)'")
+    lines.append("  all_passed = .true.")
+    lines.append("  do i = 1, 1")
+    lines.append("    n_test = test_sizes(i)")
+    lines.append("    call run_test_for_size(n_test, passed)")
+    lines.append("    all_passed = all_passed .and. passed")
+    lines.append("  end do")
+    lines.append("  if (all_passed) then")
+    lines.append("    write(*,*) 'PASS: All sizes completed successfully'")
+    lines.append("  else")
+    lines.append("    write(*,*) 'FAIL: One or more sizes had derivative errors'")
+    lines.append("  end if")
+    lines.append("")
+    lines.append("contains")
+    lines.append("")
+    lines.append("  subroutine run_test_for_size(n, passed)")
+    lines.append("    implicit none")
+    lines.append("    integer, intent(in) :: n")
+    lines.append("    logical, intent(out) :: passed")
+    lines.append("")
+
+    # Declarations in run_test_for_size - use n for dimensions
+    complex_vars = {v.upper() for v in param_types.get('complex_vars', set())}
+    for param in all_params:
+        p = param.upper()
+        if p in ['M', 'N', 'K']:
+            lines.append(f"    integer :: {param.lower()}size")
+        elif p in ['LDA', 'LDB', 'LDC']:
+            lines.append(f"    integer :: {param.lower()}_val")
+        elif p in ['KL', 'KU']:
+            lines.append(f"    integer :: {param.lower()}")
+        elif p in ['INCX', 'INCY']:
+            lines.append(f"    integer :: {param.lower()}")
+        elif p in ['TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
+            lines.append(f"    character :: {param.lower()}")
+        elif p in ['ALPHA', 'BETA']:
+            if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
+                if is_alpha_real_for_complex_function(func_name) if p == 'ALPHA' else is_beta_real_for_complex_function(func_name):
+                    lines.append(f"    {precision_type} :: {param.lower()}")
+                else:
+                    lines.append(f"    {get_complex_type(func_name)} :: {param.lower()}")
+            else:
+                lines.append(f"    {precision_type} :: {param.lower()}")
+        elif p in ['A', 'B', 'C']:
+            elem_type = get_complex_type(func_name) if p in complex_vars else precision_type
+            lines.append(f"    {elem_type}, dimension(n,n) :: {param.lower()}")
+        elif p in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
+            elem_type = get_complex_type(func_name) if p in complex_vars else precision_type
+            lines.append(f"    {elem_type}, dimension(n) :: {param.lower()}")
+        elif p in complex_vars:
+            lines.append(f"    {get_complex_type(func_name)} :: {param.lower()}")
+        else:
+            lines.append(f"    {precision_type} :: {param.lower()}")
+
+    lines.append("")
+    lines.append("    ! Derivative variables")
+    deriv_vars = list(set(inputs + outputs))
+    array_params = [p for p in all_params if p.upper() in ['CX', 'CY', 'X', 'Y', 'DX', 'DY', 'ZX', 'ZY', 'SX', 'SY', 'A', 'B', 'C', 'CA', 'CB', 'ZA', 'ZB', 'DA', 'SA']]
+    for p in array_params:
+        if p.upper() not in [v.upper() for v in deriv_vars]:
+            deriv_vars.append(p)
+    for var in deriv_vars:
+        if var.upper() in ['TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
+            continue
+        if func_type == 'FUNCTION' and (var.upper() == func_name.upper() or var.upper() == base_func_name.upper()):
+            elem_type = get_complex_type(func_name) if var.upper() in complex_vars else precision_type
+            lines.append(f"    {elem_type} :: {var.lower()}_d_result  ! Derivative of function result (avoid name clash with func_d)")
+            continue
+        elem_type = get_complex_type(func_name) if var.upper() in complex_vars else precision_type
+        if var.upper() in ['A', 'B', 'C']:
+            lines.append(f"    {elem_type}, dimension(n,n) :: {var.lower()}_d")
+        elif var.upper() in ['ALPHA', 'BETA', 'CA', 'CB', 'ZA', 'ZB', 'DA', 'SA']:
+            lines.append(f"    {elem_type} :: {var.lower()}_d")
+        elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
+            lines.append(f"    {elem_type}, dimension(n) :: {var.lower()}_d")
+        else:
+            lines.append(f"    {elem_type} :: {var.lower()}_d")
+
+    lines.append("")
+    lines.append("    ! Array restoration and derivative storage")
+    all_vars = list(set(inputs + outputs))
+    for p in all_params:
+        if p.upper() in ['CX', 'CY', 'X', 'Y', 'DX', 'DY', 'ZX', 'ZY', 'SX', 'SY', 'A', 'B', 'C', 'ALPHA', 'BETA', 'CA', 'CB', 'ZA', 'ZB', 'DA', 'SA'] and p.upper() not in [v.upper() for v in all_vars]:
+            all_vars.append(p)
+    for var in all_vars:
+        if var.upper() in ['TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
+            continue
+        if func_type == 'FUNCTION' and (var.upper() == func_name.upper() or var.upper() == base_func_name.upper()):
+            elem_type = get_complex_type(func_name) if var.upper() in complex_vars else precision_type
+            lines.append(f"    {elem_type} :: {var.lower()}_orig  ! Function result (no _d_orig - use _d_result)")
+            continue
+        elem_type = get_complex_type(func_name) if var.upper() in complex_vars else precision_type
+        if var.upper() in ['A', 'B', 'C']:
+            lines.append(f"    {elem_type}, dimension(n,n) :: {var.lower()}_orig, {var.lower()}_d_orig")
+        elif var.upper() in ['ALPHA', 'BETA', 'CA', 'CB', 'ZA', 'ZB', 'DA', 'SA']:
+            lines.append(f"    {elem_type} :: {var.lower()}_orig, {var.lower()}_d_orig")
+        elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
+            lines.append(f"    {elem_type}, dimension(n) :: {var.lower()}_orig, {var.lower()}_d_orig")
+        else:
+            lines.append(f"    {elem_type} :: {var.lower()}_orig, {var.lower()}_d_orig")
+
+    if complex_vars:
+        lines.append(f"    {precision_type} :: temp_re, temp_im  ! For complex random init")
+    lines.append("    integer :: i, j")
+    lines.append("")
+
+    # Init: set size params and character
+    for param in all_params:
+        p = param.upper()
+        if p == 'N':
+            lines.append("    nsize = n")
+        elif p == 'M':
+            lines.append("    msize = n")
+        elif p == 'K':
+            lines.append("    ksize = n")
+        elif p in ['LDA', 'LDB', 'LDC']:
+            lines.append(f"    {param.lower()}_val = n")
+        elif p in ['KL', 'KU']:
+            lines.append(f"    {param.lower()} = 1")
+        elif p in ['INCX', 'INCY']:
+            lines.append(f"    {param.lower()} = 1")
+        elif p in ['TRANSA', 'TRANSB', 'TRANS']:
+            lines.append(f"    {param.lower()} = 'N'")
+        elif p == 'UPLO':
+            lines.append("    uplo = 'U'")
+        elif p == 'SIDE':
+            lines.append("    side = 'L'")
+        elif p == 'DIAG':
+            lines.append("    diag = 'N'")
+
+    cmplx_kind = "4" if func_name.upper().startswith(('S', 'C')) else "8"
+    lines.append("")
+    # Random init for scalars and arrays
+    for param in all_params:
+        p = param.upper()
+        if p in ['INCX', 'INCY', 'M', 'N', 'K', 'KL', 'KU', 'LDA', 'LDB', 'LDC', 'TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
+            continue
+        if p in complex_vars:
+            if p in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
+                lines.append(f"    do i = 1, n")
+                lines.append(f"      call random_number(temp_re)")
+                lines.append(f"      call random_number(temp_im)")
+                lines.append(f"      {param.lower()}(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind={cmplx_kind})")
+                lines.append(f"    end do")
+            else:
+                lines.append(f"    call random_number(temp_re)")
+                lines.append(f"    call random_number(temp_im)")
+                lines.append(f"    {param.lower()} = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind={cmplx_kind})")
+        elif p in ['ALPHA', 'BETA', 'DA', 'SA']:
+            lines.append(f"    call random_number({param.lower()})")
+            lines.append(f"    {param.lower()} = {param.lower()} * 2.0d0 - 1.0d0  ! Scale to [-1,1]")
+        elif p in ['CA', 'CB', 'ZA', 'ZB', 'SA', 'SB', 'S', 'Z'] and p not in complex_vars:
+            lines.append(f"    call random_number({param.lower()})")
+            lines.append(f"    {param.lower()} = {param.lower()} * 2.0d0 - 1.0d0  ! Scale to [-1,1]")
+        elif p in ['A', 'B', 'C']:
+            lines.append(f"    call random_number({param.lower()})")
+            lines.append(f"    {param.lower()} = {param.lower()} * 2.0d0 - 1.0d0  ! Scale to [-1,1]")
+        elif p in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
+            lines.append(f"    call random_number({param.lower()})")
+            lines.append(f"    {param.lower()} = {param.lower()} * 2.0d0 - 1.0d0  ! Scale to [-1,1]")
+
+    lines.append("")
+    lines.append("    ! Initialize input derivatives")
+    for var in all_vars:
+        if var.upper() in ['TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
+            continue
+        if func_type == 'FUNCTION' and (var.upper() == func_name.upper() or var.upper() == base_func_name.upper()):
+            continue  # Function result derivative is output of func_d, not initialized here
+        if var.upper() in complex_vars:
+            if var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
+                lines.append(f"    do i = 1, n")
+                lines.append(f"      call random_number(temp_re)")
+                lines.append(f"      call random_number(temp_im)")
+                lines.append(f"      {var.lower()}_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind={cmplx_kind})")
+                lines.append(f"    end do")
+            else:
+                lines.append(f"    call random_number(temp_re)")
+                lines.append(f"    call random_number(temp_im)")
+                lines.append(f"    {var.lower()}_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind={cmplx_kind})")
+        elif var.upper() in ['A', 'B', 'C']:
+            lines.append(f"    call random_number({var.lower()}_d)")
+            lines.append(f"    {var.lower()}_d = {var.lower()}_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]")
+        elif var.upper() in ['ALPHA', 'BETA', 'DA', 'SA']:
+            lines.append(f"    call random_number({var.lower()}_d)")
+            lines.append(f"    {var.lower()}_d = {var.lower()}_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]")
+        elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
+            lines.append(f"    call random_number({var.lower()}_d)")
+            lines.append(f"    {var.lower()}_d = {var.lower()}_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]")
+        else:
+            lines.append(f"    call random_number({var.lower()}_d)")
+            lines.append(f"    {var.lower()}_d = {var.lower()}_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]")
+
+    lines.append("")
+    lines.append("    ! Store _orig and _d_orig")
+    for var in all_vars:
+        if var.upper() in ['TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
+            continue
+        if func_type == 'FUNCTION' and (var.upper() == func_name.upper() or var.upper() == base_func_name.upper()):
+            continue  # No _d_orig for function result
+        lines.append(f"    {var.lower()}_d_orig = {var.lower()}_d")
+    for var in all_vars:
+        if var.upper() in ['TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
+            continue
+        if func_type == 'FUNCTION' and (var.upper() == func_name.upper() or var.upper() == base_func_name.upper()):
+            # Store function result: var_orig = func_name(...)
+            orig_call_args = []
+            for p in all_params:
+                if p.upper() == 'N':
+                    orig_call_args.append("nsize")
+                elif p.upper() in ['M', 'K']:
+                    orig_call_args.append(f"{p.lower()}size")
+                elif p.upper() in ['LDA', 'LDB', 'LDC']:
+                    orig_call_args.append(f"{p.lower()}_val")
+                elif p.upper() in ['INCX', 'INCY']:
+                    orig_call_args.append("1")
+                else:
+                    orig_call_args.append(p.lower())
+            lines.append(f"    {var.lower()}_orig = {func_name.lower()}({', '.join(orig_call_args)})")
+            continue
+        lines.append(f"    {var.lower()}_orig = {var.lower()}")
+
+    lines.append("")
+    lines.append(f"    write(*,*) 'Testing {func_name} (n =', n, ')'")
+    for var in outputs:
+        if var.upper() in [v.upper() for v in inout_vars]:
+            lines.append(f"    {var.lower()}_orig = {var.lower()}")
+
+    # Build call args for _d (use deriv_vars so FUNCTIONs include cx_d, cy_d etc. when parser omits inputs)
+    diff_params_for_call = [v.upper() for v in deriv_vars]
+    call_args = []
+    for param in all_params:
+        p = param.upper()
+        if p == 'N':
+            call_args.append("nsize")
+        elif p == 'M':
+            call_args.append("msize")
+        elif p == 'K':
+            call_args.append("ksize")
+        elif p in ['LDA', 'LDB', 'LDC']:
+            call_args.append(f"{param.lower()}_val")
+        elif p in ['INCX', 'INCY']:
+            call_args.append("1")
+        else:
+            call_args.append(param.lower())
+        if p in diff_params_for_call and p not in ['TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
+            if not (func_type == 'FUNCTION' and (p == func_name.upper() or p == base_func_name.upper())):
+                call_args.append(param.lower() + "_d")
+    if func_type == 'FUNCTION':
+        call_args.append(f"{base_func_name.lower()}_orig")  # Tapenade func_d takes primal result as last arg
+
+    # Set ISIZE globals before _d call if the differentiated routine uses them
+    isize_vars_d = []
+    if forward_src_dir is not None:
+        d_file = Path(forward_src_dir) / f"{src_stem}_d.f"
+        if not d_file.exists():
+            d_file = Path(forward_src_dir) / f"{src_stem}_d.f90"
+        isize_vars_d = _collect_isize_vars_from_file(d_file)
+    if isize_vars_d:
+        lines.append("")
+        lines.append("    ! Set ISIZE globals required by differentiated routine")
+        for isize_name in isize_vars_d:
+            lines.append(f"    call set_{isize_name}(n)")
+        lines.append("")
+    lines.append("")
+    lines.append("    ! Call the differentiated function")
+    if func_type == 'FUNCTION':
+        diff_name = src_stem.lower() if src_stem.lower().endswith('_d') else base_func_name.lower() + '_d'
+        lines.append(f"    {base_func_name.lower()}_d_result = {diff_name}(" + ", ".join(call_args) + ")")
+    else:
+        lines.append(f"    call {func_name.lower()}_d(" + ", ".join(call_args) + ")")
+    if isize_vars_d:
+        lines.append("")
+        lines.append("    ! Reset ISIZE globals to uninitialized (-1)")
+        for isize_name in isize_vars_d:
+            lines.append(f"    call set_{isize_name}(-1)")
+    lines.append("")
+    lines.append("    write(*,*) 'Function calls completed successfully'")
+    lines.append("")
+
+    # Build check_derivatives_numerically call args
+    have_transa = 'TRANSA' in [p.upper() for p in all_params]
+    have_transb = 'TRANSB' in [p.upper() for p in all_params]
+    have_trans = 'TRANS' in [p.upper() for p in all_params]
+    have_uplo = 'UPLO' in [p.upper() for p in all_params]
+    have_side = 'SIDE' in [p.upper() for p in all_params]
+    have_diag = 'DIAG' in [p.upper() for p in all_params]
+    check_args = ["n"]
+    if have_transa:
+        check_args.append("transa")
+    if have_transb:
+        check_args.append("transb")
+    if have_trans:
+        check_args.append("trans")
+    if have_uplo:
+        check_args.append("uplo")
+    if have_side:
+        check_args.append("side")
+    if have_diag:
+        check_args.append("diag")
+    for p in all_params:
+        pu = p.upper()
+        if pu in ['M', 'N', 'K']:
+            check_args.append(f"{p.lower()}size")
+        elif pu in ['LDA', 'LDB', 'LDC']:
+            check_args.append(f"{p.lower()}_val")
+        elif pu in ['KL', 'KU']:
+            check_args.append(p.lower())
+    all_vars_unique = list(dict.fromkeys(inputs + outputs))  # preserve order, remove duplicates
+    # Ensure we have array/scalar params for FD check (parser may omit some inputs)
+    array_params = [p for p in all_params if p.upper() in ['CX', 'CY', 'X', 'Y', 'DX', 'DY', 'ZX', 'ZY', 'SX', 'SY', 'A', 'B', 'C', 'ALPHA', 'BETA', 'CA', 'CB', 'ZA', 'ZB', 'DA', 'SA']]
+    for p in array_params:
+        if p.upper() not in [v.upper() for v in all_vars_unique]:
+            all_vars_unique.append(p)
+    for var in all_vars_unique:
+        if var.upper() not in ['TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
+            check_args.append(f"{var.lower()}_orig")
+    for var in all_vars_unique:
+        if var.upper() not in ['TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
+            if not (func_type == 'FUNCTION' and var.upper() == func_name.upper()):
+                check_args.append(f"{var.lower()}_d_orig")
+    for var in outputs:
+        if func_type == 'FUNCTION' and var.upper() == func_name.upper():
+            check_args.append(f"{var.lower()}_d_result")
+        else:
+            check_args.append(f"{var.lower()}_d")
+    check_args.append("passed")
+
+    call_str = ", ".join(check_args)
+    lines.append("    ! Numerical differentiation check")
+    lines.append("    call check_derivatives_numerically(" + call_str + ")")
+
+    lines.append("")
+    lines.append("  end subroutine run_test_for_size")
+    lines.append("")
+
+    # check_derivatives_numerically subroutine
+    sig_parts = ["integer, intent(in) :: n"]
+    if have_transa:
+        sig_parts.append("character, intent(in) :: transa")
+    if have_transb:
+        sig_parts.append("character, intent(in) :: transb")
+    if have_trans:
+        sig_parts.append("character, intent(in) :: trans")
+    if have_uplo:
+        sig_parts.append("character, intent(in) :: uplo")
+    if have_side:
+        sig_parts.append("character, intent(in) :: side")
+    if have_diag:
+        sig_parts.append("character, intent(in) :: diag")
+    sig_parts.extend([f"integer, intent(in) :: {p.lower()}{'size' if p.upper() in ['M','N','K'] else '_val'}" for p in all_params if p.upper() in ['M','N','K','LDA','LDB','LDC']])
+    sig_parts.extend([f"integer, intent(in) :: {p.lower()}" for p in all_params if p.upper() in ['KL','KU']])
+    for var in inputs + outputs:
+        if var.upper() in ['TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
+            continue
+        if var.upper() in ['A', 'B', 'C']:
+            sig_parts.append(f"{precision_type}, intent(in) :: {var.lower()}_orig(n,n), {var.lower()}_d_orig(n,n)")
+        elif var.upper() in ['ALPHA', 'BETA', 'CA', 'CB', 'ZA', 'ZB', 'DA', 'SA']:
+            sig_parts.append(f"{precision_type}, intent(in) :: {var.lower()}_orig, {var.lower()}_d_orig")
+        elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
+            sig_parts.append(f"{precision_type}, intent(in) :: {var.lower()}_orig(n), {var.lower()}_d_orig(n)")
+    for var in outputs:
+        if var.upper() in ['A', 'B', 'C']:
+            sig_parts.append(f"{precision_type}, intent(in) :: {var.lower()}_d(n,n)")
+        elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
+            sig_parts.append(f"{precision_type}, intent(in) :: {var.lower()}_d(n)")
+
+    # Deduplicate sig_parts - _orig and _d_orig were added per var, but we need _d from outputs
+    sig_parts = []
+    sig_parts.append("integer, intent(in) :: n")
+    if have_transa:
+        sig_parts.append("character, intent(in) :: transa")
+    if have_transb:
+        sig_parts.append("character, intent(in) :: transb")
+    if have_trans:
+        sig_parts.append("character, intent(in) :: trans")
+    if have_uplo:
+        sig_parts.append("character, intent(in) :: uplo")
+    if have_side:
+        sig_parts.append("character, intent(in) :: side")
+    if have_diag:
+        sig_parts.append("character, intent(in) :: diag")
+    for p in all_params:
+        if p.upper() in ['M', 'N', 'K']:
+            sig_parts.append(f"integer, intent(in) :: {p.lower()}size")
+        elif p.upper() in ['LDA', 'LDB', 'LDC']:
+            sig_parts.append(f"integer, intent(in) :: {p.lower()}_val")
+        elif p.upper() in ['KL', 'KU']:
+            sig_parts.append(f"integer, intent(in) :: {p.lower()}")
+    for var in all_vars_unique:
+        if var.upper() in ['TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
+            continue
+        if func_type == 'FUNCTION' and (var.upper() == func_name.upper() or var.upper() == base_func_name.upper()):
+            elem_type = get_complex_type(func_name) if var.upper() in complex_vars else precision_type
+            sig_parts.append(f"{elem_type}, intent(in) :: {var.lower()}_orig")
+            continue
+        elem_type = get_complex_type(func_name) if var.upper() in complex_vars else precision_type
+        if var.upper() in ['A', 'B', 'C']:
+            sig_parts.append(f"{elem_type}, intent(in) :: {var.lower()}_orig(n,n), {var.lower()}_d_orig(n,n)")
+        elif var.upper() in ['ALPHA', 'BETA', 'CA', 'CB', 'ZA', 'ZB', 'DA', 'SA']:
+            sig_parts.append(f"{elem_type}, intent(in) :: {var.lower()}_orig, {var.lower()}_d_orig")
+        elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
+            sig_parts.append(f"{elem_type}, intent(in) :: {var.lower()}_orig(n), {var.lower()}_d_orig(n)")
+        else:
+            sig_parts.append(f"{elem_type}, intent(in) :: {var.lower()}_orig, {var.lower()}_d_orig")
+    for var in outputs:
+        elem_type = get_complex_type(func_name) if var.upper() in complex_vars else precision_type
+        if func_type == 'FUNCTION' and (var.upper() == func_name.upper() or var.upper() == base_func_name.upper()):
+            sig_parts.append(f"{elem_type}, intent(in) :: {var.lower()}_d_result")
+        elif var.upper() in ['A', 'B', 'C']:
+            sig_parts.append(f"{elem_type}, intent(in) :: {var.lower()}_d(n,n)")
+        elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
+            sig_parts.append(f"{elem_type}, intent(in) :: {var.lower()}_d(n)")
+        else:
+            sig_parts.append(f"{elem_type}, intent(in) :: {var.lower()}_d")
+    sig_parts.append("logical, intent(out) :: passed")
+
+    # Use check_args for subroutine - they match the call
+    lines.append("  subroutine check_derivatives_numerically(" + ", ".join(check_args) + ")")
+    lines.append("    implicit none")
+    for s in sig_parts:
+        lines.append("    " + s)
+    lines.append("")
+    lines.append(f"    {precision_type}, parameter :: h = {h_val}  ! Step size for finite differences")
+    lines.append(f"    {precision_type} :: relative_error, max_error")
+    lines.append(f"    {precision_type} :: abs_error, abs_reference, error_bound")
+    lines.append(f"    {precision_type} :: central_diff, ad_result")
+    lines.append("    logical :: has_large_errors")
+    for var in outputs:
+        if func_type == 'FUNCTION' and (var.upper() == func_name.upper() or var.upper() == base_func_name.upper()):
+            elem_type = get_complex_type(func_name) if var.upper() in complex_vars else precision_type
+            lines.append(f"    {elem_type} :: {var.lower()}_forward, {var.lower()}_backward  ! Function result for FD check")
+            continue
+        elem_type = get_complex_type(func_name) if var.upper() in complex_vars else precision_type
+        if var.upper() in ['A', 'B', 'C']:
+            lines.append(f"    {elem_type}, dimension(n,n) :: {var.lower()}_forward, {var.lower()}_backward")
+        elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
+            lines.append(f"    {elem_type}, dimension(n) :: {var.lower()}_forward, {var.lower()}_backward")
+    lines.append("    integer :: i, j")
+    # Local copies for perturbation (skip function result - it's computed by call)
+    for var in all_vars_unique:
+        if var.upper() in ['TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
+            continue
+        if func_type == 'FUNCTION' and (var.upper() == func_name.upper() or var.upper() == base_func_name.upper()):
+            continue
+        elem_type = get_complex_type(func_name) if var.upper() in complex_vars else precision_type
+        if var.upper() in ['A', 'B', 'C']:
+            lines.append(f"    {elem_type}, dimension(n,n) :: {var.lower()}")
+        elif var.upper() in ['ALPHA', 'BETA', 'CA', 'CB', 'ZA', 'ZB', 'DA', 'SA']:
+            lines.append(f"    {elem_type} :: {var.lower()}")
+        elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
+            lines.append(f"    {elem_type}, dimension(n) :: {var.lower()}")
+        else:
+            lines.append(f"    {elem_type} :: {var.lower()}")
+    lines.append("")
+    lines.append("    max_error = 0.0e0")
+    lines.append("    has_large_errors = .false.")
+    lines.append("")
+    lines.append("    write(*,*) 'Checking derivatives against numerical differentiation:'")
+    lines.append("    write(*,*) 'Step size h =', h")
+    lines.append("")
+    lines.append("    ! Forward perturbation: f(x + h)")
+    for var in all_vars_unique:
+        if var.upper() in ['TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
+            continue
+        if func_type == 'FUNCTION' and (var.upper() == func_name.upper() or var.upper() == base_func_name.upper()):
+            continue
+        if var.upper() in ['A', 'B', 'C']:
+            lines.append(f"    {var.lower()} = {var.lower()}_orig + h * {var.lower()}_d_orig")
+        elif var.upper() in ['ALPHA', 'BETA', 'CA', 'CB', 'ZA', 'ZB', 'DA', 'SA']:
+            lines.append(f"    {var.lower()} = {var.lower()}_orig + h * {var.lower()}_d_orig")
+        elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
+            lines.append(f"    {var.lower()} = {var.lower()}_orig + h * {var.lower()}_d_orig")
+        else:
+            lines.append(f"    {var.lower()} = {var.lower()}_orig + h * {var.lower()}_d_orig")
+    # Build original function call
+    orig_call_args = []
+    for p in all_params:
+        if p.upper() in ['N', 'M', 'K']:
+            orig_call_args.append(f"{p.lower()}size")
+        elif p.upper() in ['LDA', 'LDB', 'LDC']:
+            orig_call_args.append(f"{p.lower()}_val")
+        elif p.upper() in ['INCX', 'INCY']:
+            orig_call_args.append("1")
+        else:
+            orig_call_args.append(p.lower())
+    if func_type == 'FUNCTION':
+        lines.append(f"    {base_func_name.lower()}_forward = {base_func_name.lower()}({', '.join(orig_call_args)})")
+    else:
+        lines.append(f"    call {func_name.lower()}({', '.join(orig_call_args)})")
+    for var in outputs:
+        if func_type == 'FUNCTION' and (var.upper() == func_name.upper() or var.upper() == base_func_name.upper()):
+            continue
+        if var.upper() in ['A', 'B', 'C']:
+            lines.append(f"    {var.lower()}_forward = {var.lower()}")
+        elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
+            lines.append(f"    {var.lower()}_forward = {var.lower()}")
+    lines.append("")
+    lines.append("    ! Backward perturbation: f(x - h)")
+    for var in all_vars_unique:
+        if var.upper() in ['TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
+            continue
+        if func_type == 'FUNCTION' and (var.upper() == func_name.upper() or var.upper() == base_func_name.upper()):
+            continue
+        if var.upper() in ['A', 'B', 'C']:
+            lines.append(f"    {var.lower()} = {var.lower()}_orig - h * {var.lower()}_d_orig")
+        elif var.upper() in ['ALPHA', 'BETA', 'CA', 'CB', 'ZA', 'ZB', 'DA', 'SA']:
+            lines.append(f"    {var.lower()} = {var.lower()}_orig - h * {var.lower()}_d_orig")
+        elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
+            lines.append(f"    {var.lower()} = {var.lower()}_orig - h * {var.lower()}_d_orig")
+        else:
+            lines.append(f"    {var.lower()} = {var.lower()}_orig - h * {var.lower()}_d_orig")
+    if func_type == 'FUNCTION':
+        lines.append(f"    {base_func_name.lower()}_backward = {base_func_name.lower()}({', '.join(orig_call_args)})")
+    else:
+        lines.append(f"    call {func_name.lower()}({', '.join(orig_call_args)})")
+    for var in outputs:
+        if func_type == 'FUNCTION' and (var.upper() == func_name.upper() or var.upper() == base_func_name.upper()):
+            continue
+        if var.upper() in ['A', 'B', 'C']:
+            lines.append(f"    {var.lower()}_backward = {var.lower()}")
+        elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
+            lines.append(f"    {var.lower()}_backward = {var.lower()}")
+    lines.append("")
+    lines.append("    ! Compute central differences and compare with AD results")
+    for var in outputs:
+        if func_type == 'FUNCTION' and (var.upper() == func_name.upper() or var.upper() == base_func_name.upper()):
+            lines.append(f"    central_diff = ({var.lower()}_forward - {var.lower()}_backward) / (2.0e0 * h)")
+            lines.append(f"    ad_result = {var.lower()}_d_result")
+            lines.append(f"    abs_error = abs(central_diff - ad_result)")
+            lines.append(f"    abs_reference = abs(ad_result)")
+            lines.append(f"    error_bound = {atol} + {rtol} * abs_reference")
+            lines.append(f"    if (abs_error > error_bound) then")
+            lines.append(f"      has_large_errors = .true.")
+            lines.append(f"      relative_error = abs_error / max(abs_reference, 1.0e-10)")
+            lines.append(f"      write(*,*) 'Large error in function result {var.upper()}:'")
+            lines.append(f"      write(*,*) '  Central diff: ', central_diff")
+            lines.append(f"      write(*,*) '  AD result:   ', ad_result")
+            lines.append(f"      write(*,*) '  Absolute error:', abs_error")
+            lines.append(f"      write(*,*) '  Error bound:', error_bound")
+            lines.append(f"      write(*,*) '  Relative error:', relative_error")
+            lines.append(f"    end if")
+            lines.append(f"    relative_error = abs_error / max(abs_reference, 1.0e-10)")
+            lines.append(f"    max_error = max(max_error, relative_error)")
+            continue
+        if var.upper() in ['A', 'B', 'C']:
+            lines.append(f"    do j = 1, min(2, n)")
+            lines.append(f"      do i = 1, min(2, n)")
+            lines.append(f"        central_diff = ({var.lower()}_forward(i,j) - {var.lower()}_backward(i,j)) / (2.0e0 * h)")
+            lines.append(f"        ad_result = {var.lower()}_d(i,j)")
+            lines.append(f"        abs_error = abs(central_diff - ad_result)")
+            lines.append(f"        abs_reference = abs(ad_result)")
+            lines.append(f"        error_bound = {atol} + {rtol} * abs_reference")
+            lines.append(f"        if (abs_error > error_bound) then")
+            lines.append(f"          has_large_errors = .true.")
+            lines.append(f"          relative_error = abs_error / max(abs_reference, 1.0e-10)")
+            lines.append(f"          write(*,*) 'Large error in output {var.upper()}(', i, ',', j, '):'")
+            lines.append(f"          write(*,*) '  Central diff: ', central_diff")
+            lines.append(f"          write(*,*) '  AD result:   ', ad_result")
+            lines.append(f"          write(*,*) '  Absolute error:', abs_error")
+            lines.append(f"          write(*,*) '  Error bound:', error_bound")
+            lines.append(f"          write(*,*) '  Relative error:', relative_error")
+            lines.append(f"        end if")
+            lines.append(f"        relative_error = abs_error / max(abs_reference, 1.0e-10)")
+            lines.append(f"        max_error = max(max_error, relative_error)")
+            lines.append(f"      end do")
+            lines.append(f"    end do")
+        elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
+            lines.append(f"    do i = 1, n")
+            lines.append(f"        central_diff = ({var.lower()}_forward(i) - {var.lower()}_backward(i)) / (2.0e0 * h)")
+            lines.append(f"        ad_result = {var.lower()}_d(i)")
+            lines.append(f"        abs_error = abs(central_diff - ad_result)")
+            lines.append(f"        abs_reference = abs(ad_result)")
+            lines.append(f"        error_bound = {atol} + {rtol} * abs_reference")
+            lines.append(f"        if (abs_error > error_bound) then")
+            lines.append(f"          has_large_errors = .true.")
+            lines.append(f"          relative_error = abs_error / max(abs_reference, 1.0e-10)")
+            lines.append(f"          write(*,*) 'Large error in output {var.upper()}(', i, '):'")
+            lines.append(f"          write(*,*) '  Central diff: ', central_diff")
+            lines.append(f"          write(*,*) '  AD result:   ', ad_result")
+            lines.append(f"          write(*,*) '  Absolute error:', abs_error")
+            lines.append(f"          write(*,*) '  Error bound:', error_bound")
+            lines.append(f"          write(*,*) '  Relative error:', relative_error")
+            lines.append(f"        end if")
+            lines.append(f"        relative_error = abs_error / max(abs_reference, 1.0e-10)")
+            lines.append(f"        max_error = max(max_error, relative_error)")
+            lines.append(f"    end do")
+    lines.append("")
+    lines.append("    write(*,*) 'Maximum relative error:', max_error")
+    lines.append(f"    write(*,*) 'Tolerance thresholds: rtol={rtol}, atol={atol}'")
+    lines.append("    passed = .not. has_large_errors")
+    lines.append("    if (has_large_errors) then")
+    lines.append("      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'")
+    lines.append("    else")
+    lines.append("      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'")
+    lines.append("    end if")
+    lines.append("")
+    lines.append("  end subroutine check_derivatives_numerically")
+    lines.append("")
+    lines.append("end program test_" + prog_name)
+
+    return "\n".join(lines)
+
+
+def _generate_multisize_outlined_test_reverse_nongemm(func_name, src_stem, precision_type, precision_name, reverse_src_dir,
+        all_params, inputs, outputs, inout_vars, differentiable_params, param_types, isize_vars, func_type="SUBROUTINE"):
+    """
+    Generate outlined reverse test for non-GEMM functions (CAXPY, etc.).
+    Builds run_test_for_size(n, passed) and check_vjp_numerically from all_params.
+    For FUNCTIONs (e.g. SASUM, SNRM2), captures return value for FD check.
+    """
+    complex_vars = {v.upper() for v in param_types.get('complex_vars', set())}
+    is_complex = func_name.upper().startswith('C') or func_name.upper().startswith('Z')
+    complex_type = get_complex_type(func_name) if is_complex else precision_type
+
+    def var_type(p):
+        pu = p.upper()
+        if pu in complex_vars or (is_complex and pu in ['CA', 'CB', 'ZA', 'CX', 'CY', 'ZX', 'ZY']):
+            return complex_type
+        return get_param_precision(pu, func_name, param_types) if pu in param_types.get('real_vars', set()) else precision_type
+
+    def is_vector(p):
+        pu = p.upper()
+        return pu in ['X', 'Y', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY', 'DX', 'DY']
+
+    # Tolerances
+    rtol, atol = "1.0e-5", "1.0e-5"
+    if func_name.upper().startswith('C') or func_name.upper().startswith('S'):
+        rtol, atol = "1.0e-3", "1.0e-3"
+    h_val = "1.0e-7" if precision_type == "real(8)" else "1.0e-3"
+
+    lines = []
+    lines.append(f"! Test program for {func_name} reverse mode (adjoint) differentiation")
+    lines.append(f"! Generated automatically by run_tapenade_blas.py")
+    lines.append(f"! Using {precision_name} precision")
+    lines.append("! Multi-size test with outlined run_test_for_size(n) - arrays declared to size n")
+    lines.append("")
+    lines.append(f"program test_{src_stem}_reverse")
+    lines.append("  implicit none")
+    lines.append("")
+    # Declare primal routine. For FUNCTIONs we must declare the return type so gfortran knows it.
+    if func_type == 'FUNCTION':
+        if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
+            lines.append(f"  {get_complex_type(func_name)}, external :: {func_name.lower()}")
+        else:
+            lines.append(f"  {precision_type}, external :: {func_name.lower()}")
+    else:
+        lines.append(f"  external :: {func_name.lower()}")
+    lines.append(f"  external :: {func_name.lower()}_b")
+    lines.append("")
+    lines.append("  integer :: n_test")
+    lines.append("  integer :: seed_array(33)")
+    lines.append("  integer :: test_sizes(1)")
+    lines.append("  integer :: i")
+    lines.append("  logical :: passed, all_passed")
+    lines.append("")
+    lines.append("  seed_array = 42")
+    lines.append("  call random_seed(put=seed_array)")
+    lines.append("")
+    lines.append("  test_sizes = (/ 4 /)")
+    lines.append(f"  write(*,*) 'Testing {func_name} (multi-size: n = 4)'")
+    lines.append("  all_passed = .true.")
+    lines.append("  do i = 1, 1")
+    lines.append("    n_test = test_sizes(i)")
+    lines.append("    call run_test_for_size(n_test, passed)")
+    lines.append("    all_passed = all_passed .and. passed")
+    lines.append("  end do")
+    lines.append("  if (all_passed) then")
+    lines.append("    write(*,*) 'PASS: All sizes completed successfully'")
+    lines.append("  else")
+    lines.append("    write(*,*) 'FAIL: One or more sizes had derivative errors'")
+    lines.append("  end if")
+    lines.append("")
+    lines.append("contains")
+    lines.append("")
+    lines.append("  subroutine run_test_for_size(n, passed)")
+    lines.append("    implicit none")
+    lines.append("    integer, intent(in) :: n")
+    lines.append("    logical, intent(out) :: passed")
+    lines.append("")
+
+    # Declarations
+    for param in all_params:
+        pu = param.upper()
+        if pu in ['N', 'M', 'K']:
+            lines.append(f"    integer :: {param.lower()}size")
+        elif pu in ['INCX', 'INCY']:
+            lines.append(f"    integer :: {param.lower()}_val")
+        elif pu in ['LDA', 'LDB', 'LDC']:
+            lines.append(f"    integer :: {param.lower()}_val")
+        elif pu in ['TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
+            lines.append(f"    character :: {param.lower()}")
+        elif pu in ['KL', 'KU']:
+            lines.append(f"    integer :: {param.lower()}")
+        elif is_vector(pu):
+            t = var_type(param)
+            lines.append(f"    {t}, dimension(n) :: {param.lower()}")
+        elif pu in ['A', 'B', 'C'] and pu in [p.upper() for p in differentiable_params]:
+            t = var_type(param)
+            lines.append(f"    {t}, dimension(n,n) :: {param.lower()}")
+        elif pu in [p.upper() for p in differentiable_params]:
+            t = var_type(param)
+            lines.append(f"    {t} :: {param.lower()}")
+        else:
+            t = var_type(param)
+            lines.append(f"    {t} :: {param.lower()}")
+
+    for param in differentiable_params:
+        pu = param.upper()
+        t = var_type(param)
+        if is_vector(pu):
+            lines.append(f"    {t}, dimension(n) :: {param.lower()}b")
+        elif pu in ['A', 'B', 'C']:
+            lines.append(f"    {t}, dimension(n,n) :: {param.lower()}b")
+        else:
+            lines.append(f"    {t} :: {param.lower()}b")
+
+    # FUNCTIONs: the reverse routine expects an extra scalar seed for the function result (e.g. sasumb, snrm2b).
+    if func_type == 'FUNCTION':
+        if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
+            lines.append(f"    {get_complex_type(func_name)} :: {func_name.lower()}b, {func_name.lower()}b_orig")
+        else:
+            lines.append(f"    {precision_type} :: {func_name.lower()}b, {func_name.lower()}b_orig")
+
+    for param in differentiable_params:
+        pu = param.upper()
+        t = var_type(param)
+        if is_vector(pu):
+            lines.append(f"    {t}, dimension(n) :: {param.lower()}_orig")
+        elif pu in ['A', 'B', 'C']:
+            lines.append(f"    {t}, dimension(n,n) :: {param.lower()}_orig")
+        else:
+            lines.append(f"    {t} :: {param.lower()}_orig")
+
+    # Output adjoint _orig (for inout/output)
+    out_adjoint_params = [p for p in differentiable_params if p.upper() in [v.upper() for v in outputs + inout_vars]]
+    for param in out_adjoint_params:
+        pu = param.upper()
+        t = var_type(param)
+        if is_vector(pu):
+            lines.append(f"    {t}, dimension(n) :: {param.lower()}b_orig")
+        elif pu in ['A', 'B', 'C']:
+            lines.append(f"    {t}, dimension(n,n) :: {param.lower()}b_orig")
+        else:
+            lines.append(f"    {t} :: {param.lower()}b_orig")
+
+    if is_complex:
+        lines.append("    real(4) :: temp_re, temp_im")
+    lines.append("    integer :: i, j")
+    lines.append("")
+
+    # Init size params
+    if 'N' in [p.upper() for p in all_params]:
+        lines.append("    nsize = n")
+    if 'M' in [p.upper() for p in all_params]:
+        lines.append("    msize = n")
+    if 'K' in [p.upper() for p in all_params]:
+        lines.append("    ksize = n")
+    for p in all_params:
+        if p.upper() in ['INCX', 'INCY']:
+            lines.append(f"    {p.lower()}_val = 1")
+        elif p.upper() in ['LDA', 'LDB', 'LDC']:
+            lines.append(f"    {p.lower()}_val = n")
+        elif p.upper() in ['KL', 'KU']:
+            lines.append(f"    {p.lower()} = 1")
+    for p in all_params:
+        pu = p.upper()
+        if pu == 'TRANS':
+            lines.append(f"    {p.lower()} = 'N'")
+        elif pu == 'TRANSA':
+            lines.append(f"    {p.lower()} = 'N'")
+        elif pu == 'TRANSB':
+            lines.append(f"    {p.lower()} = 'N'")
+        elif pu == 'UPLO':
+            lines.append(f"    {p.lower()} = 'U'")
+        elif pu == 'SIDE':
+            lines.append(f"    {p.lower()} = 'L'")
+        elif pu == 'DIAG':
+            lines.append(f"    {p.lower()} = 'N'")
+    lines.append("")
+
+    # Random init for primal
+    for param in differentiable_params:
+        pu = param.upper()
+        if is_vector(pu):
+            if is_complex:
+                lines.append(f"    do i = 1, n")
+                lines.append(f"      call random_number(temp_re)")
+                lines.append(f"      call random_number(temp_im)")
+                lines.append(f"      {param.lower()}(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)")
+                lines.append(f"    end do")
+            else:
+                lines.append(f"    call random_number({param.lower()})")
+                lines.append(f"    {param.lower()} = {param.lower()} * 2.0 - 1.0")
+        elif pu in ['A', 'B', 'C']:
+            if pu == 'A' and is_hermitian_function(func_name) and is_complex:
+                hermitian_lines = generate_hermitian_matrix_init(func_name, param.lower(), precision_type, size_var='n', temp_re='temp_re', temp_im='temp_im')
+                for line in hermitian_lines:
+                    lines.append("    " + line.strip())
+            elif pu == 'A' and is_symmetric_function(func_name) and not is_hermitian_function(func_name):
+                if is_complex:
+                    # Complex symmetric (not Hermitian): A(i,j) = A(j,i)
+                    lines.append(f"    do j = 1, n")
+                    lines.append(f"      do i = j, n")
+                    lines.append(f"        call random_number(temp_re)")
+                    lines.append(f"        call random_number(temp_im)")
+                    lines.append(f"        {param.lower()}(i,j) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)")
+                    lines.append(f"        {param.lower()}(j,i) = {param.lower()}(i,j)")
+                    lines.append(f"      end do")
+                    lines.append(f"    end do")
+                else:
+                    # Real symmetric
+                    lines.append(f"    call random_number({param.lower()})")
+                    lines.append(f"    {param.lower()} = {param.lower()} * 2.0 - 1.0")
+                    sym_lines = generate_symmetric_direction_init(param.lower(), size_var='n')
+                    for line in sym_lines:
+                        lines.append("    " + line.strip())
+            elif is_complex:
+                lines.append(f"    do j = 1, n")
+                lines.append(f"      do i = 1, n")
+                lines.append(f"        call random_number(temp_re)")
+                lines.append(f"        call random_number(temp_im)")
+                lines.append(f"        {param.lower()}(i,j) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)")
+                lines.append(f"      end do")
+                lines.append(f"    end do")
+            else:
+                lines.append(f"    call random_number({param.lower()})")
+                lines.append(f"    {param.lower()} = {param.lower()} * 2.0 - 1.0")
+        else:
+            if is_complex:
+                # Some complex routines take real scalars (e.g., ZDSCAL has DA real*8; CHER/ZHER have ALPHA real).
+                if pu == 'DA' or (pu == 'ALPHA' and is_alpha_real_for_complex_function(func_name)) or (pu == 'BETA' and is_beta_real_for_complex_function(func_name)):
+                    lines.append(f"    call random_number({param.lower()})")
+                    lines.append(f"    {param.lower()} = {param.lower()} * 2.0 - 1.0")
+                else:
+                    lines.append(f"    call random_number(temp_re)")
+                    lines.append(f"    call random_number(temp_im)")
+                    lines.append(f"    {param.lower()} = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)")
+            else:
+                lines.append(f"    call random_number({param.lower()})")
+                lines.append(f"    {param.lower()} = {param.lower()} * 2.0 - 1.0")
+    lines.append("")
+
+    # Store _orig
+    for param in differentiable_params:
+        lines.append(f"    {param.lower()}_orig = {param.lower()}")
+    lines.append("")
+
+    # Init output adjoints (cotangents) with random, store _orig
+    for param in out_adjoint_params:
+        pu = param.upper()
+        if is_vector(pu):
+            if is_complex:
+                lines.append(f"    do i = 1, n")
+                lines.append(f"      call random_number(temp_re)")
+                lines.append(f"      call random_number(temp_im)")
+                lines.append(f"      {param.lower()}b(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)")
+                lines.append(f"    end do")
+            else:
+                lines.append(f"    call random_number({param.lower()}b)")
+                lines.append(f"    {param.lower()}b = {param.lower()}b * 2.0 - 1.0")
+        else:
+            if is_complex:
+                lines.append(f"    call random_number(temp_re)")
+                lines.append(f"    call random_number(temp_im)")
+                lines.append(f"    {param.lower()}b = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)")
+            else:
+                lines.append(f"    call random_number({param.lower()}b)")
+                lines.append(f"    {param.lower()}b = {param.lower()}b * 2.0 - 1.0")
+    for param in out_adjoint_params:
+        lines.append(f"    {param.lower()}b_orig = {param.lower()}b")
+    lines.append("")
+
+    if func_type == 'FUNCTION':
+        # Random scalar seed for the function output cotangent; store a copy for FD VJP.
+        if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
+            lines.append("    call random_number(temp_re)")
+            lines.append("    call random_number(temp_im)")
+            lines.append(f"    {func_name.lower()}b = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)")
+        else:
+            lines.append(f"    call random_number({func_name.lower()}b)")
+            lines.append(f"    {func_name.lower()}b = {func_name.lower()}b * 2.0 - 1.0")
+        lines.append(f"    {func_name.lower()}b_orig = {func_name.lower()}b")
+        lines.append("")
+
+    # Init input adjoints to zero (params that are inputs, not outputs/inout)
+    in_adjoint_params = [p for p in differentiable_params if p.upper() not in [v.upper() for v in outputs + inout_vars]]
+    for param in in_adjoint_params:
+        pu = param.upper()
+        if is_vector(pu):
+            lines.append(f"    {param.lower()}b = 0.0")
+        else:
+            lines.append(f"    {param.lower()}b = 0.0")
+    # Inout: input part of adjoint is zero (we zero the "input" adjoints; inout has both)
+    inout_adjoint_params = [p for p in differentiable_params if p.upper() in [v.upper() for v in inout_vars]]
+    for param in inout_adjoint_params:
+        # For inout, the adjoint is both input and output. We init output part (cyb) with random above.
+        # The "input" part - actually for reverse mode, cyb is the cotangent (output adjoint) and we also get cxb, cab.
+        # For CAXPY: cab, cxb are input adjoints (zero init), cyb is output adjoint (random). So we're good.
+        pass
+    lines.append("")
+
+    lines.append(f"    write(*,*) 'Testing {func_name} (n =', n, ')'")
+    lines.append("")
+    if isize_vars:
+        for isize_name in isize_vars:
+            lines.append(f"    call set_{isize_name}(n)")
+        lines.append("")
+
+    # Build _b call args
+    call_args = []
+    for param in all_params:
+        pu = param.upper()
+        if pu == 'N':
+            call_args.append("nsize")
+        elif pu == 'M':
+            call_args.append("msize")
+        elif pu == 'K':
+            call_args.append("ksize")
+        elif pu in ['LDA', 'LDB', 'LDC']:
+            call_args.append(f"{param.lower()}_val")
+        elif pu in ['INCX', 'INCY']:
+            call_args.append(f"{param.lower()}_val")
+        else:
+            call_args.append(param.lower())
+        if pu in [p.upper() for p in differentiable_params]:
+            call_args.append(f"{param.lower()}b")
+    if func_type == 'FUNCTION':
+        lines.append(f"    call {func_name.lower()}_b({', '.join(call_args)}, {func_name.lower()}b)")
+    else:
+        lines.append(f"    call {func_name.lower()}_b({', '.join(call_args)})")
+    lines.append("")
+    if isize_vars:
+        for isize_name in isize_vars:
+            lines.append(f"    call set_{isize_name}(-1)")
+        lines.append("")
+
+    # check_vjp call - pass n, call-context params (msize, nsize, kl, ku, incx_val, etc.), _orig, adjoints
+    check_args = ["n"]
+    for param in all_params:
+        pu = param.upper()
+        if pu in ['M', 'N', 'K', 'KL', 'KU', 'LDA', 'LDB', 'LDC', 'INCX', 'INCY',
+                  'TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
+            if pu == 'M':
+                check_args.append("msize")
+            elif pu == 'N':
+                check_args.append("nsize")
+            elif pu == 'K':
+                check_args.append("ksize")
+            elif pu in ['KL', 'KU']:
+                check_args.append(param.lower())
+            elif pu in ['INCX', 'INCY']:
+                check_args.append(f"{param.lower()}_val")
+            elif pu in ['LDA', 'LDB', 'LDC']:
+                check_args.append(f"{param.lower()}_val")
+            elif pu in ['TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
+                check_args.append(param.lower())
+    for param in differentiable_params:
+        check_args.append(f"{param.lower()}_orig")
+    for param in out_adjoint_params:
+        check_args.append(f"{param.lower()}b_orig")
+    for param in differentiable_params:
+        check_args.append(f"{param.lower()}b")
+    if func_type == 'FUNCTION':
+        check_args.append(f"{func_name.lower()}b_orig")
+    check_args.append("passed")
+    lines.append(f"    call check_vjp_numerically({', '.join(check_args)})")
+    lines.append("")
+    lines.append("  end subroutine run_test_for_size")
+    lines.append("")
+
+    # check_vjp_numerically subroutine - param names only for subroutine statement
+    sub_args = ["n"]
+    for param in all_params:
+        pu = param.upper()
+        if pu == 'M':
+            sub_args.append("msize")
+        elif pu == 'N':
+            sub_args.append("nsize")
+        elif pu == 'K':
+            sub_args.append("ksize")
+        elif pu in ['KL', 'KU']:
+            sub_args.append(param.lower())
+        elif pu in ['INCX', 'INCY']:
+            sub_args.append(f"{param.lower()}_val")
+        elif pu in ['LDA', 'LDB', 'LDC']:
+            sub_args.append(f"{param.lower()}_val")
+        elif pu in ['TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
+            sub_args.append(param.lower())
+    for param in differentiable_params:
+        sub_args.append(f"{param.lower()}_orig")
+    for param in out_adjoint_params:
+        sub_args.append(f"{param.lower()}b_orig")
+    for param in differentiable_params:
+        sub_args.append(f"{param.lower()}b")
+    if func_type == 'FUNCTION':
+        sub_args.append(f"{func_name.lower()}b_orig")
+    sub_args.append("passed")
+    lines.append("  subroutine check_vjp_numerically(" + ", ".join(sub_args) + ")")
+    lines.append("    implicit none")
+    lines.append("    integer, intent(in) :: n")
+    for param in all_params:
+        pu = param.upper()
+        if pu == 'M':
+            lines.append("    integer, intent(in) :: msize")
+        elif pu == 'N':
+            lines.append("    integer, intent(in) :: nsize")
+        elif pu == 'K':
+            lines.append("    integer, intent(in) :: ksize")
+        elif pu in ['KL', 'KU']:
+            lines.append(f"    integer, intent(in) :: {param.lower()}")
+        elif pu in ['INCX', 'INCY']:
+            lines.append(f"    integer, intent(in) :: {param.lower()}_val")
+        elif pu in ['LDA', 'LDB', 'LDC']:
+            lines.append(f"    integer, intent(in) :: {param.lower()}_val")
+        elif pu in ['TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
+            lines.append(f"    character, intent(in) :: {param.lower()}")
+    for param in differentiable_params:
+        pu = param.upper()
+        t = var_type(param)
+        if is_vector(pu):
+            lines.append(f"    {t}, intent(in) :: {param.lower()}_orig(n)")
+        elif pu in ['A', 'B', 'C']:
+            lines.append(f"    {t}, intent(in) :: {param.lower()}_orig(n,n)")
+        else:
+            lines.append(f"    {t}, intent(in) :: {param.lower()}_orig")
+    for param in out_adjoint_params:
+        pu = param.upper()
+        t = var_type(param)
+        if is_vector(pu):
+            lines.append(f"    {t}, intent(in) :: {param.lower()}b_orig(n)")
+        elif pu in ['A', 'B', 'C']:
+            lines.append(f"    {t}, intent(in) :: {param.lower()}b_orig(n,n)")
+        else:
+            lines.append(f"    {t}, intent(in) :: {param.lower()}b_orig")
+    for param in differentiable_params:
+        pu = param.upper()
+        t = var_type(param)
+        if is_vector(pu):
+            lines.append(f"    {t}, intent(in) :: {param.lower()}b(n)")
+        elif pu in ['A', 'B', 'C']:
+            lines.append(f"    {t}, intent(in) :: {param.lower()}b(n,n)")
+        else:
+            lines.append(f"    {t}, intent(in) :: {param.lower()}b")
+    if func_type == 'FUNCTION':
+        if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
+            lines.append(f"    {get_complex_type(func_name)}, intent(in) :: {func_name.lower()}b_orig")
+        else:
+            lines.append(f"    {precision_type}, intent(in) :: {func_name.lower()}b_orig")
+    lines.append("    logical, intent(out) :: passed")
+    lines.append("")
+    lines.append(f"    {precision_type}, parameter :: h = {h_val}")
+    lines.append(f"    {precision_type} :: vjp_ad, vjp_fd, relative_error, max_error, abs_error, abs_reference, error_bound")
+    lines.append("    logical :: has_large_errors")
+    lines.append("    integer :: i, j, n_products")
+    lines.append(f"    {precision_type}, dimension(n) :: temp_products")
+    if is_complex:
+        lines.append("    real(4) :: temp_re, temp_im")
+    lines.append("")
+
+    # Direction vectors
+    for param in differentiable_params:
+        pu = param.upper()
+        t = var_type(param)
+        if is_vector(pu):
+            lines.append(f"    {t}, dimension(n) :: {param.lower()}_dir")
+        elif pu in ['A', 'B', 'C']:
+            lines.append(f"    {t}, dimension(n,n) :: {param.lower()}_dir")
+        else:
+            lines.append(f"    {t} :: {param.lower()}_dir")
+    lines.append("")
+
+    # Output central diff vars (for outputs/inout) - dedupe if param in both
+    # For FUNCTIONs, the return value is captured in funcname_plus / funcname_minus (scalars)
+    if func_type == 'FUNCTION':
+        result_type = complex_type if (func_name.upper() in complex_vars) else precision_type
+        lines.append(f"    {result_type} :: {func_name.lower()}_plus, {func_name.lower()}_minus")
+    seen_output = set()
+    for param in outputs + inout_vars:
+        pu = param.upper()
+        if pu in seen_output:
+            continue
+        if func_type == 'FUNCTION' and pu == func_name.upper():
+            continue  # Function result handled above
+        seen_output.add(pu)
+        if pu in [p.upper() for p in differentiable_params]:
+            t = var_type(param)
+            if is_vector(pu):
+                lines.append(f"    {t}, dimension(n) :: {param.lower()}_plus, {param.lower()}_minus, {param.lower()}_central_diff")
+            elif pu in ['A', 'B', 'C']:
+                lines.append(f"    {t}, dimension(n,n) :: {param.lower()}_plus, {param.lower()}_minus, {param.lower()}_central_diff")
+    lines.append("")
+
+    # Working primal vars for perturbed calls
+    for param in differentiable_params:
+        pu = param.upper()
+        t = var_type(param)
+        if is_vector(pu):
+            lines.append(f"    {t}, dimension(n) :: {param.lower()}")
+        elif pu in ['A', 'B', 'C']:
+            lines.append(f"    {t}, dimension(n,n) :: {param.lower()}")
+        else:
+            lines.append(f"    {t} :: {param.lower()}")
+    lines.append("")
+
+    lines.append("    max_error = 0.0")
+    lines.append("    has_large_errors = .false.")
+    lines.append("")
+    lines.append("    write(*,*) 'Function calls completed successfully'")
+    lines.append("    write(*,*) 'Checking derivatives against numerical differentiation:'")
+    lines.append("    write(*,*) 'Step size h =', h")
+    lines.append("")
+
+    # Init direction vectors
+    for param in differentiable_params:
+        pu = param.upper()
+        if is_vector(pu):
+            if is_complex:
+                lines.append(f"    do i = 1, n")
+                lines.append(f"      call random_number(temp_re)")
+                lines.append(f"      call random_number(temp_im)")
+                lines.append(f"      {param.lower()}_dir(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)")
+                lines.append(f"    end do")
+            else:
+                lines.append(f"    call random_number({param.lower()}_dir)")
+                lines.append(f"    {param.lower()}_dir = {param.lower()}_dir * 2.0 - 1.0")
+        elif pu in ['A', 'B', 'C']:
+            if is_complex:
+                lines.append(f"    do j = 1, n")
+                lines.append(f"      do i = 1, n")
+                lines.append(f"        call random_number(temp_re)")
+                lines.append(f"        call random_number(temp_im)")
+                lines.append(f"        {param.lower()}_dir(i,j) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)")
+                lines.append(f"      end do")
+                lines.append(f"    end do")
+                if is_hermitian_function(func_name) and pu == 'A':
+                    herm_dir_lines = generate_hermitian_direction_init(func_name, param.lower() + '_dir', size_var='n')
+                    for line in herm_dir_lines:
+                        lines.append("    " + line.strip())
+                if is_symmetric_function(func_name) and pu == 'A' and not is_hermitian_function(func_name):
+                    sym_dir_lines = generate_symmetric_direction_init(param.lower() + '_dir', size_var='n')
+                    for line in sym_dir_lines:
+                        lines.append("    " + line.strip())
+            else:
+                lines.append(f"    call random_number({param.lower()}_dir)")
+                lines.append(f"    {param.lower()}_dir = {param.lower()}_dir * 2.0 - 1.0")
+                if is_symmetric_function(func_name) and pu == 'A' and not is_hermitian_function(func_name):
+                    sym_dir_lines = generate_symmetric_direction_init(param.lower() + '_dir', size_var='n')
+                    for line in sym_dir_lines:
+                        lines.append("    " + line.strip())
+        else:
+            if is_complex:
+                # Some complex routines take real scalars (e.g., ZDSCAL DA; CHER/ZHER ALPHA; *HER*K BETA).
+                if pu == 'DA' or (pu == 'ALPHA' and is_alpha_real_for_complex_function(func_name)) or (pu == 'BETA' and is_beta_real_for_complex_function(func_name)):
+                    lines.append(f"    call random_number({param.lower()}_dir)")
+                    lines.append(f"    {param.lower()}_dir = {param.lower()}_dir * 2.0 - 1.0")
+                else:
+                    lines.append(f"    call random_number(temp_re)")
+                    lines.append(f"    call random_number(temp_im)")
+                    lines.append(f"    {param.lower()}_dir = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)")
+            else:
+                lines.append(f"    call random_number({param.lower()}_dir)")
+                lines.append(f"    {param.lower()}_dir = {param.lower()}_dir * 2.0 - 1.0")
+    lines.append("")
+
+    # Build primal call args (for use in check_vjp)
+    def primal_call_arg(p):
+        pu = p.upper()
+        if pu == 'N':
+            return "nsize"
+        if pu == 'M':
+            return "msize"
+        if pu == 'K':
+            return "ksize"
+        if pu in ['KL', 'KU']:
+            return p.lower()
+        if pu in ['INCX', 'INCY']:
+            return f"{p.lower()}_val"
+        if pu in ['LDA', 'LDB', 'LDC']:
+            return f"{p.lower()}_val"
+        return p.lower()
+
+    # Forward perturbation
+    for param in differentiable_params:
+        pu = param.upper()
+        if is_vector(pu):
+            if is_complex:
+                lines.append(f"    {param.lower()} = {param.lower()}_orig + cmplx(h, 0.0) * {param.lower()}_dir")
+            else:
+                lines.append(f"    {param.lower()} = {param.lower()}_orig + h * {param.lower()}_dir")
+        else:
+            if is_complex:
+                if pu == 'DA' or (pu == 'ALPHA' and is_alpha_real_for_complex_function(func_name)) or (pu == 'BETA' and is_beta_real_for_complex_function(func_name)):
+                    lines.append(f"    {param.lower()} = {param.lower()}_orig + h * {param.lower()}_dir")
+                else:
+                    lines.append(f"    {param.lower()} = {param.lower()}_orig + cmplx(h, 0.0) * {param.lower()}_dir")
+            else:
+                lines.append(f"    {param.lower()} = {param.lower()}_orig + h * {param.lower()}_dir")
+    primal_args = [primal_call_arg(p) for p in all_params]
+    if func_type == 'FUNCTION':
+        lines.append(f"    {func_name.lower()}_plus = {func_name.lower()}({', '.join(primal_args)})")
+    else:
+        lines.append(f"    call {func_name.lower()}({', '.join(primal_args)})")
+    seen_out = set()
+    for param in outputs + inout_vars:
+        pu = param.upper()
+        if pu in seen_out:
+            continue
+        if func_type == 'FUNCTION' and pu == func_name.upper():
+            continue  # Already have result in funcname_plus
+        seen_out.add(pu)
+        if pu in [p.upper() for p in differentiable_params]:
+            lines.append(f"    {param.lower()}_plus = {param.lower()}")
+    lines.append("")
+
+    # Backward perturbation
+    for param in differentiable_params:
+        pu = param.upper()
+        if is_vector(pu):
+            if is_complex:
+                lines.append(f"    {param.lower()} = {param.lower()}_orig - cmplx(h, 0.0) * {param.lower()}_dir")
+            else:
+                lines.append(f"    {param.lower()} = {param.lower()}_orig - h * {param.lower()}_dir")
+        else:
+            if is_complex:
+                if pu == 'DA' or (pu == 'ALPHA' and is_alpha_real_for_complex_function(func_name)) or (pu == 'BETA' and is_beta_real_for_complex_function(func_name)):
+                    lines.append(f"    {param.lower()} = {param.lower()}_orig - h * {param.lower()}_dir")
+                else:
+                    lines.append(f"    {param.lower()} = {param.lower()}_orig - cmplx(h, 0.0) * {param.lower()}_dir")
+            else:
+                lines.append(f"    {param.lower()} = {param.lower()}_orig - h * {param.lower()}_dir")
+    if func_type == 'FUNCTION':
+        lines.append(f"    {func_name.lower()}_minus = {func_name.lower()}({', '.join(primal_args)})")
+    else:
+        lines.append(f"    call {func_name.lower()}({', '.join(primal_args)})")
+    seen_minus = set()
+    for param in outputs + inout_vars:
+        pu = param.upper()
+        if pu in seen_minus:
+            continue
+        if func_type == 'FUNCTION' and pu == func_name.upper():
+            continue
+        seen_minus.add(pu)
+        if pu in [p.upper() for p in differentiable_params]:
+            lines.append(f"    {param.lower()}_minus = {param.lower()}")
+    lines.append("")
+
+    # Central diff
+    seen_cdiff = set()
+    for param in outputs + inout_vars:
+        pu = param.upper()
+        if pu in seen_cdiff:
+            continue
+        if func_type == 'FUNCTION' and pu == func_name.upper():
+            continue  # No _central_diff variable for function result; use (plus - minus)/(2h) in vjp_fd
+        seen_cdiff.add(pu)
+        if pu in [p.upper() for p in differentiable_params]:
+            lines.append(f"    {param.lower()}_central_diff = ({param.lower()}_plus - {param.lower()}_minus) / (2.0 * h)")
+    lines.append("")
+
+    # vjp_fd: sum over output adjoints of (adjoint_orig * central_diff). For FUNCTION, directional derivative = (f_plus - f_minus)/(2h)
+    if func_type == 'FUNCTION':
+        # VJP for scalar-return functions:
+        # - real return: seed * directional_derivative
+        # - complex return: real(conjg(seed) * directional_derivative) (consistent with vjp_ad inner products)
+        if is_complex:
+            lines.append(f"    vjp_fd = real(conjg({func_name.lower()}b_orig) * ({func_name.lower()}_plus - {func_name.lower()}_minus) / (2.0 * h))")
+        else:
+            lines.append(f"    vjp_fd = {func_name.lower()}b_orig * ({func_name.lower()}_plus - {func_name.lower()}_minus) / (2.0 * h)")
+    else:
+        lines.append("    vjp_fd = 0.0")
+    seen_vjp = set()
+    for param in outputs + inout_vars:
+        pu = param.upper()
+        if pu in seen_vjp:
+            continue
+        if func_type == 'FUNCTION' and pu == func_name.upper():
+            continue  # Already set vjp_fd from function result above
+        seen_vjp.add(pu)
+        if pu not in [p.upper() for p in differentiable_params]:
+            continue
+        if is_vector(pu):
+            if is_complex:
+                lines.append(f"    n_products = n")
+                lines.append(f"    do i = 1, n")
+                lines.append(f"      temp_products(i) = real(conjg({param.lower()}b_orig(i)) * {param.lower()}_central_diff(i))")
+                lines.append(f"    end do")
+                lines.append(f"    call sort_array(temp_products, n_products)")
+                lines.append(f"    do i = 1, n_products")
+                lines.append(f"      vjp_fd = vjp_fd + temp_products(i)")
+                lines.append(f"    end do")
+            else:
+                lines.append(f"    n_products = n")
+                lines.append(f"    do i = 1, n")
+                lines.append(f"      temp_products(i) = {param.lower()}b_orig(i) * {param.lower()}_central_diff(i)")
+                lines.append(f"    end do")
+                lines.append(f"    call sort_array(temp_products, n_products)")
+                lines.append(f"    do i = 1, n_products")
+                lines.append(f"      vjp_fd = vjp_fd + temp_products(i)")
+                lines.append(f"    end do")
+        elif pu in ['A', 'B', 'C']:
+            if is_complex:
+                lines.append(f"    do j = 1, n")
+                lines.append(f"      do i = 1, n")
+                lines.append(f"        vjp_fd = vjp_fd + real(conjg({param.lower()}b_orig(i,j)) * {param.lower()}_central_diff(i,j))")
+                lines.append(f"      end do")
+                lines.append(f"    end do")
+            else:
+                lines.append(f"    do j = 1, n")
+                lines.append(f"      do i = 1, n")
+                lines.append(f"        vjp_fd = vjp_fd + {param.lower()}b_orig(i,j) * {param.lower()}_central_diff(i,j)")
+                lines.append(f"      end do")
+                lines.append(f"    end do")
+        else:
+            if is_complex:
+                lines.append(f"    vjp_fd = vjp_fd + real(conjg({param.lower()}b_orig) * {param.lower()}_central_diff)")
+            else:
+                lines.append(f"    vjp_fd = vjp_fd + {param.lower()}b_orig * {param.lower()}_central_diff")
+    lines.append("")
+
+    # vjp_ad: sum over input adjoints of (dir * adjoint)
+    lines.append("    vjp_ad = 0.0")
+    for param in differentiable_params:
+        pu = param.upper()
+        if is_vector(pu):
+            if is_complex:
+                lines.append(f"    n_products = n")
+                lines.append(f"    do i = 1, n")
+                lines.append(f"      temp_products(i) = real(conjg({param.lower()}_dir(i)) * {param.lower()}b(i))")
+                lines.append(f"    end do")
+                lines.append(f"    call sort_array(temp_products, n_products)")
+                lines.append(f"    do i = 1, n_products")
+                lines.append(f"      vjp_ad = vjp_ad + temp_products(i)")
+                lines.append(f"    end do")
+            else:
+                lines.append(f"    n_products = n")
+                lines.append(f"    do i = 1, n")
+                lines.append(f"      temp_products(i) = {param.lower()}_dir(i) * {param.lower()}b(i)")
+                lines.append(f"    end do")
+                lines.append(f"    call sort_array(temp_products, n_products)")
+                lines.append(f"    do i = 1, n_products")
+                lines.append(f"      vjp_ad = vjp_ad + temp_products(i)")
+                lines.append(f"    end do")
+        elif pu in ['A', 'B', 'C']:
+            if is_hermitian_function(func_name) and pu == 'A' and is_complex:
+                lines.append(f"    ! Hermitian A: VJP = sum over upper triangle of conjg(a_dir)*ab + a_dir*ab^T")
+                lines.append(f"    do j = 1, n")
+                lines.append(f"      do i = 1, j")
+                lines.append(f"        if (i .eq. j) then")
+                lines.append(f"          vjp_ad = vjp_ad + real(conjg({param.lower()}_dir(i,j)) * {param.lower()}b(i,j))")
+                lines.append(f"        else")
+                lines.append(f"          vjp_ad = vjp_ad + real(conjg({param.lower()}_dir(i,j)) * {param.lower()}b(i,j) + {param.lower()}_dir(i,j) * {param.lower()}b(j,i))")
+                lines.append(f"        end if")
+                lines.append(f"      end do")
+                lines.append(f"    end do")
+            elif is_symmetric_function(func_name) and pu == 'A' and not is_hermitian_function(func_name):
+                if is_complex:
+                    lines.append(f"    ! Symmetric A: VJP = sum over upper triangle conjg(a_dir)*(ab(i,j)+ab(j,i))")
+                    lines.append(f"    do j = 1, n")
+                    lines.append(f"      do i = 1, j")
+                    lines.append(f"        if (i .eq. j) then")
+                    lines.append(f"          vjp_ad = vjp_ad + real(conjg({param.lower()}_dir(i,j)) * {param.lower()}b(i,j))")
+                    lines.append(f"        else")
+                    lines.append(f"          vjp_ad = vjp_ad + real(conjg({param.lower()}_dir(i,j)) * ({param.lower()}b(i,j) + {param.lower()}b(j,i)))")
+                    lines.append(f"        end if")
+                    lines.append(f"      end do")
+                    lines.append(f"    end do")
+                else:
+                    lines.append(f"    ! Symmetric A: VJP = sum over upper triangle a_dir*(ab(i,j)+ab(j,i))")
+                    lines.append(f"    do j = 1, n")
+                    lines.append(f"      do i = 1, j")
+                    lines.append(f"        if (i .eq. j) then")
+                    lines.append(f"          vjp_ad = vjp_ad + {param.lower()}_dir(i,j) * {param.lower()}b(i,j)")
+                    lines.append(f"        else")
+                    lines.append(f"          vjp_ad = vjp_ad + {param.lower()}_dir(i,j) * ({param.lower()}b(i,j) + {param.lower()}b(j,i))")
+                    lines.append(f"        end if")
+                    lines.append(f"      end do")
+                    lines.append(f"    end do")
+            elif is_complex:
+                lines.append(f"    do j = 1, n")
+                lines.append(f"      do i = 1, n")
+                lines.append(f"        vjp_ad = vjp_ad + real(conjg({param.lower()}_dir(i,j)) * {param.lower()}b(i,j))")
+                lines.append(f"      end do")
+                lines.append(f"    end do")
+            else:
+                lines.append(f"    do j = 1, n")
+                lines.append(f"      do i = 1, n")
+                lines.append(f"        vjp_ad = vjp_ad + {param.lower()}_dir(i,j) * {param.lower()}b(i,j)")
+                lines.append(f"      end do")
+                lines.append(f"    end do")
+        else:
+            # Scalar parameters in VJP accumulation
+            if is_complex:
+                # Some complex routines take real scalars (e.g., ZDSCAL has DA real*8;
+                # CHER/ZHER have real ALPHA; some HERK/HER2K have real BETA).
+                # For those, use plain real inner product instead of conjg().
+                if pu == 'DA' or (
+                    pu == 'ALPHA' and is_alpha_real_for_complex_function(func_name)
+                ) or (
+                    pu == 'BETA' and is_beta_real_for_complex_function(func_name)
+                ):
+                    lines.append(f"    vjp_ad = vjp_ad + {param.lower()}_dir * {param.lower()}b")
+                else:
+                    # Complex scalar inner product: real(conjg(direction) * adjoint)
+                    lines.append(f"    vjp_ad = vjp_ad + real(conjg({param.lower()}_dir) * {param.lower()}b)")
+            else:
+                # Purely real functions: standard inner product
+                lines.append(f"    vjp_ad = vjp_ad + {param.lower()}_dir * {param.lower()}b")
+    lines.append("")
+
+    # Error check
+    lines.append("    abs_error = abs(vjp_fd - vjp_ad)")
+    lines.append("    abs_reference = abs(vjp_ad)")
+    lines.append(f"    error_bound = {rtol} + {atol} * abs_reference")
+    lines.append("    if (abs_error > error_bound) has_large_errors = .true.")
+    lines.append("    if (abs_reference > 1.0e-10) then")
+    lines.append("      relative_error = abs_error / abs_reference")
+    lines.append("    else")
+    lines.append("      relative_error = abs_error")
+    lines.append("    end if")
+    lines.append("    max_error = relative_error")
+    lines.append("")
+    lines.append("    write(*,*) ''")
+    lines.append("    write(*,*) 'Maximum relative error:', max_error")
+    lines.append(f"    write(*,*) 'Tolerance thresholds: rtol={rtol}, atol={atol}'")
+    lines.append("    passed = .not. has_large_errors")
+    lines.append("    if (has_large_errors) then")
+    lines.append("      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'")
+    lines.append("    else")
+    lines.append("      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'")
+    lines.append("    end if")
+    lines.append("")
+    lines.append("  end subroutine check_vjp_numerically")
+    lines.append("")
+    lines.append("  subroutine sort_array(arr, n)")
+    lines.append("    implicit none")
+    lines.append("    integer, intent(in) :: n")
+    lines.append(f"    {precision_type}, dimension(n), intent(inout) :: arr")
+    lines.append("    integer :: i, j, min_idx")
+    lines.append(f"    {precision_type} :: temp")
+    lines.append("    do i = 1, n-1")
+    lines.append("      min_idx = i")
+    lines.append("      do j = i+1, n")
+    lines.append("        if (abs(arr(j)) < abs(arr(min_idx))) min_idx = j")
+    lines.append("      end do")
+    lines.append("      if (min_idx /= i) then")
+    lines.append("        temp = arr(i)")
+    lines.append("        arr(i) = arr(min_idx)")
+    lines.append("        arr(min_idx) = temp")
+    lines.append("      end if")
+    lines.append("    end do")
+    lines.append("  end subroutine sort_array")
+    lines.append("")
+    lines.append(f"end program test_{src_stem}_reverse")
+    return "\n".join(lines)
+
+
+def _generate_multisize_outlined_test_reverse(func_name, src_file, src_stem, precision_type, precision_name, reverse_src_dir, all_params, inputs, outputs, inout_vars, param_types, func_type="SUBROUTINE"):
+    """
+    Generate multi-size scalar reverse test with outlined run_test_for_size(n) - arrays declared to size n.
+    Matches structure of scalar forward test.
+    - GEMM-like (A,B,C matrices): uses GEMM-specific body.
+    - Non-GEMM (CAXPY, etc.): builds body from all_params, inputs, outputs, inout_vars.
+    Uses set_ISIZE* calls from the actual _b.f file.
+    """
+    prog_name = src_stem
+    # Collect which set_ISIZE* calls the _b routine actually uses
+    # Try src_stem_b first (e.g. caxpy_d_b.f), then base name (e.g. caxpy_b.f) for flat mode
+    base_stem = src_stem
+    for suffix in ('_bv', '_dv', '_b', '_d'):
+        if base_stem.lower().endswith(suffix):
+            base_stem = base_stem[:-len(suffix)]
+            break
+    b_file = Path(reverse_src_dir) / f"{src_stem}_b.f"
+    b_file_f90 = Path(reverse_src_dir) / f"{src_stem}_b.f90"
+    if not b_file.exists() and base_stem != src_stem:
+        b_file = Path(reverse_src_dir) / f"{base_stem}_b.f"
+        b_file_f90 = Path(reverse_src_dir) / f"{base_stem}_b.f90"
+    isize_vars = _collect_isize_vars_from_file(b_file) if b_file.exists() else _collect_isize_vars_from_file(b_file_f90)
+
+    # Differentiable params: exclude size/character/integer
+    skip_params = {'M', 'N', 'K', 'KL', 'KU', 'LDA', 'LDB', 'LDC', 'INCX', 'INCY',
+                  'TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG'}
+    differentiable_params = [p for p in all_params if p.upper() not in skip_params]
+
+    # Only use the special GEMM block for true GEMM-style signatures (TRANSA/TRANSB present).
+    # Routines like SYMM/HEMM also have A,B,C but their first args are SIDE/UPLO, so the GEMM block
+    # would pass illegal values.
+    params_upper = [p.upper() for p in all_params]
+    # Note: SYR2K/HER2K have a single TRANS argument but are *not* GEMM; they must use the nongemm path.
+    is_gemm_like = ('A' in params_upper and 'B' in params_upper and 'C' in params_upper and
+                    ('TRANSA' in params_upper or 'TRANSB' in params_upper))
+
+    if not is_gemm_like:
+        return _generate_multisize_outlined_test_reverse_nongemm(
+            func_name, src_stem, precision_type, precision_name, reverse_src_dir,
+            all_params, inputs, outputs, inout_vars, differentiable_params, param_types, isize_vars, func_type)
+
+    # CGEMM/ZGEMM use complex types; SGEMM/DGEMM use real
+    is_complex_gemm = func_name.upper().startswith('C') or func_name.upper().startswith('Z')
+    gemm_elem_type = get_complex_type(func_name) if is_complex_gemm else precision_type
+    cmplx_kind = "4" if func_name.upper().startswith(('S', 'C')) else "8"
+    # Single precision (S/C) needs larger h and looser tolerance for stable finite differences
+    is_single_gemm = func_name.upper().startswith(('S', 'C'))
+    h_gemm = "1.0e-3" if is_single_gemm else "1.0e-7"
+    rtol_gemm = "1.0e-3" if is_single_gemm else "1.0e-5"
+    atol_gemm = "1.0e-3" if is_single_gemm else "1.0e-5"
+
+    lines = []
+    lines.append(f"! Test program for {func_name} reverse mode (adjoint) differentiation")
+    lines.append(f"! Generated automatically by run_tapenade_blas.py")
+    lines.append(f"! Using {precision_name} precision")
+    lines.append("! Multi-size test with outlined run_test_for_size(n) - arrays declared to size n")
+    lines.append("")
+    lines.append(f"program test_{prog_name}_reverse")
+    lines.append("  implicit none")
+    lines.append("")
+    lines.append(f"  external :: {func_name.lower()}")
+    lines.append(f"  external :: {func_name.lower()}_b")
+    lines.append("")
+    lines.append("  integer :: n_test")
+    lines.append("  integer :: seed_array(33)")
+    lines.append("  integer :: test_sizes(1)")
+    lines.append("  integer :: i")
+    lines.append("  logical :: passed, all_passed")
+    lines.append("")
+    lines.append("  seed_array = 42")
+    lines.append("  call random_seed(put=seed_array)")
+    lines.append("")
+    lines.append("  test_sizes = (/ 4 /)")
+    lines.append(f"  write(*,*) 'Testing {func_name} (multi-size: n = 4)'")
+    lines.append("  all_passed = .true.")
+    lines.append("  do i = 1, 1")
+    lines.append("    n_test = test_sizes(i)")
+    lines.append("    call run_test_for_size(n_test, passed)")
+    lines.append("    all_passed = all_passed .and. passed")
+    lines.append("  end do")
+    lines.append("  if (all_passed) then")
+    lines.append("    write(*,*) 'PASS: All sizes completed successfully'")
+    lines.append("  else")
+    lines.append("    write(*,*) 'FAIL: One or more sizes had derivative errors'")
+    lines.append("  end if")
+    lines.append("")
+    lines.append("contains")
+    lines.append("")
+    lines.append("  subroutine run_test_for_size(n, passed)")
+    lines.append("    implicit none")
+    lines.append("    integer, intent(in) :: n")
+    lines.append("    logical, intent(out) :: passed")
+    lines.append("")
+    lines.append("    character :: transa, transb")
+    lines.append("    integer :: msize, nsize, ksize, lda_val, ldb_val, ldc_val")
+    lines.append(f"    {gemm_elem_type} :: alpha, beta")
+    lines.append(f"    {gemm_elem_type}, dimension(n,n) :: a, b, c")
+    lines.append(f"    {gemm_elem_type} :: alphab, betab")
+    lines.append(f"    {gemm_elem_type}, dimension(n,n) :: ab, bb, cb")
+    lines.append(f"    {gemm_elem_type} :: alpha_orig, beta_orig")
+    lines.append(f"    {gemm_elem_type}, dimension(n,n) :: a_orig, b_orig, c_orig, cb_orig")
+    if is_complex_gemm:
+        lines.append(f"    {precision_type} :: temp_re, temp_im")
+    lines.append("    integer :: i, j")
+    lines.append("")
+    lines.append("    transa = 'N'")
+    lines.append("    transb = 'N'")
+    lines.append("    msize = n")
+    lines.append("    nsize = n")
+    lines.append("    ksize = n")
+    lines.append("    lda_val = n")
+    lines.append("    ldb_val = n")
+    lines.append("    ldc_val = n")
+    lines.append("")
+    if is_complex_gemm:
+        lines.append("    call random_number(temp_re)")
+        lines.append("    call random_number(temp_im)")
+        lines.append(f"    alpha = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind={cmplx_kind})")
+        lines.append("    do j = 1, n")
+        lines.append("      do i = 1, n")
+        lines.append("        call random_number(temp_re)")
+        lines.append("        call random_number(temp_im)")
+        lines.append(f"        a(i,j) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind={cmplx_kind})")
+        lines.append("      end do")
+        lines.append("    end do")
+        lines.append("    do j = 1, n")
+        lines.append("      do i = 1, n")
+        lines.append("        call random_number(temp_re)")
+        lines.append("        call random_number(temp_im)")
+        lines.append(f"        b(i,j) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind={cmplx_kind})")
+        lines.append("      end do")
+        lines.append("    end do")
+        lines.append("    call random_number(temp_re)")
+        lines.append("    call random_number(temp_im)")
+        lines.append(f"    beta = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind={cmplx_kind})")
+        lines.append("    do j = 1, n")
+        lines.append("      do i = 1, n")
+        lines.append("        call random_number(temp_re)")
+        lines.append("        call random_number(temp_im)")
+        lines.append(f"        c(i,j) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind={cmplx_kind})")
+        lines.append("      end do")
+        lines.append("    end do")
+    else:
+        lines.append(f"    call random_number(alpha)")
+        lines.append(f"    alpha = alpha * 2.0d0 - 1.0d0")
+        lines.append(f"    call random_number(a)")
+        lines.append(f"    a = a * 2.0d0 - 1.0d0")
+        lines.append(f"    call random_number(b)")
+        lines.append(f"    b = b * 2.0d0 - 1.0d0")
+        lines.append(f"    call random_number(beta)")
+        lines.append(f"    beta = beta * 2.0d0 - 1.0d0")
+        lines.append(f"    call random_number(c)")
+        lines.append(f"    c = c * 2.0d0 - 1.0d0")
+    lines.append("")
+    lines.append("    alpha_orig = alpha")
+    lines.append("    a_orig = a")
+    lines.append("    b_orig = b")
+    lines.append("    beta_orig = beta")
+    lines.append("    c_orig = c")
+    lines.append("")
+    if is_complex_gemm:
+        lines.append("    do j = 1, n")
+        lines.append("      do i = 1, n")
+        lines.append("        call random_number(temp_re)")
+        lines.append("        call random_number(temp_im)")
+        lines.append(f"        cb(i,j) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind={cmplx_kind})")
+        lines.append("      end do")
+        lines.append("    end do")
+    else:
+        lines.append(f"    call random_number(cb)")
+        lines.append(f"    cb = cb * 2.0d0 - 1.0d0")
+    lines.append(f"    cb_orig = cb")
+    lines.append("")
+    lines.append("    alphab = 0.0d0")
+    lines.append("    ab = 0.0d0")
+    lines.append("    bb = 0.0d0")
+    lines.append("    betab = 0.0d0")
+    lines.append("")
+    lines.append(f"    write(*,*) 'Testing {func_name} (n =', n, ')'")
+    lines.append("")
+    if isize_vars:
+        for isize_name in isize_vars:
+            lines.append(f"    call set_{isize_name}(n)")
+        lines.append("")
+    lines.append(f"    call {func_name.lower()}_b(transa, transb, msize, nsize, ksize, alpha, alphab, a, ab, lda_val, b, bb, ldb_val, beta, betab, c, cb, ldc_val)")
+    lines.append("")
+    if isize_vars:
+        for isize_name in isize_vars:
+            lines.append(f"    call set_{isize_name}(-1)")
+    lines.append("")
+    lines.append("    call check_vjp_numerically(n, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, alpha_orig, a_orig, b_orig, beta_orig, c_orig, cb_orig, alphab, ab, bb, betab, cb, passed)")
+    lines.append("")
+    lines.append("  end subroutine run_test_for_size")
+    lines.append("")
+    lines.append("  subroutine check_vjp_numerically(n, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, alpha_orig, a_orig, b_orig, beta_orig, c_orig, cb_orig, alphab, ab, bb, betab, cb, passed)")
+    lines.append("    implicit none")
+    lines.append("    integer, intent(in) :: n")
+    lines.append("    character, intent(in) :: transa, transb")
+    lines.append("    integer, intent(in) :: msize, nsize, ksize, lda_val, ldb_val, ldc_val")
+    lines.append(f"    {gemm_elem_type}, intent(in) :: alpha_orig, beta_orig")
+    lines.append(f"    {gemm_elem_type}, intent(in) :: a_orig(n,n), b_orig(n,n), c_orig(n,n), cb_orig(n,n)")
+    lines.append(f"    {gemm_elem_type}, intent(in) :: alphab, betab")
+    lines.append(f"    {gemm_elem_type}, intent(in) :: ab(n,n), bb(n,n), cb(n,n)")
+    lines.append("    logical, intent(out) :: passed")
+    lines.append("")
+    lines.append(f"    {precision_type}, parameter :: h = {h_gemm}")
+    lines.append(f"    {precision_type} :: vjp_ad, vjp_fd, relative_error, max_error, abs_error, abs_reference, error_bound")
+    lines.append(f"    {gemm_elem_type} :: alpha_dir, beta_dir")
+    lines.append(f"    {gemm_elem_type}, dimension(n,n) :: a_dir, b_dir, c_dir")
+    lines.append(f"    {gemm_elem_type}, dimension(n,n) :: c_plus, c_minus, c_central_diff")
+    lines.append(f"    {gemm_elem_type} :: alpha, beta")
+    lines.append(f"    {gemm_elem_type}, dimension(n,n) :: a, b, c")
+    lines.append(f"    {precision_type}, dimension(n*n) :: temp_products")
+    if is_complex_gemm:
+        lines.append(f"    {precision_type} :: temp_re, temp_im")
+    lines.append("    integer :: n_products, i, j")
+    lines.append("    logical :: has_large_errors")
+    lines.append("")
+    lines.append("    max_error = 0.0d0")
+    lines.append("    has_large_errors = .false.")
+    lines.append("")
+    lines.append("    write(*,*) 'Function calls completed successfully'")
+    lines.append("    write(*,*) 'Checking derivatives against numerical differentiation:'")
+    lines.append("    write(*,*) 'Step size h =', h")
+    lines.append("")
+    if is_complex_gemm:
+        lines.append("    call random_number(temp_re)")
+        lines.append("    call random_number(temp_im)")
+        lines.append(f"    alpha_dir = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind={cmplx_kind})")
+        lines.append("    do j = 1, n")
+        lines.append("      do i = 1, n")
+        lines.append("        call random_number(temp_re)")
+        lines.append("        call random_number(temp_im)")
+        lines.append(f"        a_dir(i,j) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind={cmplx_kind})")
+        lines.append("      end do")
+        lines.append("    end do")
+        lines.append("    do j = 1, n")
+        lines.append("      do i = 1, n")
+        lines.append("        call random_number(temp_re)")
+        lines.append("        call random_number(temp_im)")
+        lines.append(f"        b_dir(i,j) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind={cmplx_kind})")
+        lines.append("      end do")
+        lines.append("    end do")
+        lines.append("    call random_number(temp_re)")
+        lines.append("    call random_number(temp_im)")
+        lines.append(f"    beta_dir = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind={cmplx_kind})")
+        lines.append("    do j = 1, n")
+        lines.append("      do i = 1, n")
+        lines.append("        call random_number(temp_re)")
+        lines.append("        call random_number(temp_im)")
+        lines.append(f"        c_dir(i,j) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind={cmplx_kind})")
+        lines.append("      end do")
+        lines.append("    end do")
+    else:
+        lines.append("    call random_number(alpha_dir)")
+        lines.append("    alpha_dir = alpha_dir * 2.0d0 - 1.0d0")
+        lines.append("    call random_number(a_dir)")
+        lines.append("    a_dir = a_dir * 2.0d0 - 1.0d0")
+        lines.append("    call random_number(b_dir)")
+        lines.append("    b_dir = b_dir * 2.0d0 - 1.0d0")
+        lines.append("    call random_number(beta_dir)")
+        lines.append("    beta_dir = beta_dir * 2.0d0 - 1.0d0")
+        lines.append("    call random_number(c_dir)")
+        lines.append("    c_dir = c_dir * 2.0d0 - 1.0d0")
+    lines.append("")
+    lines.append("    alpha = alpha_orig + h * alpha_dir")
+    lines.append("    a = a_orig + h * a_dir")
+    lines.append("    b = b_orig + h * b_dir")
+    lines.append("    beta = beta_orig + h * beta_dir")
+    lines.append("    c = c_orig + h * c_dir")
+    lines.append(f"    call {func_name.lower()}(transa, transb, msize, nsize, ksize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)")
+    lines.append("    c_plus = c")
+    lines.append("")
+    lines.append("    alpha = alpha_orig - h * alpha_dir")
+    lines.append("    a = a_orig - h * a_dir")
+    lines.append("    b = b_orig - h * b_dir")
+    lines.append("    beta = beta_orig - h * beta_dir")
+    lines.append("    c = c_orig - h * c_dir")
+    lines.append(f"    call {func_name.lower()}(transa, transb, msize, nsize, ksize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)")
+    lines.append("    c_minus = c")
+    lines.append("")
+    lines.append("    c_central_diff = (c_plus - c_minus) / (2.0d0 * h)")
+    lines.append("")
+    lines.append("    vjp_fd = 0.0d0")
+    lines.append("    n_products = 0")
+    lines.append("    do j = 1, n")
+    lines.append("      do i = 1, n")
+    lines.append("        n_products = n_products + 1")
+    if is_complex_gemm:
+        lines.append("        temp_products(n_products) = real(conjg(cb_orig(i,j)) * c_central_diff(i,j))")
+    else:
+        lines.append("        temp_products(n_products) = cb_orig(i,j) * c_central_diff(i,j)")
+    lines.append("      end do")
+    lines.append("    end do")
+    lines.append("    call sort_array(temp_products, n_products)")
+    lines.append("    do i = 1, n_products")
+    lines.append("      vjp_fd = vjp_fd + temp_products(i)")
+    lines.append("    end do")
+    lines.append("")
+    lines.append("    vjp_ad = 0.0d0")
+    if is_complex_gemm:
+        lines.append("    vjp_ad = vjp_ad + real(conjg(alpha_dir) * alphab)")
+    else:
+        lines.append("    vjp_ad = vjp_ad + alpha_dir * alphab")
+    lines.append("    n_products = 0")
+    lines.append("    do j = 1, n")
+    lines.append("      do i = 1, n")
+    lines.append("        n_products = n_products + 1")
+    if is_complex_gemm:
+        lines.append("        temp_products(n_products) = real(conjg(a_dir(i,j)) * ab(i,j))")
+    else:
+        lines.append("        temp_products(n_products) = a_dir(i,j) * ab(i,j)")
+    lines.append("      end do")
+    lines.append("    end do")
+    lines.append("    call sort_array(temp_products, n_products)")
+    lines.append("    do i = 1, n_products")
+    lines.append("      vjp_ad = vjp_ad + temp_products(i)")
+    lines.append("    end do")
+    lines.append("    n_products = 0")
+    lines.append("    do j = 1, n")
+    lines.append("      do i = 1, n")
+    lines.append("        n_products = n_products + 1")
+    if is_complex_gemm:
+        lines.append("        temp_products(n_products) = real(conjg(b_dir(i,j)) * bb(i,j))")
+    else:
+        lines.append("        temp_products(n_products) = b_dir(i,j) * bb(i,j)")
+    lines.append("      end do")
+    lines.append("    end do")
+    lines.append("    call sort_array(temp_products, n_products)")
+    lines.append("    do i = 1, n_products")
+    lines.append("      vjp_ad = vjp_ad + temp_products(i)")
+    lines.append("    end do")
+    if is_complex_gemm:
+        lines.append("    vjp_ad = vjp_ad + real(conjg(beta_dir) * betab)")
+    else:
+        lines.append("    vjp_ad = vjp_ad + beta_dir * betab")
+    lines.append("    n_products = 0")
+    lines.append("    do j = 1, n")
+    lines.append("      do i = 1, n")
+    lines.append("        n_products = n_products + 1")
+    if is_complex_gemm:
+        lines.append("        temp_products(n_products) = real(conjg(c_dir(i,j)) * cb(i,j))")
+    else:
+        lines.append("        temp_products(n_products) = c_dir(i,j) * cb(i,j)")
+    lines.append("      end do")
+    lines.append("    end do")
+    lines.append("    call sort_array(temp_products, n_products)")
+    lines.append("    do i = 1, n_products")
+    lines.append("      vjp_ad = vjp_ad + temp_products(i)")
+    lines.append("    end do")
+    lines.append("")
+    lines.append("    abs_error = abs(vjp_fd - vjp_ad)")
+    lines.append("    abs_reference = abs(vjp_ad)")
+    lines.append(f"    error_bound = {atol_gemm} + {rtol_gemm} * abs_reference")
+    lines.append("    if (abs_error > error_bound) has_large_errors = .true.")
+    lines.append("    if (abs_reference > 1.0e-10) then")
+    lines.append("      relative_error = abs_error / abs_reference")
+    lines.append("    else")
+    lines.append("      relative_error = abs_error")
+    lines.append("    end if")
+    lines.append("    max_error = relative_error")
+    lines.append("")
+    lines.append("    write(*,*) ''")
+    lines.append("    write(*,*) 'Maximum relative error:', max_error")
+    lines.append(f"    write(*,*) 'Tolerance thresholds: rtol={rtol_gemm}, atol={atol_gemm}'")
+    lines.append("    passed = .not. has_large_errors")
+    lines.append("    if (has_large_errors) then")
+    lines.append("      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'")
+    lines.append("    else")
+    lines.append("      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'")
+    lines.append("    end if")
+    lines.append("")
+    lines.append("  end subroutine check_vjp_numerically")
+    lines.append("")
+    lines.append("  subroutine sort_array(arr, n)")
+    lines.append("    implicit none")
+    lines.append("    integer, intent(in) :: n")
+    lines.append(f"    {precision_type}, dimension(n), intent(inout) :: arr")
+    lines.append("    integer :: i, j, min_idx")
+    lines.append(f"    {precision_type} :: temp")
+    lines.append("    do i = 1, n-1")
+    lines.append("      min_idx = i")
+    lines.append("      do j = i+1, n")
+    lines.append("        if (abs(arr(j)) < abs(arr(min_idx))) min_idx = j")
+    lines.append("      end do")
+    lines.append("      if (min_idx /= i) then")
+    lines.append("        temp = arr(i)")
+    lines.append("        arr(i) = arr(min_idx)")
+    lines.append("        arr(min_idx) = temp")
+    lines.append("      end if")
+    lines.append("    end do")
+    lines.append("  end subroutine sort_array")
+    lines.append("")
+    lines.append(f"end program test_{prog_name}_reverse")
+    return "\n".join(lines)
+
+
+def _generate_multisize_outlined_test_vector_forward(func_name, src_file, src_stem, precision_type, precision_name, forward_src_dir):
+    """
+    Generate multi-size vector forward test with outlined run_test_for_size(n, passed, nbdirs).
+    nbdirs = n. Arrays declared (nbdirs,n,n) or (nbdirs). Matches structure of scalar forward.
+    """
+    prog_name = src_stem
+    lines = []
+    lines.append(f"! Test program for {func_name} vector forward mode differentiation")
+    lines.append(f"! Generated automatically by run_tapenade_blas.py")
+    lines.append(f"! Using {precision_name} precision with nbdirs=n")
+    lines.append("! Multi-size test with outlined run_test_for_size(n) - arrays declared to size n")
+    lines.append("")
+    lines.append(f"program test_{prog_name}_vector_forward")
+    lines.append("  implicit none")
+    lines.append("")
+    lines.append(f"  external :: {func_name.lower()}")
+    lines.append(f"  external :: {func_name.lower()}_dv")
+    lines.append("")
+    lines.append("  integer :: nbdirs")
+    lines.append("  integer :: n_test")
+    lines.append("  integer :: seed_array(33)")
+    lines.append("  integer :: test_sizes(1)")
+    lines.append("  integer :: i")
+    lines.append("  logical :: passed, all_passed")
+    lines.append("")
+    lines.append("  seed_array = 42")
+    lines.append("  call random_seed(put=seed_array)")
+    lines.append("")
+    lines.append("  test_sizes = (/ 4 /)")
+    lines.append(f"  write(*,*) 'Testing {func_name} (Vector Forward, multi-size: n = 4)'")
+    lines.append("  all_passed = .true.")
+    lines.append("  do i = 1, 1")
+    lines.append("    n_test = test_sizes(i)")
+    lines.append("    nbdirs = test_sizes(i)")
+    lines.append("    call run_test_for_size(n_test, passed, nbdirs)")
+    lines.append("    all_passed = all_passed .and. passed")
+    lines.append("  end do")
+    lines.append("  if (all_passed) then")
+    lines.append("    write(*,*) 'PASS: Vector forward mode - all sizes completed successfully'")
+    lines.append("  else")
+    lines.append("    write(*,*) 'FAIL: Vector forward mode - one or more sizes had derivative errors'")
+    lines.append("  end if")
+    lines.append("")
+    lines.append("contains")
+    lines.append("")
+    lines.append("  subroutine run_test_for_size(n, passed, nbdirs)")
+    lines.append("    implicit none")
+    lines.append("    integer, intent(in) :: n")
+    lines.append("    logical, intent(out) :: passed")
+    lines.append("    integer, intent(in) :: nbdirs")
+    lines.append("")
+    lines.append("    character :: transa, transb")
+    lines.append("    integer :: msize, nsize, ksize, lda_val, ldb_val, ldc_val")
+    lines.append(f"    {precision_type} :: alpha, beta")
+    lines.append(f"    {precision_type}, dimension(n,n) :: a, b, c")
+    lines.append(f"    {precision_type}, dimension(nbdirs) :: alpha_dv, beta_dv")
+    lines.append(f"    {precision_type}, dimension(nbdirs,n,n) :: a_dv, b_dv, c_dv")
+    lines.append(f"    {precision_type} :: alpha_orig, beta_orig")
+    lines.append(f"    {precision_type}, dimension(nbdirs) :: alpha_dv_orig, beta_dv_orig")
+    lines.append(f"    {precision_type}, dimension(n,n) :: a_orig, b_orig, c_orig")
+    lines.append(f"    {precision_type}, dimension(nbdirs,n,n) :: a_dv_orig, b_dv_orig, c_dv_orig")
+    lines.append("    integer :: idir")
+    lines.append(f"    real(4) :: temp_real")
+    lines.append("")
+    lines.append("    transa = 'N'")
+    lines.append("    transb = 'N'")
+    lines.append("    msize = n")
+    lines.append("    nsize = n")
+    lines.append("    ksize = n")
+    lines.append("    lda_val = n")
+    lines.append("    ldb_val = n")
+    lines.append("    ldc_val = n")
+    lines.append("")
+    lines.append(f"    call random_number(alpha)")
+    lines.append(f"    alpha = alpha * 2.0d0 - 1.0d0")
+    lines.append(f"    call random_number(a)")
+    lines.append(f"    a = a * 2.0d0 - 1.0d0")
+    lines.append(f"    call random_number(b)")
+    lines.append(f"    b = b * 2.0d0 - 1.0d0")
+    lines.append(f"    call random_number(beta)")
+    lines.append(f"    beta = beta * 2.0d0 - 1.0d0")
+    lines.append(f"    call random_number(c)")
+    lines.append(f"    c = c * 2.0d0 - 1.0d0")
+    lines.append("")
+    lines.append("    do idir = 1, nbdirs")
+    lines.append(f"      call random_number(temp_real)")
+    lines.append(f"      alpha_dv(idir) = temp_real * 2.0d0 - 1.0d0")
+    lines.append("    end do")
+    lines.append("    do idir = 1, nbdirs")
+    lines.append(f"      call random_number(a_dv(idir,:,:))")
+    lines.append(f"      a_dv(idir,:,:) = a_dv(idir,:,:) * 2.0d0 - 1.0d0")
+    lines.append("    end do")
+    lines.append("    do idir = 1, nbdirs")
+    lines.append(f"      call random_number(b_dv(idir,:,:))")
+    lines.append(f"      b_dv(idir,:,:) = b_dv(idir,:,:) * 2.0d0 - 1.0d0")
+    lines.append("    end do")
+    lines.append("    do idir = 1, nbdirs")
+    lines.append(f"      call random_number(temp_real)")
+    lines.append(f"      beta_dv(idir) = temp_real * 2.0d0 - 1.0d0")
+    lines.append("    end do")
+    lines.append("    do idir = 1, nbdirs")
+    lines.append(f"      call random_number(c_dv(idir,:,:))")
+    lines.append(f"      c_dv(idir,:,:) = c_dv(idir,:,:) * 2.0d0 - 1.0d0")
+    lines.append("    end do")
+    lines.append("")
+    lines.append("    alpha_orig = alpha")
+    lines.append("    alpha_dv_orig = alpha_dv")
+    lines.append("    a_orig = a")
+    lines.append("    a_dv_orig = a_dv")
+    lines.append("    b_orig = b")
+    lines.append("    b_dv_orig = b_dv")
+    lines.append("    beta_orig = beta")
+    lines.append("    beta_dv_orig = beta_dv")
+    lines.append("    c_orig = c")
+    lines.append("    c_dv_orig = c_dv")
+    lines.append("")
+    lines.append(f"    write(*,*) 'Testing {func_name} (Vector Forward, n =', n, ')'")
+    lines.append("")
+    lines.append(f"    call {func_name.lower()}_dv(transa, transb, msize, nsize, ksize, alpha, alpha_dv, a, a_dv, lda_val, b, b_dv, ldb_val, beta, beta_dv, c, c_dv, ldc_val, nbdirs)")
+    lines.append("")
+    lines.append("    write(*,*) 'Function calls completed successfully'")
+    lines.append("")
+    lines.append("    call check_derivatives_numerically(n, nbdirs, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, alpha_orig, alpha_dv_orig, a_orig, a_dv_orig, b_orig, b_dv_orig, beta_orig, beta_dv_orig, c_orig, c_dv_orig, c_dv, passed)")
+    lines.append("")
+    lines.append("  end subroutine run_test_for_size")
+    lines.append("")
+    lines.append("  subroutine check_derivatives_numerically(n, nbdirs, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, alpha_orig, alpha_dv_orig, a_orig, a_dv_orig, b_orig, b_dv_orig, beta_orig, beta_dv_orig, c_orig, c_dv_orig, c_dv, passed)")
+    lines.append("    implicit none")
+    lines.append("    integer, intent(in) :: n, nbdirs")
+    lines.append("    character, intent(in) :: transa, transb")
+    lines.append("    integer, intent(in) :: msize, nsize, ksize, lda_val, ldb_val, ldc_val")
+    lines.append(f"    {precision_type}, intent(in) :: alpha_orig, beta_orig")
+    lines.append(f"    {precision_type}, intent(in) :: alpha_dv_orig(nbdirs), beta_dv_orig(nbdirs)")
+    lines.append(f"    {precision_type}, intent(in) :: a_orig(n,n), a_dv_orig(nbdirs,n,n)")
+    lines.append(f"    {precision_type}, intent(in) :: b_orig(n,n), b_dv_orig(nbdirs,n,n)")
+    lines.append(f"    {precision_type}, intent(in) :: c_orig(n,n), c_dv_orig(nbdirs,n,n)")
+    lines.append(f"    {precision_type}, intent(in) :: c_dv(nbdirs,n,n)")
+    lines.append("    logical, intent(out) :: passed")
+    lines.append("")
+    lines.append(f"    {precision_type}, parameter :: h = 1.0e-7")
+    lines.append(f"    {precision_type} :: relative_error, max_error, abs_error, abs_reference, error_bound, central_diff, ad_result")
+    lines.append("    logical :: has_large_errors")
+    lines.append(f"    {precision_type}, dimension(n,n) :: c_forward, c_backward")
+    lines.append("    integer :: i, j, idir")
+    lines.append(f"    {precision_type} :: alpha, beta")
+    lines.append(f"    {precision_type}, dimension(n,n) :: a, b, c")
+    lines.append("")
+    lines.append("    max_error = 0.0e0")
+    lines.append("    has_large_errors = .false.")
+    lines.append("")
+    lines.append("    write(*,*) 'Checking vector derivatives against numerical differentiation:'")
+    lines.append("    write(*,*) 'Step size h =', h")
+    lines.append("")
+    lines.append("    do idir = 1, nbdirs")
+    lines.append("      alpha = alpha_orig + h * alpha_dv_orig(idir)")
+    lines.append("      a = a_orig + h * a_dv_orig(idir,:,:)")
+    lines.append("      b = b_orig + h * b_dv_orig(idir,:,:)")
+    lines.append("      beta = beta_orig + h * beta_dv_orig(idir)")
+    lines.append("      c = c_orig + h * c_dv_orig(idir,:,:)")
+    lines.append(f"      call {func_name.lower()}(transa, transb, msize, nsize, ksize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)")
+    lines.append("      c_forward = c")
+    lines.append("      alpha = alpha_orig - h * alpha_dv_orig(idir)")
+    lines.append("      a = a_orig - h * a_dv_orig(idir,:,:)")
+    lines.append("      b = b_orig - h * b_dv_orig(idir,:,:)")
+    lines.append("      beta = beta_orig - h * beta_dv_orig(idir)")
+    lines.append("      c = c_orig - h * c_dv_orig(idir,:,:)")
+    lines.append(f"      call {func_name.lower()}(transa, transb, msize, nsize, ksize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)")
+    lines.append("      c_backward = c")
+    lines.append("      do j = 1, min(2, n)")
+    lines.append("        do i = 1, min(2, n)")
+    lines.append("          central_diff = (c_forward(i,j) - c_backward(i,j)) / (2.0e0 * h)")
+    lines.append("          ad_result = c_dv(idir,i,j)")
+    lines.append("          abs_error = abs(central_diff - ad_result)")
+    lines.append("          abs_reference = abs(ad_result)")
+    lines.append("          error_bound = 1.0e-5 + 1.0e-5 * abs_reference")
+    lines.append("          if (abs_error > error_bound) then")
+    lines.append("            has_large_errors = .true.")
+    lines.append("    write(*,*) '  Large error in direction', idir, ' output C(', i, ',', j, '):'")
+    lines.append("    write(*,*) '    Central diff: ', central_diff")
+    lines.append("    write(*,*) '    AD result:   ', ad_result")
+    lines.append("          end if")
+    lines.append("          relative_error = abs_error / max(abs_reference, 1.0e-10)")
+    lines.append("          max_error = max(max_error, relative_error)")
+    lines.append("        end do")
+    lines.append("      end do")
+    lines.append("    end do")
+    lines.append("")
+    lines.append("    write(*,*) 'Maximum relative error across all directions:', max_error")
+    lines.append("    write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'")
+    lines.append("    passed = .not. has_large_errors")
+    lines.append("    if (has_large_errors) then")
+    lines.append("      write(*,*) 'FAIL: Large errors detected in vector derivatives (outside tolerance)'")
+    lines.append("    else")
+    lines.append("      write(*,*) 'PASS: Vector derivatives are within tolerance (rtol + atol)'")
+    lines.append("    end if")
+    lines.append("")
+    lines.append("  end subroutine check_derivatives_numerically")
+    lines.append("")
+    lines.append(f"end program test_{prog_name}_vector_forward")
+    return "\n".join(lines)
+
+
+def _generate_multisize_outlined_test_vector_reverse(func_name, src_file, src_stem, precision_type, precision_name, reverse_src_dir):
+    """
+    Generate multi-size vector reverse test with outlined run_test_for_size(n, passed, nbdirs).
+    nbdirs = n. Arrays declared (nbdirs,n,n) or (nbdirs). Matches structure of scalar forward.
+    """
+    prog_name = src_stem
+    lines = []
+    lines.append(f"! Test program for {func_name} vector reverse mode differentiation")
+    lines.append(f"! Generated automatically by run_tapenade_blas.py")
+    lines.append(f"! Using {precision_name} precision with nbdirs=n")
+    lines.append("! Multi-size test with outlined run_test_for_size(n) - arrays declared to size n")
+    lines.append("")
+    lines.append(f"program test_{prog_name}_vector_reverse")
+    lines.append("  implicit none")
+    lines.append("")
+    lines.append(f"  external :: {func_name.lower()}")
+    lines.append(f"  external :: {func_name.lower()}_bv")
+    lines.append("")
+    lines.append("  integer :: nbdirs")
+    lines.append("  integer :: n_test")
+    lines.append("  integer :: seed_array(33)")
+    lines.append("  integer :: test_sizes(1)")
+    lines.append("  integer :: i")
+    lines.append("  logical :: passed, all_passed")
+    lines.append("")
+    lines.append("  seed_array = 42")
+    lines.append("  call random_seed(put=seed_array)")
+    lines.append("")
+    lines.append("  test_sizes = (/ 4 /)")
+    lines.append(f"  write(*,*) 'Testing {func_name} (Vector Reverse, multi-size: n = 4)'")
+    lines.append("  all_passed = .true.")
+    lines.append("  do i = 1, 1")
+    lines.append("    n_test = test_sizes(i)")
+    lines.append("    nbdirs = test_sizes(i)")
+    lines.append("    call run_test_for_size(n_test, passed, nbdirs)")
+    lines.append("    all_passed = all_passed .and. passed")
+    lines.append("  end do")
+    lines.append("  if (all_passed) then")
+    lines.append("    write(*,*) 'PASS: Vector reverse mode - all sizes completed successfully'")
+    lines.append("  else")
+    lines.append("    write(*,*) 'FAIL: Vector reverse mode - one or more sizes had derivative errors'")
+    lines.append("  end if")
+    lines.append("")
+    lines.append("contains")
+    lines.append("")
+    lines.append("  subroutine run_test_for_size(n, passed, nbdirs)")
+    lines.append("    implicit none")
+    lines.append("    integer, intent(in) :: n")
+    lines.append("    logical, intent(out) :: passed")
+    lines.append("    integer, intent(in) :: nbdirs")
+    lines.append("")
+    lines.append("    character :: transa, transb")
+    lines.append("    integer :: msize, nsize, ksize, lda_val, ldb_val, ldc_val")
+    lines.append(f"    {precision_type} :: alpha, beta")
+    lines.append(f"    {precision_type}, dimension(n,n) :: a, b, c")
+    lines.append(f"    {precision_type}, dimension(nbdirs) :: alphab, betab")
+    lines.append(f"    {precision_type}, dimension(nbdirs,n,n) :: ab, bb, cb")
+    lines.append(f"    {precision_type} :: alpha_orig, beta_orig")
+    lines.append(f"    {precision_type}, dimension(n,n) :: a_orig, b_orig, c_orig")
+    lines.append(f"    {precision_type}, dimension(nbdirs,n,n) :: cb_orig")
+    lines.append("    integer :: k")
+    lines.append("")
+    lines.append("    transa = 'N'")
+    lines.append("    transb = 'N'")
+    lines.append("    msize = n")
+    lines.append("    nsize = n")
+    lines.append("    ksize = n")
+    lines.append("    lda_val = n")
+    lines.append("    ldb_val = n")
+    lines.append("    ldc_val = n")
+    lines.append("")
+    lines.append(f"    call random_number(alpha)")
+    lines.append(f"    alpha = alpha * 2.0d0 - 1.0d0")
+    lines.append(f"    call random_number(a)")
+    lines.append(f"    a = a * 2.0d0 - 1.0d0")
+    lines.append(f"    call random_number(b)")
+    lines.append(f"    b = b * 2.0d0 - 1.0d0")
+    lines.append(f"    call random_number(beta)")
+    lines.append(f"    beta = beta * 2.0d0 - 1.0d0")
+    lines.append(f"    call random_number(c)")
+    lines.append(f"    c = c * 2.0d0 - 1.0d0")
+    lines.append("")
+    lines.append("    alpha_orig = alpha")
+    lines.append("    a_orig = a")
+    lines.append("    b_orig = b")
+    lines.append("    beta_orig = beta")
+    lines.append("    c_orig = c")
+    lines.append("")
+    lines.append("    do k = 1, nbdirs")
+    lines.append(f"      call random_number(cb(k,:,:))")
+    lines.append(f"      cb(k,:,:) = cb(k,:,:) * 2.0d0 - 1.0d0")
+    lines.append("    end do")
+    lines.append("    cb_orig = cb")
+    lines.append("")
+    lines.append("    alphab = 0.0d0")
+    lines.append("    ab = 0.0d0")
+    lines.append("    bb = 0.0d0")
+    lines.append("    betab = 0.0d0")
+    lines.append("")
+    lines.append(f"    write(*,*) 'Testing {func_name} (Vector Reverse, n =', n, ')'")
+    lines.append("")
+    lines.append("    call set_ISIZE2OFA(n)")
+    lines.append("    call set_ISIZE2OFB(n)")
+    lines.append("")
+    lines.append(f"    call {func_name.lower()}_bv(transa, transb, msize, nsize, ksize, alpha, alphab, a, ab, lda_val, b, bb, ldb_val, beta, betab, c, cb, ldc_val, nbdirs)")
+    lines.append("")
+    lines.append("    call set_ISIZE2OFA(-1)")
+    lines.append("    call set_ISIZE2OFB(-1)")
+    lines.append("")
+    lines.append("    call check_vjp_numerically(n, nbdirs, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, alpha_orig, a_orig, b_orig, beta_orig, c_orig, cb_orig, alphab, ab, bb, betab, cb, passed)")
+    lines.append("")
+    lines.append("  end subroutine run_test_for_size")
+    lines.append("")
+    lines.append("  subroutine check_vjp_numerically(n, nbdirs, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, alpha_orig, a_orig, b_orig, beta_orig, c_orig, cb_orig, alphab, ab, bb, betab, cb, passed)")
+    lines.append("    implicit none")
+    lines.append("    integer, intent(in) :: n, nbdirs")
+    lines.append("    character, intent(in) :: transa, transb")
+    lines.append("    integer, intent(in) :: msize, nsize, ksize, lda_val, ldb_val, ldc_val")
+    lines.append(f"    {precision_type}, intent(in) :: alpha_orig, beta_orig")
+    lines.append(f"    {precision_type}, intent(in) :: a_orig(n,n), b_orig(n,n), c_orig(n,n)")
+    lines.append(f"    {precision_type}, intent(in) :: cb_orig(nbdirs,n,n)")
+    lines.append(f"    {precision_type}, intent(in) :: alphab(nbdirs), betab(nbdirs)")
+    lines.append(f"    {precision_type}, intent(in) :: ab(nbdirs,n,n), bb(nbdirs,n,n), cb(nbdirs,n,n)")
+    lines.append("    logical, intent(out) :: passed")
+    lines.append("")
+    lines.append(f"    {precision_type}, parameter :: h = 1.0e-7")
+    lines.append(f"    {precision_type} :: vjp_ad, vjp_fd, relative_error, max_error, abs_error, abs_reference, error_bound")
+    lines.append(f"    {precision_type} :: alpha_dir, beta_dir")
+    lines.append(f"    {precision_type}, dimension(n,n) :: a_dir, b_dir, c_dir")
+    lines.append(f"    {precision_type}, dimension(n,n) :: c_plus, c_minus, c_central_diff")
+    lines.append(f"    {precision_type} :: alpha, beta")
+    lines.append(f"    {precision_type}, dimension(n,n) :: a, b, c")
+    lines.append(f"    {precision_type}, dimension(n*n) :: temp_products")
+    lines.append("    integer :: n_products, i, j, k")
+    lines.append("    logical :: has_large_errors")
+    lines.append("")
+    lines.append("    max_error = 0.0d0")
+    lines.append("    has_large_errors = .false.")
+    lines.append("")
+    lines.append("    write(*,*) 'Function calls completed successfully'")
+    lines.append("    write(*,*) 'Checking derivatives against numerical differentiation:'")
+    lines.append("    write(*,*) 'Step size h =', h")
+    lines.append("")
+    lines.append("    do k = 1, nbdirs")
+    lines.append("      call random_number(alpha_dir)")
+    lines.append("      alpha_dir = alpha_dir * 2.0d0 - 1.0d0")
+    lines.append("      call random_number(a_dir)")
+    lines.append("      a_dir = a_dir * 2.0d0 - 1.0d0")
+    lines.append("      call random_number(b_dir)")
+    lines.append("      b_dir = b_dir * 2.0d0 - 1.0d0")
+    lines.append("      call random_number(beta_dir)")
+    lines.append("      beta_dir = beta_dir * 2.0d0 - 1.0d0")
+    lines.append("      call random_number(c_dir)")
+    lines.append("      c_dir = c_dir * 2.0d0 - 1.0d0")
+    lines.append("      alpha = alpha_orig + h * alpha_dir")
+    lines.append("      a = a_orig + h * a_dir")
+    lines.append("      b = b_orig + h * b_dir")
+    lines.append("      beta = beta_orig + h * beta_dir")
+    lines.append("      c = c_orig + h * c_dir")
+    lines.append(f"      call {func_name.lower()}(transa, transb, msize, nsize, ksize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)")
+    lines.append("      c_plus = c")
+    lines.append("      alpha = alpha_orig - h * alpha_dir")
+    lines.append("      a = a_orig - h * a_dir")
+    lines.append("      b = b_orig - h * b_dir")
+    lines.append("      beta = beta_orig - h * beta_dir")
+    lines.append("      c = c_orig - h * c_dir")
+    lines.append(f"      call {func_name.lower()}(transa, transb, msize, nsize, ksize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)")
+    lines.append("      c_minus = c")
+    lines.append("      c_central_diff = (c_plus - c_minus) / (2.0d0 * h)")
+    lines.append("      vjp_fd = 0.0d0")
+    lines.append("      n_products = 0")
+    lines.append("      do j = 1, n")
+    lines.append("        do i = 1, n")
+    lines.append("          n_products = n_products + 1")
+    lines.append("          temp_products(n_products) = cb_orig(k,i,j) * c_central_diff(i,j)")
+    lines.append("        end do")
+    lines.append("      end do")
+    lines.append("      call sort_array(temp_products, n_products)")
+    lines.append("      do i = 1, n_products")
+    lines.append("        vjp_fd = vjp_fd + temp_products(i)")
+    lines.append("      end do")
+    lines.append("      vjp_ad = 0.0d0")
+    lines.append("      n_products = 0")
+    lines.append("      do j = 1, n")
+    lines.append("        do i = 1, n")
+    lines.append("          n_products = n_products + 1")
+    lines.append("          temp_products(n_products) = b_dir(i,j) * bb(k,i,j)")
+    lines.append("        end do")
+    lines.append("      end do")
+    lines.append("      call sort_array(temp_products, n_products)")
+    lines.append("      do i = 1, n_products")
+    lines.append("        vjp_ad = vjp_ad + temp_products(i)")
+    lines.append("      end do")
+    lines.append("      vjp_ad = vjp_ad + beta_dir * betab(k)")
+    lines.append("      n_products = 0")
+    lines.append("      do j = 1, n")
+    lines.append("        do i = 1, n")
+    lines.append("          n_products = n_products + 1")
+    lines.append("          temp_products(n_products) = a_dir(i,j) * ab(k,i,j)")
+    lines.append("        end do")
+    lines.append("      end do")
+    lines.append("      call sort_array(temp_products, n_products)")
+    lines.append("      do i = 1, n_products")
+    lines.append("        vjp_ad = vjp_ad + temp_products(i)")
+    lines.append("      end do")
+    lines.append("      vjp_ad = vjp_ad + alpha_dir * alphab(k)")
+    lines.append("      n_products = 0")
+    lines.append("      do j = 1, n")
+    lines.append("        do i = 1, n")
+    lines.append("          n_products = n_products + 1")
+    lines.append("          temp_products(n_products) = c_dir(i,j) * cb(k,i,j)")
+    lines.append("        end do")
+    lines.append("      end do")
+    lines.append("      call sort_array(temp_products, n_products)")
+    lines.append("      do i = 1, n_products")
+    lines.append("        vjp_ad = vjp_ad + temp_products(i)")
+    lines.append("      end do")
+    lines.append("      abs_error = abs(vjp_fd - vjp_ad)")
+    lines.append("      abs_reference = abs(vjp_ad)")
+    lines.append("      error_bound = 1.0e-5 + 1.0e-5 * abs_reference")
+    lines.append("      if (abs_error > error_bound) has_large_errors = .true.")
+    lines.append("      if (abs_reference > 1.0e-10) then")
+    lines.append("        relative_error = abs_error / abs_reference")
+    lines.append("      else")
+    lines.append("        relative_error = abs_error")
+    lines.append("      end if")
+    lines.append("      if (relative_error > max_error) max_error = relative_error")
+    lines.append("    end do")
+    lines.append("")
+    lines.append("    write(*,*) ''")
+    lines.append("    write(*,*) 'Maximum relative error:', max_error")
+    lines.append("    write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'")
+    lines.append("    passed = .not. has_large_errors")
+    lines.append("    if (has_large_errors) then")
+    lines.append("      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'")
+    lines.append("    else")
+    lines.append("      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'")
+    lines.append("    end if")
+    lines.append("")
+    lines.append("  end subroutine check_vjp_numerically")
+    lines.append("")
+    lines.append("  subroutine sort_array(arr, n)")
+    lines.append("    implicit none")
+    lines.append("    integer, intent(in) :: n")
+    lines.append(f"    {precision_type}, dimension(n), intent(inout) :: arr")
+    lines.append("    integer :: i, j, min_idx")
+    lines.append(f"    {precision_type} :: temp")
+    lines.append("    do i = 1, n-1")
+    lines.append("      min_idx = i")
+    lines.append("      do j = i+1, n")
+    lines.append("        if (abs(arr(j)) < abs(arr(min_idx))) min_idx = j")
+    lines.append("      end do")
+    lines.append("      if (min_idx /= i) then")
+    lines.append("        temp = arr(i)")
+    lines.append("        arr(i) = arr(min_idx)")
+    lines.append("        arr(min_idx) = temp")
+    lines.append("      end if")
+    lines.append("    end do")
+    lines.append("  end subroutine sort_array")
+    lines.append("")
+    lines.append(f"end program test_{prog_name}_vector_reverse")
+    return "\n".join(lines)
+
+
+def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_type="SUBROUTINE", compiler="gfortran", c_compiler="gcc", param_types=None, forward_src_dir=None, multi_size=False, test_base=None):
     """
     Generate a test main program for the differentiated function.
     Returns the main program content as a string.
     forward_src_dir: If set (Path), scan for {stem}_d.f and add set_ISIZE*/reset around the _d call.
+    multi_size: If True, use outlined run_test_for_size(n) with arrays sized to n (n=1,2,3,4).
+    test_base: Base name for program/test file (e.g. dgemm). If None, uses src_file.stem.
     
     Args:
         param_types: Dictionary with 'real_vars', 'complex_vars', 'integer_vars', 'char_vars' sets
@@ -1087,6 +3538,7 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
     if param_types is None:
         param_types = {'real_vars': set(), 'complex_vars': set(), 'integer_vars': set(), 'char_vars': set()}
     src_stem = src_file.stem
+    prog_name = (test_base if test_base is not None else src_stem)
     
     # Parse parameter constraints from the source file
     constraints = parse_parameter_constraints(src_file)
@@ -1121,7 +3573,7 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
     main_lines.append(f"! Generated automatically by run_tapenade_blas.py")
     main_lines.append(f"! Using {precision_name} precision")
     main_lines.append("")
-    main_lines.append("program test_" + src_stem)
+    main_lines.append("program test_" + prog_name)
     main_lines.append("  implicit none")
     main_lines.append("")
     
@@ -1196,13 +3648,27 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
             if min_ld is not None and min_ld > required_max_size:
                 required_max_size = min_ld
     
+    # Multi-size outlined: use run_test_for_size(n) with arrays sized to n
+    # Include FUNCTIONS (cdotc, ddot, etc.) - they use result = func() and call func_d(..., result_d)
+    if multi_size and not is_any_band_matrix_function(func_name) and not any(p.upper() in ['AP', 'BP', 'CP'] for p in all_params):
+        return _generate_multisize_outlined_test(
+            func_name, src_file, inputs, outputs, inout_vars, func_type,
+            constraints, param_values, all_params, precision_type, precision_name,
+            h_precision, param_types, prog_name, src_stem, forward_src_dir
+        )
+    
     # Add variable declarations based on the function signature
     main_lines.append("  ! Test parameters")
-    main_lines.append("  integer, parameter :: n = 4  ! Matrix/vector size for test")
-    if required_max_size > 4:
-        main_lines.append(f"  integer, parameter :: max_size = {required_max_size}  ! Maximum array dimension (adjusted for LD constraints)")
+    if multi_size:
+        multi_max = max(8, required_max_size)
+        main_lines.append(f"  integer, parameter :: max_size = {multi_max}  ! Maximum array dimension (multi-size test)")
+        main_lines.append("  integer :: n_test  ! Loop over n = 1, 2, 3, 4")
     else:
-        main_lines.append("  integer, parameter :: max_size = n  ! Maximum array dimension (rows/cols of matrices)")
+        main_lines.append("  integer, parameter :: n = 4  ! Matrix/vector size for test")
+        if required_max_size > 4:
+            main_lines.append(f"  integer, parameter :: max_size = {required_max_size}  ! Maximum array dimension (adjusted for LD constraints)")
+        else:
+            main_lines.append("  integer, parameter :: max_size = n  ! Maximum array dimension (rows/cols of matrices)")
     main_lines.append("  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions")
     main_lines.append("")
     
@@ -1258,12 +3724,14 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
             # Get array size from constraint if available
             array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
             # Band matrices (SBMV, HBMV): A is (LDA, N) with LDA >= K+1
+            # Use max_size for both dims (n is variable in main program, needs constant bounds)
             if param_upper == 'A' and (is_any_band_matrix_function(func_name)):
+                band_size = 'max_size' if multi_size else array_size
                 if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                     complex_type = get_complex_type(func_name)
-                    main_lines.append(f"  {complex_type}, dimension({array_size},n) :: {param.lower()}  ! Band storage (k+1) x n")
+                    main_lines.append(f"  {complex_type}, dimension({band_size},{band_size}) :: {param.lower()}  ! Band storage (k+1) x n")
                 else:
-                    main_lines.append(f"  {precision_type}, dimension({array_size},n) :: {param.lower()}  ! Band storage (k+1) x n")
+                    main_lines.append(f"  {precision_type}, dimension({band_size},{band_size}) :: {param.lower()}  ! Band storage (k+1) x n")
             elif func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
                 main_lines.append(f"  {complex_type}, dimension({array_size},{array_size}) :: {param.lower()}")
@@ -1271,9 +3739,12 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
                 main_lines.append(f"  {precision_type}, dimension({array_size},{array_size}) :: {param.lower()}")
         elif param_upper in ['AP', 'BP', 'CP']:
             # Packed arrays - 1D arrays with size n*(n+1)/2
-            # Get n from constraints
-            n_value = param_values.get('N', 'n')
-            packed_size = f"({n_value}*({n_value}+1))/2"
+            # Use max_size for constant bounds when multi_size (n is variable in main program)
+            if multi_size:
+                packed_size = "max_size*(max_size+1)/2"
+            else:
+                n_value = param_values.get('N', 'n')
+                packed_size = f"({n_value}*({n_value}+1))/2"
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
                 main_lines.append(f"  {complex_type}, dimension({packed_size}) :: {param.lower()}")
@@ -1311,8 +3782,7 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
                     main_lines.append(f"  {precision_type}, dimension({array_size},{array_size}) :: {param.lower()}_d")
             elif param_upper in ['AP', 'BP', 'CP']:
                 # Packed arrays - 1D arrays with size n*(n+1)/2
-                n_value = param_values.get('N', 'n')
-                packed_size = f"({n_value}*({n_value}+1))/2"
+                packed_size = "max_size*(max_size+1)/2" if multi_size else f"({param_values.get('N', 'n')}*({param_values.get('N', 'n')}+1))/2"
                 if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                     complex_type = get_complex_type(func_name)
                     main_lines.append(f"  {complex_type}, dimension({packed_size}) :: {param.lower()}_d")
@@ -1352,8 +3822,7 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
                 main_lines.append(f"  {precision_type}, dimension({array_size},{array_size}) :: {var.lower()}_output")
         elif var.upper() in ['AP', 'BP', 'CP']:
             # Packed arrays
-            n_value = param_values.get('N', 'n')
-            packed_size = f"({n_value}*({n_value}+1))/2"
+            packed_size = "max_size*(max_size+1)/2" if multi_size else f"({param_values.get('N', 'n')}*({param_values.get('N', 'n')}+1))/2"
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                     complex_type = get_complex_type(func_name)
                     main_lines.append(f"  {complex_type}, dimension({packed_size}) :: {var.lower()}_output")
@@ -1380,13 +3849,14 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
         if var.upper() in ['A', 'B', 'C']:
             # Get array size from constraint if available
             array_size = get_array_size_from_constraint(var.upper(), constraints, param_values)
-            # Band matrix A: same storage (array_size, n) as primal
+            # Band matrix A: same storage as primal (use max_size for constant bounds in main program)
             if var.upper() == 'A' and (is_any_band_matrix_function(func_name)):
+                band_size = 'max_size' if multi_size else array_size
                 if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                     complex_type = get_complex_type(func_name)
-                    main_lines.append(f"  {complex_type}, dimension({array_size},n) :: {var.lower()}_orig  ! Band storage")
+                    main_lines.append(f"  {complex_type}, dimension({band_size},{band_size}) :: {var.lower()}_orig  ! Band storage")
                 else:
-                    main_lines.append(f"  {precision_type}, dimension({array_size},n) :: {var.lower()}_orig  ! Band storage")
+                    main_lines.append(f"  {precision_type}, dimension({band_size},{band_size}) :: {var.lower()}_orig  ! Band storage")
             elif func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                     complex_type = get_complex_type(func_name)
                     main_lines.append(f"  {complex_type}, dimension({array_size},{array_size}) :: {var.lower()}_orig")
@@ -1394,8 +3864,7 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
                 main_lines.append(f"  {precision_type}, dimension({array_size},{array_size}) :: {var.lower()}_orig")
         elif var.upper() in ['AP', 'BP', 'CP']:
             # Packed arrays
-            n_value = param_values.get('N', 'n')
-            packed_size = f"({n_value}*({n_value}+1))/2"
+            packed_size = "max_size*(max_size+1)/2" if multi_size else f"({param_values.get('N', 'n')}*({param_values.get('N', 'n')}+1))/2"
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                     complex_type = get_complex_type(func_name)
                     main_lines.append(f"  {complex_type}, dimension({packed_size}) :: {var.lower()}_orig")
@@ -1434,8 +3903,7 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
                     main_lines.append(f"  {precision_type}, dimension({array_size},{array_size}) :: {var.lower()}_orig")
             elif var.upper() in ['AP', 'BP', 'CP']:
                 # Packed arrays
-                n_value = param_values.get('N', 'n')
-                packed_size = f"({n_value}*({n_value}+1))/2"
+                packed_size = "max_size*(max_size+1)/2" if multi_size else f"({param_values.get('N', 'n')}*({param_values.get('N', 'n')}+1))/2"
                 if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                     complex_type = get_complex_type(func_name)
                     main_lines.append(f"  {complex_type}, dimension({packed_size}) :: {var.lower()}_orig")
@@ -1522,8 +3990,7 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
                 main_lines.append(f"  {precision_type}, dimension({array_size},{array_size}) :: {var.lower()}_d_orig")
         elif var.upper() in ['AP', 'BP', 'CP']:
             # Packed arrays
-            n_value = param_values.get('N', 'n')
-            packed_size = f"({n_value}*({n_value}+1))/2"
+            packed_size = "max_size*(max_size+1)/2" if multi_size else f"({param_values.get('N', 'n')}*({param_values.get('N', 'n')}+1))/2"
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                     complex_type = get_complex_type(func_name)
                     main_lines.append(f"  {complex_type}, dimension({packed_size}) :: {var.lower()}_d_orig")
@@ -1556,6 +4023,8 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
         main_lines.append("  integer :: i, j, band_row")
     else:
         main_lines.append("  integer :: i, j")
+    if multi_size:
+        main_lines.append("  integer :: n  ! Current size (set in loop)")
     main_lines.append("")
     main_lines.append("  ! Initialize test data with random numbers")
     main_lines.append("  ! Initialize random seed for reproducible results")
@@ -1563,6 +4032,11 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
     main_lines.append("  seed_array = 42")
     main_lines.append("  call random_seed(put=seed_array)")
     main_lines.append("")
+    if multi_size:
+        main_lines.append(f"  write(*,*) 'Testing {func_name} (multi-size: n = 1, 2, 3, 4)'")
+        main_lines.append("  do n_test = 1, 4")
+        main_lines.append("    n = n_test")
+        main_lines.append("")
     
     # Generic initialization for all functions
     for param in all_params:
@@ -1661,6 +4135,10 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
             elif is_band_hermitian_function(func_name) and param_upper == 'A':
                 # A is Hermitian band (CHBMV, ZHBMV)
                 band_lines = generate_hermitian_band_matrix_init(func_name, param.lower(), precision_type)
+                main_lines.extend(band_lines)
+            elif is_band_general_function(func_name) and param_upper == 'A':
+                # A is general band (CGBMV, DGBMV, SGBMV, ZGBMV)
+                band_lines = generate_general_band_matrix_init(func_name, param.lower(), precision_type)
                 main_lines.extend(band_lines)
             elif is_band_symmetric_function(func_name) and param_upper == 'A':
                 # A is symmetric band (SSBMV, DSBMV)
@@ -1773,7 +4251,7 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
             else:
                 main_lines.append(f"  call random_number({var.lower()}_d)")
                 main_lines.append(f"  {var.lower()}_d = {var.lower()}_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]")
-        elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'SX', 'SY']:
+        elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 # Complex arrays - initialize derivatives with complex values
                 main_lines.append(f"  do i = 1, n")
@@ -1811,7 +4289,7 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
             continue
         if var.upper() in ['A', 'B', 'C', 'AP', 'BP', 'CP']:
             main_lines.append(f"  {var.lower()}_d_orig = {var.lower()}_d")
-        elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'SX', 'SY']:
+        elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
             main_lines.append(f"  {var.lower()}_d_orig = {var.lower()}_d")
         else:
             main_lines.append(f"  {var.lower()}_d_orig = {var.lower()}_d")
@@ -1867,7 +4345,7 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
     for var in inout_vars:
         if var.upper() in ['A', 'B', 'C']:
             main_lines.append(f"  {var.lower()}_orig = {var.lower()}")
-        elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'SX', 'SY']:
+        elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
             main_lines.append(f"  {var.lower()}_orig = {var.lower()}")
         else:
             main_lines.append(f"  {var.lower()}_orig = {var.lower()}")
@@ -1894,7 +4372,7 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
         for var in inout_vars:
             if var.upper() in ['A', 'B', 'C']:
                 main_lines.append(f"  {var.lower()}_output = {var.lower()}")
-            elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'SX', 'SY']:
+            elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
                 main_lines.append(f"  {var.lower()}_output = {var.lower()}")
             else:
                 main_lines.append(f"  {var.lower()}_output = {var.lower()}")
@@ -1987,7 +4465,7 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
                 else:
                     # Pure input parameter - keep same values (don't reinitialize)
                     main_lines.append(f"  ! {param.lower()} already has correct value from original call")
-        elif param_upper in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'SX', 'SY']:
+        elif param_upper in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 if param_upper in inout_vars:
                     # Inout parameter - copy from stored input values
@@ -2079,7 +4557,25 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
     main_lines.append("  ! Numerical differentiation check")
     main_lines.append("  call check_derivatives_numerically()")
     main_lines.append("")
-    main_lines.append("  write(*,*) 'Test completed successfully'")
+    if multi_size:
+        # Indent loop body: add 2 spaces to lines between "n = n_test" and "call check_derivatives_numerically()"
+        start_idx = None
+        end_idx = None
+        for i, line in enumerate(main_lines):
+            if "n = n_test" in line:
+                start_idx = i + 2  # Skip "n = n_test" and blank line
+                break
+        for i in range(len(main_lines) - 1, -1, -1):
+            if "call check_derivatives_numerically()" in main_lines[i]:
+                end_idx = i
+                break
+        if start_idx is not None and end_idx is not None:
+            for i in range(start_idx, end_idx + 1):
+                main_lines[i] = "  " + main_lines[i]
+        main_lines.append("  end do")
+        main_lines.append("  write(*,*) 'All sizes completed successfully'")
+    else:
+        main_lines.append("  write(*,*) 'Test completed successfully'")
     main_lines.append("")
     main_lines.append("contains")
     main_lines.append("")
@@ -2168,7 +4664,7 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
             # Real functions - use h directly
             if input_var.upper() in ['A', 'B', 'C']:
                 main_lines.append(f"    {input_var.lower()} = {input_var.lower()}_orig + h * {input_var.lower()}_d_orig")
-            elif input_var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'SX', 'SY']:
+            elif input_var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
                 main_lines.append(f"    {input_var.lower()} = {input_var.lower()}_orig + h * {input_var.lower()}_d_orig")
             else:
                 if input_var.upper() in ['DA']:
@@ -2193,7 +4689,7 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
         for var in outputs:
             if var.upper() in ['A', 'B', 'C']:
                 main_lines.append(f"    {var.lower()}_forward = {var.lower()}")
-            elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'SX', 'SY']:
+            elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
                 main_lines.append(f"    {var.lower()}_forward = {var.lower()}")
     
     main_lines.append("    ")
@@ -2225,7 +4721,7 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
             # Real functions - use h directly
             if input_var.upper() in ['A', 'B', 'C']:
                 main_lines.append(f"    {input_var.lower()} = {input_var.lower()}_orig - h * {input_var.lower()}_d_orig")
-            elif input_var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'SX', 'SY']:
+            elif input_var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
                 main_lines.append(f"    {input_var.lower()} = {input_var.lower()}_orig - h * {input_var.lower()}_d_orig")
             else:
                 if input_var.upper() in ['DA']:
@@ -2250,7 +4746,7 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
         for var in outputs:
             if var.upper() in ['A', 'B', 'C']:
                 main_lines.append(f"    {var.lower()}_backward = {var.lower()}")
-            elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'SX', 'SY']:
+            elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
                 main_lines.append(f"    {var.lower()}_backward = {var.lower()}")
     
     main_lines.append("    ")
@@ -2309,7 +4805,7 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
                 main_lines.append(f"        max_error = max(max_error, relative_error)")
                 main_lines.append(f"      end do")
                 main_lines.append(f"    end do")
-            elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'SX', 'SY']:
+            elif var.upper() in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
                 main_lines.append(f"    ! Check derivatives for output {var.upper()}")
                 main_lines.append(f"    do i = 1, min(2, n)  ! Check only first few elements")
                 main_lines.append(f"      ! Central difference: (f(x+h) - f(x-h)) / (2h)")
@@ -2348,7 +4844,7 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
     main_lines.append("    ")
     main_lines.append("  end subroutine check_derivatives_numerically")
     main_lines.append("")
-    main_lines.append("end program test_" + src_stem)
+    main_lines.append("end program test_" + prog_name)
     
     return "\n".join(main_lines)
 
@@ -2967,7 +5463,7 @@ def _collect_isize_vars_from_file(file_path):
     return names
 
 
-def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars, func_type="SUBROUTINE", compiler="gfortran", c_compiler="gcc", param_types=None, reverse_src_dir=None):
+def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars, func_type="SUBROUTINE", compiler="gfortran", c_compiler="gcc", param_types=None, reverse_src_dir=None, multi_size=False):
     """
     Generate a test main program for reverse mode differentiated function.
     Implements VJP verification using finite differences.
@@ -2976,6 +5472,7 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
         param_types: Dictionary with 'real_vars', 'complex_vars', 'integer_vars', 'char_vars' sets
                      for handling mixed-precision functions
         reverse_src_dir: If set (Path), scan for {stem}_b.f and add set_ISIZE*/reset to -1 around the _b call
+        multi_size: If True, loop over n = 4 with pass/fail aggregation
     """
     if param_types is None:
         param_types = {'real_vars': set(), 'complex_vars': set(), 'integer_vars': set(), 'char_vars': set()}
@@ -3079,6 +5576,10 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
             if min_ld is not None and min_ld > required_max_size_reverse:
                 required_max_size_reverse = min_ld
     
+    # Multi-size outlined: use run_test_for_size(n) with arrays sized to n (matches scalar forward)
+    if multi_size and not is_any_band_matrix_function(func_name) and not any(p.upper() in ['AP', 'BP', 'CP'] for p in all_params):
+        return _generate_multisize_outlined_test_reverse(func_name, src_file, src_stem, precision_type, precision_name, reverse_src_dir, all_params, inputs, outputs, inout_vars, param_types, func_type)
+    
     # Determine if source is Fortran 90 or Fortran 77
     is_fortran90 = src_file.suffix.lower() in ['.f90', '.f95', '.f03', '.f08']
     
@@ -3107,11 +5608,16 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
     main_lines.append(f"  external :: {func_name.lower()}_b")
     main_lines.append("")
     main_lines.append("  ! Test parameters")
-    main_lines.append("  integer, parameter :: n = 4  ! Matrix/vector size for test")
-    if required_max_size_reverse > 4:
-        main_lines.append(f"  integer, parameter :: max_size = {required_max_size_reverse}  ! Maximum array dimension (adjusted for LD constraints)")
+    if multi_size:
+        multi_max = max(100, required_max_size_reverse)
+        main_lines.append(f"  integer :: n  ! Current size (set in loop)")
+        main_lines.append(f"  integer, parameter :: max_size = {multi_max}  ! Maximum array dimension (multi-size: 1,4,40,100)")
     else:
-        main_lines.append("  integer, parameter :: max_size = n  ! Maximum array dimension (rows/cols of matrices)")
+        main_lines.append("  integer, parameter :: n = 4  ! Matrix/vector size for test")
+        if required_max_size_reverse > 4:
+            main_lines.append(f"  integer, parameter :: max_size = {required_max_size_reverse}  ! Maximum array dimension (adjusted for LD constraints)")
+        else:
+            main_lines.append("  integer, parameter :: max_size = n  ! Maximum array dimension (rows/cols of matrices)")
     main_lines.append("  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions")
     main_lines.append("")
     
@@ -3149,9 +5655,8 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
             # Parameter arrays for rotm/rotmg
             main_lines.append(f"  {precision_type}, dimension(5) :: {param.lower()}")
         elif param_upper in ['AP', 'BP', 'CP']:
-            # Packed arrays
-            n_value = 'n'
-            packed_size = f"({n_value}*({n_value}+1))/2"
+            # Packed arrays - use max_size for constant bounds (n is variable in multi_size loop)
+            packed_size = "max_size*(max_size+1)/2"
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
                 main_lines.append(f"  {complex_type}, dimension({packed_size}) :: {param.lower()}")
@@ -3221,9 +5726,8 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
                 param_prec = get_param_precision(param_upper, func_name, param_types)
                 main_lines.append(f"  {param_prec}, dimension(max_size) :: {param.lower()}b")
         elif param_upper in ['AP', 'BP', 'CP']:
-            # Packed arrays
-            n_value = 'n'
-            packed_size = f"({n_value}*({n_value}+1))/2"
+            # Packed arrays - use max_size for constant bounds
+            packed_size = "max_size*(max_size+1)/2"
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
                 main_lines.append(f"  {complex_type}, dimension({packed_size}) :: {param.lower()}b")
@@ -3277,9 +5781,8 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
                 param_prec = get_param_precision(param_upper, func_name, param_types)
                 main_lines.append(f"  {param_prec}, dimension(max_size) :: {param.lower()}_orig")
         elif param_upper in ['AP', 'BP', 'CP']:
-            # Packed arrays
-            n_value = 'n'
-            packed_size = f"({n_value}*({n_value}+1))/2"
+            # Packed arrays - use max_size for constant bounds
+            packed_size = "max_size*(max_size+1)/2"
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
                 main_lines.append(f"  {complex_type}, dimension({packed_size}) :: {param.lower()}_orig")
@@ -3331,9 +5834,8 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
             else:
                 main_lines.append(f"  {precision_type}, dimension(max_size) :: {param.lower()}_plus, {param.lower()}_minus")
         elif param_upper in ['AP', 'BP', 'CP']:
-            # Packed arrays
-            n_value = 'n'
-            packed_size = f"({n_value}*({n_value}+1))/2"
+            # Packed arrays - use max_size for constant bounds
+            packed_size = "max_size*(max_size+1)/2"
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
                 main_lines.append(f"  {complex_type}, dimension({packed_size}) :: {param.lower()}_plus, {param.lower()}_minus")
@@ -3377,9 +5879,8 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
                 else:
                     main_lines.append(f"  {precision_type}, dimension(max_size) :: {param.lower()}b_orig")
             elif param_upper in ['AP', 'BP', 'CP']:
-                # Packed arrays
-                n_value = 'n'
-                packed_size = f"({n_value}*({n_value}+1))/2"
+                # Packed arrays - use max_size for constant bounds
+                packed_size = "max_size*(max_size+1)/2"
                 if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                     complex_type = get_complex_type(func_name)
                     main_lines.append(f"  {complex_type}, dimension({packed_size}) :: {param.lower()}b_orig")
@@ -3404,7 +5905,9 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
     # check_vjp_numerically() routine (do not redeclare them there).
     main_lines.append(f"  {precision_type} :: vjp_ad, vjp_fd, relative_error, max_error, abs_error, abs_reference, error_bound")
     main_lines.append("  logical :: has_large_errors")
-    # Add band_row for band matrix initialization in main program
+    # Add band_row for band matrix initialization in main program.
+    # ksize is already declared above from the param loop (K -> ksize).
+    # band_row is used in the band-initialization helpers' loop bounds.
     if is_any_band_matrix_function(func_name):
         main_lines.append("  integer :: i, j, band_row")
         # Complex functions need both temp_real and temp_imag
@@ -3416,6 +5919,9 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
         main_lines.append("  integer :: i, j")
     main_lines.append(f"  {precision_type}, dimension(max_size*max_size) :: temp_products  ! For sorted summation")
     main_lines.append("  integer :: n_products")
+    if multi_size:
+        main_lines.append("  integer :: test_sizes(1), itest")
+        main_lines.append("  logical :: passed, all_passed")
     
     # Add temporary variables for complex initialization at program level
     # These are needed for initializing any complex primal values
@@ -3429,6 +5935,14 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
     main_lines.append("  seed_array = 42")
     main_lines.append("  call random_seed(put=seed_array)")
     main_lines.append("")
+    if multi_size:
+        main_lines.append(f"  test_sizes = (/ 4 /)")
+        main_lines.append(f"  write(*,*) 'Testing {func_name} (multi-size: n = 4)'")
+        main_lines.append("  all_passed = .true.")
+        main_lines.append("  do itest = 1, 1")
+        main_lines.append("    n = test_sizes(itest)")
+        main_lines.append(f"    write(*,*) 'Testing {func_name} (n =', n, ')'")
+        main_lines.append("")
     
     # Initialize parameters
     main_lines.append("  ! Initialize primal values")
@@ -3467,6 +5981,10 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
                 # A is Hermitian band (CHBMV, ZHBMV)
                 band_lines = generate_hermitian_band_matrix_init(func_name, param.lower(), precision_type)
                 main_lines.extend(band_lines)
+            elif param_upper == 'A' and is_band_general_function(func_name):
+                # A is general band (CGBMV, DGBMV, SGBMV, ZGBMV)
+                band_lines = generate_general_band_matrix_init(func_name, param.lower(), precision_type)
+                main_lines.extend(band_lines)
             elif param_upper == 'A' and is_band_symmetric_function(func_name):
                 # A is symmetric band (SSBMV, DSBMV)
                 band_lines = generate_symmetric_band_matrix_init(func_name, param.lower(), precision_type)
@@ -3501,11 +6019,9 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
                 main_lines.append(f"  call random_number({param.lower()})")
                 main_lines.append(f"  {param.lower()} = {param.lower()} * 2.0{suffix} - 1.0{suffix}")
         elif param_upper in ['AP', 'BP', 'CP']:
-            # Packed arrays - handle complex types
+            # Packed arrays - handle complex types (loop uses n for current size)
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
-                n_value = 'n'
-                packed_size = f"({n_value}*({n_value}+1))/2"
-                main_lines.append(f"  do i = 1, {packed_size}")
+                main_lines.append(f"  do i = 1, (n*(n+1))/2")
                 main_lines.append(f"    call random_number(temp_real_init)")
                 main_lines.append(f"    call random_number(temp_imag_init)")
                 main_lines.append(f"    {param.lower()}(i) = cmplx(temp_real_init, temp_imag_init) * (2.0,2.0) - (1.0,1.0)")
@@ -3553,8 +6069,9 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
         main_lines.append(f"  {param.lower()}_orig = {param.lower()}")
     
     main_lines.append("")
-    main_lines.append("  write(*,*) 'Testing " + func_name + "'")
-    main_lines.append("")
+    if not multi_size:
+        main_lines.append("  write(*,*) 'Testing " + func_name + "'")
+        main_lines.append("")
 
     main_lines.append("  ! Initialize output adjoints (cotangents) with random values")
     main_lines.append("  ! These are the 'seeds' for reverse mode")
@@ -3682,15 +6199,30 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
     main_lines.append("  ! VJP Verification using finite differences")
     main_lines.append("  ! For reverse mode, we verify: cotangent^T @ J @ direction = direction^T @ adjoint")
     main_lines.append("  ! Equivalently: cotangent^T @ (f(x+h*dir) - f(x-h*dir))/(2h) should equal dir^T @ computed_adjoint")
-    main_lines.append("  call check_vjp_numerically()")
-    main_lines.append("")
-    main_lines.append("  write(*,*) ''")
-    main_lines.append("  write(*,*) 'Test completed successfully'")
+    if multi_size:
+        main_lines.append("  call check_vjp_numerically(passed)")
+        main_lines.append("  all_passed = all_passed .and. passed")
+        main_lines.append("  end do")
+        main_lines.append("  if (all_passed) then")
+        main_lines.append("    write(*,*) 'PASS: All sizes completed successfully'")
+        main_lines.append("  else")
+        main_lines.append("    write(*,*) 'FAIL: One or more sizes had derivative errors'")
+        main_lines.append("  end if")
+    else:
+        main_lines.append("  call check_vjp_numerically()")
+        main_lines.append("")
+        main_lines.append("  write(*,*) ''")
+        main_lines.append("  write(*,*) 'Test completed successfully'")
     main_lines.append("")
     main_lines.append("contains")
     main_lines.append("")
-    main_lines.append("  subroutine check_vjp_numerically()")
-    main_lines.append("    implicit none")
+    if multi_size:
+        main_lines.append("  subroutine check_vjp_numerically(passed)")
+        main_lines.append("    implicit none")
+        main_lines.append("    logical, intent(out) :: passed")
+    else:
+        main_lines.append("  subroutine check_vjp_numerically()")
+        main_lines.append("    implicit none")
     main_lines.append("    ")
     
     # Need band_row variable for band matrices
@@ -3842,7 +6374,9 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
             if param_upper in ['A', 'B', 'C']:
                 # Band matrix A: only fill band entries for direction
                 if param_upper == 'A' and (is_any_band_matrix_function(func_name)):
-                    if is_band_hermitian_function(func_name):
+                    if is_band_general_function(func_name):
+                        band_dir_lines = generate_general_band_direction_init(func_name, f"{param_lower}_dir", 'n')
+                    elif is_band_hermitian_function(func_name):
                         band_dir_lines = generate_hermitian_band_direction_init(func_name, f"{param_lower}_dir", 'n')
                     elif is_band_triangular_function(func_name):
                         band_dir_lines = generate_triangular_band_direction_init(func_name, f"{param_lower}_dir", 'n')
@@ -3900,7 +6434,9 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
         else:
             # Real function - use parameter-specific precision
             if param_upper == 'A' and is_any_band_matrix_function(func_name):
-                if is_band_triangular_function(func_name):
+                if is_band_general_function(func_name):
+                    band_dir_lines = generate_general_band_direction_init(func_name, f"{param_lower}_dir", 'n')
+                elif is_band_triangular_function(func_name):
                     band_dir_lines = generate_triangular_band_direction_init(func_name, f"{param_lower}_dir", 'n')
                 else:
                     band_dir_lines = generate_symmetric_band_direction_init(func_name, f"{param_lower}_dir", 'n')
@@ -3914,12 +6450,16 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
     main_lines.append("    ")
     
     # Forward perturbation: f(x + h*dir) - perturb ALL inputs simultaneously
+    # For INOUT packed (AP/BP/CP), do not perturb so central_diff = d(output)/d(alpha,x,y) only
     main_lines.append("    ! Forward perturbation: f(x + h*dir)")
     for param in differentiable_params:
         param_lower = param.lower()
         param_upper = param.upper()
+        is_inout_packed = param_upper in ['AP', 'BP', 'CP'] and param_upper in [v.upper() for v in inout_vars]
+        if is_inout_packed:
+            main_lines.append(f"    {param_lower} = {param_lower}_orig")
         # For complex functions, use cmplx(h, 0.0) to ensure proper complex arithmetic
-        if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
+        elif func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
             if param_upper in ['A', 'B', 'C', 'X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY', 'SX1', 'SY1', 'DX1', 'DY1']:
                 main_lines.append(f"    {param_lower} = {param_lower}_orig + cmplx(h, 0.0) * {param_lower}_dir")
             elif param_upper in ['DA']:
@@ -3973,12 +6513,16 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
     main_lines.append("    ")
     
     # Backward perturbation: f(x - h*dir) - perturb ALL inputs simultaneously
+    # For INOUT packed (AP/BP/CP), do not perturb (keep ap = ap_orig)
     main_lines.append("    ! Backward perturbation: f(x - h*dir)")
     for param in differentiable_params:
         param_lower = param.lower()
         param_upper = param.upper()
+        is_inout_packed = param_upper in ['AP', 'BP', 'CP'] and param_upper in [v.upper() for v in inout_vars]
+        if is_inout_packed:
+            main_lines.append(f"    {param_lower} = {param_lower}_orig")
         # For complex functions, use cmplx(h, 0.0) to ensure proper complex arithmetic
-        if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
+        elif func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
             if param_upper in ['A', 'B', 'C', 'X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY', 'SX1', 'SY1', 'DX1', 'DY1']:
                 main_lines.append(f"    {param_lower} = {param_lower}_orig - cmplx(h, 0.0) * {param_lower}_dir")
             elif param_upper in ['DA']:
@@ -4079,7 +6623,9 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
                 main_lines.append(f"      vjp_fd = vjp_fd + temp_products(i)")
                 main_lines.append(f"    end do")
             elif op_upper in ['AP', 'BP', 'CP']:
-                # Packed arrays - treat as vectors
+                # Packed arrays - treat as vectors. Always include cotangent · central_diff in vjp_fd.
+                # For INOUT packed we do not perturb AP in the FD (see perturbation block), so central_diff
+                # is the derivative w.r.t. (alpha, x, y) only; we still add it here.
                 main_lines.append(f"    ! Compute and sort products for {output_param.lower()} (FD)")
                 main_lines.append(f"    n_products = n*(n+1)/2")
                 main_lines.append(f"    do i = 1, n_products")
@@ -4129,7 +6675,10 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
                 main_lines.append(f"    ! Compute and sort products for {param_lower} (band storage)")
                 main_lines.append(f"    n_products = 0")
                 main_lines.append(f"    do j = 1, n")
-                main_lines.append(f"      do band_row = max(1, ksize+2-j), ksize+1")
+                if is_band_general_function(func_name):
+                    main_lines.append(f"      do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)")
+                else:
+                    main_lines.append(f"      do band_row = max(1, ksize+2-j), ksize+1")
                 main_lines.append(f"        n_products = n_products + 1")
                 if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                     main_lines.append(f"        temp_products(n_products) = real(conjg({param_lower}_dir(band_row,j)) * {param_lower}b(band_row,j))")
@@ -4191,29 +6740,22 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
             main_lines.append(f"      vjp_ad = vjp_ad + temp_products(i)")
             main_lines.append(f"    end do")
         elif param in ['AP', 'BP', 'CP']:
-            # Packed arrays - treat as vectors
-            main_lines.append(f"    ! Compute and sort products for {param_lower}")
-            main_lines.append(f"    n_products = n*(n+1)/2")
-            main_lines.append(f"    do i = 1, n_products")
-            # For INOUT parameters, use cb directly (it contains the computed input adjoint after reverse pass)
-            # Note: cb is modified during reverse pass but contains the correct input adjoint
-            if is_inout:
+            # Packed arrays - treat as vectors. For INOUT packed arrays (e.g., AP in SPR/SPR2),
+            # skip them in the AD side as well and only verify derivatives w.r.t. true inputs.
+            if not is_inout:
+                main_lines.append(f"    ! Compute and sort products for {param_lower}")
+                main_lines.append(f"    n_products = n*(n+1)/2")
+                main_lines.append(f"    do i = 1, n_products")
                 if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                     # For complex types, use real(conjg(a)*b) for inner product
                     main_lines.append(f"      temp_products(i) = real(conjg({param_lower}_dir(i)) * {param_lower}b(i))")
                 else:
                     main_lines.append(f"      temp_products(i) = {param_lower}_dir(i) * {param_lower}b(i)")
-            else:
-                if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
-                    # For complex types, use real(conjg(a)*b) for inner product
-                    main_lines.append(f"      temp_products(i) = real(conjg({param_lower}_dir(i)) * {param_lower}b(i))")
-                else:
-                    main_lines.append(f"      temp_products(i) = {param_lower}_dir(i) * {param_lower}b(i)")
-            main_lines.append(f"    end do")
-            main_lines.append(f"    call sort_array(temp_products, n_products)")
-            main_lines.append(f"    do i = 1, n_products")
-            main_lines.append(f"      vjp_ad = vjp_ad + temp_products(i)")
-            main_lines.append(f"    end do")
+                main_lines.append(f"    end do")
+                main_lines.append(f"    call sort_array(temp_products, n_products)")
+                main_lines.append(f"    do i = 1, n_products")
+                main_lines.append(f"      vjp_ad = vjp_ad + temp_products(i)")
+                main_lines.append(f"    end do")
         elif param.upper() in ['DPARAM', 'SPARAM']:
             # Parameter arrays for rotm/rotmg - 5 elements
             main_lines.append(f"    ! Compute and sort products for {param_lower}")
@@ -4293,6 +6835,8 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
     main_lines.append("    write(*,*) ''")
     main_lines.append("    write(*,*) 'Maximum relative error:', max_error")
     main_lines.append(f"    write(*,*) 'Tolerance thresholds: rtol={rtol}, atol={atol}'")
+    if multi_size:
+        main_lines.append("    passed = .not. has_large_errors")
     main_lines.append("    if (has_large_errors) then")
     main_lines.append("      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'")
     main_lines.append("    else")
@@ -4334,33 +6878,38 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
     program = re.sub(r"(?m)^[ \t]*real\\(\\d+\\)[ \t]*::[ \t]*vjp_fd[ \t]*,[ \t]*vjp_ad[ \t]*\\n", "", program)
     program = re.sub(r"(?m)^[ \t]*real\\(\\d+\\)[ \t]*::[ \t]*abs_error[ \t]*,[ \t]*abs_reference[ \t]*,[ \t]*error_bound[ \t]*\\n", "", program)
     # Inject the declarations at the top of the internal subroutine (after IMPLICIT NONE)
-    sub_hdr = "  subroutine check_vjp_numerically()\\n    implicit none\\n"
-    if sub_hdr in program:
-        program = program.replace(
-            sub_hdr,
-            sub_hdr
-            + f"    {precision_type} :: vjp_fd, vjp_ad\\n"
-            + f"    {precision_type} :: abs_error, abs_reference, error_bound\\n",
-            1,
-        )
+    vjp_decls = f"    {precision_type} :: vjp_fd, vjp_ad\\n" + f"    {precision_type} :: abs_error, abs_reference, error_bound\\n"
+    if multi_size:
+        sub_hdr = "  subroutine check_vjp_numerically(passed)\\n    implicit none\\n    logical, intent(out) :: passed\\n"
+        if sub_hdr in program:
+            program = program.replace(sub_hdr, sub_hdr + vjp_decls, 1)
+    else:
+        sub_hdr = "  subroutine check_vjp_numerically()\\n    implicit none\\n"
+        if sub_hdr in program:
+            program = program.replace(sub_hdr, sub_hdr + vjp_decls, 1)
 
     return program
 
-def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inout_vars, func_type="SUBROUTINE", compiler="gfortran", c_compiler="gcc", param_types=None, nbdirsmax=4, forward_src_dir=None, no_nbdirsmax=False):
+def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inout_vars, func_type="SUBROUTINE", compiler="gfortran", c_compiler="gcc", param_types=None, nbdirsmax=4, forward_src_dir=None, no_nbdirsmax=False, multi_size=False):
     """
     Generate a test main program for vector forward mode differentiated function.
     In vector mode, derivative variables are type-promoted:
     - Scalars become arrays: DOUBLE PRECISION tempd -> DOUBLE PRECISION tempd(nbdirsmax)
     - Arrays gain an extra dimension: DOUBLE PRECISION ad(lda, *) -> DOUBLE PRECISION ad(nbdirsmax, lda, *)
+
+    Uses base function name from src_stem (e.g. CAXPY from caxpy_dv) for complex scalar type decisions.
     
     Args:
         param_types: Dictionary with 'real_vars', 'complex_vars', 'integer_vars', 'char_vars' sets
         nbdirsmax: Maximum number of derivative directions (default: 4)
         forward_src_dir: If set (Path), scan for {stem}_dv.f and add set_ISIZE*/reset around the _dv call
+        multi_size: If True, loop over n = 4 with pass/fail aggregation
     """
     if param_types is None:
         param_types = {'real_vars': set(), 'complex_vars': set(), 'integer_vars': set(), 'char_vars': set()}
     src_stem = src_file.stem
+    # Base function name (e.g. CAXPY from caxpy_dv) for type decisions when parsing _dv/_d files
+    base_func_name = src_stem.upper().split('_')[0] if '_' in src_stem else src_stem.upper()
     
     # Parse parameter constraints from the source file
     constraints = parse_parameter_constraints(src_file)
@@ -4501,17 +7050,25 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
     
     # Add variable declarations
     main_lines.append("  ! Test parameters")
-    main_lines.append("  integer, parameter :: n = 4  ! Matrix/vector size for test")
-    if required_max_size > 4:
-        main_lines.append(f"  integer, parameter :: max_size = {required_max_size}  ! Maximum array dimension (adjusted for LD constraints)")
+    if multi_size:
+        multi_max = max(100, required_max_size)
+        main_lines.append("  integer :: n  ! Current size (set in loop)")
+        main_lines.append(f"  integer, parameter :: max_size = {multi_max}  ! Maximum array dimension (multi-size: 1,4,40,100)")
     else:
-        main_lines.append("  integer, parameter :: max_size = n  ! Maximum array dimension")
+        main_lines.append("  integer, parameter :: n = 4  ! Matrix/vector size for test")
+        if required_max_size > 4:
+            main_lines.append(f"  integer, parameter :: max_size = {required_max_size}  ! Maximum array dimension (adjusted for LD constraints)")
+        else:
+            main_lines.append("  integer, parameter :: max_size = n  ! Maximum array dimension")
     main_lines.append("  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions")
     # Add band_row for band matrix initialization
     if is_any_band_matrix_function(func_name):
         main_lines.append("  integer :: i, j, idir, band_row  ! Loop counters")
     else:
         main_lines.append("  integer :: i, j, idir  ! Loop counters")
+    if multi_size:
+        main_lines.append("  integer :: test_sizes(1), itest")
+        main_lines.append("  logical :: passed, all_passed")
     main_lines.append("  integer :: seed_array(33)  ! Random seed")
     main_lines.append("  real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization")
     main_lines.append("")
@@ -4543,10 +7100,10 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
         elif param_upper in ['ALPHA', 'BETA', 'CA', 'CB', 'ZA', 'ZB', 'SA', 'SB', 'S', 'Z', 'DD1', 'DD2', 'SD1', 'SD2', 'DA']:
             # Scalars - handle complex vs real based on parameter type (not just function prefix).
             # This matters for routines like DCABS1/SCABS1 where the function is real but input Z is complex.
+            # Use base_func_name so CA/CB/ZA/ZB get complex when source is e.g. caxpy_dv (parsed name may be CAXPY_DV).
             complex_vars = param_types.get('complex_vars', set())
-            # Decide complex-vs-real from the actual declared parameter type.
-            # Do NOT infer from the routine prefix: e.g. ZDROT has REAL(8) c,s but COMPLEX vectors.
-            is_complex_scalar = (param_upper in complex_vars)
+            is_complex_scalar = (param_upper in complex_vars or
+                                 (param_upper in ['CA', 'CB', 'ZA', 'ZB'] and (base_func_name.startswith('C') or base_func_name.startswith('Z'))))
             if param_upper == 'DA':
                 # DA is always real, even in complex functions (e.g., ZDSCAL)
                 main_lines.append(f"  {precision_type} :: {param.lower()}")
@@ -4571,15 +7128,17 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
             else:
                 main_lines.append(f"  {precision_type}, dimension({array_size},{array_size}) :: {param.lower()}")
         elif param_upper in ['AP', 'BP', 'CP']:
-            n_value = param_values.get('N', 'n')
-            packed_size = f"({n_value}*({n_value}+1))/2"
+            # Packed storage length is N*(N+1)/2. In --multi-size mode, N is runtime,
+            # so we must declare packed arrays with a compile-time constant bound.
+            packed_n = 'max_size' if multi_size else 'n'
+            packed_size = f"({packed_n}*({packed_n}+1))/2"
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
                 main_lines.append(f"  {complex_type}, dimension({packed_size}) :: {param.lower()}")
             else:
                 main_lines.append(f"  {precision_type}, dimension({packed_size}) :: {param.lower()}")
         elif param_upper in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
-            array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
+            array_size = 'max_size' if multi_size else get_array_size_from_constraint(param_upper, constraints, param_values)
             # Check if parameter is complex (either function is complex or param is in complex_vars)
             complex_vars = param_types.get('complex_vars', set())
             is_complex_param = (func_name.upper().startswith('C') or func_name.upper().startswith('Z') or 
@@ -4616,15 +7175,15 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
                 else:
                     main_lines.append(f"  {precision_type}, dimension({nd_var},{array_size},{array_size}) :: {param.lower()}_dv")
             elif param_upper in ['AP', 'BP', 'CP']:
-                n_value = param_values.get('N', 'n')
-                packed_size = f"({n_value}*({n_value}+1))/2"
+                packed_n = 'max_size' if multi_size else 'n'
+                packed_size = f"({packed_n}*({packed_n}+1))/2"
                 if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                     complex_type = get_complex_type(func_name)
                     main_lines.append(f"  {complex_type}, dimension({nd_var},{packed_size}) :: {param.lower()}_dv")
                 else:
                     main_lines.append(f"  {precision_type}, dimension({nd_var},{packed_size}) :: {param.lower()}_dv")
             elif param_upper in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
-                array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
+                array_size = 'max_size' if multi_size else get_array_size_from_constraint(param_upper, constraints, param_values)
                 # Check if parameter is complex (either function is complex or param is in complex_vars)
                 complex_vars = param_types.get('complex_vars', set())
                 is_complex_param = (func_name.upper().startswith('C') or func_name.upper().startswith('Z') or 
@@ -4641,7 +7200,8 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
             else:
                 # Scalar becomes array(nbdirsmax)
                 complex_vars = param_types.get('complex_vars', set())
-                is_complex_scalar = (param_upper in complex_vars)
+                is_complex_scalar = (param_upper in complex_vars or
+                                     (param_upper in ['CA', 'CB', 'ZA', 'ZB'] and (base_func_name.startswith('C') or base_func_name.startswith('Z'))))
                 if param_upper in ['DA', 'DD1', 'DD2', 'SD1', 'SD2', 'DX1', 'DY1', 'SX1', 'SY1']:
                     main_lines.append(f"  {precision_type}, dimension({nd_var}) :: {param.lower()}_dv")
                 elif is_complex_scalar:
@@ -4656,19 +7216,19 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
         param_upper = param.upper()
         if param_upper in [v.upper() for v in inputs + outputs + inout_vars]:  # Only for real-valued parameters
             # For complex functions, use complex type; for real functions, use precision_type
-            if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
+            if base_func_name.startswith('C') or base_func_name.startswith('Z'):
                 complex_type = get_complex_type(func_name)
                 if param_upper in ['A', 'B', 'C']:
                     array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
                     main_lines.append(f"  {complex_type}, dimension({array_size},{array_size}) :: {param.lower()}_orig")
                     main_lines.append(f"  {complex_type}, dimension({nd_var},{array_size},{array_size}) :: {param.lower()}_dv_orig")
                 elif param_upper in ['AP', 'BP', 'CP']:
-                    n_value = param_values.get('N', 'n')
-                    packed_size = f"({n_value}*({n_value}+1))/2"
+                    packed_n = 'max_size' if multi_size else 'n'
+                    packed_size = f"({packed_n}*({packed_n}+1))/2"
                     main_lines.append(f"  {complex_type}, dimension({packed_size}) :: {param.lower()}_orig")
                     main_lines.append(f"  {complex_type}, dimension({nd_var},{packed_size}) :: {param.lower()}_dv_orig")
                 elif param_upper in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
-                    array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
+                    array_size = 'max_size' if multi_size else get_array_size_from_constraint(param_upper, constraints, param_values)
                     main_lines.append(f"  {complex_type}, dimension({array_size}) :: {param.lower()}_orig")
                     main_lines.append(f"  {complex_type}, dimension({nd_var},{array_size}) :: {param.lower()}_dv_orig")
                 elif param_upper in ['DA']:
@@ -4697,8 +7257,8 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
                         main_lines.append(f"  {precision_type}, dimension({array_size},{array_size}) :: {param.lower()}_orig")
                         main_lines.append(f"  {precision_type}, dimension({nd_var},{array_size},{array_size}) :: {param.lower()}_dv_orig")
                 elif param_upper in ['AP', 'BP', 'CP']:
-                    n_value = param_values.get('N', 'n')
-                    packed_size = f"({n_value}*({n_value}+1))/2"
+                    packed_n = 'max_size' if multi_size else 'n'
+                    packed_size = f"({packed_n}*({packed_n}+1))/2"
                     is_complex_param = param_upper in complex_vars
                     if is_complex_param:
                         complex_type = get_complex_type(func_name)
@@ -4708,7 +7268,7 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
                         main_lines.append(f"  {precision_type}, dimension({packed_size}) :: {param.lower()}_orig")
                         main_lines.append(f"  {precision_type}, dimension({nd_var},{packed_size}) :: {param.lower()}_dv_orig")
                 elif param_upper in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
-                    array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
+                    array_size = 'max_size' if multi_size else get_array_size_from_constraint(param_upper, constraints, param_values)
                     is_complex_param = param_upper in complex_vars
                     if is_complex_param:
                         complex_type = get_complex_type(func_name)
@@ -4741,6 +7301,14 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
             main_lines.append(f"  {precision_type}, dimension({nd_var}) :: {func_name.lower()}_dv_result")
     
     main_lines.append("")
+    if multi_size:
+        main_lines.append("  test_sizes = (/ 4 /)")
+        main_lines.append(f"  write(*,*) 'Testing {func_name} (Vector Forward, multi-size: n = 4)'")
+        main_lines.append("  all_passed = .true.")
+        main_lines.append("  do itest = 1, 1")
+        main_lines.append("    n = test_sizes(itest)")
+        main_lines.append(f"    write(*,*) 'Testing {func_name} (Vector Forward, n =', n, ')'")
+        main_lines.append("")
     main_lines.append("  ! Initialize test parameters")
     # Only initialize parameters that exist in the function signature
     for param in all_params:
@@ -4787,9 +7355,10 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
         elif param_upper in ['DIAG']:
             main_lines.append(f"  {param.lower()} = 'N'")
         elif param_upper in ['ALPHA', 'BETA', 'CA', 'CB', 'ZA', 'ZB', 'SA', 'SB', 'S', 'Z', 'DD1', 'DD2', 'SD1', 'SD2', 'DA']:
-            # Scalar initialization: decide complex vs real based on parameter type, not only function prefix.
+            # Scalar initialization: decide complex vs real based on parameter type; use base_func_name for C/Z routines.
             complex_vars = param_types.get('complex_vars', set())
-            is_complex_scalar = (param_upper in complex_vars)
+            is_complex_scalar = (param_upper in complex_vars or
+                                 (param_upper in ['CA', 'CB', 'ZA', 'ZB'] and (base_func_name.startswith('C') or base_func_name.startswith('Z'))))
             if param_upper == 'DA':
                 # DA is always real, even in complex functions
                 main_lines.append(f"  call random_number({param.lower()})")
@@ -4816,6 +7385,8 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
             if param_upper == 'A' and (is_any_band_matrix_function(func_name)):
                 if is_band_hermitian_function(func_name):
                     band_lines = generate_hermitian_band_matrix_init(func_name, param.lower(), precision_type)
+                elif is_band_general_function(func_name):
+                    band_lines = generate_general_band_matrix_init(func_name, param.lower(), precision_type)
                 elif is_band_triangular_function(func_name):
                     band_lines = generate_triangular_band_matrix_init(func_name, param.lower(), precision_type)
                 else:
@@ -4886,7 +7457,8 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
         if param_upper in all_real_params:
             if param_upper in ['ALPHA', 'BETA', 'CA', 'CB', 'ZA', 'ZB', 'SA', 'SB', 'S', 'Z', 'DD1', 'DD2', 'SD1', 'SD2', 'DA']:
                 complex_vars = param_types.get('complex_vars', set())
-                is_complex_scalar = (param_upper in complex_vars)
+                is_complex_scalar = (param_upper in complex_vars or
+                                     (param_upper in ['CA', 'CB', 'ZA', 'ZB'] and (base_func_name.startswith('C') or base_func_name.startswith('Z'))))
                 if param_upper == 'DA':
                     main_lines.append(f"  do idir = 1, {nd_var}")
                     main_lines.append(f"    call random_number(temp_real)")
@@ -5072,9 +7644,19 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
     main_lines.append("  write(*,*) 'Function calls completed successfully'")
     main_lines.append("")
     main_lines.append("  ! Numerical differentiation check")
-    main_lines.append("  call check_derivatives_numerically()")
-    main_lines.append("")
-    main_lines.append("  write(*,*) 'Vector forward mode test completed successfully'")
+    if multi_size:
+        main_lines.append("  call check_derivatives_numerically(passed)")
+        main_lines.append("  all_passed = all_passed .and. passed")
+        main_lines.append("  end do")
+        main_lines.append("  if (all_passed) then")
+        main_lines.append("    write(*,*) 'PASS: Vector forward mode - all sizes completed successfully'")
+        main_lines.append("  else")
+        main_lines.append("    write(*,*) 'FAIL: Vector forward mode - one or more sizes had derivative errors'")
+        main_lines.append("  end if")
+    else:
+        main_lines.append("  call check_derivatives_numerically()")
+        main_lines.append("")
+        main_lines.append("  write(*,*) 'Vector forward mode test completed successfully'")
     main_lines.append("")
     main_lines.append("contains")
     
@@ -5102,8 +7684,13 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
         else:
             original_call_args.append(param.lower())  # Original argument
     main_lines.append("")
-    main_lines.append("  subroutine check_derivatives_numerically()")
-    main_lines.append("    implicit none")
+    if multi_size:
+        main_lines.append("  subroutine check_derivatives_numerically(passed)")
+        main_lines.append("    implicit none")
+        main_lines.append("    logical, intent(out) :: passed")
+    else:
+        main_lines.append("  subroutine check_derivatives_numerically()")
+        main_lines.append("    implicit none")
     main_lines.append(f"    {h_precision}, parameter :: h = {h_value}  ! Step size for finite differences")
     main_lines.append(f"    {precision_type} :: relative_error, max_error")
     main_lines.append(f"    {precision_type} :: abs_error, abs_reference, error_bound")
@@ -5134,8 +7721,9 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
             else:
                 main_lines.append(f"    {precision_type}, dimension({array_size},{array_size}) :: {param.lower()}_forward, {param.lower()}_backward")
         elif param_upper in ['AP', 'BP', 'CP']:
-            n_value = param_values.get('N', 'n')
-            packed_size = f"({n_value}*({n_value}+1))/2"
+            # Must match main ap size to avoid shape mismatch on ap_forward = ap (and memory corruption)
+            packed_n = 'max_size' if multi_size else param_values.get('N', 'n')
+            packed_size = f"({packed_n}*({packed_n}+1))/2"
             # For complex functions, use complex type; for real functions, use precision_type
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
@@ -5407,7 +7995,8 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
     main_lines.append("    ")
     main_lines.append("    write(*,*) 'Maximum relative error across all directions:', max_error")
     main_lines.append(f"    write(*,*) 'Tolerance thresholds: rtol={rtol}, atol={atol}'")
-    # Final pass/fail based on error check (has_large_errors flag)
+    if multi_size:
+        main_lines.append("    passed = .not. has_large_errors")
     main_lines.append("    if (has_large_errors) then")
     main_lines.append("      write(*,*) 'FAIL: Large errors detected in vector derivatives (outside tolerance)'")
     main_lines.append("    else")
@@ -5420,7 +8009,7 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
     
     return "\n".join(main_lines)
 
-def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inout_vars, func_type="SUBROUTINE", compiler="gfortran", c_compiler="gcc", param_types=None, nbdirsmax=4, reverse_src_dir=None, no_nbdirsmax=False):
+def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inout_vars, func_type="SUBROUTINE", compiler="gfortran", c_compiler="gcc", param_types=None, nbdirsmax=4, reverse_src_dir=None, no_nbdirsmax=False, multi_size=False):
     """
     Generate a test main program for vector reverse mode differentiated function.
     In vector mode, derivative variables are type-promoted:
@@ -5431,6 +8020,7 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
         param_types: Dictionary with 'real_vars', 'complex_vars', 'integer_vars', 'char_vars' sets
         nbdirsmax: Maximum number of derivative directions (default: 4)
         reverse_src_dir: If set (Path), scan for {stem}_bv.f and add set_ISIZE*/reset to -1 around the _bv call
+        multi_size: If True, loop over n = 4 with pass/fail aggregation
     """
     if param_types is None:
         param_types = {'real_vars': set(), 'complex_vars': set(), 'integer_vars': set(), 'char_vars': set()}
@@ -5567,17 +8157,25 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
     
     # Add variable declarations
     main_lines.append("  ! Test parameters")
-    main_lines.append("  integer, parameter :: n = 4  ! Matrix/vector size for test")
-    if required_max_size > 4:
-        main_lines.append(f"  integer, parameter :: max_size = {required_max_size}  ! Maximum array dimension (adjusted for LD constraints)")
+    if multi_size:
+        multi_max = max(100, required_max_size)
+        main_lines.append("  integer :: n  ! Current size (set in loop)")
+        main_lines.append(f"  integer, parameter :: max_size = {multi_max}  ! Maximum array dimension (multi-size: 1,4,40,100)")
     else:
-        main_lines.append("  integer, parameter :: max_size = n  ! Maximum array dimension")
+        main_lines.append("  integer, parameter :: n = 4  ! Matrix/vector size for test")
+        if required_max_size > 4:
+            main_lines.append(f"  integer, parameter :: max_size = {required_max_size}  ! Maximum array dimension (adjusted for LD constraints)")
+        else:
+            main_lines.append("  integer, parameter :: max_size = n  ! Maximum array dimension")
     main_lines.append("  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions")
     # Add band_row for band matrix initialization
     if is_any_band_matrix_function(func_name):
         main_lines.append("  integer :: i, j, k, band_row  ! Loop counters")
     else:
         main_lines.append("  integer :: i, j, k  ! Loop counters")
+    if multi_size:
+        main_lines.append("  integer :: test_sizes(1), itest")
+        main_lines.append("  logical :: passed, all_passed")
     main_lines.append("  integer :: seed_array(33)  ! Random seed")
     main_lines.append("  real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization")
     main_lines.append("")
@@ -5627,29 +8225,29 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
         elif param_upper in ['TRANSA', 'TRANSB', 'TRANS', 'UPLO', 'SIDE', 'DIAG']:
             main_lines.append(f"  character :: {param.lower()}")
         elif param_upper in ['A', 'B', 'C']:
-            array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
-            # Band matrix A: (array_size, n) band storage
+            array_size = 'max_size' if multi_size else get_array_size_from_constraint(param_upper, constraints, param_values)
+            # Band matrix A: (array_size, n) band storage - use constant bounds when multi_size (n is variable)
             if param_upper == 'A' and (is_any_band_matrix_function(func_name)):
+                band_size = 'max_size' if multi_size else array_size
                 if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                     complex_type = get_complex_type(func_name)
-                    main_lines.append(f"  {complex_type}, dimension({array_size},n) :: {param.lower()}  ! Band storage")
+                    main_lines.append(f"  {complex_type}, dimension({band_size},{band_size}) :: {param.lower()}  ! Band storage")
                 else:
-                    main_lines.append(f"  {precision_type}, dimension({array_size},n) :: {param.lower()}  ! Band storage")
+                    main_lines.append(f"  {precision_type}, dimension({band_size},{band_size}) :: {param.lower()}  ! Band storage")
             elif func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
                 main_lines.append(f"  {complex_type}, dimension({array_size},{array_size}) :: {param.lower()}")
             else:
                 main_lines.append(f"  {precision_type}, dimension({array_size},{array_size}) :: {param.lower()}")
         elif param_upper in ['AP', 'BP', 'CP']:
-            n_value = param_values.get('N', 'n')
-            packed_size = f"({n_value}*({n_value}+1))/2"
+            packed_size = "max_size*(max_size+1)/2" if multi_size else f"({param_values.get('N', 'n')}*({param_values.get('N', 'n')}+1))/2"
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
                 main_lines.append(f"  {complex_type}, dimension({packed_size}) :: {param.lower()}")
             else:
                 main_lines.append(f"  {precision_type}, dimension({packed_size}) :: {param.lower()}")
         elif param_upper in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
-            array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
+            array_size = 'max_size' if multi_size else get_array_size_from_constraint(param_upper, constraints, param_values)
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
                 main_lines.append(f"  {complex_type}, dimension({array_size}) :: {param.lower()}")
@@ -5687,29 +8285,29 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
             else:
                 main_lines.append(f"  {precision_type}, dimension({nd_var}) :: {param.lower()}b")
         elif param_upper in ['A', 'B', 'C']:
-            array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
-            # Band matrix A: adjoint in band storage (nbdirsmax, k+1, n)
+            array_size = 'max_size' if multi_size else get_array_size_from_constraint(param_upper, constraints, param_values)
+            # Band matrix A: adjoint in band storage (nbdirsmax, k+1, n) - use constant bounds when multi_size
+            band_size = 'max_size' if multi_size else array_size
             if param_upper == 'A' and (is_any_band_matrix_function(func_name)):
                 if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                     complex_type = get_complex_type(func_name)
-                    main_lines.append(f"  {complex_type}, dimension({nd_var},{array_size},n) :: {param.lower()}b  ! Band storage")
+                    main_lines.append(f"  {complex_type}, dimension({nd_var},{band_size},{band_size}) :: {param.lower()}b  ! Band storage")
                 else:
-                    main_lines.append(f"  {precision_type}, dimension({nd_var},{array_size},n) :: {param.lower()}b  ! Band storage")
+                    main_lines.append(f"  {precision_type}, dimension({nd_var},{band_size},{band_size}) :: {param.lower()}b  ! Band storage")
             elif func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
                 main_lines.append(f"  {complex_type}, dimension({nd_var},{array_size},{array_size}) :: {param.lower()}b")
             else:
                 main_lines.append(f"  {precision_type}, dimension({nd_var},{array_size},{array_size}) :: {param.lower()}b")
         elif param_upper in ['AP', 'BP', 'CP']:
-            n_value = param_values.get('N', 'n')
-            packed_size = f"({n_value}*({n_value}+1))/2"
+            packed_size = "max_size*(max_size+1)/2" if multi_size else f"({param_values.get('N', 'n')}*({param_values.get('N', 'n')}+1))/2"
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
                 main_lines.append(f"  {complex_type}, dimension({nd_var},{packed_size}) :: {param.lower()}b")
             else:
                 main_lines.append(f"  {precision_type}, dimension({nd_var},{packed_size}) :: {param.lower()}b")
         elif param_upper in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
-            array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
+            array_size = 'max_size' if multi_size else get_array_size_from_constraint(param_upper, constraints, param_values)
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
                 main_lines.append(f"  {complex_type}, dimension({nd_var},{array_size}) :: {param.lower()}b")
@@ -5765,15 +8363,16 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
             else:
                 main_lines.append(f"  {precision_type}, dimension({nd_var},{array_size},{array_size}) :: {param.lower()}b_orig")
         elif param_upper in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
-            array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
+            array_size = 'max_size' if multi_size else get_array_size_from_constraint(param_upper, constraints, param_values)
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
                 main_lines.append(f"  {complex_type}, dimension({nd_var},{array_size}) :: {param.lower()}b_orig")
             else:
                 main_lines.append(f"  {precision_type}, dimension({nd_var},{array_size}) :: {param.lower()}b_orig")
         elif param_upper in ['AP', 'BP', 'CP']:
-            n_value = param_values.get('N', 'n')
-            packed_size = f"({n_value}*({n_value}+1))/2"
+            # Use constant bound when multi_size so explicit-shape array is valid
+            packed_n = 'max_size' if multi_size else param_values.get('N', 'n')
+            packed_size = f"({packed_n}*({packed_n}+1))/2"
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
                 main_lines.append(f"  {complex_type}, dimension({nd_var},{packed_size}) :: {param.lower()}b_orig")
@@ -5812,15 +8411,16 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
             else:
                 main_lines.append(f"  {precision_type}, dimension({array_size},{array_size}) :: {param.lower()}_orig")
         elif param_upper in ['AP', 'BP', 'CP']:
-            n_value = param_values.get('N', 'n')
-            packed_size = f"({n_value}*({n_value}+1))/2"
+            # Packed storage arrays: use constant bound when multi_size is enabled
+            packed_n = 'max_size' if multi_size else param_values.get('N', 'n')
+            packed_size = f"({packed_n}*({packed_n}+1))/2"
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
                 main_lines.append(f"  {complex_type}, dimension({packed_size}) :: {param.lower()}_orig")
             else:
                 main_lines.append(f"  {precision_type}, dimension({packed_size}) :: {param.lower()}_orig")
         elif param_upper in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
-            array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
+            array_size = 'max_size' if multi_size else get_array_size_from_constraint(param_upper, constraints, param_values)
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
                 main_lines.append(f"  {complex_type}, dimension({array_size}) :: {param.lower()}_orig")
@@ -5863,6 +8463,14 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
     main_lines.append("  seed_array = 42")
     main_lines.append("  call random_seed(put=seed_array)")
     main_lines.append("")
+    if multi_size:
+        main_lines.append("  test_sizes = (/ 4 /)")
+        main_lines.append(f"  write(*,*) 'Testing {func_name} (Vector Reverse, multi-size: n = 4)'")
+        main_lines.append("  all_passed = .true.")
+        main_lines.append("  do itest = 1, 1")
+        main_lines.append("    n = test_sizes(itest)")
+        main_lines.append(f"    write(*,*) 'Testing {func_name} (Vector Reverse, n =', n, ')'")
+        main_lines.append("")
     
     # Initialize primal values
     main_lines.append("  ! Initialize primal values")
@@ -5942,6 +8550,18 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
         elif param_upper in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 main_lines.append(f"  do i = 1, n")
+                main_lines.append(f"    call random_number(temp_real)")
+                main_lines.append(f"    call random_number(temp_imag)")
+                main_lines.append(f"    {param.lower()}(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)")
+                main_lines.append(f"  end do")
+            else:
+                main_lines.append(f"  call random_number({param.lower()})")
+                main_lines.append(f"  {param.lower()} = {param.lower()} * 2.0 - 1.0")
+        elif param_upper in ['AP', 'BP', 'CP']:
+            # Packed arrays (symmetric/Hermitian/triangular) - must be initialized for reproducible tests
+            if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
+                n_val = param_values.get('N', 'n')
+                main_lines.append(f"  do i = 1, ({n_val}*({n_val}+1))/2")
                 main_lines.append(f"    call random_number(temp_real)")
                 main_lines.append(f"    call random_number(temp_imag)")
                 main_lines.append(f"    {param.lower()}(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)")
@@ -6105,9 +8725,11 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
         isize_vars_bv = _collect_isize_vars_from_file(bv_file)
     if isize_vars_bv:
         main_lines.append("  ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).")
-        main_lines.append("  ! Differentiated code checks they are set via check_ISIZE*_initialized.")
-        for n in isize_vars_bv:
-            main_lines.append(f"  call set_{n}(max_size)")
+        main_lines.append("  ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.")
+        for isize_var in isize_vars_bv:
+            m = re.match(r'ISIZE(\d+)OF', isize_var, re.IGNORECASE)
+            size_arg = 'n' if (m and m.group(1) == '1') else 'max_size'
+            main_lines.append(f"  call set_{isize_var}({size_arg})")
         main_lines.append("")
     
     # Call reverse vector mode differentiated function
@@ -6158,23 +8780,38 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
     if isize_vars_bv:
         main_lines.append("")
         main_lines.append("  ! Reset ISIZE globals to uninitialized (-1) for completeness")
-        for n in isize_vars_bv:
-            main_lines.append(f"  call set_{n}(-1)")
+        for isize_var in isize_vars_bv:
+            main_lines.append(f"  call set_{isize_var}(-1)")
     main_lines.append("")
     
     # VJP verification
     main_lines.append("  ! VJP Verification using finite differences")
-    main_lines.append("  call check_vjp_numerically()")
-    main_lines.append("")
-    main_lines.append("  write(*,*) ''")
-    main_lines.append("  write(*,*) 'Test completed successfully'")
+    if multi_size:
+        main_lines.append("  call check_vjp_numerically(passed)")
+        main_lines.append("  all_passed = all_passed .and. passed")
+        main_lines.append("  end do")
+        main_lines.append("  if (all_passed) then")
+        main_lines.append("    write(*,*) 'PASS: Vector reverse mode - all sizes completed successfully'")
+        main_lines.append("  else")
+        main_lines.append("    write(*,*) 'FAIL: Vector reverse mode - one or more sizes had derivative errors'")
+        main_lines.append("  end if")
+    else:
+        main_lines.append("  call check_vjp_numerically()")
+        main_lines.append("")
+        main_lines.append("  write(*,*) ''")
+        main_lines.append("  write(*,*) 'Test completed successfully'")
     main_lines.append("")
     
     # Add check_vjp_numerically subroutine
     main_lines.append("contains")
     main_lines.append("")
-    main_lines.append("  subroutine check_vjp_numerically()")
-    main_lines.append("    implicit none")
+    if multi_size:
+        main_lines.append("  subroutine check_vjp_numerically(passed)")
+        main_lines.append("    implicit none")
+        main_lines.append("    logical, intent(out) :: passed")
+    else:
+        main_lines.append("  subroutine check_vjp_numerically()")
+        main_lines.append("    implicit none")
     main_lines.append("    ")
     if is_any_band_matrix_function(func_name):
         main_lines.append("    integer :: band_row")
@@ -6196,19 +8833,20 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
                 main_lines.append(f"    {precision_type} :: {param.lower()}_dir")
         elif param_upper in ['A', 'B', 'C']:
             array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
+            band_size = 'max_size' if multi_size else array_size
             if param_upper == 'A' and (is_any_band_matrix_function(func_name)):
                 if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                     complex_type = get_complex_type(func_name)
-                    main_lines.append(f"    {complex_type}, dimension({array_size},n) :: {param.lower()}_dir")
+                    main_lines.append(f"    {complex_type}, dimension({band_size},{band_size}) :: {param.lower()}_dir")
                 else:
-                    main_lines.append(f"    {precision_type}, dimension({array_size},n) :: {param.lower()}_dir")
+                    main_lines.append(f"    {precision_type}, dimension({band_size},{band_size}) :: {param.lower()}_dir")
             elif func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
                 main_lines.append(f"    {complex_type}, dimension({array_size},{array_size}) :: {param.lower()}_dir")
             else:
                 main_lines.append(f"    {precision_type}, dimension({array_size},{array_size}) :: {param.lower()}_dir")
         elif param_upper in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
-            array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
+            array_size = 'max_size' if multi_size else get_array_size_from_constraint(param_upper, constraints, param_values)
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
                 main_lines.append(f"    {complex_type}, dimension({array_size}) :: {param.lower()}_dir")
@@ -6216,7 +8854,7 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
                 main_lines.append(f"    {precision_type}, dimension({array_size}) :: {param.lower()}_dir")
         elif param_upper in ['AP', 'BP', 'CP']:
             # Packed arrays - size is n*(n+1)/2
-            packed_size = f"({param_values.get('N', 'n')}*({param_values.get('N', 'n')}+1))/2"
+            packed_size = "max_size*(max_size+1)/2" if multi_size else f"({param_values.get('N', 'n')}*({param_values.get('N', 'n')}+1))/2"
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 complex_type = get_complex_type(func_name)
                 main_lines.append(f"    {complex_type}, dimension({packed_size}) :: {param.lower()}_dir")
@@ -6255,14 +8893,14 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
                 else:
                     main_lines.append(f"    {precision_type}, dimension({array_size},{array_size}) :: {param.lower()}_plus, {param.lower()}_minus, {param.lower()}_central_diff")
             elif param_upper in ['X', 'Y', 'DX', 'DY', 'CX', 'CY', 'ZX', 'ZY', 'SX', 'SY']:
-                array_size = get_array_size_from_constraint(param_upper, constraints, param_values)
+                array_size = 'max_size' if multi_size else get_array_size_from_constraint(param_upper, constraints, param_values)
                 if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                     complex_type = get_complex_type(func_name)
                     main_lines.append(f"    {complex_type}, dimension({array_size}) :: {param.lower()}_plus, {param.lower()}_minus, {param.lower()}_central_diff")
                 else:
                     main_lines.append(f"    {precision_type}, dimension({array_size}) :: {param.lower()}_plus, {param.lower()}_minus, {param.lower()}_central_diff")
             elif param_upper in ['AP', 'BP', 'CP']:
-                packed_size = f"({param_values.get('N', 'n')}*({param_values.get('N', 'n')}+1))/2"
+                packed_size = "max_size*(max_size+1)/2" if multi_size else f"({param_values.get('N', 'n')}*({param_values.get('N', 'n')}+1))/2"
                 if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                     complex_type = get_complex_type(func_name)
                     main_lines.append(f"    {complex_type}, dimension({packed_size}) :: {param.lower()}_plus, {param.lower()}_minus, {param.lower()}_central_diff")
@@ -6320,7 +8958,9 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
                 main_lines.append(f"      {param.lower()}_dir = {param.lower()}_dir * 2.0 - 1.0")
         elif param_upper in ['A', 'B', 'C']:
             if param_upper == 'A' and (is_any_band_matrix_function(func_name)):
-                if is_band_hermitian_function(func_name):
+                if is_band_general_function(func_name):
+                    band_dir_lines = generate_general_band_direction_init(func_name, f"{param.lower()}_dir", 'n')
+                elif is_band_hermitian_function(func_name):
                     band_dir_lines = generate_hermitian_band_direction_init(func_name, f"{param.lower()}_dir", 'n')
                 elif is_band_triangular_function(func_name):
                     band_dir_lines = generate_triangular_band_direction_init(func_name, f"{param.lower()}_dir", 'n')
@@ -6354,7 +8994,7 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
                 main_lines.append(f"      {param.lower()}_dir = {param.lower()}_dir * 2.0 - 1.0")
         elif param_upper in ['AP', 'BP', 'CP']:
             # Packed arrays - initialize with random values
-            packed_size = f"({param_values.get('N', 'n')}*({param_values.get('N', 'n')}+1))/2"
+            packed_size = "max_size*(max_size+1)/2" if multi_size else f"({param_values.get('N', 'n')}*({param_values.get('N', 'n')}+1))/2"
             if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                 main_lines.append(f"      do i = 1, {packed_size}")
                 main_lines.append(f"        call random_number(temp_real)")
@@ -6592,7 +9232,7 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
                 main_lines.append(f"        vjp_fd = vjp_fd + temp_products(i)")
                 main_lines.append(f"      end do")
             elif param_upper in ['AP', 'BP', 'CP']:
-                packed_size = f"({param_values.get('N', 'n')}*({param_values.get('N', 'n')}+1))/2"
+                packed_size = "max_size*(max_size+1)/2" if multi_size else f"({param_values.get('N', 'n')}*({param_values.get('N', 'n')}+1))/2"
                 main_lines.append(f"      ! Compute and sort products for {param.lower()} (FD)")
                 main_lines.append(f"      n_products = {packed_size}")
                 main_lines.append(f"      do i = 1, {packed_size}")
@@ -6650,7 +9290,12 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
                     main_lines.append(f"      ! Compute and sort products for {param.lower()} (band storage)")
                     main_lines.append(f"      n_products = 0")
                     main_lines.append(f"      do j = 1, n")
-                    main_lines.append(f"        do band_row = max(1, ksize+2-j), ksize+1")
+                    # General band (GBMV): bounds depend on ku, kl, msize; there is no ksize parameter.
+                    if is_band_general_function(func_name):
+                        main_lines.append(f"        do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)")
+                    else:
+                        # Symmetric/Hermitian/triangular band: use ksize (band width)
+                        main_lines.append(f"        do band_row = max(1, ksize+2-j), ksize+1")
                     main_lines.append(f"          n_products = n_products + 1")
                     if func_name.upper().startswith('C') or func_name.upper().startswith('Z'):
                         main_lines.append(f"          temp_products(n_products) = real(conjg({param.lower()}_dir(band_row,j)) * {param.lower()}b(k,band_row,j))")
@@ -6708,7 +9353,7 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
                 main_lines.append(f"        vjp_ad = vjp_ad + temp_products(i)")
                 main_lines.append(f"      end do")
             elif param_upper in ['AP', 'BP', 'CP']:
-                packed_size = f"({param_values.get('N', 'n')}*({param_values.get('N', 'n')}+1))/2"
+                packed_size = "max_size*(max_size+1)/2" if multi_size else f"({param_values.get('N', 'n')}*({param_values.get('N', 'n')}+1))/2"
                 main_lines.append(f"      ! Compute and sort products for {param.lower()}")
                 main_lines.append(f"      n_products = {packed_size}")
                 main_lines.append(f"      do i = 1, {packed_size}")
@@ -6833,6 +9478,8 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
     main_lines.append("    write(*,*) ''")
     main_lines.append("    write(*,*) 'Maximum relative error:', max_error")
     main_lines.append(f"    write(*,*) 'Tolerance thresholds: rtol={rtol}, atol={atol}'")
+    if multi_size:
+        main_lines.append("    passed = .not. has_large_errors")
     main_lines.append("    if (has_large_errors) then")
     main_lines.append("      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'")
     main_lines.append("    else")
@@ -8110,6 +10757,7 @@ def main():
                     help="AD modes to generate: d (forward scalar), dv (forward vector), b (reverse scalar), bv (reverse vector), all (all modes). Default: all")
     ap.add_argument("--nbdirsmax", type=int, default=4, help="Maximum number of derivative directions for vector mode (default: 4)")
     ap.add_argument("--no-nbdirsmax", action="store_true", help="Remove nbdirsmax: use nbdirs (subroutine arg) as dimension, comment out DIFFSIZES.inc for dv/b")
+    ap.add_argument("--multi-size", action="store_true", help="Generate forward scalar tests that loop over n=1,2,3,4 (outline into run_test_for_size subroutine)")
     ap.add_argument("--flat", action="store_true", help="Use flat directory structure (all files in function directory, single DIFFSIZES.inc)")
     ap.add_argument("--extra", nargs=argparse.REMAINDER, help="Extra args passed to Tapenade after -d/-r", default=[])
     args = ap.parse_args()
@@ -8717,13 +11365,19 @@ def main():
             test_out_dir = mode_dirs.get('test', None)
             # In flat mode, also generate a test if the differentiated source exists (e.g. from a prior run with that mode)
             src_dir_flat = mode_dirs.get('src') if flat_mode else None
+            # Base name for test files: strip _d, _b, _dv, _bv so Makefile (which uses FUNCS_D from *_d.f) finds test_dgemm.f90
+            test_base = src.stem
+            for suffix in ('_bv', '_dv', '_b', '_d'):
+                if test_base.endswith(suffix):
+                    test_base = test_base[:-len(suffix)]
+                    break
             
             # Generate scalar forward mode driver
             if run_d:
                 try:
                     forward_src = (src_dir_flat if flat_mode else mode_dirs.get('d'))
-                    main_program = generate_test_main(func_name, src, inputs, outputs, inout_vars, func_type, args.compiler, args.c_compiler, param_types, forward_src_dir=forward_src)
-                    main_path = (test_out_dir if test_out_dir else mode_dirs['d']) / f"test_{src.stem}.f90"
+                    main_program = generate_test_main(func_name, src, inputs, outputs, inout_vars, func_type, args.compiler, args.c_compiler, param_types, forward_src_dir=forward_src, multi_size=getattr(args, 'multi_size', False), test_base=test_base)
+                    main_path = (test_out_dir if test_out_dir else mode_dirs['d']) / f"test_{test_base}.f90"
                     with open(main_path, "w") as mf:
                         mf.write(main_program)
                 except Exception as e:
@@ -8734,8 +11388,8 @@ def main():
                 reverse_src = mode_dirs.get('src', mode_dirs.get('b', func_out_dir)) if flat_mode else mode_dirs.get('b')
                 if reverse_src is not None:
                     try:
-                        main_program = generate_test_main_reverse(func_name, src, inputs, outputs, inout_vars, func_type, args.compiler, args.c_compiler, param_types, reverse_src_dir=reverse_src)
-                        main_path = (test_out_dir if test_out_dir else reverse_src) / f"test_{src.stem}_reverse.f90"
+                        main_program = generate_test_main_reverse(func_name, src, inputs, outputs, inout_vars, func_type, args.compiler, args.c_compiler, param_types, reverse_src_dir=reverse_src, multi_size=getattr(args, 'multi_size', False))
+                        main_path = (test_out_dir if test_out_dir else reverse_src) / f"test_{test_base}_reverse.f90"
                         with open(main_path, "w") as mf:
                             mf.write(main_program)
                     except Exception as e:
@@ -8747,8 +11401,8 @@ def main():
                 if dv_dir is not None:
                     try:
                         forward_src_dv = (src_dir_flat if flat_mode else mode_dirs.get('dv'))
-                        vector_program = generate_test_main_vector_forward(func_name, src, inputs, outputs, inout_vars, func_type, args.compiler, args.c_compiler, param_types, args.nbdirsmax, forward_src_dir=forward_src_dv, no_nbdirsmax=getattr(args, 'no_nbdirsmax', False))
-                        vector_path = (test_out_dir if test_out_dir else dv_dir) / f"test_{src.stem}_vector_forward.f90"
+                        vector_program = generate_test_main_vector_forward(func_name, src, inputs, outputs, inout_vars, func_type, args.compiler, args.c_compiler, param_types, args.nbdirsmax, forward_src_dir=forward_src_dv, no_nbdirsmax=getattr(args, 'no_nbdirsmax', False), multi_size=getattr(args, 'multi_size', False))
+                        vector_path = (test_out_dir if test_out_dir else dv_dir) / f"test_{test_base}_vector_forward.f90"
                         with open(vector_path, "w") as vf:
                             vf.write(vector_program)
                     except Exception as e:
@@ -8759,8 +11413,8 @@ def main():
                 bv_src = mode_dirs.get('src', mode_dirs.get('bv', func_out_dir)) if flat_mode else mode_dirs.get('bv')
                 if bv_src is not None:
                     try:
-                        vector_reverse_program = generate_test_main_vector_reverse(func_name, src, inputs, outputs, inout_vars, func_type, args.compiler, args.c_compiler, param_types, args.nbdirsmax, reverse_src_dir=bv_src, no_nbdirsmax=getattr(args, 'no_nbdirsmax', False))
-                        vector_reverse_path = (test_out_dir if test_out_dir else bv_src) / f"test_{src.stem}_vector_reverse.f90"
+                        vector_reverse_program = generate_test_main_vector_reverse(func_name, src, inputs, outputs, inout_vars, func_type, args.compiler, args.c_compiler, param_types, args.nbdirsmax, reverse_src_dir=bv_src, no_nbdirsmax=getattr(args, 'no_nbdirsmax', False), multi_size=getattr(args, 'multi_size', False))
+                        vector_reverse_path = (test_out_dir if test_out_dir else bv_src) / f"test_{test_base}_vector_reverse.f90"
                         with open(vector_reverse_path, "w") as vrf:
                             vrf.write(vector_reverse_program)
                     except Exception as e:

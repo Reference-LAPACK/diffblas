@@ -10,28 +10,30 @@ program test_sasum_vector_reverse
   external :: sasum_bv
 
   ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension
+  integer :: n  ! Current size (set in loop)
+  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
   integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
   integer :: i, j, k  ! Loop counters
+  integer :: test_sizes(1), itest
+  logical :: passed, all_passed
   integer :: seed_array(33)  ! Random seed
   real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
 
   integer :: nsize
-  real(4), dimension(4) :: sx
+  real(4), dimension(max_size) :: sx
   integer :: incx_val
 
   ! Adjoint variables (reverse vector mode)
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
-  real(4), dimension(nbdirs,4) :: sxb
+  real(4), dimension(nbdirs,max_size) :: sxb
   real(4), dimension(nbdirs) :: sasumb
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
   real(4), dimension(nbdirs) :: sasumb_orig
 
   ! Storage for original values (for VJP verification)
-  real(4), dimension(4) :: sx_orig
+  real(4), dimension(max_size) :: sx_orig
 
   ! Variables for VJP verification via finite differences
   real(4), parameter :: h = 1.0e-3
@@ -43,6 +45,13 @@ program test_sasum_vector_reverse
   ! Initialize random seed for reproducibility
   seed_array = 42
   call random_seed(put=seed_array)
+
+  test_sizes = (/ 4 /)
+  write(*,*) 'Testing SASUM (Vector Reverse, multi-size: n = 4)'
+  all_passed = .true.
+  do itest = 1, 1
+    n = test_sizes(itest)
+    write(*,*) 'Testing SASUM (Vector Reverse, n =', n, ')'
 
   ! Initialize primal values
   nsize = n
@@ -69,8 +78,8 @@ program test_sasum_vector_reverse
   sasumb_orig = sasumb
 
   ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! Differentiated code checks they are set via check_ISIZE*_initialized.
-  call set_ISIZE1OFSx(max_size)
+  ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
+  call set_ISIZE1OFSx(n)
 
   ! Call reverse vector mode differentiated function
   call sasum_bv(nsize, sx, sxb, incx_val, sasumb, nbdirs)
@@ -79,18 +88,23 @@ program test_sasum_vector_reverse
   call set_ISIZE1OFSx(-1)
 
   ! VJP Verification using finite differences
-  call check_vjp_numerically()
-
-  write(*,*) ''
-  write(*,*) 'Test completed successfully'
+  call check_vjp_numerically(passed)
+  all_passed = all_passed .and. passed
+  end do
+  if (all_passed) then
+    write(*,*) 'PASS: Vector reverse mode - all sizes completed successfully'
+  else
+    write(*,*) 'FAIL: Vector reverse mode - one or more sizes had derivative errors'
+  end if
 
 contains
 
-  subroutine check_vjp_numerically()
+  subroutine check_vjp_numerically(passed)
     implicit none
+    logical, intent(out) :: passed
     
     ! Direction vectors for VJP testing
-    real(4), dimension(4) :: sx_dir
+    real(4), dimension(max_size) :: sx_dir
     real(4) :: sasum_plus, sasum_minus
     
     max_error = 0.0d0
@@ -157,6 +171,7 @@ contains
     write(*,*) ''
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
+    passed = .not. has_large_errors
     if (has_large_errors) then
       write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
     else

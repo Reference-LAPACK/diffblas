@@ -10,10 +10,12 @@ program test_sspr_vector_reverse
   external :: sspr_bv
 
   ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension
+  integer :: n  ! Current size (set in loop)
+  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
   integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
   integer :: i, j, k  ! Loop counters
+  integer :: test_sizes(1), itest
+  logical :: passed, all_passed
   integer :: seed_array(33)  ! Random seed
   real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
 
@@ -22,22 +24,22 @@ program test_sspr_vector_reverse
   real(4) :: alpha
   real(4), dimension(max_size) :: x
   integer :: incx_val
-  real(4), dimension((n*(n+1))/2) :: ap
+  real(4), dimension(max_size*(max_size+1)/2) :: ap
 
   ! Adjoint variables (reverse vector mode)
   ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
   !                  input adjoints are OUTPUT (computed gradients)
   real(4), dimension(nbdirs) :: alphab
   real(4), dimension(nbdirs,max_size) :: xb
-  real(4), dimension(nbdirs,(n*(n+1))/2) :: apb
+  real(4), dimension(nbdirs,max_size*(max_size+1)/2) :: apb
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  real(4), dimension(nbdirs,(n*(n+1))/2) :: apb_orig
+  real(4), dimension(nbdirs,(max_size*(max_size+1))/2) :: apb_orig
 
   ! Storage for original values (for VJP verification)
   real(4) :: alpha_orig
   real(4), dimension(max_size) :: x_orig
-  real(4), dimension((n*(n+1))/2) :: ap_orig
+  real(4), dimension((max_size*(max_size+1))/2) :: ap_orig
 
   ! Variables for VJP verification via finite differences
   real(4), parameter :: h = 1.0e-3
@@ -50,6 +52,13 @@ program test_sspr_vector_reverse
   seed_array = 42
   call random_seed(put=seed_array)
 
+  test_sizes = (/ 4 /)
+  write(*,*) 'Testing SSPR (Vector Reverse, multi-size: n = 4)'
+  all_passed = .true.
+  do itest = 1, 1
+    n = test_sizes(itest)
+    write(*,*) 'Testing SSPR (Vector Reverse, n =', n, ')'
+
   ! Initialize primal values
   uplo = 'U'
   nsize = n
@@ -58,6 +67,8 @@ program test_sspr_vector_reverse
   call random_number(x)
   x = x * 2.0 - 1.0
   incx_val = 1
+  call random_number(ap)
+  ap = ap * 2.0 - 1.0
 
   ! Store original primal values
   alpha_orig = alpha
@@ -80,8 +91,8 @@ program test_sspr_vector_reverse
   apb_orig = apb
 
   ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! Differentiated code checks they are set via check_ISIZE*_initialized.
-  call set_ISIZE1OFX(max_size)
+  ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
+  call set_ISIZE1OFX(n)
 
   ! Call reverse vector mode differentiated function
   call sspr_bv(uplo, nsize, alpha, alphab, x, xb, incx_val, ap, apb, nbdirs)
@@ -90,21 +101,26 @@ program test_sspr_vector_reverse
   call set_ISIZE1OFX(-1)
 
   ! VJP Verification using finite differences
-  call check_vjp_numerically()
-
-  write(*,*) ''
-  write(*,*) 'Test completed successfully'
+  call check_vjp_numerically(passed)
+  all_passed = all_passed .and. passed
+  end do
+  if (all_passed) then
+    write(*,*) 'PASS: Vector reverse mode - all sizes completed successfully'
+  else
+    write(*,*) 'FAIL: Vector reverse mode - one or more sizes had derivative errors'
+  end if
 
 contains
 
-  subroutine check_vjp_numerically()
+  subroutine check_vjp_numerically(passed)
     implicit none
+    logical, intent(out) :: passed
     
     ! Direction vectors for VJP testing
     real(4) :: alpha_dir
     real(4), dimension(max_size) :: x_dir
-    real(4), dimension((n*(n+1))/2) :: ap_dir
-    real(4), dimension((n*(n+1))/2) :: ap_plus, ap_minus, ap_central_diff
+    real(4), dimension(max_size*(max_size+1)/2) :: ap_dir
+    real(4), dimension(max_size*(max_size+1)/2) :: ap_plus, ap_minus, ap_central_diff
     
     max_error = 0.0d0
     has_large_errors = .false.
@@ -150,8 +166,8 @@ contains
       ! Left side: cotangent^T @ Jacobian @ direction (via finite differences, with sorted summation)
       vjp_fd = 0.0
       ! Compute and sort products for ap (FD)
-      n_products = (n*(n+1))/2
-      do i = 1, (n*(n+1))/2
+      n_products = max_size*(max_size+1)/2
+      do i = 1, max_size*(max_size+1)/2
         temp_products(i) = apb_orig(k,i) * ap_central_diff(i)
       end do
       call sort_array(temp_products, n_products)
@@ -163,20 +179,20 @@ contains
       ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
       ! For pure inputs: use adjoint directly
       vjp_ad = 0.0
-      ! Compute and sort products for ap
-      n_products = (n*(n+1))/2
-      do i = 1, (n*(n+1))/2
-        temp_products(i) = ap_dir(i) * apb(k,i)
+      ! Compute and sort products for x
+      n_products = n
+      do i = 1, n
+        temp_products(i) = x_dir(i) * xb(k,i)
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
       vjp_ad = vjp_ad + alpha_dir * alphab(k)
-      ! Compute and sort products for x
-      n_products = n
-      do i = 1, n
-        temp_products(i) = x_dir(i) * xb(k,i)
+      ! Compute and sort products for ap
+      n_products = max_size*(max_size+1)/2
+      do i = 1, max_size*(max_size+1)/2
+        temp_products(i) = ap_dir(i) * apb(k,i)
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products
@@ -203,6 +219,7 @@ contains
     write(*,*) ''
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
+    passed = .not. has_large_errors
     if (has_large_errors) then
       write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
     else

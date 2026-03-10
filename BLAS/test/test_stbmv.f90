@@ -9,8 +9,8 @@ program test_stbmv
   external :: stbmv_d
 
   ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension (rows/cols of matrices)
+  integer, parameter :: max_size = 8  ! Maximum array dimension (multi-size test)
+  integer :: n_test  ! Loop over n = 1, 2, 3, 4
   integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
 
   character :: uplo
@@ -18,7 +18,7 @@ program test_stbmv
   character :: diag
   integer :: nsize
   integer :: ksize
-  real(4), dimension(max_size,n) :: a  ! Band storage (k+1) x n
+  real(4), dimension(max_size,max_size) :: a  ! Band storage (k+1) x n
   integer :: lda_val
   real(4), dimension(max_size) :: x
   integer :: incx_val
@@ -31,8 +31,8 @@ program test_stbmv
   real(4), dimension(max_size) :: x_output
 
   ! Array restoration variables for numerical differentiation
+  real(4), dimension(max_size,max_size) :: a_orig  ! Band storage
   real(4), dimension(max_size) :: x_orig
-  real(4), dimension(max_size,n) :: a_orig  ! Band storage
 
   ! Variables for central difference computation
   real(4), dimension(max_size) :: x_forward, x_backward
@@ -47,6 +47,7 @@ program test_stbmv
   ! Temporary variables for matrix initialization
   real(4) :: temp_real, temp_imag
   integer :: i, j, band_row
+  integer :: n  ! Current size (set in loop)
 
   ! Initialize test data with random numbers
   ! Initialize random seed for reproducible results
@@ -54,71 +55,76 @@ program test_stbmv
   seed_array = 42
   call random_seed(put=seed_array)
 
-  uplo = 'U'
-  trans = 'N'
-  diag = 'N'
-  nsize = n
-  ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
-  ! Initialize a as triangular band matrix (upper band storage)
-  ! A(band_row, j) = full(i,j) with band_row = ksize+1+i-j, i = max(1,j-ksize)..j
-  do j = 1, n
-    do band_row = max(1, ksize+2-j), ksize+1
-      call random_number(temp_real)
-      a(band_row, j) = temp_real * 2.0 - 1.0  ! Scale to [-1,1]
+  write(*,*) 'Testing STBMV (multi-size: n = 1, 2, 3, 4)'
+  do n_test = 1, 4
+    n = n_test
+
+    uplo = 'U'
+    trans = 'N'
+    diag = 'N'
+    nsize = n
+    ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
+    ! Initialize a as triangular band matrix (upper band storage)
+    ! A(band_row, j) = full(i,j) with band_row = ksize+1+i-j, i = max(1,j-ksize)..j
+    do j = 1, n
+      do band_row = max(1, ksize+2-j), ksize+1
+        call random_number(temp_real)
+        a(band_row, j) = temp_real * 2.0 - 1.0  ! Scale to [-1,1]
+      end do
     end do
-  end do
-  lda_val = lda  ! LDA must be at least ( k + 1 )
-  call random_number(x)
-  x = x * 2.0 - 1.0  ! Scale to [-1,1]
-  incx_val = 1  ! INCX 1
-
-  ! Initialize input derivatives to random values
-  call random_number(x_d)
-  x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-  ! Initialize a_d as triangular band matrix (upper band storage)
-  ! A(band_row, j) = full(i,j) with band_row = ksize+1+i-j, i = max(1,j-ksize)..j
-  do j = 1, n
-    do band_row = max(1, ksize+2-j), ksize+1
-      call random_number(temp_real)
-      a_d(band_row, j) = temp_real * 2.0 - 1.0  ! Scale to [-1,1]
+    lda_val = lda  ! LDA must be at least ( k + 1 )
+    call random_number(x)
+    x = x * 2.0 - 1.0  ! Scale to [-1,1]
+    incx_val = 1  ! INCX 1
+  
+    ! Initialize input derivatives to random values
+    ! Initialize a_d as triangular band matrix (upper band storage)
+    ! A(band_row, j) = full(i,j) with band_row = ksize+1+i-j, i = max(1,j-ksize)..j
+    do j = 1, n
+      do band_row = max(1, ksize+2-j), ksize+1
+        call random_number(temp_real)
+        a_d(band_row, j) = temp_real * 2.0 - 1.0  ! Scale to [-1,1]
+      end do
     end do
+    call random_number(x_d)
+    x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+  
+    ! Store initial derivative values after random initialization
+    a_d_orig = a_d
+    x_d_orig = x_d
+  
+    ! Store original values for central difference computation
+    a_orig = a
+    x_orig = x
+  
+    write(*,*) 'Testing STBMV'
+    ! Store input values of inout parameters before first function call
+    x_orig = x
+  
+    ! Re-initialize data for differentiated function
+    ! Only reinitialize inout parameters - keep input-only parameters unchanged
+  
+    ! uplo already has correct value from original call
+    ! trans already has correct value from original call
+    ! diag already has correct value from original call
+    nsize = n
+    ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
+    ! a already has correct value from original call
+    lda_val = lda  ! LDA must be at least ( k + 1 )
+    x = x_orig
+    incx_val = 1  ! INCX 1
+  
+    ! Call the differentiated function
+    call stbmv_d(uplo, trans, diag, nsize, ksize, a, a_d, lda_val, x, x_d, incx_val)
+  
+    ! Print results and compare
+    write(*,*) 'Function calls completed successfully'
+  
+    ! Numerical differentiation check
+    call check_derivatives_numerically()
+
   end do
-
-  ! Store initial derivative values after random initialization
-  a_d_orig = a_d
-  x_d_orig = x_d
-
-  ! Store original values for central difference computation
-  x_orig = x
-  a_orig = a
-
-  write(*,*) 'Testing STBMV'
-  ! Store input values of inout parameters before first function call
-  x_orig = x
-
-  ! Re-initialize data for differentiated function
-  ! Only reinitialize inout parameters - keep input-only parameters unchanged
-
-  ! uplo already has correct value from original call
-  ! trans already has correct value from original call
-  ! diag already has correct value from original call
-  nsize = n
-  ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
-  ! a already has correct value from original call
-  lda_val = lda  ! LDA must be at least ( k + 1 )
-  x = x_orig
-  incx_val = 1  ! INCX 1
-
-  ! Call the differentiated function
-  call stbmv_d(uplo, trans, diag, nsize, ksize, a, a_d, lda_val, x, x_d, incx_val)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically()
-
-  write(*,*) 'Test completed successfully'
+  write(*,*) 'All sizes completed successfully'
 
 contains
 
@@ -143,15 +149,15 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    x = x_orig + h * x_d_orig
     a = a_orig + h * a_d_orig
+    x = x_orig + h * x_d_orig
     call stbmv(uplo, trans, diag, nsize, ksize, a, lda_val, x, incx_val)
     ! Store forward perturbation results
     x_forward = x
     
     ! Backward perturbation: f(x - h)
-    x = x_orig - h * x_d_orig
     a = a_orig - h * a_d_orig
+    x = x_orig - h * x_d_orig
     call stbmv(uplo, trans, diag, nsize, ksize, a, lda_val, x, incx_val)
     ! Store backward perturbation results
     x_backward = x
