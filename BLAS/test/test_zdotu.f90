@@ -99,16 +99,16 @@ contains
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, nsize, zx_orig, zy_orig, zdotu_orig, zx_d_orig, zy_d_orig, zdotu_d_result, passed)
+    call check_derivatives_numerically(n, nsize, zy_orig, zx_orig, zdotu_orig, zy_d_orig, zx_d_orig, zdotu_d_result, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, nsize, zx_orig, zy_orig, zdotu_orig, zx_d_orig, zy_d_orig, zdotu_d_result, passed)
+  subroutine check_derivatives_numerically(n, nsize, zy_orig, zx_orig, zdotu_orig, zy_d_orig, zx_d_orig, zdotu_d_result, passed)
     implicit none
     integer, intent(in) :: n
     integer, intent(in) :: nsize
-    complex(8), intent(in) :: zx_orig(n), zx_d_orig(n)
     complex(8), intent(in) :: zy_orig(n), zy_d_orig(n)
+    complex(8), intent(in) :: zx_orig(n), zx_d_orig(n)
     complex(8), intent(in) :: zdotu_orig
     complex(8), intent(in) :: zdotu_d_result
     logical, intent(out) :: passed
@@ -120,8 +120,8 @@ contains
     logical :: has_large_errors
     complex(8) :: zdotu_forward, zdotu_backward  ! Function result for FD check
     integer :: i, j
-    complex(8), dimension(n) :: zx
     complex(8), dimension(n) :: zy
+    complex(8), dimension(n) :: zx
 
     max_error = 0.0e0
     has_large_errors = .false.
@@ -130,13 +130,13 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    zx = zx_orig + h * zx_d_orig
     zy = zy_orig + h * zy_d_orig
+    zx = zx_orig + h * zx_d_orig
     zdotu_forward = zdotu(nsize, zx, 1, zy, 1)
 
     ! Backward perturbation: f(x - h)
-    zx = zx_orig - h * zx_d_orig
     zy = zy_orig - h * zy_d_orig
+    zx = zx_orig - h * zx_d_orig
     zdotu_backward = zdotu(nsize, zx, 1, zy, 1)
 
     ! Compute central differences and compare with AD results

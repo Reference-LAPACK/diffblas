@@ -64,54 +64,7 @@ program test_dtrmm_vector_reverse
     n = test_sizes(itest)
     write(*,*) 'Testing DTRMM (Vector Reverse, n =', n, ')'
 
-  ! Initialize primal values
-  side = 'L'
-  uplo = 'U'
-  transa = 'N'
-  diag = 'N'
-  msize = n
-  nsize = n
-  call random_number(alpha)
-  alpha = alpha * 2.0 - 1.0
-  call random_number(a)
-  a = a * 2.0 - 1.0
-  lda_val = lda
-  call random_number(b)
-  b = b * 2.0 - 1.0
-  ldb_val = ldb
-
-  ! Store original primal values
-  alpha_orig = alpha
-  a_orig = a
-  b_orig = b
-
-  ! Initialize output adjoints (cotangents) with random values for each direction
-  ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirs
-    call random_number(bb(k,:,:))
-    bb(k,:,:) = bb(k,:,:) * 2.0 - 1.0
-  end do
-
-  ! Initialize input adjoints to zero (they will be computed)
-  ! Note: Inout parameters are skipped - they already have output adjoints initialized
-  alphab = 0.0
-  ab = 0.0
-
-  ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
-  bb_orig = bb
-
-  ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
-  call set_ISIZE2OFA(max_size)
-
-  ! Call reverse vector mode differentiated function
-  call dtrmm_bv(side, uplo, transa, diag, msize, nsize, alpha, alphab, a, ab, lda_val, b, bb, ldb_val, nbdirs)
-
-  ! Reset ISIZE globals to uninitialized (-1) for completeness
-  call set_ISIZE2OFA(-1)
-
-  ! VJP Verification using finite differences
-  call check_vjp_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -121,6 +74,61 @@ program test_dtrmm_vector_reverse
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize primal values
+    side = 'L'
+    uplo = 'U'
+    transa = 'N'
+    diag = 'N'
+    msize = n
+    nsize = n
+    call random_number(alpha)
+    alpha = alpha * 2.0 - 1.0
+    call random_number(a)
+    a = a * 2.0 - 1.0
+    lda_val = lda
+    call random_number(b)
+    b = b * 2.0 - 1.0
+    ldb_val = ldb
+    
+    ! Store original primal values
+    alpha_orig = alpha
+    a_orig = a
+    b_orig = b
+    
+    ! Initialize output adjoints (cotangents) with random values for each direction
+    ! These are the 'seeds' for reverse mode
+    do k = 1, nbdirs
+      call random_number(bb(k,:,:))
+      bb(k,:,:) = bb(k,:,:) * 2.0 - 1.0
+    end do
+    
+    ! Initialize input adjoints to zero (they will be computed)
+    ! Note: Inout parameters are skipped - they already have output adjoints initialized
+    alphab = 0.0
+    ab = 0.0
+    
+    ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
+    bb_orig = bb
+    
+    ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
+    ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
+    call set_ISIZE2OFA(max_size)
+    
+    ! Call reverse vector mode differentiated function
+    call dtrmm_bv(side, uplo, transa, diag, msize, nsize, alpha, alphab, a, ab, lda_val, b, bb, ldb_val, nbdirs)
+    
+    ! Reset ISIZE globals to uninitialized (-1) for completeness
+    call set_ISIZE2OFA(-1)
+    
+    ! VJP Verification using finite differences
+    call check_vjp_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_vjp_numerically(passed)
     implicit none
@@ -204,7 +212,6 @@ contains
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
-      vjp_ad = vjp_ad + alpha_dir * alphab(k)
       ! Compute and sort products for b
       n_products = 0
       do j = 1, n
@@ -217,6 +224,7 @@ contains
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
+      vjp_ad = vjp_ad + alpha_dir * alphab(k)
       
       ! Error check: |vjp_fd - vjp_ad| > atol + rtol * |vjp_ad|
       abs_error = abs(vjp_fd - vjp_ad)

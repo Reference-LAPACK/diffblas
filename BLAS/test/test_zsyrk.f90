@@ -51,15 +51,15 @@ contains
     integer :: ldc_val
 
     ! Derivative variables
+    complex(8) :: alpha_d
     complex(8), dimension(n,n) :: a_d
     complex(8) :: beta_d
-    complex(8) :: alpha_d
     complex(8), dimension(n,n) :: c_d
 
     ! Array restoration and derivative storage
+    complex(8) :: alpha_orig, alpha_d_orig
     complex(8), dimension(n,n) :: a_orig, a_d_orig
     complex(8) :: beta_orig, beta_d_orig
-    complex(8) :: alpha_orig, alpha_d_orig
     complex(8), dimension(n,n) :: c_orig, c_d_orig
     real(8) :: temp_re, temp_im  ! For complex random init
     integer :: i, j
@@ -87,25 +87,25 @@ contains
     ! Initialize input derivatives
     call random_number(temp_re)
     call random_number(temp_im)
+    alpha_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
+    call random_number(temp_re)
+    call random_number(temp_im)
     a_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
     call random_number(temp_re)
     call random_number(temp_im)
     beta_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
     call random_number(temp_re)
     call random_number(temp_im)
-    alpha_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
-    call random_number(temp_re)
-    call random_number(temp_im)
     c_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
 
     ! Store _orig and _d_orig
+    alpha_d_orig = alpha_d
     a_d_orig = a_d
     beta_d_orig = beta_d
-    alpha_d_orig = alpha_d
     c_d_orig = c_d
+    alpha_orig = alpha
     a_orig = a
     beta_orig = beta
-    alpha_orig = alpha
     c_orig = c
 
     write(*,*) 'Testing ZSYRK (n =', n, ')'

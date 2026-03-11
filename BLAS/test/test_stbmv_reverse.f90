@@ -61,56 +61,8 @@ program test_stbmv_reverse
     n = test_sizes(itest)
     write(*,*) 'Testing STBMV (n =', n, ')'
 
-  ! Initialize primal values
-  uplo = 'U'
-  trans = 'N'
-  diag = 'N'
-  nsize = n
-  ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
-  ! Initialize a as triangular band matrix (upper band storage)
-  ! A(band_row, j) = full(i,j) with band_row = ksize+1+i-j, i = max(1,j-ksize)..j
-  do j = 1, n
-    do band_row = max(1, ksize+2-j), ksize+1
-      call random_number(temp_real)
-      a(band_row, j) = temp_real * 2.0 - 1.0  ! Scale to [-1,1]
-    end do
-  end do
-  lda_val = lda
-  call random_number(x)
-  x = x * 2.0 - 1.0
-  incx_val = 1
-
-  ! Store original primal values
-  a_orig = a
-  x_orig = x
-
-  ! Initialize output adjoints (cotangents) with random values
-  ! These are the 'seeds' for reverse mode
-  call random_number(xb)
-  xb = xb * 2.0 - 1.0
-
-  ! Save output adjoints (cotangents) for VJP verification
-  ! Note: output adjoints may be modified by reverse mode function
-  xb_orig = xb
-
-  ! Initialize input adjoints to zero (they will be computed)
-  ab = 0.0
-
-  ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! Differentiated code checks they are set via check_ISIZE*_initialized.
-  call set_ISIZE2OFA(max_size)
-
-  ! Call reverse mode differentiated function
-  call stbmv_b(uplo, trans, diag, nsize, ksize, a, ab, lda_val, x, xb, incx_val)
-
-  ! Reset ISIZE globals to uninitialized (-1) for completeness
-  call set_ISIZE2OFA(-1)
-
-  ! VJP Verification using finite differences
-  ! For reverse mode, we verify: cotangent^T @ J @ direction = direction^T @ adjoint
-  ! Equivalently: cotangent^T @ (f(x+h*dir) - f(x-h*dir))/(2h) should equal dir^T @ computed_adjoint
-  call check_vjp_numerically(passed)
-  all_passed = all_passed .and. passed
+    call run_test_for_size(n, passed)
+    all_passed = all_passed .and. passed
   end do
   if (all_passed) then
     write(*,*) 'PASS: All sizes completed successfully'
@@ -119,6 +71,63 @@ program test_stbmv_reverse
   end if
 
 contains
+
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+      ! Initialize primal values
+      uplo = 'U'
+      trans = 'N'
+      diag = 'N'
+      nsize = n
+      ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
+      ! Initialize a as triangular band matrix (upper band storage)
+      ! A(band_row, j) = full(i,j) with band_row = ksize+1+i-j, i = max(1,j-ksize)..j
+      do j = 1, n
+        do band_row = max(1, ksize+2-j), ksize+1
+          call random_number(temp_real)
+          a(band_row, j) = temp_real * 2.0 - 1.0  ! Scale to [-1,1]
+        end do
+      end do
+      lda_val = lda
+      call random_number(x)
+      x = x * 2.0 - 1.0
+      incx_val = 1
+
+      ! Store original primal values
+      a_orig = a
+      x_orig = x
+
+      ! Initialize output adjoints (cotangents) with random values
+      ! These are the 'seeds' for reverse mode
+      call random_number(xb)
+      xb = xb * 2.0 - 1.0
+
+      ! Save output adjoints (cotangents) for VJP verification
+      ! Note: output adjoints may be modified by reverse mode function
+      xb_orig = xb
+
+      ! Initialize input adjoints to zero (they will be computed)
+      ab = 0.0
+
+      ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
+      ! Differentiated code checks they are set via check_ISIZE*_initialized.
+      call set_ISIZE2OFA(max_size)
+
+      ! Call reverse mode differentiated function
+      call stbmv_b(uplo, trans, diag, nsize, ksize, a, ab, lda_val, x, xb, incx_val)
+
+      ! Reset ISIZE globals to uninitialized (-1) for completeness
+      call set_ISIZE2OFA(-1)
+
+      ! VJP Verification using finite differences
+      ! For reverse mode, we verify: cotangent^T @ J @ direction = direction^T @ adjoint
+      ! Equivalently: cotangent^T @ (f(x+h*dir) - f(x-h*dir))/(2h) should equal dir^T @ computed_adjoint
+      call check_vjp_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_vjp_numerically(passed)
     implicit none

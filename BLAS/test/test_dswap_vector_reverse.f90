@@ -57,42 +57,7 @@ program test_dswap_vector_reverse
     n = test_sizes(itest)
     write(*,*) 'Testing DSWAP (Vector Reverse, n =', n, ')'
 
-  ! Initialize primal values
-  nsize = n
-  call random_number(dx)
-  dx = dx * 2.0 - 1.0
-  incx_val = 1
-  call random_number(dy)
-  dy = dy * 2.0 - 1.0
-  incy_val = 1
-
-  ! Store original primal values
-  dx_orig = dx
-  dy_orig = dy
-
-  ! Initialize output adjoints (cotangents) with random values for each direction
-  ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirs
-    call random_number(dxb(k,:))
-    dxb(k,:) = dxb(k,:) * 2.0 - 1.0
-  end do
-  do k = 1, nbdirs
-    call random_number(dyb(k,:))
-    dyb(k,:) = dyb(k,:) * 2.0 - 1.0
-  end do
-
-  ! Initialize input adjoints to zero (they will be computed)
-  ! Note: Inout parameters are skipped - they already have output adjoints initialized
-
-  ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
-  dxb_orig = dxb
-  dyb_orig = dyb
-
-  ! Call reverse vector mode differentiated function
-  call dswap_bv(nsize, dx, dxb, incx_val, dy, dyb, incy_val, nbdirs)
-
-  ! VJP Verification using finite differences
-  call check_vjp_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -102,6 +67,49 @@ program test_dswap_vector_reverse
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize primal values
+    nsize = n
+    call random_number(dx)
+    dx = dx * 2.0 - 1.0
+    incx_val = 1
+    call random_number(dy)
+    dy = dy * 2.0 - 1.0
+    incy_val = 1
+    
+    ! Store original primal values
+    dx_orig = dx
+    dy_orig = dy
+    
+    ! Initialize output adjoints (cotangents) with random values for each direction
+    ! These are the 'seeds' for reverse mode
+    do k = 1, nbdirs
+      call random_number(dxb(k,:))
+      dxb(k,:) = dxb(k,:) * 2.0 - 1.0
+    end do
+    do k = 1, nbdirs
+      call random_number(dyb(k,:))
+      dyb(k,:) = dyb(k,:) * 2.0 - 1.0
+    end do
+    
+    ! Initialize input adjoints to zero (they will be computed)
+    ! Note: Inout parameters are skipped - they already have output adjoints initialized
+    
+    ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
+    dxb_orig = dxb
+    dyb_orig = dyb
+    
+    ! Call reverse vector mode differentiated function
+    call dswap_bv(nsize, dx, dxb, incx_val, dy, dyb, incy_val, nbdirs)
+    
+    ! VJP Verification using finite differences
+    call check_vjp_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_vjp_numerically(passed)
     implicit none

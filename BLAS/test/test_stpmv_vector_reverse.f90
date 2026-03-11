@@ -58,47 +58,7 @@ program test_stpmv_vector_reverse
     n = test_sizes(itest)
     write(*,*) 'Testing STPMV (Vector Reverse, n =', n, ')'
 
-  ! Initialize primal values
-  uplo = 'U'
-  trans = 'N'
-  diag = 'N'
-  nsize = n
-  call random_number(ap)
-  ap = ap * 2.0 - 1.0
-  call random_number(x)
-  x = x * 2.0 - 1.0
-  incx_val = 1
-
-  ! Store original primal values
-  ap_orig = ap
-  x_orig = x
-
-  ! Initialize output adjoints (cotangents) with random values for each direction
-  ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirs
-    call random_number(xb(k,:))
-    xb(k,:) = xb(k,:) * 2.0 - 1.0
-  end do
-
-  ! Initialize input adjoints to zero (they will be computed)
-  ! Note: Inout parameters are skipped - they already have output adjoints initialized
-  apb = 0.0
-
-  ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
-  xb_orig = xb
-
-  ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
-  call set_ISIZE1OFAp(n)
-
-  ! Call reverse vector mode differentiated function
-  call stpmv_bv(uplo, trans, diag, nsize, ap, apb, x, xb, incx_val, nbdirs)
-
-  ! Reset ISIZE globals to uninitialized (-1) for completeness
-  call set_ISIZE1OFAp(-1)
-
-  ! VJP Verification using finite differences
-  call check_vjp_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -108,6 +68,54 @@ program test_stpmv_vector_reverse
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize primal values
+    uplo = 'U'
+    trans = 'N'
+    diag = 'N'
+    nsize = n
+    call random_number(ap)
+    ap = ap * 2.0 - 1.0
+    call random_number(x)
+    x = x * 2.0 - 1.0
+    incx_val = 1
+    
+    ! Store original primal values
+    ap_orig = ap
+    x_orig = x
+    
+    ! Initialize output adjoints (cotangents) with random values for each direction
+    ! These are the 'seeds' for reverse mode
+    do k = 1, nbdirs
+      call random_number(xb(k,:))
+      xb(k,:) = xb(k,:) * 2.0 - 1.0
+    end do
+    
+    ! Initialize input adjoints to zero (they will be computed)
+    ! Note: Inout parameters are skipped - they already have output adjoints initialized
+    apb = 0.0
+    
+    ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
+    xb_orig = xb
+    
+    ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
+    ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
+    call set_ISIZE1OFAp(n)
+    
+    ! Call reverse vector mode differentiated function
+    call stpmv_bv(uplo, trans, diag, nsize, ap, apb, x, xb, incx_val, nbdirs)
+    
+    ! Reset ISIZE globals to uninitialized (-1) for completeness
+    call set_ISIZE1OFAp(-1)
+    
+    ! VJP Verification using finite differences
+    call check_vjp_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_vjp_numerically(passed)
     implicit none
@@ -171,19 +179,19 @@ contains
       ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
       ! For pure inputs: use adjoint directly
       vjp_ad = 0.0
-      ! Compute and sort products for ap
-      n_products = max_size*(max_size+1)/2
-      do i = 1, max_size*(max_size+1)/2
-        temp_products(i) = ap_dir(i) * apb(k,i)
+      ! Compute and sort products for x
+      n_products = n
+      do i = 1, n
+        temp_products(i) = x_dir(i) * xb(k,i)
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
-      ! Compute and sort products for x
-      n_products = n
-      do i = 1, n
-        temp_products(i) = x_dir(i) * xb(k,i)
+      ! Compute and sort products for ap
+      n_products = max_size*(max_size+1)/2
+      do i = 1, max_size*(max_size+1)/2
+        temp_products(i) = ap_dir(i) * apb(k,i)
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products

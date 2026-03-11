@@ -46,69 +46,7 @@ program test_zaxpy_vector_forward
     n = test_sizes(itest)
     write(*,*) 'Testing ZAXPY (Vector Forward, n =', n, ')'
 
-  ! Initialize test parameters
-  nsize = n
-  incx_val = 1
-  incy_val = 1
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
-  seed_array = 42
-  call random_seed(put=seed_array)
-
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  za = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  do i = 1, max_size
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    zx(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-  do i = 1, max_size
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    zy(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-
-  ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirs
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    za_dv(idir) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-  do idir = 1, nbdirs
-    do i = 1, max_size
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      zx_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-  end do
-  do idir = 1, nbdirs
-    do i = 1, max_size
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      zy_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-  end do
-
-  write(*,*) 'Testing ZAXPY (Vector Forward Mode)'
-  ! Store original values before any function calls (critical for INOUT parameters)
-  za_orig = za
-  za_dv_orig = za_dv
-  zx_orig = zx
-  zx_dv_orig = zx_dv
-  zy_orig = zy
-  zy_dv_orig = zy_dv
-
-  ! Call the vector mode differentiated function
-
-  call zaxpy_dv(nsize, za, za_dv, zx, zx_dv, incx_val, zy, zy_dv, incy_val, nbdirs)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -118,6 +56,76 @@ program test_zaxpy_vector_forward
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize test parameters
+    nsize = n
+    incx_val = 1
+    incy_val = 1
+    
+    ! Initialize test data with random numbers
+    ! Initialize random seed for reproducible results
+    seed_array = 42
+    call random_seed(put=seed_array)
+    
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    za = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    do i = 1, max_size
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      zx(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end do
+    do i = 1, max_size
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      zy(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end do
+    
+    ! Initialize input derivatives to random values (exactly like scalar mode)
+    do idir = 1, nbdirs
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      za_dv(idir) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end do
+    do idir = 1, nbdirs
+      do i = 1, max_size
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        zx_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      end do
+    end do
+    do idir = 1, nbdirs
+      do i = 1, max_size
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        zy_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      end do
+    end do
+    
+    write(*,*) 'Testing ZAXPY (Vector Forward Mode)'
+    ! Store original values before any function calls (critical for INOUT parameters)
+    za_orig = za
+    za_dv_orig = za_dv
+    zx_orig = zx
+    zx_dv_orig = zx_dv
+    zy_orig = zy
+    zy_dv_orig = zy_dv
+    
+    ! Call the vector mode differentiated function
+    
+    call zaxpy_dv(nsize, za, za_dv, zx, zx_dv, incx_val, zy, zy_dv, incy_val, nbdirs)
+    
+    ! Print results and compare
+    write(*,*) 'Function calls completed successfully'
+    
+    ! Numerical differentiation check
+    call check_derivatives_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_derivatives_numerically(passed)
     implicit none

@@ -59,59 +59,7 @@ program test_ctrmv_vector_reverse
     n = test_sizes(itest)
     write(*,*) 'Testing CTRMV (Vector Reverse, n =', n, ')'
 
-  ! Initialize primal values
-  uplo = 'U'
-  trans = 'N'
-  diag = 'N'
-  nsize = n
-  do j = 1, n
-    do i = 1, n
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      a(i,j) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-    end do
-  end do
-  lda_val = lda
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    x(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-  end do
-  incx_val = 1
-
-  ! Store original primal values
-  a_orig = a
-  x_orig = x
-
-  ! Initialize output adjoints (cotangents) with random values for each direction
-  ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirs
-    do i = 1, n
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      xb(k,i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-    end do
-  end do
-
-  ! Initialize input adjoints to zero (they will be computed)
-  ! Note: Inout parameters are skipped - they already have output adjoints initialized
-  ab = 0.0
-
-  ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
-  xb_orig = xb
-
-  ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
-  call set_ISIZE2OFA(max_size)
-
-  ! Call reverse vector mode differentiated function
-  call ctrmv_bv(uplo, trans, diag, nsize, a, ab, lda_val, x, xb, incx_val, nbdirs)
-
-  ! Reset ISIZE globals to uninitialized (-1) for completeness
-  call set_ISIZE2OFA(-1)
-
-  ! VJP Verification using finite differences
-  call check_vjp_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -121,6 +69,66 @@ program test_ctrmv_vector_reverse
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize primal values
+    uplo = 'U'
+    trans = 'N'
+    diag = 'N'
+    nsize = n
+    do j = 1, n
+      do i = 1, n
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        a(i,j) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+      end do
+    end do
+    lda_val = lda
+    do i = 1, n
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      x(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+    end do
+    incx_val = 1
+    
+    ! Store original primal values
+    a_orig = a
+    x_orig = x
+    
+    ! Initialize output adjoints (cotangents) with random values for each direction
+    ! These are the 'seeds' for reverse mode
+    do k = 1, nbdirs
+      do i = 1, n
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        xb(k,i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+      end do
+    end do
+    
+    ! Initialize input adjoints to zero (they will be computed)
+    ! Note: Inout parameters are skipped - they already have output adjoints initialized
+    ab = 0.0
+    
+    ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
+    xb_orig = xb
+    
+    ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
+    ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
+    call set_ISIZE2OFA(max_size)
+    
+    ! Call reverse vector mode differentiated function
+    call ctrmv_bv(uplo, trans, diag, nsize, a, ab, lda_val, x, xb, incx_val, nbdirs)
+    
+    ! Reset ISIZE globals to uninitialized (-1) for completeness
+    call set_ISIZE2OFA(-1)
+    
+    ! VJP Verification using finite differences
+    call check_vjp_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_vjp_numerically(passed)
     implicit none

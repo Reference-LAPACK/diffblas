@@ -46,68 +46,7 @@ program test_ztbmv_vector_forward
     n = test_sizes(itest)
     write(*,*) 'Testing ZTBMV (Vector Forward, n =', n, ')'
 
-  ! Initialize test parameters
-  nsize = n
-  ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
-  lda_val = lda
-  incx_val = 1
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
-  seed_array = 42
-  call random_seed(put=seed_array)
-
-  uplo = 'U'
-  trans = 'N'
-  diag = 'N'
-  ! Initialize a as triangular band matrix (upper band storage)
-  do j = 1, n
-    do band_row = max(1, ksize+2-j), ksize+1
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      a(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-  end do
-  do i = 1, max_size
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    x(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-
-  ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirs
-    do i = 1, max_size
-      do j = 1, max_size
-        call random_number(temp_real)
-        call random_number(temp_imag)
-        a_dv(idir,i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-      end do
-    end do
-  end do
-  do idir = 1, nbdirs
-    do i = 1, max_size
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      x_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-  end do
-
-  write(*,*) 'Testing ZTBMV (Vector Forward Mode)'
-  ! Store original values before any function calls (critical for INOUT parameters)
-  a_orig = a
-  a_dv_orig = a_dv
-  x_orig = x
-  x_dv_orig = x_dv
-
-  ! Call the vector mode differentiated function
-
-  call ztbmv_dv(uplo, trans, diag, nsize, ksize, a, a_dv, lda_val, x, x_dv, incx_val, nbdirs)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -117,6 +56,75 @@ program test_ztbmv_vector_forward
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize test parameters
+    nsize = n
+    ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
+    lda_val = lda
+    incx_val = 1
+    
+    ! Initialize test data with random numbers
+    ! Initialize random seed for reproducible results
+    seed_array = 42
+    call random_seed(put=seed_array)
+    
+    uplo = 'U'
+    trans = 'N'
+    diag = 'N'
+    ! Initialize a as triangular band matrix (upper band storage)
+    do j = 1, n
+      do band_row = max(1, ksize+2-j), ksize+1
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        a(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      end do
+    end do
+    do i = 1, max_size
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      x(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end do
+    
+    ! Initialize input derivatives to random values (exactly like scalar mode)
+    do idir = 1, nbdirs
+      do i = 1, max_size
+        do j = 1, max_size
+          call random_number(temp_real)
+          call random_number(temp_imag)
+          a_dv(idir,i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+        end do
+      end do
+    end do
+    do idir = 1, nbdirs
+      do i = 1, max_size
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        x_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      end do
+    end do
+    
+    write(*,*) 'Testing ZTBMV (Vector Forward Mode)'
+    ! Store original values before any function calls (critical for INOUT parameters)
+    a_orig = a
+    a_dv_orig = a_dv
+    x_orig = x
+    x_dv_orig = x_dv
+    
+    ! Call the vector mode differentiated function
+    
+    call ztbmv_dv(uplo, trans, diag, nsize, ksize, a, a_dv, lda_val, x, x_dv, incx_val, nbdirs)
+    
+    ! Print results and compare
+    write(*,*) 'Function calls completed successfully'
+    
+    ! Numerical differentiation check
+    call check_derivatives_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_derivatives_numerically(passed)
     implicit none

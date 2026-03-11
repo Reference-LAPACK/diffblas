@@ -56,54 +56,7 @@ program test_zcopy_vector_reverse
     n = test_sizes(itest)
     write(*,*) 'Testing ZCOPY (Vector Reverse, n =', n, ')'
 
-  ! Initialize primal values
-  nsize = n
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    zx(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-  end do
-  incx_val = 1
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    zy(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-  end do
-  incy_val = 1
-
-  ! Store original primal values
-  zx_orig = zx
-  zy_orig = zy
-
-  ! Initialize output adjoints (cotangents) with random values for each direction
-  ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirs
-    do i = 1, n
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      zyb(k,i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-    end do
-  end do
-
-  ! Initialize input adjoints to zero (they will be computed)
-  ! Note: Inout parameters are skipped - they already have output adjoints initialized
-  zxb = 0.0
-
-  ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
-  zyb_orig = zyb
-
-  ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
-  call set_ISIZE1OFZx(n)
-
-  ! Call reverse vector mode differentiated function
-  call zcopy_bv(nsize, zx, zxb, incx_val, zy, zyb, incy_val, nbdirs)
-
-  ! Reset ISIZE globals to uninitialized (-1) for completeness
-  call set_ISIZE1OFZx(-1)
-
-  ! VJP Verification using finite differences
-  call check_vjp_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -113,6 +66,61 @@ program test_zcopy_vector_reverse
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize primal values
+    nsize = n
+    do i = 1, n
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      zx(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+    end do
+    incx_val = 1
+    do i = 1, n
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      zy(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+    end do
+    incy_val = 1
+    
+    ! Store original primal values
+    zx_orig = zx
+    zy_orig = zy
+    
+    ! Initialize output adjoints (cotangents) with random values for each direction
+    ! These are the 'seeds' for reverse mode
+    do k = 1, nbdirs
+      do i = 1, n
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        zyb(k,i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+      end do
+    end do
+    
+    ! Initialize input adjoints to zero (they will be computed)
+    ! Note: Inout parameters are skipped - they already have output adjoints initialized
+    zxb = 0.0
+    
+    ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
+    zyb_orig = zyb
+    
+    ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
+    ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
+    call set_ISIZE1OFZx(n)
+    
+    ! Call reverse vector mode differentiated function
+    call zcopy_bv(nsize, zx, zxb, incx_val, zy, zyb, incy_val, nbdirs)
+    
+    ! Reset ISIZE globals to uninitialized (-1) for completeness
+    call set_ISIZE1OFZx(-1)
+    
+    ! VJP Verification using finite differences
+    call check_vjp_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_vjp_numerically(passed)
     implicit none

@@ -108,17 +108,17 @@ contains
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, nsize, cx_orig, cy_orig, ca_orig, cx_d_orig, cy_d_orig, ca_d_orig, cy_d, passed)
+    call check_derivatives_numerically(n, nsize, ca_orig, cx_orig, cy_orig, ca_d_orig, cx_d_orig, cy_d_orig, cy_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, nsize, cx_orig, cy_orig, ca_orig, cx_d_orig, cy_d_orig, ca_d_orig, cy_d, passed)
+  subroutine check_derivatives_numerically(n, nsize, ca_orig, cx_orig, cy_orig, ca_d_orig, cx_d_orig, cy_d_orig, cy_d, passed)
     implicit none
     integer, intent(in) :: n
     integer, intent(in) :: nsize
+    complex(4), intent(in) :: ca_orig, ca_d_orig
     complex(4), intent(in) :: cx_orig(n), cx_d_orig(n)
     complex(4), intent(in) :: cy_orig(n), cy_d_orig(n)
-    complex(4), intent(in) :: ca_orig, ca_d_orig
     complex(4), intent(in) :: cy_d(n)
     logical, intent(out) :: passed
 
@@ -129,9 +129,9 @@ contains
     logical :: has_large_errors
     complex(4), dimension(n) :: cy_forward, cy_backward
     integer :: i, j
+    complex(4) :: ca
     complex(4), dimension(n) :: cx
     complex(4), dimension(n) :: cy
-    complex(4) :: ca
 
     max_error = 0.0e0
     has_large_errors = .false.
@@ -140,16 +140,16 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
+    ca = ca_orig + h * ca_d_orig
     cx = cx_orig + h * cx_d_orig
     cy = cy_orig + h * cy_d_orig
-    ca = ca_orig + h * ca_d_orig
     call caxpy(nsize, ca, cx, 1, cy, 1)
     cy_forward = cy
 
     ! Backward perturbation: f(x - h)
+    ca = ca_orig - h * ca_d_orig
     cx = cx_orig - h * cx_d_orig
     cy = cy_orig - h * cy_d_orig
-    ca = ca_orig - h * ca_d_orig
     call caxpy(nsize, ca, cx, 1, cy, 1)
     cy_backward = cy
 

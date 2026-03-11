@@ -11,6 +11,8 @@ program test_stpmv
   ! Test parameters
   integer, parameter :: max_size = 8  ! Maximum array dimension (multi-size test)
   integer :: n_test  ! Loop over n = 1, 2, 3, 4
+  integer :: test_sizes(1), itest
+  logical :: passed, all_passed
   integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
 
   character :: uplo
@@ -29,8 +31,8 @@ program test_stpmv
   real(4), dimension(max_size) :: x_output
 
   ! Array restoration variables for numerical differentiation
-  real(4), dimension(max_size*(max_size+1)/2) :: ap_orig
   real(4), dimension(max_size) :: x_orig
+  real(4), dimension(max_size*(max_size+1)/2) :: ap_orig
 
   ! Variables for central difference computation
   real(4), dimension(max_size) :: x_forward, x_backward
@@ -53,65 +55,83 @@ program test_stpmv
   seed_array = 42
   call random_seed(put=seed_array)
 
-  write(*,*) 'Testing STPMV (multi-size: n = 1, 2, 3, 4)'
-  do n_test = 1, 4
+  test_sizes = (/ 4 /)
+  write(*,*) 'Testing STPMV (multi-size: n = 4)'
+  all_passed = .true.
+  do itest = 1, 1
+    n_test = test_sizes(itest)
     n = n_test
 
-    uplo = 'U'
-    trans = 'N'
-    diag = 'N'
-    nsize = n
-    call random_number(ap)
-    ap = ap * 2.0d0 - 1.0d0  ! Scale to [-1,1]
-    call random_number(x)
-    x = x * 2.0 - 1.0  ! Scale to [-1,1]
-    incx_val = 1  ! INCX 1
-  
-    ! Initialize input derivatives to random values
-    call random_number(ap_d)
-    ap_d = ap_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-    call random_number(x_d)
-    x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-  
-    ! Store initial derivative values after random initialization
-    x_d_orig = x_d
-    ap_d_orig = ap_d
-  
-    ! Store original values for central difference computation
-    ap_orig = ap
-    x_orig = x
-  
-    write(*,*) 'Testing STPMV'
-    ! Store input values of inout parameters before first function call
-    x_orig = x
-  
-    ! Re-initialize data for differentiated function
-    ! Only reinitialize inout parameters - keep input-only parameters unchanged
-  
-    ! uplo already has correct value from original call
-    ! trans already has correct value from original call
-    ! diag already has correct value from original call
-    nsize = n
-    ! ap already has correct value from original call
-    x = x_orig
-    incx_val = 1  ! INCX 1
-  
-    ! Call the differentiated function
-    call stpmv_d(uplo, trans, diag, nsize, ap, ap_d, x, x_d, incx_val)
-  
-    ! Print results and compare
-    write(*,*) 'Function calls completed successfully'
-  
-    ! Numerical differentiation check
-    call check_derivatives_numerically()
+    call run_test_for_size(n_test, passed)
+    all_passed = all_passed .and. passed
 
   end do
-  write(*,*) 'All sizes completed successfully'
+  if (all_passed) then
+    write(*,*) 'PASS: All sizes completed successfully'
+  else
+    write(*,*) 'FAIL: One or more sizes had derivative errors'
+  end if
 
 contains
 
-  subroutine check_derivatives_numerically()
+  subroutine run_test_for_size(n, passed)
     implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+    integer :: i, j
+
+      uplo = 'U'
+      trans = 'N'
+      diag = 'N'
+      nsize = n
+      call random_number(ap)
+      ap = ap * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+      call random_number(x)
+      x = x * 2.0 - 1.0  ! Scale to [-1,1]
+      incx_val = 1  ! INCX 1
+
+      ! Initialize input derivatives to random values
+      call random_number(x_d)
+      x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+      call random_number(ap_d)
+      ap_d = ap_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+
+      ! Store initial derivative values after random initialization
+      x_d_orig = x_d
+      ap_d_orig = ap_d
+
+      ! Store original values for central difference computation
+      x_orig = x
+      ap_orig = ap
+
+      write(*,*) 'Testing STPMV'
+      ! Store input values of inout parameters before first function call
+      x_orig = x
+
+      ! Re-initialize data for differentiated function
+      ! Only reinitialize inout parameters - keep input-only parameters unchanged
+
+      ! uplo already has correct value from original call
+      ! trans already has correct value from original call
+      ! diag already has correct value from original call
+      nsize = n
+      ! ap already has correct value from original call
+      x = x_orig
+      incx_val = 1  ! INCX 1
+
+      ! Call the differentiated function
+      call stpmv_d(uplo, trans, diag, nsize, ap, ap_d, x, x_d, incx_val)
+
+      ! Print results and compare
+      write(*,*) 'Function calls completed successfully'
+
+      ! Numerical differentiation check
+      call check_derivatives_numerically(passed)
+  end subroutine run_test_for_size
+
+  subroutine check_derivatives_numerically(passed)
+    implicit none
+    logical, intent(out) :: passed
     real(4), parameter :: h = 1.0e-3  ! Step size for finite differences
     real(4) :: relative_error, max_error
     real(4) :: output_orig, output_pert
@@ -131,15 +151,15 @@ contains
     
     ! Central difference computation: f(x + h) - f(x - h) / (2h)
     ! Forward perturbation: f(x + h)
-    ap = ap_orig + h * ap_d_orig
     x = x_orig + h * x_d_orig
+    ap = ap_orig + h * ap_d_orig
     call stpmv(uplo, trans, diag, nsize, ap, x, incx_val)
     ! Store forward perturbation results
     x_forward = x
     
     ! Backward perturbation: f(x - h)
-    ap = ap_orig - h * ap_d_orig
     x = x_orig - h * x_d_orig
+    ap = ap_orig - h * ap_d_orig
     call stpmv(uplo, trans, diag, nsize, ap, x, incx_val)
     ! Store backward perturbation results
     x_backward = x
@@ -172,6 +192,7 @@ contains
     
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
+    passed = .not. has_large_errors
     if (has_large_errors) then
       write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
     else

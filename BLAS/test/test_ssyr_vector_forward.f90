@@ -47,56 +47,7 @@ program test_ssyr_vector_forward
     n = test_sizes(itest)
     write(*,*) 'Testing SSYR (Vector Forward, n =', n, ')'
 
-  ! Initialize test parameters
-  nsize = n
-  incx_val = 1
-  lda_val = lda
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
-  seed_array = 42
-  call random_seed(put=seed_array)
-
-  uplo = 'U'
-  call random_number(alpha)
-  alpha = alpha * 2.0 - 1.0  ! Scale to [-1,1]
-  call random_number(x)
-  x = x * 2.0 - 1.0  ! Scale to [-1,1]
-  call random_number(a)
-  a = a * 2.0 - 1.0  ! Scale to [-1,1]
-
-  ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirs
-    call random_number(temp_real)
-    alpha_dv(idir) = temp_real * 2.0 - 1.0
-  end do
-  do idir = 1, nbdirs
-    call random_number(x_dv(idir,:))
-    x_dv(idir,:) = x_dv(idir,:) * 2.0 - 1.0
-  end do
-  do idir = 1, nbdirs
-    call random_number(a_dv(idir,:,:))
-    a_dv(idir,:,:) = a_dv(idir,:,:) * 2.0 - 1.0
-  end do
-
-  write(*,*) 'Testing SSYR (Vector Forward Mode)'
-  ! Store original values before any function calls (critical for INOUT parameters)
-  alpha_orig = alpha
-  alpha_dv_orig = alpha_dv
-  x_orig = x
-  x_dv_orig = x_dv
-  a_orig = a
-  a_dv_orig = a_dv
-
-  ! Call the vector mode differentiated function
-
-  call ssyr_dv(uplo, nsize, alpha, alpha_dv, x, x_dv, incx_val, a, a_dv, lda_val, nbdirs)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -106,6 +57,63 @@ program test_ssyr_vector_forward
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize test parameters
+    nsize = n
+    incx_val = 1
+    lda_val = lda
+    
+    ! Initialize test data with random numbers
+    ! Initialize random seed for reproducible results
+    seed_array = 42
+    call random_seed(put=seed_array)
+    
+    uplo = 'U'
+    call random_number(alpha)
+    alpha = alpha * 2.0 - 1.0  ! Scale to [-1,1]
+    call random_number(x)
+    x = x * 2.0 - 1.0  ! Scale to [-1,1]
+    call random_number(a)
+    a = a * 2.0 - 1.0  ! Scale to [-1,1]
+    
+    ! Initialize input derivatives to random values (exactly like scalar mode)
+    do idir = 1, nbdirs
+      call random_number(temp_real)
+      alpha_dv(idir) = temp_real * 2.0 - 1.0
+    end do
+    do idir = 1, nbdirs
+      call random_number(x_dv(idir,:))
+      x_dv(idir,:) = x_dv(idir,:) * 2.0 - 1.0
+    end do
+    do idir = 1, nbdirs
+      call random_number(a_dv(idir,:,:))
+      a_dv(idir,:,:) = a_dv(idir,:,:) * 2.0 - 1.0
+    end do
+    
+    write(*,*) 'Testing SSYR (Vector Forward Mode)'
+    ! Store original values before any function calls (critical for INOUT parameters)
+    alpha_orig = alpha
+    alpha_dv_orig = alpha_dv
+    x_orig = x
+    x_dv_orig = x_dv
+    a_orig = a
+    a_dv_orig = a_dv
+    
+    ! Call the vector mode differentiated function
+    
+    call ssyr_dv(uplo, nsize, alpha, alpha_dv, x, x_dv, incx_val, a, a_dv, lda_val, nbdirs)
+    
+    ! Print results and compare
+    write(*,*) 'Function calls completed successfully'
+    
+    ! Numerical differentiation check
+    call check_derivatives_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_derivatives_numerically(passed)
     implicit none

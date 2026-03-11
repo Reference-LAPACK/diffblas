@@ -46,57 +46,7 @@ program test_stbmv_vector_forward
     n = test_sizes(itest)
     write(*,*) 'Testing STBMV (Vector Forward, n =', n, ')'
 
-  ! Initialize test parameters
-  nsize = n
-  ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
-  lda_val = lda
-  incx_val = 1
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
-  seed_array = 42
-  call random_seed(put=seed_array)
-
-  uplo = 'U'
-  trans = 'N'
-  diag = 'N'
-  ! Initialize a as triangular band matrix (upper band storage)
-  ! A(band_row, j) = full(i,j) with band_row = ksize+1+i-j, i = max(1,j-ksize)..j
-  do j = 1, n
-    do band_row = max(1, ksize+2-j), ksize+1
-      call random_number(temp_real)
-      a(band_row, j) = temp_real * 2.0 - 1.0  ! Scale to [-1,1]
-    end do
-  end do
-  call random_number(x)
-  x = x * 2.0 - 1.0  ! Scale to [-1,1]
-
-  ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirs
-    call random_number(a_dv(idir,:,:))
-    a_dv(idir,:,:) = a_dv(idir,:,:) * 2.0 - 1.0
-  end do
-  do idir = 1, nbdirs
-    call random_number(x_dv(idir,:))
-    x_dv(idir,:) = x_dv(idir,:) * 2.0 - 1.0
-  end do
-
-  write(*,*) 'Testing STBMV (Vector Forward Mode)'
-  ! Store original values before any function calls (critical for INOUT parameters)
-  a_orig = a
-  a_dv_orig = a_dv
-  x_orig = x
-  x_dv_orig = x_dv
-
-  ! Call the vector mode differentiated function
-
-  call stbmv_dv(uplo, trans, diag, nsize, ksize, a, a_dv, lda_val, x, x_dv, incx_val, nbdirs)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -106,6 +56,64 @@ program test_stbmv_vector_forward
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize test parameters
+    nsize = n
+    ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
+    lda_val = lda
+    incx_val = 1
+    
+    ! Initialize test data with random numbers
+    ! Initialize random seed for reproducible results
+    seed_array = 42
+    call random_seed(put=seed_array)
+    
+    uplo = 'U'
+    trans = 'N'
+    diag = 'N'
+    ! Initialize a as triangular band matrix (upper band storage)
+    ! A(band_row, j) = full(i,j) with band_row = ksize+1+i-j, i = max(1,j-ksize)..j
+    do j = 1, n
+      do band_row = max(1, ksize+2-j), ksize+1
+        call random_number(temp_real)
+        a(band_row, j) = temp_real * 2.0 - 1.0  ! Scale to [-1,1]
+      end do
+    end do
+    call random_number(x)
+    x = x * 2.0 - 1.0  ! Scale to [-1,1]
+    
+    ! Initialize input derivatives to random values (exactly like scalar mode)
+    do idir = 1, nbdirs
+      call random_number(a_dv(idir,:,:))
+      a_dv(idir,:,:) = a_dv(idir,:,:) * 2.0 - 1.0
+    end do
+    do idir = 1, nbdirs
+      call random_number(x_dv(idir,:))
+      x_dv(idir,:) = x_dv(idir,:) * 2.0 - 1.0
+    end do
+    
+    write(*,*) 'Testing STBMV (Vector Forward Mode)'
+    ! Store original values before any function calls (critical for INOUT parameters)
+    a_orig = a
+    a_dv_orig = a_dv
+    x_orig = x
+    x_dv_orig = x_dv
+    
+    ! Call the vector mode differentiated function
+    
+    call stbmv_dv(uplo, trans, diag, nsize, ksize, a, a_dv, lda_val, x, x_dv, incx_val, nbdirs)
+    
+    ! Print results and compare
+    write(*,*) 'Function calls completed successfully'
+    
+    ! Numerical differentiation check
+    call check_derivatives_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_derivatives_numerically(passed)
     implicit none

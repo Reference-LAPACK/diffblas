@@ -297,7 +297,7 @@ $(BUILD_DIR)/libdiffblas_d.a: compile-d $(DIFFSIZES_ACCESS_OBJ)
 	@echo "Created libdiffblas_d.a with $$(ls $(BUILD_DIR)/*_d.o 2>/dev/null | wc -w) objects"
 
 $(BUILD_DIR)/libdiffblas_d.so: compile-d
-	@$(FC) -shared -o $@ $$(ls $(BUILD_DIR)/*_d.o 2>/dev/null)
+	@objs="$$(ls $(BUILD_DIR)/*_d.o 2>/dev/null)"; if [ -n "$$objs" ]; then $(FC) -shared -o $@ $$objs; else touch $@; fi
 
 # Single library for all reverse mode differentiated code
 $(BUILD_DIR)/libdiffblas_b.a: compile-b $(DIFFSIZES_ACCESS_OBJ)
@@ -305,7 +305,7 @@ $(BUILD_DIR)/libdiffblas_b.a: compile-b $(DIFFSIZES_ACCESS_OBJ)
 	@echo "Created libdiffblas_b.a with $$(ls $(BUILD_DIR)/*_b.o 2>/dev/null | wc -w) objects"
 
 $(BUILD_DIR)/libdiffblas_b.so: compile-b $(DIFFSIZES_ACCESS_OBJ)
-	@$(FC) -shared -o $@ $$(ls $(BUILD_DIR)/*_b.o 2>/dev/null) $(BUILD_DIR)/adStack.o $(DIFFSIZES_ACCESS_OBJ)
+	@objs="$$(ls $(BUILD_DIR)/*_b.o 2>/dev/null)"; if [ -n "$$objs" ]; then $(FC) -shared -o $@ $$objs $(BUILD_DIR)/adStack.o $(DIFFSIZES_ACCESS_OBJ); else touch $@; fi
 
 # Single library for all vector forward mode differentiated code
 $(BUILD_DIR)/libdiffblas_dv.a: compile-dv $(DIFFSIZES_ACCESS_OBJ)
@@ -313,7 +313,7 @@ $(BUILD_DIR)/libdiffblas_dv.a: compile-dv $(DIFFSIZES_ACCESS_OBJ)
 	@echo "Created libdiffblas_dv.a with $$(ls $(BUILD_DIR)/*_dv.o 2>/dev/null | wc -w) objects"
 
 $(BUILD_DIR)/libdiffblas_dv.so: compile-dv
-	@$(FC) -shared -o $@ $$(ls $(BUILD_DIR)/*_dv.o 2>/dev/null) $(BUILD_DIR)/DIFFSIZES.o
+	@objs="$$(ls $(BUILD_DIR)/*_dv.o 2>/dev/null)"; if [ -n "$$objs" ]; then $(FC) -shared -o $@ $$objs $(BUILD_DIR)/DIFFSIZES.o; else touch $@; fi
 
 # Single library for all vector reverse mode differentiated code
 $(BUILD_DIR)/libdiffblas_bv.a: compile-bv $(DIFFSIZES_ACCESS_OBJ)
@@ -321,7 +321,7 @@ $(BUILD_DIR)/libdiffblas_bv.a: compile-bv $(DIFFSIZES_ACCESS_OBJ)
 	@echo "Created libdiffblas_bv.a with $$(ls $(BUILD_DIR)/*_bv.o 2>/dev/null | wc -w) objects"
 
 $(BUILD_DIR)/libdiffblas_bv.so: compile-bv $(DIFFSIZES_ACCESS_OBJ)
-	@$(FC) -shared -o $@ $$(ls $(BUILD_DIR)/*_bv.o 2>/dev/null) $(BUILD_DIR)/adStack.o $(BUILD_DIR)/DIFFSIZES.o $(DIFFSIZES_ACCESS_OBJ)
+	@objs="$$(ls $(BUILD_DIR)/*_bv.o 2>/dev/null)"; if [ -n "$$objs" ]; then $(FC) -shared -o $@ $$objs $(BUILD_DIR)/adStack.o $(BUILD_DIR)/DIFFSIZES.o $(DIFFSIZES_ACCESS_OBJ); else touch $@; fi
 
 # Note: Original BLAS functions come from $(BLAS_LIB) (librefblas in LAPACKDIR)
 # No need to build a separate liborigblas

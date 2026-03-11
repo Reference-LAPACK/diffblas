@@ -51,15 +51,15 @@ contains
     integer :: ldc_val
 
     ! Derivative variables
+    real(4) :: alpha_d
     real(4), dimension(n,n) :: a_d
     real(4) :: beta_d
-    real(4) :: alpha_d
     real(4), dimension(n,n) :: c_d
 
     ! Array restoration and derivative storage
+    real(4) :: alpha_orig, alpha_d_orig
     real(4), dimension(n,n) :: a_orig, a_d_orig
     real(4) :: beta_orig, beta_d_orig
-    real(4) :: alpha_orig, alpha_d_orig
     real(4), dimension(n,n) :: c_orig, c_d_orig
     integer :: i, j
 
@@ -80,23 +80,23 @@ contains
     c = c * 2.0d0 - 1.0d0  ! Scale to [-1,1]
 
     ! Initialize input derivatives
+    call random_number(alpha_d)
+    alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(a_d)
     a_d = a_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(beta_d)
     beta_d = beta_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-    call random_number(alpha_d)
-    alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(c_d)
     c_d = c_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
     ! Store _orig and _d_orig
+    alpha_d_orig = alpha_d
     a_d_orig = a_d
     beta_d_orig = beta_d
-    alpha_d_orig = alpha_d
     c_d_orig = c_d
+    alpha_orig = alpha
     a_orig = a
     beta_orig = beta
-    alpha_orig = alpha
     c_orig = c
 
     write(*,*) 'Testing SSYRK (n =', n, ')'

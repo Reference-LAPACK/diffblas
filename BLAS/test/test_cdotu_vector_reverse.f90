@@ -57,56 +57,7 @@ program test_cdotu_vector_reverse
     n = test_sizes(itest)
     write(*,*) 'Testing CDOTU (Vector Reverse, n =', n, ')'
 
-  ! Initialize primal values
-  nsize = n
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    cx(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-  end do
-  incx_val = 1
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    cy(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-  end do
-  incy_val = 1
-
-  ! Store original primal values
-  cx_orig = cx
-  cy_orig = cy
-
-  ! Initialize output adjoints (cotangents) with random values for each direction
-  ! These are the 'seeds' for reverse mode
-  ! Initialize function result adjoint (output cotangent)
-  do k = 1, nbdirs
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    cdotub(k) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-  end do
-
-  ! Initialize input adjoints to zero (they will be computed)
-  ! Note: Inout parameters are skipped - they already have output adjoints initialized
-  cxb = 0.0
-  cyb = 0.0
-
-  ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
-  cdotub_orig = cdotub
-
-  ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
-  call set_ISIZE1OFCx(n)
-  call set_ISIZE1OFCy(n)
-
-  ! Call reverse vector mode differentiated function
-  call cdotu_bv(nsize, cx, cxb, incx_val, cy, cyb, incy_val, cdotub, nbdirs)
-
-  ! Reset ISIZE globals to uninitialized (-1) for completeness
-  call set_ISIZE1OFCx(-1)
-  call set_ISIZE1OFCy(-1)
-
-  ! VJP Verification using finite differences
-  call check_vjp_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -116,6 +67,63 @@ program test_cdotu_vector_reverse
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize primal values
+    nsize = n
+    do i = 1, n
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      cx(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+    end do
+    incx_val = 1
+    do i = 1, n
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      cy(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+    end do
+    incy_val = 1
+    
+    ! Store original primal values
+    cx_orig = cx
+    cy_orig = cy
+    
+    ! Initialize output adjoints (cotangents) with random values for each direction
+    ! These are the 'seeds' for reverse mode
+    ! Initialize function result adjoint (output cotangent)
+    do k = 1, nbdirs
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      cdotub(k) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+    end do
+    
+    ! Initialize input adjoints to zero (they will be computed)
+    ! Note: Inout parameters are skipped - they already have output adjoints initialized
+    cxb = 0.0
+    cyb = 0.0
+    
+    ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
+    cdotub_orig = cdotub
+    
+    ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
+    ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
+    call set_ISIZE1OFCx(n)
+    call set_ISIZE1OFCy(n)
+    
+    ! Call reverse vector mode differentiated function
+    call cdotu_bv(nsize, cx, cxb, incx_val, cy, cyb, incy_val, cdotub, nbdirs)
+    
+    ! Reset ISIZE globals to uninitialized (-1) for completeness
+    call set_ISIZE1OFCx(-1)
+    call set_ISIZE1OFCy(-1)
+    
+    ! VJP Verification using finite differences
+    call check_vjp_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_vjp_numerically(passed)
     implicit none
@@ -170,19 +178,19 @@ contains
       ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
       ! For pure inputs: use adjoint directly
       vjp_ad = 0.0
-      ! Compute and sort products for cx
+      ! Compute and sort products for cy
       n_products = n
       do i = 1, n
-        temp_products(i) = real(conjg(cx_dir(i)) * cxb(k,i))
+        temp_products(i) = real(conjg(cy_dir(i)) * cyb(k,i))
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
-      ! Compute and sort products for cy
+      ! Compute and sort products for cx
       n_products = n
       do i = 1, n
-        temp_products(i) = real(conjg(cy_dir(i)) * cyb(k,i))
+        temp_products(i) = real(conjg(cx_dir(i)) * cxb(k,i))
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products

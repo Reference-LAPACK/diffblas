@@ -59,81 +59,7 @@ program test_dgbmv_vector_forward
     n = test_sizes(itest)
     write(*,*) 'Testing DGBMV (Vector Forward, n =', n, ')'
 
-  ! Initialize test parameters
-  msize = n
-  nsize = n
-  kl = 1
-  ku = 1
-  lda_val = lda
-  incx_val = 1
-  incy_val = 1
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
-  seed_array = 42
-  call random_seed(put=seed_array)
-
-  trans = 'N'
-  call random_number(alpha)
-  alpha = alpha * 2.0d0 - 1.0d0  ! Scale to [-1,1]
-  ! Initialize a as general band matrix (kl, ku band storage)
-  do j = 1, n
-    do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)
-      call random_number(temp_real)
-      a(band_row, j) = temp_real * 2.0 - 1.0
-    end do
-  end do
-  call random_number(x)
-  x = x * 2.0d0 - 1.0d0  ! Scale to [-1,1]
-  call random_number(beta)
-  beta = beta * 2.0d0 - 1.0d0  ! Scale to [-1,1]
-  call random_number(y)
-  y = y * 2.0d0 - 1.0d0  ! Scale to [-1,1]
-
-  ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirs
-    call random_number(temp_real)
-    alpha_dv(idir) = temp_real * 2.0d0 - 1.0d0
-  end do
-  do idir = 1, nbdirs
-    call random_number(a_dv(idir,:,:))
-    a_dv(idir,:,:) = a_dv(idir,:,:) * 2.0d0 - 1.0d0
-  end do
-  do idir = 1, nbdirs
-    call random_number(x_dv(idir,:))
-    x_dv(idir,:) = x_dv(idir,:) * 2.0d0 - 1.0d0
-  end do
-  do idir = 1, nbdirs
-    call random_number(temp_real)
-    beta_dv(idir) = temp_real * 2.0d0 - 1.0d0
-  end do
-  do idir = 1, nbdirs
-    call random_number(y_dv(idir,:))
-    y_dv(idir,:) = y_dv(idir,:) * 2.0d0 - 1.0d0
-  end do
-
-  write(*,*) 'Testing DGBMV (Vector Forward Mode)'
-  ! Store original values before any function calls (critical for INOUT parameters)
-  alpha_orig = alpha
-  alpha_dv_orig = alpha_dv
-  a_orig = a
-  a_dv_orig = a_dv
-  x_orig = x
-  x_dv_orig = x_dv
-  beta_orig = beta
-  beta_dv_orig = beta_dv
-  y_orig = y
-  y_dv_orig = y_dv
-
-  ! Call the vector mode differentiated function
-
-  call dgbmv_dv(trans, msize, nsize, kl, ku, alpha, alpha_dv, a, a_dv, lda_val, x, x_dv, incx_val, beta, beta_dv, y, y_dv, incy_val, nbdirs)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -143,6 +69,88 @@ program test_dgbmv_vector_forward
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize test parameters
+    msize = n
+    nsize = n
+    kl = 1
+    ku = 1
+    lda_val = lda
+    incx_val = 1
+    incy_val = 1
+    
+    ! Initialize test data with random numbers
+    ! Initialize random seed for reproducible results
+    seed_array = 42
+    call random_seed(put=seed_array)
+    
+    trans = 'N'
+    call random_number(alpha)
+    alpha = alpha * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+    ! Initialize a as general band matrix (kl, ku band storage)
+    do j = 1, n
+      do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)
+        call random_number(temp_real)
+        a(band_row, j) = temp_real * 2.0 - 1.0
+      end do
+    end do
+    call random_number(x)
+    x = x * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+    call random_number(beta)
+    beta = beta * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+    call random_number(y)
+    y = y * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+    
+    ! Initialize input derivatives to random values (exactly like scalar mode)
+    do idir = 1, nbdirs
+      call random_number(temp_real)
+      alpha_dv(idir) = temp_real * 2.0d0 - 1.0d0
+    end do
+    do idir = 1, nbdirs
+      call random_number(a_dv(idir,:,:))
+      a_dv(idir,:,:) = a_dv(idir,:,:) * 2.0d0 - 1.0d0
+    end do
+    do idir = 1, nbdirs
+      call random_number(x_dv(idir,:))
+      x_dv(idir,:) = x_dv(idir,:) * 2.0d0 - 1.0d0
+    end do
+    do idir = 1, nbdirs
+      call random_number(temp_real)
+      beta_dv(idir) = temp_real * 2.0d0 - 1.0d0
+    end do
+    do idir = 1, nbdirs
+      call random_number(y_dv(idir,:))
+      y_dv(idir,:) = y_dv(idir,:) * 2.0d0 - 1.0d0
+    end do
+    
+    write(*,*) 'Testing DGBMV (Vector Forward Mode)'
+    ! Store original values before any function calls (critical for INOUT parameters)
+    alpha_orig = alpha
+    alpha_dv_orig = alpha_dv
+    a_orig = a
+    a_dv_orig = a_dv
+    x_orig = x
+    x_dv_orig = x_dv
+    beta_orig = beta
+    beta_dv_orig = beta_dv
+    y_orig = y
+    y_dv_orig = y_dv
+    
+    ! Call the vector mode differentiated function
+    
+    call dgbmv_dv(trans, msize, nsize, kl, ku, alpha, alpha_dv, a, a_dv, lda_val, x, x_dv, incx_val, beta, beta_dv, y, y_dv, incy_val, nbdirs)
+    
+    ! Print results and compare
+    write(*,*) 'Function calls completed successfully'
+    
+    ! Numerical differentiation check
+    call check_derivatives_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_derivatives_numerically(passed)
     implicit none

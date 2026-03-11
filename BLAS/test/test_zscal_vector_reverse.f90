@@ -55,44 +55,7 @@ program test_zscal_vector_reverse
     n = test_sizes(itest)
     write(*,*) 'Testing ZSCAL (Vector Reverse, n =', n, ')'
 
-  ! Initialize primal values
-  nsize = n
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  za = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    zx(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-  end do
-  incx_val = 1
-
-  ! Store original primal values
-  za_orig = za
-  zx_orig = zx
-
-  ! Initialize output adjoints (cotangents) with random values for each direction
-  ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirs
-    do i = 1, n
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      zxb(k,i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-    end do
-  end do
-
-  ! Initialize input adjoints to zero (they will be computed)
-  ! Note: Inout parameters are skipped - they already have output adjoints initialized
-  zab = 0.0
-
-  ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
-  zxb_orig = zxb
-
-  ! Call reverse vector mode differentiated function
-  call zscal_bv(nsize, za, zab, zx, zxb, incx_val, nbdirs)
-
-  ! VJP Verification using finite differences
-  call check_vjp_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -102,6 +65,51 @@ program test_zscal_vector_reverse
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize primal values
+    nsize = n
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    za = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+    do i = 1, n
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      zx(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+    end do
+    incx_val = 1
+    
+    ! Store original primal values
+    za_orig = za
+    zx_orig = zx
+    
+    ! Initialize output adjoints (cotangents) with random values for each direction
+    ! These are the 'seeds' for reverse mode
+    do k = 1, nbdirs
+      do i = 1, n
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        zxb(k,i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+      end do
+    end do
+    
+    ! Initialize input adjoints to zero (they will be computed)
+    ! Note: Inout parameters are skipped - they already have output adjoints initialized
+    zab = 0.0
+    
+    ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
+    zxb_orig = zxb
+    
+    ! Call reverse vector mode differentiated function
+    call zscal_bv(nsize, za, zab, zx, zxb, incx_val, nbdirs)
+    
+    ! VJP Verification using finite differences
+    call check_vjp_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_vjp_numerically(passed)
     implicit none
@@ -169,6 +177,7 @@ contains
       ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
       ! For pure inputs: use adjoint directly
       vjp_ad = 0.0d0
+      vjp_ad = vjp_ad + real(conjg(za_dir) * zab(k))
       ! Compute and sort products for zx
       n_products = n
       do i = 1, n
@@ -178,7 +187,6 @@ contains
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
-      vjp_ad = vjp_ad + real(conjg(za_dir) * zab(k))
       
       ! Error check: |vjp_fd - vjp_ad| > atol + rtol * |vjp_ad|
       abs_error = abs(vjp_fd - vjp_ad)

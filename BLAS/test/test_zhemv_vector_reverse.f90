@@ -67,77 +67,7 @@ program test_zhemv_vector_reverse
     n = test_sizes(itest)
     write(*,*) 'Testing ZHEMV (Vector Reverse, n =', n, ')'
 
-  ! Initialize primal values
-  uplo = 'U'
-  nsize = n
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  alpha = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-  do j = 1, n
-    do i = 1, n
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      a(i,j) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-    end do
-  end do
-  lda_val = lda
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    x(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-  end do
-  incx_val = 1
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  beta = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    y(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-  end do
-  incy_val = 1
-
-  ! Store original primal values
-  alpha_orig = alpha
-  a_orig = a
-  x_orig = x
-  beta_orig = beta
-  y_orig = y
-
-  ! Initialize output adjoints (cotangents) with random values for each direction
-  ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirs
-    do i = 1, n
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      yb(k,i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-    end do
-  end do
-
-  ! Initialize input adjoints to zero (they will be computed)
-  ! Note: Inout parameters are skipped - they already have output adjoints initialized
-  alphab = 0.0
-  ab = 0.0
-  xb = 0.0
-  betab = 0.0
-
-  ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
-  yb_orig = yb
-
-  ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
-  call set_ISIZE1OFX(n)
-  call set_ISIZE2OFA(max_size)
-
-  ! Call reverse vector mode differentiated function
-  call zhemv_bv(uplo, nsize, alpha, alphab, a, ab, lda_val, x, xb, incx_val, beta, betab, y, yb, incy_val, nbdirs)
-
-  ! Reset ISIZE globals to uninitialized (-1) for completeness
-  call set_ISIZE1OFX(-1)
-  call set_ISIZE2OFA(-1)
-
-  ! VJP Verification using finite differences
-  call check_vjp_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -147,6 +77,84 @@ program test_zhemv_vector_reverse
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize primal values
+    uplo = 'U'
+    nsize = n
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    alpha = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+    do j = 1, n
+      do i = 1, n
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        a(i,j) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+      end do
+    end do
+    lda_val = lda
+    do i = 1, n
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      x(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+    end do
+    incx_val = 1
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    beta = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+    do i = 1, n
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      y(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+    end do
+    incy_val = 1
+    
+    ! Store original primal values
+    alpha_orig = alpha
+    a_orig = a
+    x_orig = x
+    beta_orig = beta
+    y_orig = y
+    
+    ! Initialize output adjoints (cotangents) with random values for each direction
+    ! These are the 'seeds' for reverse mode
+    do k = 1, nbdirs
+      do i = 1, n
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        yb(k,i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+      end do
+    end do
+    
+    ! Initialize input adjoints to zero (they will be computed)
+    ! Note: Inout parameters are skipped - they already have output adjoints initialized
+    alphab = 0.0
+    ab = 0.0
+    xb = 0.0
+    betab = 0.0
+    
+    ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
+    yb_orig = yb
+    
+    ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
+    ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
+    call set_ISIZE1OFX(n)
+    call set_ISIZE2OFA(max_size)
+    
+    ! Call reverse vector mode differentiated function
+    call zhemv_bv(uplo, nsize, alpha, alphab, a, ab, lda_val, x, xb, incx_val, beta, betab, y, yb, incy_val, nbdirs)
+    
+    ! Reset ISIZE globals to uninitialized (-1) for completeness
+    call set_ISIZE1OFX(-1)
+    call set_ISIZE2OFA(-1)
+    
+    ! VJP Verification using finite differences
+    call check_vjp_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_vjp_numerically(passed)
     implicit none
@@ -260,19 +268,19 @@ contains
         vjp_ad = vjp_ad + temp_products(i)
       end do
       vjp_ad = vjp_ad + real(conjg(alpha_dir) * alphab(k))
-      ! Compute and sort products for y
+      ! Compute and sort products for x
       n_products = n
       do i = 1, n
-        temp_products(i) = real(conjg(y_dir(i)) * yb(k,i))
+        temp_products(i) = real(conjg(x_dir(i)) * xb(k,i))
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
-      ! Compute and sort products for x
+      ! Compute and sort products for y
       n_products = n
       do i = 1, n
-        temp_products(i) = real(conjg(x_dir(i)) * xb(k,i))
+        temp_products(i) = real(conjg(y_dir(i)) * yb(k,i))
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products

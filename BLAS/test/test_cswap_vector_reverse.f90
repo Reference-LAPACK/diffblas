@@ -32,8 +32,8 @@ program test_cswap_vector_reverse
   complex(4), dimension(nbdirs,max_size) :: cyb
 
   ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  complex(4), dimension(nbdirs,max_size) :: cxb_orig
   complex(4), dimension(nbdirs,max_size) :: cyb_orig
+  complex(4), dimension(nbdirs,max_size) :: cxb_orig
 
   ! Storage for original values (for VJP verification)
   complex(4), dimension(max_size) :: cx_orig
@@ -57,54 +57,7 @@ program test_cswap_vector_reverse
     n = test_sizes(itest)
     write(*,*) 'Testing CSWAP (Vector Reverse, n =', n, ')'
 
-  ! Initialize primal values
-  nsize = n
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    cx(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-  end do
-  incx_val = 1
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    cy(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-  end do
-  incy_val = 1
-
-  ! Store original primal values
-  cx_orig = cx
-  cy_orig = cy
-
-  ! Initialize output adjoints (cotangents) with random values for each direction
-  ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirs
-    do i = 1, n
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      cxb(k,i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-    end do
-  end do
-  do k = 1, nbdirs
-    do i = 1, n
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      cyb(k,i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-    end do
-  end do
-
-  ! Initialize input adjoints to zero (they will be computed)
-  ! Note: Inout parameters are skipped - they already have output adjoints initialized
-
-  ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
-  cxb_orig = cxb
-  cyb_orig = cyb
-
-  ! Call reverse vector mode differentiated function
-  call cswap_bv(nsize, cx, cxb, incx_val, cy, cyb, incy_val, nbdirs)
-
-  ! VJP Verification using finite differences
-  call check_vjp_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -115,6 +68,61 @@ program test_cswap_vector_reverse
 
 contains
 
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize primal values
+    nsize = n
+    do i = 1, n
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      cx(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+    end do
+    incx_val = 1
+    do i = 1, n
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      cy(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+    end do
+    incy_val = 1
+    
+    ! Store original primal values
+    cx_orig = cx
+    cy_orig = cy
+    
+    ! Initialize output adjoints (cotangents) with random values for each direction
+    ! These are the 'seeds' for reverse mode
+    do k = 1, nbdirs
+      do i = 1, n
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        cxb(k,i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+      end do
+    end do
+    do k = 1, nbdirs
+      do i = 1, n
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        cyb(k,i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+      end do
+    end do
+    
+    ! Initialize input adjoints to zero (they will be computed)
+    ! Note: Inout parameters are skipped - they already have output adjoints initialized
+    
+    ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
+    cyb_orig = cyb
+    cxb_orig = cxb
+    
+    ! Call reverse vector mode differentiated function
+    call cswap_bv(nsize, cx, cxb, incx_val, cy, cyb, incy_val, nbdirs)
+    
+    ! VJP Verification using finite differences
+    call check_vjp_numerically(passed)
+  end subroutine run_test_for_size
+
   subroutine check_vjp_numerically(passed)
     implicit none
     logical, intent(out) :: passed
@@ -122,8 +130,8 @@ contains
     ! Direction vectors for VJP testing
     complex(4), dimension(max_size) :: cx_dir
     complex(4), dimension(max_size) :: cy_dir
-    complex(4), dimension(max_size) :: cx_plus, cx_minus, cx_central_diff
     complex(4), dimension(max_size) :: cy_plus, cy_minus, cy_central_diff
+    complex(4), dimension(max_size) :: cx_plus, cx_minus, cx_central_diff
     
     max_error = 0.0d0
     has_large_errors = .false.
@@ -152,40 +160,40 @@ contains
       cx = cx_orig + cmplx(h, 0.0) * cx_dir
       cy = cy_orig + cmplx(h, 0.0) * cy_dir
       call cswap(nsize, cx, incx_val, cy, incy_val)
-      cx_plus = cx
       cy_plus = cy
+      cx_plus = cx
       
       ! Backward perturbation: f(x - h*dir)
       cx = cx_orig - cmplx(h, 0.0) * cx_dir
       cy = cy_orig - cmplx(h, 0.0) * cy_dir
       call cswap(nsize, cx, incx_val, cy, incy_val)
-      cx_minus = cx
       cy_minus = cy
+      cx_minus = cx
       
       ! Compute central differences and VJP verification
       ! VJP check: direction^T @ adjoint should equal finite difference
       
       ! Compute central differences: (f(x+h*dir) - f(x-h*dir)) / (2h)
-      cx_central_diff = (cx_plus - cx_minus) / (2.0 * h)
       cy_central_diff = (cy_plus - cy_minus) / (2.0 * h)
+      cx_central_diff = (cx_plus - cx_minus) / (2.0 * h)
       
       ! VJP verification:
       ! cotangent^T @ central_diff should equal direction^T @ computed_adjoint
       ! Left side: cotangent^T @ Jacobian @ direction (via finite differences, with sorted summation)
       vjp_fd = 0.0
-      ! Compute and sort products for cx (FD)
+      ! Compute and sort products for cy (FD)
       n_products = n
       do i = 1, n
-        temp_products(i) = real(conjg(cxb_orig(k,i)) * cx_central_diff(i))
+        temp_products(i) = real(conjg(cyb_orig(k,i)) * cy_central_diff(i))
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products
         vjp_fd = vjp_fd + temp_products(i)
       end do
-      ! Compute and sort products for cy (FD)
+      ! Compute and sort products for cx (FD)
       n_products = n
       do i = 1, n
-        temp_products(i) = real(conjg(cyb_orig(k,i)) * cy_central_diff(i))
+        temp_products(i) = real(conjg(cxb_orig(k,i)) * cx_central_diff(i))
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products
@@ -196,19 +204,19 @@ contains
       ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
       ! For pure inputs: use adjoint directly
       vjp_ad = 0.0
-      ! Compute and sort products for cx
+      ! Compute and sort products for cy
       n_products = n
       do i = 1, n
-        temp_products(i) = real(conjg(cx_dir(i)) * cxb(k,i))
+        temp_products(i) = real(conjg(cy_dir(i)) * cyb(k,i))
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
-      ! Compute and sort products for cy
+      ! Compute and sort products for cx
       n_products = n
       do i = 1, n
-        temp_products(i) = real(conjg(cy_dir(i)) * cyb(k,i))
+        temp_products(i) = real(conjg(cx_dir(i)) * cxb(k,i))
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products

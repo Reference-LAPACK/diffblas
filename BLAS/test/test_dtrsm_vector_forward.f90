@@ -51,60 +51,7 @@ program test_dtrsm_vector_forward
     n = test_sizes(itest)
     write(*,*) 'Testing DTRSM (Vector Forward, n =', n, ')'
 
-  ! Initialize test parameters
-  msize = n
-  nsize = n
-  lda_val = lda
-  ldb_val = ldb
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
-  seed_array = 42
-  call random_seed(put=seed_array)
-
-  side = 'L'
-  uplo = 'U'
-  transa = 'N'
-  diag = 'N'
-  call random_number(alpha)
-  alpha = alpha * 2.0d0 - 1.0d0  ! Scale to [-1,1]
-  call random_number(a)
-  a = a * 2.0d0 - 1.0d0  ! Scale to [-1,1]
-  call random_number(b)
-  b = b * 2.0d0 - 1.0d0  ! Scale to [-1,1]
-
-  ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirs
-    call random_number(temp_real)
-    alpha_dv(idir) = temp_real * 2.0d0 - 1.0d0
-  end do
-  do idir = 1, nbdirs
-    call random_number(a_dv(idir,:,:))
-    a_dv(idir,:,:) = a_dv(idir,:,:) * 2.0d0 - 1.0d0
-  end do
-  do idir = 1, nbdirs
-    call random_number(b_dv(idir,:,:))
-    b_dv(idir,:,:) = b_dv(idir,:,:) * 2.0d0 - 1.0d0
-  end do
-
-  write(*,*) 'Testing DTRSM (Vector Forward Mode)'
-  ! Store original values before any function calls (critical for INOUT parameters)
-  alpha_orig = alpha
-  alpha_dv_orig = alpha_dv
-  a_orig = a
-  a_dv_orig = a_dv
-  b_orig = b
-  b_dv_orig = b_dv
-
-  ! Call the vector mode differentiated function
-
-  call dtrsm_dv(side, uplo, transa, diag, msize, nsize, alpha, alpha_dv, a, a_dv, lda_val, b, b_dv, ldb_val, nbdirs)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -114,6 +61,67 @@ program test_dtrsm_vector_forward
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize test parameters
+    msize = n
+    nsize = n
+    lda_val = lda
+    ldb_val = ldb
+    
+    ! Initialize test data with random numbers
+    ! Initialize random seed for reproducible results
+    seed_array = 42
+    call random_seed(put=seed_array)
+    
+    side = 'L'
+    uplo = 'U'
+    transa = 'N'
+    diag = 'N'
+    call random_number(alpha)
+    alpha = alpha * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+    call random_number(a)
+    a = a * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+    call random_number(b)
+    b = b * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+    
+    ! Initialize input derivatives to random values (exactly like scalar mode)
+    do idir = 1, nbdirs
+      call random_number(temp_real)
+      alpha_dv(idir) = temp_real * 2.0d0 - 1.0d0
+    end do
+    do idir = 1, nbdirs
+      call random_number(a_dv(idir,:,:))
+      a_dv(idir,:,:) = a_dv(idir,:,:) * 2.0d0 - 1.0d0
+    end do
+    do idir = 1, nbdirs
+      call random_number(b_dv(idir,:,:))
+      b_dv(idir,:,:) = b_dv(idir,:,:) * 2.0d0 - 1.0d0
+    end do
+    
+    write(*,*) 'Testing DTRSM (Vector Forward Mode)'
+    ! Store original values before any function calls (critical for INOUT parameters)
+    alpha_orig = alpha
+    alpha_dv_orig = alpha_dv
+    a_orig = a
+    a_dv_orig = a_dv
+    b_orig = b
+    b_dv_orig = b_dv
+    
+    ! Call the vector mode differentiated function
+    
+    call dtrsm_dv(side, uplo, transa, diag, msize, nsize, alpha, alpha_dv, a, a_dv, lda_val, b, b_dv, ldb_val, nbdirs)
+    
+    ! Print results and compare
+    write(*,*) 'Function calls completed successfully'
+    
+    ! Numerical differentiation check
+    call check_derivatives_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_derivatives_numerically(passed)
     implicit none

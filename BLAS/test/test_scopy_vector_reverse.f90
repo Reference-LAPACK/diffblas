@@ -56,45 +56,7 @@ program test_scopy_vector_reverse
     n = test_sizes(itest)
     write(*,*) 'Testing SCOPY (Vector Reverse, n =', n, ')'
 
-  ! Initialize primal values
-  nsize = n
-  call random_number(sx)
-  sx = sx * 2.0 - 1.0
-  incx_val = 1
-  call random_number(sy)
-  sy = sy * 2.0 - 1.0
-  incy_val = 1
-
-  ! Store original primal values
-  sx_orig = sx
-  sy_orig = sy
-
-  ! Initialize output adjoints (cotangents) with random values for each direction
-  ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirs
-    call random_number(syb(k,:))
-    syb(k,:) = syb(k,:) * 2.0 - 1.0
-  end do
-
-  ! Initialize input adjoints to zero (they will be computed)
-  ! Note: Inout parameters are skipped - they already have output adjoints initialized
-  sxb = 0.0
-
-  ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
-  syb_orig = syb
-
-  ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
-  call set_ISIZE1OFSx(n)
-
-  ! Call reverse vector mode differentiated function
-  call scopy_bv(nsize, sx, sxb, incx_val, sy, syb, incy_val, nbdirs)
-
-  ! Reset ISIZE globals to uninitialized (-1) for completeness
-  call set_ISIZE1OFSx(-1)
-
-  ! VJP Verification using finite differences
-  call check_vjp_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -104,6 +66,52 @@ program test_scopy_vector_reverse
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize primal values
+    nsize = n
+    call random_number(sx)
+    sx = sx * 2.0 - 1.0
+    incx_val = 1
+    call random_number(sy)
+    sy = sy * 2.0 - 1.0
+    incy_val = 1
+    
+    ! Store original primal values
+    sx_orig = sx
+    sy_orig = sy
+    
+    ! Initialize output adjoints (cotangents) with random values for each direction
+    ! These are the 'seeds' for reverse mode
+    do k = 1, nbdirs
+      call random_number(syb(k,:))
+      syb(k,:) = syb(k,:) * 2.0 - 1.0
+    end do
+    
+    ! Initialize input adjoints to zero (they will be computed)
+    ! Note: Inout parameters are skipped - they already have output adjoints initialized
+    sxb = 0.0
+    
+    ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
+    syb_orig = syb
+    
+    ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
+    ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
+    call set_ISIZE1OFSx(n)
+    
+    ! Call reverse vector mode differentiated function
+    call scopy_bv(nsize, sx, sxb, incx_val, sy, syb, incy_val, nbdirs)
+    
+    ! Reset ISIZE globals to uninitialized (-1) for completeness
+    call set_ISIZE1OFSx(-1)
+    
+    ! VJP Verification using finite differences
+    call check_vjp_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_vjp_numerically(passed)
     implicit none

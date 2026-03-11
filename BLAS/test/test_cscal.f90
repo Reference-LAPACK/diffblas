@@ -45,12 +45,12 @@ contains
     integer :: incx
 
     ! Derivative variables
-    complex(4), dimension(n) :: cx_d
     complex(4) :: ca_d
+    complex(4), dimension(n) :: cx_d
 
     ! Array restoration and derivative storage
-    complex(4), dimension(n) :: cx_orig, cx_d_orig
     complex(4) :: ca_orig, ca_d_orig
+    complex(4), dimension(n) :: cx_orig, cx_d_orig
     real(4) :: temp_re, temp_im  ! For complex random init
     integer :: i, j
 
@@ -67,20 +67,20 @@ contains
     end do
 
     ! Initialize input derivatives
+    call random_number(temp_re)
+    call random_number(temp_im)
+    ca_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
     do i = 1, n
       call random_number(temp_re)
       call random_number(temp_im)
       cx_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
     end do
-    call random_number(temp_re)
-    call random_number(temp_im)
-    ca_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
 
     ! Store _orig and _d_orig
-    cx_d_orig = cx_d
     ca_d_orig = ca_d
-    cx_orig = cx
+    cx_d_orig = cx_d
     ca_orig = ca
+    cx_orig = cx
 
     write(*,*) 'Testing CSCAL (n =', n, ')'
     cx_orig = cx
@@ -91,16 +91,16 @@ contains
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, nsize, cx_orig, ca_orig, cx_d_orig, ca_d_orig, cx_d, passed)
+    call check_derivatives_numerically(n, nsize, ca_orig, cx_orig, ca_d_orig, cx_d_orig, cx_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, nsize, cx_orig, ca_orig, cx_d_orig, ca_d_orig, cx_d, passed)
+  subroutine check_derivatives_numerically(n, nsize, ca_orig, cx_orig, ca_d_orig, cx_d_orig, cx_d, passed)
     implicit none
     integer, intent(in) :: n
     integer, intent(in) :: nsize
-    complex(4), intent(in) :: cx_orig(n), cx_d_orig(n)
     complex(4), intent(in) :: ca_orig, ca_d_orig
+    complex(4), intent(in) :: cx_orig(n), cx_d_orig(n)
     complex(4), intent(in) :: cx_d(n)
     logical, intent(out) :: passed
 
@@ -111,8 +111,8 @@ contains
     logical :: has_large_errors
     complex(4), dimension(n) :: cx_forward, cx_backward
     integer :: i, j
-    complex(4), dimension(n) :: cx
     complex(4) :: ca
+    complex(4), dimension(n) :: cx
 
     max_error = 0.0e0
     has_large_errors = .false.
@@ -121,14 +121,14 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    cx = cx_orig + h * cx_d_orig
     ca = ca_orig + h * ca_d_orig
+    cx = cx_orig + h * cx_d_orig
     call cscal(nsize, ca, cx, 1)
     cx_forward = cx
 
     ! Backward perturbation: f(x - h)
-    cx = cx_orig - h * cx_d_orig
     ca = ca_orig - h * ca_d_orig
+    cx = cx_orig - h * cx_d_orig
     call cscal(nsize, ca, cx, 1)
     cx_backward = cx
 

@@ -71,70 +71,8 @@ program test_dgbmv_reverse
     n = test_sizes(itest)
     write(*,*) 'Testing DGBMV (n =', n, ')'
 
-  ! Initialize primal values
-  trans = 'N'
-  msize = n
-  nsize = n
-  kl = 1
-  ku = 1
-  call random_number(alpha)
-  alpha = alpha * 2.0d0 - 1.0d0
-  ! Initialize a as general band matrix (kl, ku band storage)
-  do j = 1, n
-    do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)
-      call random_number(temp_real)
-      a(band_row, j) = temp_real * 2.0 - 1.0
-    end do
-  end do
-  lda_val = lda
-  call random_number(x)
-  x = x * 2.0d0 - 1.0d0
-  incx_val = 1
-  call random_number(beta)
-  beta = beta * 2.0d0 - 1.0d0
-  call random_number(y)
-  y = y * 2.0d0 - 1.0d0
-  incy_val = 1
-
-  ! Store original primal values
-  alpha_orig = alpha
-  a_orig = a
-  x_orig = x
-  beta_orig = beta
-  y_orig = y
-
-  ! Initialize output adjoints (cotangents) with random values
-  ! These are the 'seeds' for reverse mode
-  call random_number(yb)
-  yb = yb * 2.0d0 - 1.0d0
-
-  ! Save output adjoints (cotangents) for VJP verification
-  ! Note: output adjoints may be modified by reverse mode function
-  yb_orig = yb
-
-  ! Initialize input adjoints to zero (they will be computed)
-  ab = 0.0d0
-  alphab = 0.0d0
-  xb = 0.0d0
-  betab = 0.0d0
-
-  ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! Differentiated code checks they are set via check_ISIZE*_initialized.
-  call set_ISIZE1OFX(max_size)
-  call set_ISIZE2OFA(max_size)
-
-  ! Call reverse mode differentiated function
-  call dgbmv_b(trans, msize, nsize, kl, ku, alpha, alphab, a, ab, lda_val, x, xb, incx_val, beta, betab, y, yb, incy_val)
-
-  ! Reset ISIZE globals to uninitialized (-1) for completeness
-  call set_ISIZE1OFX(-1)
-  call set_ISIZE2OFA(-1)
-
-  ! VJP Verification using finite differences
-  ! For reverse mode, we verify: cotangent^T @ J @ direction = direction^T @ adjoint
-  ! Equivalently: cotangent^T @ (f(x+h*dir) - f(x-h*dir))/(2h) should equal dir^T @ computed_adjoint
-  call check_vjp_numerically(passed)
-  all_passed = all_passed .and. passed
+    call run_test_for_size(n, passed)
+    all_passed = all_passed .and. passed
   end do
   if (all_passed) then
     write(*,*) 'PASS: All sizes completed successfully'
@@ -143,6 +81,77 @@ program test_dgbmv_reverse
   end if
 
 contains
+
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+      ! Initialize primal values
+      trans = 'N'
+      msize = n
+      nsize = n
+      kl = 1
+      ku = 1
+      call random_number(alpha)
+      alpha = alpha * 2.0d0 - 1.0d0
+      ! Initialize a as general band matrix (kl, ku band storage)
+      do j = 1, n
+        do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)
+          call random_number(temp_real)
+          a(band_row, j) = temp_real * 2.0 - 1.0
+        end do
+      end do
+      lda_val = lda
+      call random_number(x)
+      x = x * 2.0d0 - 1.0d0
+      incx_val = 1
+      call random_number(beta)
+      beta = beta * 2.0d0 - 1.0d0
+      call random_number(y)
+      y = y * 2.0d0 - 1.0d0
+      incy_val = 1
+
+      ! Store original primal values
+      alpha_orig = alpha
+      a_orig = a
+      x_orig = x
+      beta_orig = beta
+      y_orig = y
+
+      ! Initialize output adjoints (cotangents) with random values
+      ! These are the 'seeds' for reverse mode
+      call random_number(yb)
+      yb = yb * 2.0d0 - 1.0d0
+
+      ! Save output adjoints (cotangents) for VJP verification
+      ! Note: output adjoints may be modified by reverse mode function
+      yb_orig = yb
+
+      ! Initialize input adjoints to zero (they will be computed)
+      ab = 0.0d0
+      alphab = 0.0d0
+      xb = 0.0d0
+      betab = 0.0d0
+
+      ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
+      ! Differentiated code checks they are set via check_ISIZE*_initialized.
+      call set_ISIZE1OFX(max_size)
+      call set_ISIZE2OFA(max_size)
+
+      ! Call reverse mode differentiated function
+      call dgbmv_b(trans, msize, nsize, kl, ku, alpha, alphab, a, ab, lda_val, x, xb, incx_val, beta, betab, y, yb, incy_val)
+
+      ! Reset ISIZE globals to uninitialized (-1) for completeness
+      call set_ISIZE1OFX(-1)
+      call set_ISIZE2OFA(-1)
+
+      ! VJP Verification using finite differences
+      ! For reverse mode, we verify: cotangent^T @ J @ direction = direction^T @ adjoint
+      ! Equivalently: cotangent^T @ (f(x+h*dir) - f(x-h*dir))/(2h) should equal dir^T @ computed_adjoint
+      call check_vjp_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_vjp_numerically(passed)
     implicit none

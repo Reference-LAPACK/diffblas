@@ -55,72 +55,7 @@ program test_dspmv_vector_forward
     n = test_sizes(itest)
     write(*,*) 'Testing DSPMV (Vector Forward, n =', n, ')'
 
-  ! Initialize test parameters
-  nsize = n
-  incx_val = 1
-  incy_val = 1
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
-  seed_array = 42
-  call random_seed(put=seed_array)
-
-  uplo = 'U'
-  call random_number(alpha)
-  alpha = alpha * 2.0d0 - 1.0d0  ! Scale to [-1,1]
-  call random_number(ap)
-  ap = ap * 2.0d0 - 1.0d0  ! Scale to [-1,1]
-  call random_number(x)
-  x = x * 2.0d0 - 1.0d0  ! Scale to [-1,1]
-  call random_number(beta)
-  beta = beta * 2.0d0 - 1.0d0  ! Scale to [-1,1]
-  call random_number(y)
-  y = y * 2.0d0 - 1.0d0  ! Scale to [-1,1]
-
-  ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirs
-    call random_number(temp_real)
-    alpha_dv(idir) = temp_real * 2.0d0 - 1.0d0
-  end do
-  do idir = 1, nbdirs
-    call random_number(ap_dv(idir,:))
-    ap_dv(idir,:) = ap_dv(idir,:) * 2.0d0 - 1.0d0
-  end do
-  do idir = 1, nbdirs
-    call random_number(x_dv(idir,:))
-    x_dv(idir,:) = x_dv(idir,:) * 2.0d0 - 1.0d0
-  end do
-  do idir = 1, nbdirs
-    call random_number(temp_real)
-    beta_dv(idir) = temp_real * 2.0d0 - 1.0d0
-  end do
-  do idir = 1, nbdirs
-    call random_number(y_dv(idir,:))
-    y_dv(idir,:) = y_dv(idir,:) * 2.0d0 - 1.0d0
-  end do
-
-  write(*,*) 'Testing DSPMV (Vector Forward Mode)'
-  ! Store original values before any function calls (critical for INOUT parameters)
-  alpha_orig = alpha
-  alpha_dv_orig = alpha_dv
-  ap_orig = ap
-  ap_dv_orig = ap_dv
-  x_orig = x
-  x_dv_orig = x_dv
-  beta_orig = beta
-  beta_dv_orig = beta_dv
-  y_orig = y
-  y_dv_orig = y_dv
-
-  ! Call the vector mode differentiated function
-
-  call dspmv_dv(uplo, nsize, alpha, alpha_dv, ap, ap_dv, x, x_dv, incx_val, beta, beta_dv, y, y_dv, incy_val, nbdirs)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -130,6 +65,79 @@ program test_dspmv_vector_forward
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize test parameters
+    nsize = n
+    incx_val = 1
+    incy_val = 1
+    
+    ! Initialize test data with random numbers
+    ! Initialize random seed for reproducible results
+    seed_array = 42
+    call random_seed(put=seed_array)
+    
+    uplo = 'U'
+    call random_number(alpha)
+    alpha = alpha * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+    call random_number(ap)
+    ap = ap * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+    call random_number(x)
+    x = x * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+    call random_number(beta)
+    beta = beta * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+    call random_number(y)
+    y = y * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+    
+    ! Initialize input derivatives to random values (exactly like scalar mode)
+    do idir = 1, nbdirs
+      call random_number(temp_real)
+      alpha_dv(idir) = temp_real * 2.0d0 - 1.0d0
+    end do
+    do idir = 1, nbdirs
+      call random_number(ap_dv(idir,:))
+      ap_dv(idir,:) = ap_dv(idir,:) * 2.0d0 - 1.0d0
+    end do
+    do idir = 1, nbdirs
+      call random_number(x_dv(idir,:))
+      x_dv(idir,:) = x_dv(idir,:) * 2.0d0 - 1.0d0
+    end do
+    do idir = 1, nbdirs
+      call random_number(temp_real)
+      beta_dv(idir) = temp_real * 2.0d0 - 1.0d0
+    end do
+    do idir = 1, nbdirs
+      call random_number(y_dv(idir,:))
+      y_dv(idir,:) = y_dv(idir,:) * 2.0d0 - 1.0d0
+    end do
+    
+    write(*,*) 'Testing DSPMV (Vector Forward Mode)'
+    ! Store original values before any function calls (critical for INOUT parameters)
+    alpha_orig = alpha
+    alpha_dv_orig = alpha_dv
+    ap_orig = ap
+    ap_dv_orig = ap_dv
+    x_orig = x
+    x_dv_orig = x_dv
+    beta_orig = beta
+    beta_dv_orig = beta_dv
+    y_orig = y
+    y_dv_orig = y_dv
+    
+    ! Call the vector mode differentiated function
+    
+    call dspmv_dv(uplo, nsize, alpha, alpha_dv, ap, ap_dv, x, x_dv, incx_val, beta, beta_dv, y, y_dv, incy_val, nbdirs)
+    
+    ! Print results and compare
+    write(*,*) 'Function calls completed successfully'
+    
+    ! Numerical differentiation check
+    call check_derivatives_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_derivatives_numerically(passed)
     implicit none

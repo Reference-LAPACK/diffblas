@@ -46,59 +46,7 @@ program test_cdotu_vector_forward
     n = test_sizes(itest)
     write(*,*) 'Testing CDOTU (Vector Forward, n =', n, ')'
 
-  ! Initialize test parameters
-  nsize = n
-  incx_val = 1
-  incy_val = 1
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
-  seed_array = 42
-  call random_seed(put=seed_array)
-
-  do i = 1, max_size
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    cx(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-  do i = 1, max_size
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    cy(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-
-  ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirs
-    do i = 1, max_size
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      cx_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-  end do
-  do idir = 1, nbdirs
-    do i = 1, max_size
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      cy_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-  end do
-
-  write(*,*) 'Testing CDOTU (Vector Forward Mode)'
-  ! Store original values before any function calls (critical for INOUT parameters)
-  cx_orig = cx
-  cx_dv_orig = cx_dv
-  cy_orig = cy
-  cy_dv_orig = cy_dv
-
-  ! Call the vector mode differentiated function
-
-  call cdotu_dv(nsize, cx, cx_dv, incx_val, cy, cy_dv, incy_val, cdotu_result, cdotu_dv_result, nbdirs)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -108,6 +56,66 @@ program test_cdotu_vector_forward
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize test parameters
+    nsize = n
+    incx_val = 1
+    incy_val = 1
+    
+    ! Initialize test data with random numbers
+    ! Initialize random seed for reproducible results
+    seed_array = 42
+    call random_seed(put=seed_array)
+    
+    do i = 1, max_size
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      cx(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end do
+    do i = 1, max_size
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      cy(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end do
+    
+    ! Initialize input derivatives to random values (exactly like scalar mode)
+    do idir = 1, nbdirs
+      do i = 1, max_size
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        cx_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      end do
+    end do
+    do idir = 1, nbdirs
+      do i = 1, max_size
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        cy_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      end do
+    end do
+    
+    write(*,*) 'Testing CDOTU (Vector Forward Mode)'
+    ! Store original values before any function calls (critical for INOUT parameters)
+    cx_orig = cx
+    cx_dv_orig = cx_dv
+    cy_orig = cy
+    cy_dv_orig = cy_dv
+    
+    ! Call the vector mode differentiated function
+    
+    call cdotu_dv(nsize, cx, cx_dv, incx_val, cy, cy_dv, incy_val, cdotu_result, cdotu_dv_result, nbdirs)
+    
+    ! Print results and compare
+    write(*,*) 'Function calls completed successfully'
+    
+    ! Numerical differentiation check
+    call check_derivatives_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_derivatives_numerically(passed)
     implicit none

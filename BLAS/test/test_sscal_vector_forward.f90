@@ -41,46 +41,7 @@ program test_sscal_vector_forward
     n = test_sizes(itest)
     write(*,*) 'Testing SSCAL (Vector Forward, n =', n, ')'
 
-  ! Initialize test parameters
-  nsize = n
-  incx_val = 1
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
-  seed_array = 42
-  call random_seed(put=seed_array)
-
-  call random_number(sa)
-  sa = sa * 2.0 - 1.0  ! Scale to [-1,1]
-  call random_number(sx)
-  sx = sx * 2.0 - 1.0  ! Scale to [-1,1]
-
-  ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirs
-    call random_number(temp_real)
-    sa_dv(idir) = temp_real * 2.0 - 1.0
-  end do
-  do idir = 1, nbdirs
-    call random_number(sx_dv(idir,:))
-    sx_dv(idir,:) = sx_dv(idir,:) * 2.0 - 1.0
-  end do
-
-  write(*,*) 'Testing SSCAL (Vector Forward Mode)'
-  ! Store original values before any function calls (critical for INOUT parameters)
-  sa_orig = sa
-  sa_dv_orig = sa_dv
-  sx_orig = sx
-  sx_dv_orig = sx_dv
-
-  ! Call the vector mode differentiated function
-
-  call sscal_dv(nsize, sa, sa_dv, sx, sx_dv, incx_val, nbdirs)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -90,6 +51,53 @@ program test_sscal_vector_forward
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize test parameters
+    nsize = n
+    incx_val = 1
+    
+    ! Initialize test data with random numbers
+    ! Initialize random seed for reproducible results
+    seed_array = 42
+    call random_seed(put=seed_array)
+    
+    call random_number(sa)
+    sa = sa * 2.0 - 1.0  ! Scale to [-1,1]
+    call random_number(sx)
+    sx = sx * 2.0 - 1.0  ! Scale to [-1,1]
+    
+    ! Initialize input derivatives to random values (exactly like scalar mode)
+    do idir = 1, nbdirs
+      call random_number(temp_real)
+      sa_dv(idir) = temp_real * 2.0 - 1.0
+    end do
+    do idir = 1, nbdirs
+      call random_number(sx_dv(idir,:))
+      sx_dv(idir,:) = sx_dv(idir,:) * 2.0 - 1.0
+    end do
+    
+    write(*,*) 'Testing SSCAL (Vector Forward Mode)'
+    ! Store original values before any function calls (critical for INOUT parameters)
+    sa_orig = sa
+    sa_dv_orig = sa_dv
+    sx_orig = sx
+    sx_dv_orig = sx_dv
+    
+    ! Call the vector mode differentiated function
+    
+    call sscal_dv(nsize, sa, sa_dv, sx, sx_dv, incx_val, nbdirs)
+    
+    ! Print results and compare
+    write(*,*) 'Function calls completed successfully'
+    
+    ! Numerical differentiation check
+    call check_derivatives_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_derivatives_numerically(passed)
     implicit none

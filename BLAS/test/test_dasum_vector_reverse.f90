@@ -53,42 +53,7 @@ program test_dasum_vector_reverse
     n = test_sizes(itest)
     write(*,*) 'Testing DASUM (Vector Reverse, n =', n, ')'
 
-  ! Initialize primal values
-  nsize = n
-  call random_number(dx)
-  dx = dx * 2.0 - 1.0
-  incx_val = 1
-
-  ! Store original primal values
-  dx_orig = dx
-
-  ! Initialize output adjoints (cotangents) with random values for each direction
-  ! These are the 'seeds' for reverse mode
-  ! Initialize function result adjoint (output cotangent)
-  do k = 1, nbdirs
-    call random_number(dasumb(k))
-    dasumb(k) = dasumb(k) * 2.0 - 1.0
-  end do
-
-  ! Initialize input adjoints to zero (they will be computed)
-  ! Note: Inout parameters are skipped - they already have output adjoints initialized
-  dxb = 0.0
-
-  ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
-  dasumb_orig = dasumb
-
-  ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
-  call set_ISIZE1OFDx(n)
-
-  ! Call reverse vector mode differentiated function
-  call dasum_bv(nsize, dx, dxb, incx_val, dasumb, nbdirs)
-
-  ! Reset ISIZE globals to uninitialized (-1) for completeness
-  call set_ISIZE1OFDx(-1)
-
-  ! VJP Verification using finite differences
-  call check_vjp_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -98,6 +63,49 @@ program test_dasum_vector_reverse
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize primal values
+    nsize = n
+    call random_number(dx)
+    dx = dx * 2.0 - 1.0
+    incx_val = 1
+    
+    ! Store original primal values
+    dx_orig = dx
+    
+    ! Initialize output adjoints (cotangents) with random values for each direction
+    ! These are the 'seeds' for reverse mode
+    ! Initialize function result adjoint (output cotangent)
+    do k = 1, nbdirs
+      call random_number(dasumb(k))
+      dasumb(k) = dasumb(k) * 2.0 - 1.0
+    end do
+    
+    ! Initialize input adjoints to zero (they will be computed)
+    ! Note: Inout parameters are skipped - they already have output adjoints initialized
+    dxb = 0.0
+    
+    ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
+    dasumb_orig = dasumb
+    
+    ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
+    ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
+    call set_ISIZE1OFDx(n)
+    
+    ! Call reverse vector mode differentiated function
+    call dasum_bv(nsize, dx, dxb, incx_val, dasumb, nbdirs)
+    
+    ! Reset ISIZE globals to uninitialized (-1) for completeness
+    call set_ISIZE1OFDx(-1)
+    
+    ! VJP Verification using finite differences
+    call check_vjp_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_vjp_numerically(passed)
     implicit none

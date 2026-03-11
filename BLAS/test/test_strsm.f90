@@ -52,14 +52,14 @@ contains
     integer :: ldb_val
 
     ! Derivative variables
-    real(4), dimension(n,n) :: a_d
-    real(4), dimension(n,n) :: b_d
     real(4) :: alpha_d
+    real(4), dimension(n,n) :: b_d
+    real(4), dimension(n,n) :: a_d
 
     ! Array restoration and derivative storage
-    real(4), dimension(n,n) :: a_orig, a_d_orig
-    real(4), dimension(n,n) :: b_orig, b_d_orig
     real(4) :: alpha_orig, alpha_d_orig
+    real(4), dimension(n,n) :: b_orig, b_d_orig
+    real(4), dimension(n,n) :: a_orig, a_d_orig
     integer :: i, j
 
     side = 'L'
@@ -79,20 +79,20 @@ contains
     b = b * 2.0d0 - 1.0d0  ! Scale to [-1,1]
 
     ! Initialize input derivatives
-    call random_number(a_d)
-    a_d = a_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-    call random_number(b_d)
-    b_d = b_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(alpha_d)
     alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(b_d)
+    b_d = b_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(a_d)
+    a_d = a_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
     ! Store _orig and _d_orig
-    a_d_orig = a_d
-    b_d_orig = b_d
     alpha_d_orig = alpha_d
-    a_orig = a
-    b_orig = b
+    b_d_orig = b_d
+    a_d_orig = a_d
     alpha_orig = alpha
+    b_orig = b
+    a_orig = a
 
     write(*,*) 'Testing STRSM (n =', n, ')'
     b_orig = b
@@ -103,11 +103,11 @@ contains
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, transa, uplo, side, diag, msize, nsize, lda_val, ldb_val, a_orig, alpha_orig, b_orig, a_d_orig, alpha_d_orig, b_d_orig, b_d, passed)
+    call check_derivatives_numerically(n, transa, uplo, side, diag, msize, nsize, lda_val, ldb_val, a_orig, b_orig, alpha_orig, a_d_orig, b_d_orig, alpha_d_orig, b_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, transa, uplo, side, diag, msize, nsize, lda_val, ldb_val, a_orig, alpha_orig, b_orig, a_d_orig, alpha_d_orig, b_d_orig, b_d, passed)
+  subroutine check_derivatives_numerically(n, transa, uplo, side, diag, msize, nsize, lda_val, ldb_val, a_orig, b_orig, alpha_orig, a_d_orig, b_d_orig, alpha_d_orig, b_d, passed)
     implicit none
     integer, intent(in) :: n
     character, intent(in) :: transa
@@ -119,8 +119,8 @@ contains
     integer, intent(in) :: lda_val
     integer, intent(in) :: ldb_val
     real(4), intent(in) :: a_orig(n,n), a_d_orig(n,n)
-    real(4), intent(in) :: alpha_orig, alpha_d_orig
     real(4), intent(in) :: b_orig(n,n), b_d_orig(n,n)
+    real(4), intent(in) :: alpha_orig, alpha_d_orig
     real(4), intent(in) :: b_d(n,n)
     logical, intent(out) :: passed
 
@@ -132,8 +132,8 @@ contains
     real(4), dimension(n,n) :: b_forward, b_backward
     integer :: i, j
     real(4), dimension(n,n) :: a
-    real(4) :: alpha
     real(4), dimension(n,n) :: b
+    real(4) :: alpha
 
     max_error = 0.0e0
     has_large_errors = .false.
@@ -143,15 +143,15 @@ contains
 
     ! Forward perturbation: f(x + h)
     a = a_orig + h * a_d_orig
-    alpha = alpha_orig + h * alpha_d_orig
     b = b_orig + h * b_d_orig
+    alpha = alpha_orig + h * alpha_d_orig
     call strsm(side, uplo, transa, diag, msize, nsize, alpha, a, lda_val, b, ldb_val)
     b_forward = b
 
     ! Backward perturbation: f(x - h)
     a = a_orig - h * a_d_orig
-    alpha = alpha_orig - h * alpha_d_orig
     b = b_orig - h * b_d_orig
+    alpha = alpha_orig - h * alpha_d_orig
     call strsm(side, uplo, transa, diag, msize, nsize, alpha, a, lda_val, b, ldb_val)
     b_backward = b
 

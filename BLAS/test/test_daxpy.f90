@@ -48,13 +48,13 @@ contains
 
     ! Derivative variables
     real(8) :: da_d
-    real(8), dimension(n) :: dy_d
     real(8), dimension(n) :: dx_d
+    real(8), dimension(n) :: dy_d
 
     ! Array restoration and derivative storage
     real(8) :: da_orig, da_d_orig
-    real(8), dimension(n) :: dy_orig, dy_d_orig
     real(8), dimension(n) :: dx_orig, dx_d_orig
+    real(8), dimension(n) :: dy_orig, dy_d_orig
     integer :: i, j
 
     nsize = n
@@ -71,18 +71,18 @@ contains
     ! Initialize input derivatives
     call random_number(da_d)
     da_d = da_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-    call random_number(dy_d)
-    dy_d = dy_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(dx_d)
     dx_d = dx_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(dy_d)
+    dy_d = dy_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
     ! Store _orig and _d_orig
     da_d_orig = da_d
-    dy_d_orig = dy_d
     dx_d_orig = dx_d
+    dy_d_orig = dy_d
     da_orig = da
-    dy_orig = dy
     dx_orig = dx
+    dy_orig = dy
 
     write(*,*) 'Testing DAXPY (n =', n, ')'
     dy_orig = dy
@@ -93,17 +93,17 @@ contains
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, nsize, da_orig, dy_orig, dx_orig, da_d_orig, dy_d_orig, dx_d_orig, dy_d, passed)
+    call check_derivatives_numerically(n, nsize, dx_orig, da_orig, dy_orig, dx_d_orig, da_d_orig, dy_d_orig, dy_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, nsize, da_orig, dy_orig, dx_orig, da_d_orig, dy_d_orig, dx_d_orig, dy_d, passed)
+  subroutine check_derivatives_numerically(n, nsize, dx_orig, da_orig, dy_orig, dx_d_orig, da_d_orig, dy_d_orig, dy_d, passed)
     implicit none
     integer, intent(in) :: n
     integer, intent(in) :: nsize
+    real(8), intent(in) :: dx_orig(n), dx_d_orig(n)
     real(8), intent(in) :: da_orig, da_d_orig
     real(8), intent(in) :: dy_orig(n), dy_d_orig(n)
-    real(8), intent(in) :: dx_orig(n), dx_d_orig(n)
     real(8), intent(in) :: dy_d(n)
     logical, intent(out) :: passed
 
@@ -114,9 +114,9 @@ contains
     logical :: has_large_errors
     real(8), dimension(n) :: dy_forward, dy_backward
     integer :: i, j
+    real(8), dimension(n) :: dx
     real(8) :: da
     real(8), dimension(n) :: dy
-    real(8), dimension(n) :: dx
 
     max_error = 0.0e0
     has_large_errors = .false.
@@ -125,16 +125,16 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
+    dx = dx_orig + h * dx_d_orig
     da = da_orig + h * da_d_orig
     dy = dy_orig + h * dy_d_orig
-    dx = dx_orig + h * dx_d_orig
     call daxpy(nsize, da, dx, 1, dy, 1)
     dy_forward = dy
 
     ! Backward perturbation: f(x - h)
+    dx = dx_orig - h * dx_d_orig
     da = da_orig - h * da_d_orig
     dy = dy_orig - h * dy_d_orig
-    dx = dx_orig - h * dx_d_orig
     call daxpy(nsize, da, dx, 1, dy, 1)
     dy_backward = dy
 

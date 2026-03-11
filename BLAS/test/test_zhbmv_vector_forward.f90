@@ -57,106 +57,7 @@ program test_zhbmv_vector_forward
     n = test_sizes(itest)
     write(*,*) 'Testing ZHBMV (Vector Forward, n =', n, ')'
 
-  ! Initialize test parameters
-  nsize = n
-  ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
-  lda_val = lda
-  incx_val = 1
-  incy_val = 1
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
-  seed_array = 42
-  call random_seed(put=seed_array)
-
-  uplo = 'U'
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  alpha = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  ! Initialize a as Hermitian band matrix (upper band storage, real diagonal)
-  do j = 1, n
-    do band_row = max(1, ksize+2-j), ksize+1
-      if (band_row .eq. ksize+1) then
-        call random_number(temp_real)
-        a(band_row, j) = cmplx(temp_real * 2.0 - 1.0, 0.0)  ! Real diagonal
-      else
-        call random_number(temp_real)
-        call random_number(temp_imag)
-        a(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-      end if
-    end do
-  end do
-  do i = 1, max_size
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    x(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  beta = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  do i = 1, max_size
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    y(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-
-  ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirs
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    alpha_dv(idir) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-  do idir = 1, nbdirs
-    do i = 1, max_size
-      do j = 1, max_size
-        call random_number(temp_real)
-        call random_number(temp_imag)
-        a_dv(idir,i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-      end do
-    end do
-  end do
-  do idir = 1, nbdirs
-    do i = 1, max_size
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      x_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-  end do
-  do idir = 1, nbdirs
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    beta_dv(idir) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-  do idir = 1, nbdirs
-    do i = 1, max_size
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      y_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-  end do
-
-  write(*,*) 'Testing ZHBMV (Vector Forward Mode)'
-  ! Store original values before any function calls (critical for INOUT parameters)
-  alpha_orig = alpha
-  alpha_dv_orig = alpha_dv
-  a_orig = a
-  a_dv_orig = a_dv
-  x_orig = x
-  x_dv_orig = x_dv
-  beta_orig = beta
-  beta_dv_orig = beta_dv
-  y_orig = y
-  y_dv_orig = y_dv
-
-  ! Call the vector mode differentiated function
-
-  call zhbmv_dv(uplo, nsize, ksize, alpha, alpha_dv, a, a_dv, lda_val, x, x_dv, incx_val, beta, beta_dv, y, y_dv, incy_val, nbdirs)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -166,6 +67,113 @@ program test_zhbmv_vector_forward
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize test parameters
+    nsize = n
+    ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
+    lda_val = lda
+    incx_val = 1
+    incy_val = 1
+    
+    ! Initialize test data with random numbers
+    ! Initialize random seed for reproducible results
+    seed_array = 42
+    call random_seed(put=seed_array)
+    
+    uplo = 'U'
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    alpha = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    ! Initialize a as Hermitian band matrix (upper band storage, real diagonal)
+    do j = 1, n
+      do band_row = max(1, ksize+2-j), ksize+1
+        if (band_row .eq. ksize+1) then
+          call random_number(temp_real)
+          a(band_row, j) = cmplx(temp_real * 2.0 - 1.0, 0.0)  ! Real diagonal
+        else
+          call random_number(temp_real)
+          call random_number(temp_imag)
+          a(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+        end if
+      end do
+    end do
+    do i = 1, max_size
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      x(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end do
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    beta = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    do i = 1, max_size
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      y(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end do
+    
+    ! Initialize input derivatives to random values (exactly like scalar mode)
+    do idir = 1, nbdirs
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      alpha_dv(idir) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end do
+    do idir = 1, nbdirs
+      do i = 1, max_size
+        do j = 1, max_size
+          call random_number(temp_real)
+          call random_number(temp_imag)
+          a_dv(idir,i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+        end do
+      end do
+    end do
+    do idir = 1, nbdirs
+      do i = 1, max_size
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        x_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      end do
+    end do
+    do idir = 1, nbdirs
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      beta_dv(idir) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end do
+    do idir = 1, nbdirs
+      do i = 1, max_size
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        y_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      end do
+    end do
+    
+    write(*,*) 'Testing ZHBMV (Vector Forward Mode)'
+    ! Store original values before any function calls (critical for INOUT parameters)
+    alpha_orig = alpha
+    alpha_dv_orig = alpha_dv
+    a_orig = a
+    a_dv_orig = a_dv
+    x_orig = x
+    x_dv_orig = x_dv
+    beta_orig = beta
+    beta_dv_orig = beta_dv
+    y_orig = y
+    y_dv_orig = y_dv
+    
+    ! Call the vector mode differentiated function
+    
+    call zhbmv_dv(uplo, nsize, ksize, alpha, alpha_dv, a, a_dv, lda_val, x, x_dv, incx_val, beta, beta_dv, y, y_dv, incy_val, nbdirs)
+    
+    ! Print results and compare
+    write(*,*) 'Function calls completed successfully'
+    
+    ! Numerical differentiation check
+    call check_derivatives_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_derivatives_numerically(passed)
     implicit none

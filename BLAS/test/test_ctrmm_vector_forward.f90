@@ -51,82 +51,7 @@ program test_ctrmm_vector_forward
     n = test_sizes(itest)
     write(*,*) 'Testing CTRMM (Vector Forward, n =', n, ')'
 
-  ! Initialize test parameters
-  msize = n
-  nsize = n
-  lda_val = lda
-  ldb_val = ldb
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
-  seed_array = 42
-  call random_seed(put=seed_array)
-
-  side = 'L'
-  uplo = 'U'
-  transa = 'N'
-  diag = 'N'
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  alpha = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  do i = 1, max_size
-    do j = 1, max_size
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      a(i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-  end do
-  do i = 1, max_size
-    do j = 1, max_size
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      b(i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-  end do
-
-  ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirs
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    alpha_dv(idir) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-  do idir = 1, nbdirs
-    do i = 1, max_size
-      do j = 1, max_size
-        call random_number(temp_real)
-        call random_number(temp_imag)
-        a_dv(idir,i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-      end do
-    end do
-  end do
-  do idir = 1, nbdirs
-    do i = 1, max_size
-      do j = 1, max_size
-        call random_number(temp_real)
-        call random_number(temp_imag)
-        b_dv(idir,i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-      end do
-    end do
-  end do
-
-  write(*,*) 'Testing CTRMM (Vector Forward Mode)'
-  ! Store original values before any function calls (critical for INOUT parameters)
-  alpha_orig = alpha
-  alpha_dv_orig = alpha_dv
-  a_orig = a
-  a_dv_orig = a_dv
-  b_orig = b
-  b_dv_orig = b_dv
-
-  ! Call the vector mode differentiated function
-
-  call ctrmm_dv(side, uplo, transa, diag, msize, nsize, alpha, alpha_dv, a, a_dv, lda_val, b, b_dv, ldb_val, nbdirs)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -136,6 +61,89 @@ program test_ctrmm_vector_forward
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize test parameters
+    msize = n
+    nsize = n
+    lda_val = lda
+    ldb_val = ldb
+    
+    ! Initialize test data with random numbers
+    ! Initialize random seed for reproducible results
+    seed_array = 42
+    call random_seed(put=seed_array)
+    
+    side = 'L'
+    uplo = 'U'
+    transa = 'N'
+    diag = 'N'
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    alpha = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    do i = 1, max_size
+      do j = 1, max_size
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        a(i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      end do
+    end do
+    do i = 1, max_size
+      do j = 1, max_size
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        b(i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      end do
+    end do
+    
+    ! Initialize input derivatives to random values (exactly like scalar mode)
+    do idir = 1, nbdirs
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      alpha_dv(idir) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end do
+    do idir = 1, nbdirs
+      do i = 1, max_size
+        do j = 1, max_size
+          call random_number(temp_real)
+          call random_number(temp_imag)
+          a_dv(idir,i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+        end do
+      end do
+    end do
+    do idir = 1, nbdirs
+      do i = 1, max_size
+        do j = 1, max_size
+          call random_number(temp_real)
+          call random_number(temp_imag)
+          b_dv(idir,i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+        end do
+      end do
+    end do
+    
+    write(*,*) 'Testing CTRMM (Vector Forward Mode)'
+    ! Store original values before any function calls (critical for INOUT parameters)
+    alpha_orig = alpha
+    alpha_dv_orig = alpha_dv
+    a_orig = a
+    a_dv_orig = a_dv
+    b_orig = b
+    b_dv_orig = b_dv
+    
+    ! Call the vector mode differentiated function
+    
+    call ctrmm_dv(side, uplo, transa, diag, msize, nsize, alpha, alpha_dv, a, a_dv, lda_val, b, b_dv, ldb_val, nbdirs)
+    
+    ! Print results and compare
+    write(*,*) 'Function calls completed successfully'
+    
+    ! Numerical differentiation check
+    call check_derivatives_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_derivatives_numerically(passed)
     implicit none

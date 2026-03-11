@@ -11,6 +11,8 @@ program test_dtbmv
   ! Test parameters
   integer, parameter :: max_size = 8  ! Maximum array dimension (multi-size test)
   integer :: n_test  ! Loop over n = 1, 2, 3, 4
+  integer :: test_sizes(1), itest
+  logical :: passed, all_passed
   integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
 
   character :: uplo
@@ -55,81 +57,99 @@ program test_dtbmv
   seed_array = 42
   call random_seed(put=seed_array)
 
-  write(*,*) 'Testing DTBMV (multi-size: n = 1, 2, 3, 4)'
-  do n_test = 1, 4
+  test_sizes = (/ 4 /)
+  write(*,*) 'Testing DTBMV (multi-size: n = 4)'
+  all_passed = .true.
+  do itest = 1, 1
+    n_test = test_sizes(itest)
     n = n_test
 
-    uplo = 'U'
-    trans = 'N'
-    diag = 'N'
-    nsize = n
-    ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
-    ! Initialize a as triangular band matrix (upper band storage)
-    ! A(band_row, j) = full(i,j) with band_row = ksize+1+i-j, i = max(1,j-ksize)..j
-    do j = 1, n
-      do band_row = max(1, ksize+2-j), ksize+1
-        call random_number(temp_real)
-        a(band_row, j) = temp_real * 2.0 - 1.0  ! Scale to [-1,1]
-      end do
-    end do
-    lda_val = lda  ! LDA must be at least ( k + 1 )
-    call random_number(x)
-    x = x * 2.0d0 - 1.0d0  ! Scale to [-1,1]
-    incx_val = 1  ! INCX 1
-  
-    ! Initialize input derivatives to random values
-    ! Initialize a_d as triangular band matrix (upper band storage)
-    ! A(band_row, j) = full(i,j) with band_row = ksize+1+i-j, i = max(1,j-ksize)..j
-    do j = 1, n
-      do band_row = max(1, ksize+2-j), ksize+1
-        call random_number(temp_real)
-        a_d(band_row, j) = temp_real * 2.0 - 1.0  ! Scale to [-1,1]
-      end do
-    end do
-    call random_number(x_d)
-    x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-  
-    ! Store initial derivative values after random initialization
-    a_d_orig = a_d
-    x_d_orig = x_d
-  
-    ! Store original values for central difference computation
-    a_orig = a
-    x_orig = x
-  
-    write(*,*) 'Testing DTBMV'
-    ! Store input values of inout parameters before first function call
-    x_orig = x
-  
-    ! Re-initialize data for differentiated function
-    ! Only reinitialize inout parameters - keep input-only parameters unchanged
-  
-    ! uplo already has correct value from original call
-    ! trans already has correct value from original call
-    ! diag already has correct value from original call
-    nsize = n
-    ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
-    ! a already has correct value from original call
-    lda_val = lda  ! LDA must be at least ( k + 1 )
-    x = x_orig
-    incx_val = 1  ! INCX 1
-  
-    ! Call the differentiated function
-    call dtbmv_d(uplo, trans, diag, nsize, ksize, a, a_d, lda_val, x, x_d, incx_val)
-  
-    ! Print results and compare
-    write(*,*) 'Function calls completed successfully'
-  
-    ! Numerical differentiation check
-    call check_derivatives_numerically()
+    call run_test_for_size(n_test, passed)
+    all_passed = all_passed .and. passed
 
   end do
-  write(*,*) 'All sizes completed successfully'
+  if (all_passed) then
+    write(*,*) 'PASS: All sizes completed successfully'
+  else
+    write(*,*) 'FAIL: One or more sizes had derivative errors'
+  end if
 
 contains
 
-  subroutine check_derivatives_numerically()
+  subroutine run_test_for_size(n, passed)
     implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+    integer :: i, j, band_row
+
+      uplo = 'U'
+      trans = 'N'
+      diag = 'N'
+      nsize = n
+      ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
+      ! Initialize a as triangular band matrix (upper band storage)
+      ! A(band_row, j) = full(i,j) with band_row = ksize+1+i-j, i = max(1,j-ksize)..j
+      do j = 1, n
+        do band_row = max(1, ksize+2-j), ksize+1
+          call random_number(temp_real)
+          a(band_row, j) = temp_real * 2.0 - 1.0  ! Scale to [-1,1]
+        end do
+      end do
+      lda_val = lda  ! LDA must be at least ( k + 1 )
+      call random_number(x)
+      x = x * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+      incx_val = 1  ! INCX 1
+
+      ! Initialize input derivatives to random values
+      ! Initialize a_d as triangular band matrix (upper band storage)
+      ! A(band_row, j) = full(i,j) with band_row = ksize+1+i-j, i = max(1,j-ksize)..j
+      do j = 1, n
+        do band_row = max(1, ksize+2-j), ksize+1
+          call random_number(temp_real)
+          a_d(band_row, j) = temp_real * 2.0 - 1.0  ! Scale to [-1,1]
+        end do
+      end do
+      call random_number(x_d)
+      x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+
+      ! Store initial derivative values after random initialization
+      a_d_orig = a_d
+      x_d_orig = x_d
+
+      ! Store original values for central difference computation
+      a_orig = a
+      x_orig = x
+
+      write(*,*) 'Testing DTBMV'
+      ! Store input values of inout parameters before first function call
+      x_orig = x
+
+      ! Re-initialize data for differentiated function
+      ! Only reinitialize inout parameters - keep input-only parameters unchanged
+
+      ! uplo already has correct value from original call
+      ! trans already has correct value from original call
+      ! diag already has correct value from original call
+      nsize = n
+      ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
+      ! a already has correct value from original call
+      lda_val = lda  ! LDA must be at least ( k + 1 )
+      x = x_orig
+      incx_val = 1  ! INCX 1
+
+      ! Call the differentiated function
+      call dtbmv_d(uplo, trans, diag, nsize, ksize, a, a_d, lda_val, x, x_d, incx_val)
+
+      ! Print results and compare
+      write(*,*) 'Function calls completed successfully'
+
+      ! Numerical differentiation check
+      call check_derivatives_numerically(passed)
+  end subroutine run_test_for_size
+
+  subroutine check_derivatives_numerically(passed)
+    implicit none
+    logical, intent(out) :: passed
     real(8), parameter :: h = 1.0e-6  ! Step size for finite differences
     real(8) :: relative_error, max_error
     real(8) :: output_orig, output_pert
@@ -190,6 +210,7 @@ contains
     
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
+    passed = .not. has_large_errors
     if (has_large_errors) then
       write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
     else

@@ -54,16 +54,16 @@ contains
 
     ! Derivative variables
     real(8), dimension(n,n) :: a_d
+    real(8), dimension(n,n) :: b_d
     real(8) :: alpha_d
     real(8), dimension(n,n) :: c_d
-    real(8), dimension(n,n) :: b_d
     real(8) :: beta_d
 
     ! Array restoration and derivative storage
     real(8), dimension(n,n) :: a_orig, a_d_orig
+    real(8), dimension(n,n) :: b_orig, b_d_orig
     real(8) :: alpha_orig, alpha_d_orig
     real(8), dimension(n,n) :: c_orig, c_d_orig
-    real(8), dimension(n,n) :: b_orig, b_d_orig
     real(8) :: beta_orig, beta_d_orig
     integer :: i, j
 
@@ -89,25 +89,25 @@ contains
     ! Initialize input derivatives
     call random_number(a_d)
     a_d = a_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(b_d)
+    b_d = b_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(alpha_d)
     alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(c_d)
     c_d = c_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-    call random_number(b_d)
-    b_d = b_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(beta_d)
     beta_d = beta_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
     ! Store _orig and _d_orig
     a_d_orig = a_d
+    b_d_orig = b_d
     alpha_d_orig = alpha_d
     c_d_orig = c_d
-    b_d_orig = b_d
     beta_d_orig = beta_d
     a_orig = a
+    b_orig = b
     alpha_orig = alpha
     c_orig = c
-    b_orig = b
     beta_orig = beta
 
     write(*,*) 'Testing DSYMM (n =', n, ')'
@@ -119,11 +119,11 @@ contains
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, uplo, side, msize, nsize, lda_val, ldb_val, ldc_val, a_orig, alpha_orig, c_orig, b_orig, beta_orig, a_d_orig, alpha_d_orig, c_d_orig, b_d_orig, beta_d_orig, c_d, passed)
+    call check_derivatives_numerically(n, uplo, side, msize, nsize, lda_val, ldb_val, ldc_val, a_orig, b_orig, alpha_orig, c_orig, beta_orig, a_d_orig, b_d_orig, alpha_d_orig, c_d_orig, beta_d_orig, c_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, uplo, side, msize, nsize, lda_val, ldb_val, ldc_val, a_orig, alpha_orig, c_orig, b_orig, beta_orig, a_d_orig, alpha_d_orig, c_d_orig, b_d_orig, beta_d_orig, c_d, passed)
+  subroutine check_derivatives_numerically(n, uplo, side, msize, nsize, lda_val, ldb_val, ldc_val, a_orig, b_orig, alpha_orig, c_orig, beta_orig, a_d_orig, b_d_orig, alpha_d_orig, c_d_orig, beta_d_orig, c_d, passed)
     implicit none
     integer, intent(in) :: n
     character, intent(in) :: uplo
@@ -134,9 +134,9 @@ contains
     integer, intent(in) :: ldb_val
     integer, intent(in) :: ldc_val
     real(8), intent(in) :: a_orig(n,n), a_d_orig(n,n)
+    real(8), intent(in) :: b_orig(n,n), b_d_orig(n,n)
     real(8), intent(in) :: alpha_orig, alpha_d_orig
     real(8), intent(in) :: c_orig(n,n), c_d_orig(n,n)
-    real(8), intent(in) :: b_orig(n,n), b_d_orig(n,n)
     real(8), intent(in) :: beta_orig, beta_d_orig
     real(8), intent(in) :: c_d(n,n)
     logical, intent(out) :: passed
@@ -149,9 +149,9 @@ contains
     real(8), dimension(n,n) :: c_forward, c_backward
     integer :: i, j
     real(8), dimension(n,n) :: a
+    real(8), dimension(n,n) :: b
     real(8) :: alpha
     real(8), dimension(n,n) :: c
-    real(8), dimension(n,n) :: b
     real(8) :: beta
 
     max_error = 0.0e0
@@ -162,18 +162,18 @@ contains
 
     ! Forward perturbation: f(x + h)
     a = a_orig + h * a_d_orig
+    b = b_orig + h * b_d_orig
     alpha = alpha_orig + h * alpha_d_orig
     c = c_orig + h * c_d_orig
-    b = b_orig + h * b_d_orig
     beta = beta_orig + h * beta_d_orig
     call dsymm(side, uplo, msize, nsize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)
     c_forward = c
 
     ! Backward perturbation: f(x - h)
     a = a_orig - h * a_d_orig
+    b = b_orig - h * b_d_orig
     alpha = alpha_orig - h * alpha_d_orig
     c = c_orig - h * c_d_orig
-    b = b_orig - h * b_d_orig
     beta = beta_orig - h * beta_d_orig
     call dsymm(side, uplo, msize, nsize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)
     c_backward = c

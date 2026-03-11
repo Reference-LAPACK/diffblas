@@ -72,85 +72,8 @@ program test_zhbmv_reverse
     n = test_sizes(itest)
     write(*,*) 'Testing ZHBMV (n =', n, ')'
 
-  ! Initialize primal values
-  uplo = 'U'
-  nsize = n
-  ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
-  call random_number(temp_real_init)
-  call random_number(temp_imag_init)
-  alpha = cmplx(temp_real_init, temp_imag_init) * (2.0,2.0) - (1.0,1.0)
-  ! Initialize a as Hermitian band matrix (upper band storage, real diagonal)
-  do j = 1, n
-    do band_row = max(1, ksize+2-j), ksize+1
-      if (band_row .eq. ksize+1) then
-        call random_number(temp_real)
-        a(band_row, j) = cmplx(temp_real * 2.0 - 1.0, 0.0)  ! Real diagonal
-      else
-        call random_number(temp_real)
-        call random_number(temp_imag)
-        a(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-      end if
-    end do
-  end do
-  lda_val = lda
-  do i = 1, max_size
-    call random_number(temp_real_init)
-    call random_number(temp_imag_init)
-    x(i) = cmplx(temp_real_init, temp_imag_init) * (2.0,2.0) - (1.0,1.0)
-  end do
-  incx_val = 1
-  call random_number(temp_real_init)
-  call random_number(temp_imag_init)
-  beta = cmplx(temp_real_init, temp_imag_init) * (2.0,2.0) - (1.0,1.0)
-  do i = 1, max_size
-    call random_number(temp_real_init)
-    call random_number(temp_imag_init)
-    y(i) = cmplx(temp_real_init, temp_imag_init) * (2.0,2.0) - (1.0,1.0)
-  end do
-  incy_val = 1
-
-  ! Store original primal values
-  alpha_orig = alpha
-  a_orig = a
-  x_orig = x
-  beta_orig = beta
-  y_orig = y
-
-  ! Initialize output adjoints (cotangents) with random values
-  ! These are the 'seeds' for reverse mode
-  do i = 1, max_size
-    call random_number(temp_real_init)
-    call random_number(temp_imag_init)
-    yb(i) = cmplx(temp_real_init, temp_imag_init) * (2.0,2.0) - (1.0,1.0)
-  end do
-
-  ! Save output adjoints (cotangents) for VJP verification
-  ! Note: output adjoints may be modified by reverse mode function
-  yb_orig = yb
-
-  ! Initialize input adjoints to zero (they will be computed)
-  ab = 0.0d0
-  alphab = 0.0d0
-  xb = 0.0d0
-  betab = 0.0d0
-
-  ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! Differentiated code checks they are set via check_ISIZE*_initialized.
-  call set_ISIZE1OFX(max_size)
-  call set_ISIZE2OFA(max_size)
-
-  ! Call reverse mode differentiated function
-  call zhbmv_b(uplo, nsize, ksize, alpha, alphab, a, ab, lda_val, x, xb, incx_val, beta, betab, y, yb, incy_val)
-
-  ! Reset ISIZE globals to uninitialized (-1) for completeness
-  call set_ISIZE1OFX(-1)
-  call set_ISIZE2OFA(-1)
-
-  ! VJP Verification using finite differences
-  ! For reverse mode, we verify: cotangent^T @ J @ direction = direction^T @ adjoint
-  ! Equivalently: cotangent^T @ (f(x+h*dir) - f(x-h*dir))/(2h) should equal dir^T @ computed_adjoint
-  call check_vjp_numerically(passed)
-  all_passed = all_passed .and. passed
+    call run_test_for_size(n, passed)
+    all_passed = all_passed .and. passed
   end do
   if (all_passed) then
     write(*,*) 'PASS: All sizes completed successfully'
@@ -159,6 +82,92 @@ program test_zhbmv_reverse
   end if
 
 contains
+
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+      ! Initialize primal values
+      uplo = 'U'
+      nsize = n
+      ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
+      call random_number(temp_real_init)
+      call random_number(temp_imag_init)
+      alpha = cmplx(temp_real_init, temp_imag_init) * (2.0,2.0) - (1.0,1.0)
+      ! Initialize a as Hermitian band matrix (upper band storage, real diagonal)
+      do j = 1, n
+        do band_row = max(1, ksize+2-j), ksize+1
+          if (band_row .eq. ksize+1) then
+            call random_number(temp_real)
+            a(band_row, j) = cmplx(temp_real * 2.0 - 1.0, 0.0)  ! Real diagonal
+          else
+            call random_number(temp_real)
+            call random_number(temp_imag)
+            a(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+          end if
+        end do
+      end do
+      lda_val = lda
+      do i = 1, max_size
+        call random_number(temp_real_init)
+        call random_number(temp_imag_init)
+        x(i) = cmplx(temp_real_init, temp_imag_init) * (2.0,2.0) - (1.0,1.0)
+      end do
+      incx_val = 1
+      call random_number(temp_real_init)
+      call random_number(temp_imag_init)
+      beta = cmplx(temp_real_init, temp_imag_init) * (2.0,2.0) - (1.0,1.0)
+      do i = 1, max_size
+        call random_number(temp_real_init)
+        call random_number(temp_imag_init)
+        y(i) = cmplx(temp_real_init, temp_imag_init) * (2.0,2.0) - (1.0,1.0)
+      end do
+      incy_val = 1
+
+      ! Store original primal values
+      alpha_orig = alpha
+      a_orig = a
+      x_orig = x
+      beta_orig = beta
+      y_orig = y
+
+      ! Initialize output adjoints (cotangents) with random values
+      ! These are the 'seeds' for reverse mode
+      do i = 1, max_size
+        call random_number(temp_real_init)
+        call random_number(temp_imag_init)
+        yb(i) = cmplx(temp_real_init, temp_imag_init) * (2.0,2.0) - (1.0,1.0)
+      end do
+
+      ! Save output adjoints (cotangents) for VJP verification
+      ! Note: output adjoints may be modified by reverse mode function
+      yb_orig = yb
+
+      ! Initialize input adjoints to zero (they will be computed)
+      ab = 0.0d0
+      alphab = 0.0d0
+      xb = 0.0d0
+      betab = 0.0d0
+
+      ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
+      ! Differentiated code checks they are set via check_ISIZE*_initialized.
+      call set_ISIZE1OFX(max_size)
+      call set_ISIZE2OFA(max_size)
+
+      ! Call reverse mode differentiated function
+      call zhbmv_b(uplo, nsize, ksize, alpha, alphab, a, ab, lda_val, x, xb, incx_val, beta, betab, y, yb, incy_val)
+
+      ! Reset ISIZE globals to uninitialized (-1) for completeness
+      call set_ISIZE1OFX(-1)
+      call set_ISIZE2OFA(-1)
+
+      ! VJP Verification using finite differences
+      ! For reverse mode, we verify: cotangent^T @ J @ direction = direction^T @ adjoint
+      ! Equivalently: cotangent^T @ (f(x+h*dir) - f(x-h*dir))/(2h) should equal dir^T @ computed_adjoint
+      call check_vjp_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_vjp_numerically(passed)
     implicit none

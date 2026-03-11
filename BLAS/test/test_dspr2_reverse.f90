@@ -63,57 +63,8 @@ program test_dspr2_reverse
     n = test_sizes(itest)
     write(*,*) 'Testing DSPR2 (n =', n, ')'
 
-  ! Initialize primal values
-  uplo = 'U'
-  nsize = n
-  call random_number(alpha)
-  alpha = alpha * 2.0d0 - 1.0d0
-  call random_number(x)
-  x = x * 2.0d0 - 1.0d0
-  incx_val = 1
-  call random_number(y)
-  y = y * 2.0d0 - 1.0d0
-  incy_val = 1
-  call random_number(ap)
-  ap = ap * 2.0d0 - 1.0d0
-
-  ! Store original primal values
-  alpha_orig = alpha
-  x_orig = x
-  y_orig = y
-  ap_orig = ap
-
-  ! Initialize output adjoints (cotangents) with random values
-  ! These are the 'seeds' for reverse mode
-  call random_number(apb)
-  apb = apb * 2.0d0 - 1.0d0
-
-  ! Save output adjoints (cotangents) for VJP verification
-  ! Note: output adjoints may be modified by reverse mode function
-  apb_orig = apb
-
-  ! Initialize input adjoints to zero (they will be computed)
-  alphab = 0.0d0
-  yb = 0.0d0
-  xb = 0.0d0
-
-  ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! Differentiated code checks they are set via check_ISIZE*_initialized.
-  call set_ISIZE1OFX(max_size)
-  call set_ISIZE1OFY(max_size)
-
-  ! Call reverse mode differentiated function
-  call dspr2_b(uplo, nsize, alpha, alphab, x, xb, incx_val, y, yb, incy_val, ap, apb)
-
-  ! Reset ISIZE globals to uninitialized (-1) for completeness
-  call set_ISIZE1OFX(-1)
-  call set_ISIZE1OFY(-1)
-
-  ! VJP Verification using finite differences
-  ! For reverse mode, we verify: cotangent^T @ J @ direction = direction^T @ adjoint
-  ! Equivalently: cotangent^T @ (f(x+h*dir) - f(x-h*dir))/(2h) should equal dir^T @ computed_adjoint
-  call check_vjp_numerically(passed)
-  all_passed = all_passed .and. passed
+    call run_test_for_size(n, passed)
+    all_passed = all_passed .and. passed
   end do
   if (all_passed) then
     write(*,*) 'PASS: All sizes completed successfully'
@@ -122,6 +73,64 @@ program test_dspr2_reverse
   end if
 
 contains
+
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+      ! Initialize primal values
+      uplo = 'U'
+      nsize = n
+      call random_number(alpha)
+      alpha = alpha * 2.0d0 - 1.0d0
+      call random_number(x)
+      x = x * 2.0d0 - 1.0d0
+      incx_val = 1
+      call random_number(y)
+      y = y * 2.0d0 - 1.0d0
+      incy_val = 1
+      call random_number(ap)
+      ap = ap * 2.0d0 - 1.0d0
+
+      ! Store original primal values
+      alpha_orig = alpha
+      x_orig = x
+      y_orig = y
+      ap_orig = ap
+
+      ! Initialize output adjoints (cotangents) with random values
+      ! These are the 'seeds' for reverse mode
+      call random_number(apb)
+      apb = apb * 2.0d0 - 1.0d0
+
+      ! Save output adjoints (cotangents) for VJP verification
+      ! Note: output adjoints may be modified by reverse mode function
+      apb_orig = apb
+
+      ! Initialize input adjoints to zero (they will be computed)
+      alphab = 0.0d0
+      xb = 0.0d0
+      yb = 0.0d0
+
+      ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
+      ! Differentiated code checks they are set via check_ISIZE*_initialized.
+      call set_ISIZE1OFX(max_size)
+      call set_ISIZE1OFY(max_size)
+
+      ! Call reverse mode differentiated function
+      call dspr2_b(uplo, nsize, alpha, alphab, x, xb, incx_val, y, yb, incy_val, ap, apb)
+
+      ! Reset ISIZE globals to uninitialized (-1) for completeness
+      call set_ISIZE1OFX(-1)
+      call set_ISIZE1OFY(-1)
+
+      ! VJP Verification using finite differences
+      ! For reverse mode, we verify: cotangent^T @ J @ direction = direction^T @ adjoint
+      ! Equivalently: cotangent^T @ (f(x+h*dir) - f(x-h*dir))/(2h) should equal dir^T @ computed_adjoint
+      call check_vjp_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_vjp_numerically(passed)
     implicit none

@@ -68,62 +68,7 @@ program test_dsbmv_vector_reverse
     n = test_sizes(itest)
     write(*,*) 'Testing DSBMV (Vector Reverse, n =', n, ')'
 
-  ! Initialize primal values
-  uplo = 'U'
-  nsize = n
-  ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
-  call random_number(alpha)
-  alpha = alpha * 2.0 - 1.0
-  call random_number(a)
-  a = a * 2.0 - 1.0
-  lda_val = lda
-  call random_number(x)
-  x = x * 2.0 - 1.0
-  incx_val = 1
-  call random_number(beta)
-  beta = beta * 2.0 - 1.0
-  call random_number(y)
-  y = y * 2.0 - 1.0
-  incy_val = 1
-
-  ! Store original primal values
-  alpha_orig = alpha
-  a_orig = a
-  x_orig = x
-  beta_orig = beta
-  y_orig = y
-
-  ! Initialize output adjoints (cotangents) with random values for each direction
-  ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirs
-    call random_number(yb(k,:))
-    yb(k,:) = yb(k,:) * 2.0 - 1.0
-  end do
-
-  ! Initialize input adjoints to zero (they will be computed)
-  ! Note: Inout parameters are skipped - they already have output adjoints initialized
-  alphab = 0.0
-  ab = 0.0
-  xb = 0.0
-  betab = 0.0
-
-  ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
-  yb_orig = yb
-
-  ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
-  call set_ISIZE1OFX(n)
-  call set_ISIZE2OFA(max_size)
-
-  ! Call reverse vector mode differentiated function
-  call dsbmv_bv(uplo, nsize, ksize, alpha, alphab, a, ab, lda_val, x, xb, incx_val, beta, betab, y, yb, incy_val, nbdirs)
-
-  ! Reset ISIZE globals to uninitialized (-1) for completeness
-  call set_ISIZE1OFX(-1)
-  call set_ISIZE2OFA(-1)
-
-  ! VJP Verification using finite differences
-  call check_vjp_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -133,6 +78,69 @@ program test_dsbmv_vector_reverse
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize primal values
+    uplo = 'U'
+    nsize = n
+    ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
+    call random_number(alpha)
+    alpha = alpha * 2.0 - 1.0
+    call random_number(a)
+    a = a * 2.0 - 1.0
+    lda_val = lda
+    call random_number(x)
+    x = x * 2.0 - 1.0
+    incx_val = 1
+    call random_number(beta)
+    beta = beta * 2.0 - 1.0
+    call random_number(y)
+    y = y * 2.0 - 1.0
+    incy_val = 1
+    
+    ! Store original primal values
+    alpha_orig = alpha
+    a_orig = a
+    x_orig = x
+    beta_orig = beta
+    y_orig = y
+    
+    ! Initialize output adjoints (cotangents) with random values for each direction
+    ! These are the 'seeds' for reverse mode
+    do k = 1, nbdirs
+      call random_number(yb(k,:))
+      yb(k,:) = yb(k,:) * 2.0 - 1.0
+    end do
+    
+    ! Initialize input adjoints to zero (they will be computed)
+    ! Note: Inout parameters are skipped - they already have output adjoints initialized
+    alphab = 0.0
+    ab = 0.0
+    xb = 0.0
+    betab = 0.0
+    
+    ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
+    yb_orig = yb
+    
+    ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
+    ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
+    call set_ISIZE1OFX(n)
+    call set_ISIZE2OFA(max_size)
+    
+    ! Call reverse vector mode differentiated function
+    call dsbmv_bv(uplo, nsize, ksize, alpha, alphab, a, ab, lda_val, x, xb, incx_val, beta, betab, y, yb, incy_val, nbdirs)
+    
+    ! Reset ISIZE globals to uninitialized (-1) for completeness
+    call set_ISIZE1OFX(-1)
+    call set_ISIZE2OFA(-1)
+    
+    ! VJP Verification using finite differences
+    call check_vjp_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_vjp_numerically(passed)
     implicit none
@@ -231,19 +239,19 @@ contains
         vjp_ad = vjp_ad + temp_products(i)
       end do
       vjp_ad = vjp_ad + alpha_dir * alphab(k)
-      ! Compute and sort products for y
+      ! Compute and sort products for x
       n_products = n
       do i = 1, n
-        temp_products(i) = y_dir(i) * yb(k,i)
+        temp_products(i) = x_dir(i) * xb(k,i)
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
-      ! Compute and sort products for x
+      ! Compute and sort products for y
       n_products = n
       do i = 1, n
-        temp_products(i) = x_dir(i) * xb(k,i)
+        temp_products(i) = y_dir(i) * yb(k,i)
       end do
       call sort_array(temp_products, n_products)
       do i = 1, n_products

@@ -44,61 +44,7 @@ program test_ztpmv_vector_forward
     n = test_sizes(itest)
     write(*,*) 'Testing ZTPMV (Vector Forward, n =', n, ')'
 
-  ! Initialize test parameters
-  nsize = n
-  incx_val = 1
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
-  seed_array = 42
-  call random_seed(put=seed_array)
-
-  uplo = 'U'
-  trans = 'N'
-  diag = 'N'
-  do i = 1, size(ap)
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    ap(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-  do i = 1, max_size
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    x(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-
-  ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirs
-    do i = 1, size(ap)
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      ap_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-  end do
-  do idir = 1, nbdirs
-    do i = 1, max_size
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      x_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-  end do
-
-  write(*,*) 'Testing ZTPMV (Vector Forward Mode)'
-  ! Store original values before any function calls (critical for INOUT parameters)
-  ap_orig = ap
-  ap_dv_orig = ap_dv
-  x_orig = x
-  x_dv_orig = x_dv
-
-  ! Call the vector mode differentiated function
-
-  call ztpmv_dv(uplo, trans, diag, nsize, ap, ap_dv, x, x_dv, incx_val, nbdirs)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -108,6 +54,68 @@ program test_ztpmv_vector_forward
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize test parameters
+    nsize = n
+    incx_val = 1
+    
+    ! Initialize test data with random numbers
+    ! Initialize random seed for reproducible results
+    seed_array = 42
+    call random_seed(put=seed_array)
+    
+    uplo = 'U'
+    trans = 'N'
+    diag = 'N'
+    do i = 1, size(ap)
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      ap(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end do
+    do i = 1, max_size
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      x(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end do
+    
+    ! Initialize input derivatives to random values (exactly like scalar mode)
+    do idir = 1, nbdirs
+      do i = 1, size(ap)
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        ap_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      end do
+    end do
+    do idir = 1, nbdirs
+      do i = 1, max_size
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        x_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      end do
+    end do
+    
+    write(*,*) 'Testing ZTPMV (Vector Forward Mode)'
+    ! Store original values before any function calls (critical for INOUT parameters)
+    ap_orig = ap
+    ap_dv_orig = ap_dv
+    x_orig = x
+    x_dv_orig = x_dv
+    
+    ! Call the vector mode differentiated function
+    
+    call ztpmv_dv(uplo, trans, diag, nsize, ap, ap_dv, x, x_dv, incx_val, nbdirs)
+    
+    ! Print results and compare
+    write(*,*) 'Function calls completed successfully'
+    
+    ! Numerical differentiation check
+    call check_derivatives_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_derivatives_numerically(passed)
     implicit none

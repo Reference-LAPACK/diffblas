@@ -58,75 +58,7 @@ program test_ssymm_vector_forward
     n = test_sizes(itest)
     write(*,*) 'Testing SSYMM (Vector Forward, n =', n, ')'
 
-  ! Initialize test parameters
-  msize = n
-  nsize = n
-  lda_val = lda
-  ldb_val = ldb
-  ldc_val = ldc
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
-  seed_array = 42
-  call random_seed(put=seed_array)
-
-  side = 'L'
-  uplo = 'U'
-  call random_number(alpha)
-  alpha = alpha * 2.0 - 1.0  ! Scale to [-1,1]
-  call random_number(a)
-  a = a * 2.0 - 1.0  ! Scale to [-1,1]
-  call random_number(b)
-  b = b * 2.0 - 1.0  ! Scale to [-1,1]
-  call random_number(beta)
-  beta = beta * 2.0 - 1.0  ! Scale to [-1,1]
-  call random_number(c)
-  c = c * 2.0 - 1.0  ! Scale to [-1,1]
-
-  ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirs
-    call random_number(temp_real)
-    alpha_dv(idir) = temp_real * 2.0 - 1.0
-  end do
-  do idir = 1, nbdirs
-    call random_number(a_dv(idir,:,:))
-    a_dv(idir,:,:) = a_dv(idir,:,:) * 2.0 - 1.0
-  end do
-  do idir = 1, nbdirs
-    call random_number(b_dv(idir,:,:))
-    b_dv(idir,:,:) = b_dv(idir,:,:) * 2.0 - 1.0
-  end do
-  do idir = 1, nbdirs
-    call random_number(temp_real)
-    beta_dv(idir) = temp_real * 2.0 - 1.0
-  end do
-  do idir = 1, nbdirs
-    call random_number(c_dv(idir,:,:))
-    c_dv(idir,:,:) = c_dv(idir,:,:) * 2.0 - 1.0
-  end do
-
-  write(*,*) 'Testing SSYMM (Vector Forward Mode)'
-  ! Store original values before any function calls (critical for INOUT parameters)
-  alpha_orig = alpha
-  alpha_dv_orig = alpha_dv
-  a_orig = a
-  a_dv_orig = a_dv
-  b_orig = b
-  b_dv_orig = b_dv
-  beta_orig = beta
-  beta_dv_orig = beta_dv
-  c_orig = c
-  c_dv_orig = c_dv
-
-  ! Call the vector mode differentiated function
-
-  call ssymm_dv(side, uplo, msize, nsize, alpha, alpha_dv, a, a_dv, lda_val, b, b_dv, ldb_val, beta, beta_dv, c, c_dv, ldc_val, nbdirs)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -136,6 +68,82 @@ program test_ssymm_vector_forward
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize test parameters
+    msize = n
+    nsize = n
+    lda_val = lda
+    ldb_val = ldb
+    ldc_val = ldc
+    
+    ! Initialize test data with random numbers
+    ! Initialize random seed for reproducible results
+    seed_array = 42
+    call random_seed(put=seed_array)
+    
+    side = 'L'
+    uplo = 'U'
+    call random_number(alpha)
+    alpha = alpha * 2.0 - 1.0  ! Scale to [-1,1]
+    call random_number(a)
+    a = a * 2.0 - 1.0  ! Scale to [-1,1]
+    call random_number(b)
+    b = b * 2.0 - 1.0  ! Scale to [-1,1]
+    call random_number(beta)
+    beta = beta * 2.0 - 1.0  ! Scale to [-1,1]
+    call random_number(c)
+    c = c * 2.0 - 1.0  ! Scale to [-1,1]
+    
+    ! Initialize input derivatives to random values (exactly like scalar mode)
+    do idir = 1, nbdirs
+      call random_number(temp_real)
+      alpha_dv(idir) = temp_real * 2.0 - 1.0
+    end do
+    do idir = 1, nbdirs
+      call random_number(a_dv(idir,:,:))
+      a_dv(idir,:,:) = a_dv(idir,:,:) * 2.0 - 1.0
+    end do
+    do idir = 1, nbdirs
+      call random_number(b_dv(idir,:,:))
+      b_dv(idir,:,:) = b_dv(idir,:,:) * 2.0 - 1.0
+    end do
+    do idir = 1, nbdirs
+      call random_number(temp_real)
+      beta_dv(idir) = temp_real * 2.0 - 1.0
+    end do
+    do idir = 1, nbdirs
+      call random_number(c_dv(idir,:,:))
+      c_dv(idir,:,:) = c_dv(idir,:,:) * 2.0 - 1.0
+    end do
+    
+    write(*,*) 'Testing SSYMM (Vector Forward Mode)'
+    ! Store original values before any function calls (critical for INOUT parameters)
+    alpha_orig = alpha
+    alpha_dv_orig = alpha_dv
+    a_orig = a
+    a_dv_orig = a_dv
+    b_orig = b
+    b_dv_orig = b_dv
+    beta_orig = beta
+    beta_dv_orig = beta_dv
+    c_orig = c
+    c_dv_orig = c_dv
+    
+    ! Call the vector mode differentiated function
+    
+    call ssymm_dv(side, uplo, msize, nsize, alpha, alpha_dv, a, a_dv, lda_val, b, b_dv, ldb_val, beta, beta_dv, c, c_dv, ldc_val, nbdirs)
+    
+    ! Print results and compare
+    write(*,*) 'Function calls completed successfully'
+    
+    ! Numerical differentiation check
+    call check_derivatives_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_derivatives_numerically(passed)
     implicit none

@@ -11,6 +11,8 @@ program test_ztbmv
   ! Test parameters
   integer, parameter :: max_size = 8  ! Maximum array dimension (multi-size test)
   integer :: n_test  ! Loop over n = 1, 2, 3, 4
+  integer :: test_sizes(1), itest
+  logical :: passed, all_passed
   integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
 
   character :: uplo
@@ -55,87 +57,105 @@ program test_ztbmv
   seed_array = 42
   call random_seed(put=seed_array)
 
-  write(*,*) 'Testing ZTBMV (multi-size: n = 1, 2, 3, 4)'
-  do n_test = 1, 4
+  test_sizes = (/ 4 /)
+  write(*,*) 'Testing ZTBMV (multi-size: n = 4)'
+  all_passed = .true.
+  do itest = 1, 1
+    n_test = test_sizes(itest)
     n = n_test
 
-    uplo = 'U'
-    trans = 'N'
-    diag = 'N'
-    nsize = n
-    ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
-    ! Initialize a as triangular band matrix (upper band storage)
-    do j = 1, n
-      do band_row = max(1, ksize+2-j), ksize+1
-        call random_number(temp_real)
-        call random_number(temp_imag)
-        a(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-      end do
-    end do
-    lda_val = lda  ! LDA must be at least ( k + 1 )
-    do i = 1, n
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      x(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-    incx_val = 1  ! INCX 1
-  
-    ! Initialize input derivatives to random values
-    ! Initialize a_d as triangular band matrix (upper band storage)
-    do j = 1, n
-      do band_row = max(1, ksize+2-j), ksize+1
-        call random_number(temp_real)
-        call random_number(temp_imag)
-        a_d(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-      end do
-    end do
-    do i = 1, n
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      x_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-  
-    ! Store initial derivative values after random initialization
-    a_d_orig = a_d
-    x_d_orig = x_d
-  
-    ! Store original values for central difference computation
-    a_orig = a
-    x_orig = x
-  
-    write(*,*) 'Testing ZTBMV'
-    ! Store input values of inout parameters before first function call
-    x_orig = x
-  
-    ! Re-initialize data for differentiated function
-    ! Only reinitialize inout parameters - keep input-only parameters unchanged
-  
-    ! uplo already has correct value from original call
-    ! trans already has correct value from original call
-    ! diag already has correct value from original call
-    nsize = n
-    ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
-    ! a already has correct value from original call
-    lda_val = lda  ! LDA must be at least ( k + 1 )
-    x = x_orig
-    incx_val = 1  ! INCX 1
-  
-    ! Call the differentiated function
-    call ztbmv_d(uplo, trans, diag, nsize, ksize, a, a_d, lda_val, x, x_d, incx_val)
-  
-    ! Print results and compare
-    write(*,*) 'Function calls completed successfully'
-  
-    ! Numerical differentiation check
-    call check_derivatives_numerically()
+    call run_test_for_size(n_test, passed)
+    all_passed = all_passed .and. passed
 
   end do
-  write(*,*) 'All sizes completed successfully'
+  if (all_passed) then
+    write(*,*) 'PASS: All sizes completed successfully'
+  else
+    write(*,*) 'FAIL: One or more sizes had derivative errors'
+  end if
 
 contains
 
-  subroutine check_derivatives_numerically()
+  subroutine run_test_for_size(n, passed)
     implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+    integer :: i, j, band_row
+
+      uplo = 'U'
+      trans = 'N'
+      diag = 'N'
+      nsize = n
+      ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
+      ! Initialize a as triangular band matrix (upper band storage)
+      do j = 1, n
+        do band_row = max(1, ksize+2-j), ksize+1
+          call random_number(temp_real)
+          call random_number(temp_imag)
+          a(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+        end do
+      end do
+      lda_val = lda  ! LDA must be at least ( k + 1 )
+      do i = 1, n
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        x(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      end do
+      incx_val = 1  ! INCX 1
+
+      ! Initialize input derivatives to random values
+      ! Initialize a_d as triangular band matrix (upper band storage)
+      do j = 1, n
+        do band_row = max(1, ksize+2-j), ksize+1
+          call random_number(temp_real)
+          call random_number(temp_imag)
+          a_d(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+        end do
+      end do
+      do i = 1, n
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        x_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      end do
+
+      ! Store initial derivative values after random initialization
+      a_d_orig = a_d
+      x_d_orig = x_d
+
+      ! Store original values for central difference computation
+      a_orig = a
+      x_orig = x
+
+      write(*,*) 'Testing ZTBMV'
+      ! Store input values of inout parameters before first function call
+      x_orig = x
+
+      ! Re-initialize data for differentiated function
+      ! Only reinitialize inout parameters - keep input-only parameters unchanged
+
+      ! uplo already has correct value from original call
+      ! trans already has correct value from original call
+      ! diag already has correct value from original call
+      nsize = n
+      ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
+      ! a already has correct value from original call
+      lda_val = lda  ! LDA must be at least ( k + 1 )
+      x = x_orig
+      incx_val = 1  ! INCX 1
+
+      ! Call the differentiated function
+      call ztbmv_d(uplo, trans, diag, nsize, ksize, a, a_d, lda_val, x, x_d, incx_val)
+
+      ! Print results and compare
+      write(*,*) 'Function calls completed successfully'
+
+      ! Numerical differentiation check
+      call check_derivatives_numerically(passed)
+  end subroutine run_test_for_size
+
+  subroutine check_derivatives_numerically(passed)
+    implicit none
+    logical, intent(out) :: passed
     real(8), parameter :: h = 1.0e-6  ! Step size for finite differences
     real(8) :: relative_error, max_error
     real(8) :: output_orig, output_pert
@@ -196,6 +216,7 @@ contains
     
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
+    passed = .not. has_large_errors
     if (has_large_errors) then
       write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
     else

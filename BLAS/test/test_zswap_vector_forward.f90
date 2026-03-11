@@ -42,59 +42,7 @@ program test_zswap_vector_forward
     n = test_sizes(itest)
     write(*,*) 'Testing ZSWAP (Vector Forward, n =', n, ')'
 
-  ! Initialize test parameters
-  nsize = n
-  incx_val = 1
-  incy_val = 1
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
-  seed_array = 42
-  call random_seed(put=seed_array)
-
-  do i = 1, max_size
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    zx(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-  do i = 1, max_size
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    zy(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-
-  ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirs
-    do i = 1, max_size
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      zx_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-  end do
-  do idir = 1, nbdirs
-    do i = 1, max_size
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      zy_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-  end do
-
-  write(*,*) 'Testing ZSWAP (Vector Forward Mode)'
-  ! Store original values before any function calls (critical for INOUT parameters)
-  zx_orig = zx
-  zx_dv_orig = zx_dv
-  zy_orig = zy
-  zy_dv_orig = zy_dv
-
-  ! Call the vector mode differentiated function
-
-  call zswap_dv(nsize, zx, zx_dv, incx_val, zy, zy_dv, incy_val, nbdirs)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -105,6 +53,66 @@ program test_zswap_vector_forward
 
 contains
 
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize test parameters
+    nsize = n
+    incx_val = 1
+    incy_val = 1
+    
+    ! Initialize test data with random numbers
+    ! Initialize random seed for reproducible results
+    seed_array = 42
+    call random_seed(put=seed_array)
+    
+    do i = 1, max_size
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      zx(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end do
+    do i = 1, max_size
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      zy(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end do
+    
+    ! Initialize input derivatives to random values (exactly like scalar mode)
+    do idir = 1, nbdirs
+      do i = 1, max_size
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        zx_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      end do
+    end do
+    do idir = 1, nbdirs
+      do i = 1, max_size
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        zy_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      end do
+    end do
+    
+    write(*,*) 'Testing ZSWAP (Vector Forward Mode)'
+    ! Store original values before any function calls (critical for INOUT parameters)
+    zx_orig = zx
+    zx_dv_orig = zx_dv
+    zy_orig = zy
+    zy_dv_orig = zy_dv
+    
+    ! Call the vector mode differentiated function
+    
+    call zswap_dv(nsize, zx, zx_dv, incx_val, zy, zy_dv, incy_val, nbdirs)
+    
+    ! Print results and compare
+    write(*,*) 'Function calls completed successfully'
+    
+    ! Numerical differentiation check
+    call check_derivatives_numerically(passed)
+  end subroutine run_test_for_size
+
   subroutine check_derivatives_numerically(passed)
     implicit none
     logical, intent(out) :: passed
@@ -114,8 +122,8 @@ contains
     complex(8) :: central_diff, ad_result
     integer :: i, j, idir
     logical :: has_large_errors
-    complex(8), dimension(max_size) :: zx_forward, zx_backward
     complex(8), dimension(max_size) :: zy_forward, zy_backward
+    complex(8), dimension(max_size) :: zx_forward, zx_backward
     
     max_error = 0.0e0
     has_large_errors = .false.
@@ -131,40 +139,17 @@ contains
       zx = zx_orig + cmplx(h, 0.0) * zx_dv_orig(idir,:)
       zy = zy_orig + cmplx(h, 0.0) * zy_dv_orig(idir,:)
       call zswap(nsize, zx, incx_val, zy, incy_val)
-      zx_forward = zx
       zy_forward = zy
+      zx_forward = zx
       
       ! Backward perturbation: f(x - h * direction)
       zx = zx_orig - cmplx(h, 0.0) * zx_dv_orig(idir,:)
       zy = zy_orig - cmplx(h, 0.0) * zy_dv_orig(idir,:)
       call zswap(nsize, zx, incx_val, zy, incy_val)
-      zx_backward = zx
       zy_backward = zy
+      zx_backward = zx
       
       ! Compute central differences and compare with AD results
-      do i = 1, min(2, nsize)  ! Check only first few elements
-        ! Central difference: (f(x+h) - f(x-h)) / (2h)
-        central_diff = (zx_forward(i) - zx_backward(i)) / (2.0e0 * h)
-        ! AD result
-        ad_result = zx_dv(idir,i)
-        ! Error check: |a - b| > atol + rtol * |b|
-        abs_error = abs(central_diff - ad_result)
-        abs_reference = abs(ad_result)
-        error_bound = 1.0e-5 + 1.0e-5 * abs_reference
-        if (abs_error > error_bound) then
-          has_large_errors = .true.
-          relative_error = abs_error / max(abs_reference, 1.0e-10)
-          write(*,*) '  Large error in direction', idir, ' output ZX(', i, '):'
-          write(*,*) '    Central diff: ', central_diff
-          write(*,*) '    AD result:   ', ad_result
-          write(*,*) '    Absolute error:', abs_error
-          write(*,*) '    Error bound:', error_bound
-          write(*,*) '    Relative error:', relative_error
-        end if
-        ! Track max error for reporting (normalized)
-        relative_error = abs_error / max(abs_reference, 1.0e-10)
-        max_error = max(max_error, relative_error)
-      end do
       do i = 1, min(2, nsize)  ! Check only first few elements
         ! Central difference: (f(x+h) - f(x-h)) / (2h)
         central_diff = (zy_forward(i) - zy_backward(i)) / (2.0e0 * h)
@@ -178,6 +163,29 @@ contains
           has_large_errors = .true.
           relative_error = abs_error / max(abs_reference, 1.0e-10)
           write(*,*) '  Large error in direction', idir, ' output ZY(', i, '):'
+          write(*,*) '    Central diff: ', central_diff
+          write(*,*) '    AD result:   ', ad_result
+          write(*,*) '    Absolute error:', abs_error
+          write(*,*) '    Error bound:', error_bound
+          write(*,*) '    Relative error:', relative_error
+        end if
+        ! Track max error for reporting (normalized)
+        relative_error = abs_error / max(abs_reference, 1.0e-10)
+        max_error = max(max_error, relative_error)
+      end do
+      do i = 1, min(2, nsize)  ! Check only first few elements
+        ! Central difference: (f(x+h) - f(x-h)) / (2h)
+        central_diff = (zx_forward(i) - zx_backward(i)) / (2.0e0 * h)
+        ! AD result
+        ad_result = zx_dv(idir,i)
+        ! Error check: |a - b| > atol + rtol * |b|
+        abs_error = abs(central_diff - ad_result)
+        abs_reference = abs(ad_result)
+        error_bound = 1.0e-5 + 1.0e-5 * abs_reference
+        if (abs_error > error_bound) then
+          has_large_errors = .true.
+          relative_error = abs_error / max(abs_reference, 1.0e-10)
+          write(*,*) '  Large error in direction', idir, ' output ZX(', i, '):'
           write(*,*) '    Central diff: ', central_diff
           write(*,*) '    AD result:   ', ad_result
           write(*,*) '    Absolute error:', abs_error

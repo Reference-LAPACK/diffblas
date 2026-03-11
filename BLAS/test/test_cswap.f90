@@ -46,12 +46,12 @@ contains
     integer :: incy
 
     ! Derivative variables
-    complex(4), dimension(n) :: cx_d
     complex(4), dimension(n) :: cy_d
+    complex(4), dimension(n) :: cx_d
 
     ! Array restoration and derivative storage
-    complex(4), dimension(n) :: cx_orig, cx_d_orig
     complex(4), dimension(n) :: cy_orig, cy_d_orig
+    complex(4), dimension(n) :: cx_orig, cx_d_orig
     real(4) :: temp_re, temp_im  ! For complex random init
     integer :: i, j
 
@@ -74,23 +74,23 @@ contains
     do i = 1, n
       call random_number(temp_re)
       call random_number(temp_im)
-      cx_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
+      cy_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
     end do
     do i = 1, n
       call random_number(temp_re)
       call random_number(temp_im)
-      cy_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
+      cx_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
     end do
 
     ! Store _orig and _d_orig
-    cx_d_orig = cx_d
     cy_d_orig = cy_d
-    cx_orig = cx
+    cx_d_orig = cx_d
     cy_orig = cy
+    cx_orig = cx
 
     write(*,*) 'Testing CSWAP (n =', n, ')'
-    cx_orig = cx
     cy_orig = cy
+    cx_orig = cx
 
     ! Call the differentiated function
     call cswap_d(nsize, cx, cx_d, 1, cy, cy_d, 1)
@@ -98,18 +98,18 @@ contains
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, nsize, cx_orig, cy_orig, cx_d_orig, cy_d_orig, cx_d, cy_d, passed)
+    call check_derivatives_numerically(n, nsize, cy_orig, cx_orig, cy_d_orig, cx_d_orig, cy_d, cx_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, nsize, cx_orig, cy_orig, cx_d_orig, cy_d_orig, cx_d, cy_d, passed)
+  subroutine check_derivatives_numerically(n, nsize, cy_orig, cx_orig, cy_d_orig, cx_d_orig, cy_d, cx_d, passed)
     implicit none
     integer, intent(in) :: n
     integer, intent(in) :: nsize
-    complex(4), intent(in) :: cx_orig(n), cx_d_orig(n)
     complex(4), intent(in) :: cy_orig(n), cy_d_orig(n)
-    complex(4), intent(in) :: cx_d(n)
+    complex(4), intent(in) :: cx_orig(n), cx_d_orig(n)
     complex(4), intent(in) :: cy_d(n)
+    complex(4), intent(in) :: cx_d(n)
     logical, intent(out) :: passed
 
     real(4), parameter :: h = 1.0e-3  ! Step size for finite differences
@@ -117,11 +117,11 @@ contains
     real(4) :: abs_error, abs_reference, error_bound
     real(4) :: central_diff, ad_result
     logical :: has_large_errors
-    complex(4), dimension(n) :: cx_forward, cx_backward
     complex(4), dimension(n) :: cy_forward, cy_backward
+    complex(4), dimension(n) :: cx_forward, cx_backward
     integer :: i, j
-    complex(4), dimension(n) :: cx
     complex(4), dimension(n) :: cy
+    complex(4), dimension(n) :: cx
 
     max_error = 0.0e0
     has_large_errors = .false.
@@ -130,39 +130,20 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    cx = cx_orig + h * cx_d_orig
     cy = cy_orig + h * cy_d_orig
+    cx = cx_orig + h * cx_d_orig
     call cswap(nsize, cx, 1, cy, 1)
-    cx_forward = cx
     cy_forward = cy
+    cx_forward = cx
 
     ! Backward perturbation: f(x - h)
-    cx = cx_orig - h * cx_d_orig
     cy = cy_orig - h * cy_d_orig
+    cx = cx_orig - h * cx_d_orig
     call cswap(nsize, cx, 1, cy, 1)
-    cx_backward = cx
     cy_backward = cy
+    cx_backward = cx
 
     ! Compute central differences and compare with AD results
-    do i = 1, n
-        central_diff = (cx_forward(i) - cx_backward(i)) / (2.0e0 * h)
-        ad_result = cx_d(i)
-        abs_error = abs(central_diff - ad_result)
-        abs_reference = abs(ad_result)
-        error_bound = 1.0e-3 + 1.0e-3 * abs_reference
-        if (abs_error > error_bound) then
-          has_large_errors = .true.
-          relative_error = abs_error / max(abs_reference, 1.0e-10)
-          write(*,*) 'Large error in output CX(', i, '):'
-          write(*,*) '  Central diff: ', central_diff
-          write(*,*) '  AD result:   ', ad_result
-          write(*,*) '  Absolute error:', abs_error
-          write(*,*) '  Error bound:', error_bound
-          write(*,*) '  Relative error:', relative_error
-        end if
-        relative_error = abs_error / max(abs_reference, 1.0e-10)
-        max_error = max(max_error, relative_error)
-    end do
     do i = 1, n
         central_diff = (cy_forward(i) - cy_backward(i)) / (2.0e0 * h)
         ad_result = cy_d(i)
@@ -173,6 +154,25 @@ contains
           has_large_errors = .true.
           relative_error = abs_error / max(abs_reference, 1.0e-10)
           write(*,*) 'Large error in output CY(', i, '):'
+          write(*,*) '  Central diff: ', central_diff
+          write(*,*) '  AD result:   ', ad_result
+          write(*,*) '  Absolute error:', abs_error
+          write(*,*) '  Error bound:', error_bound
+          write(*,*) '  Relative error:', relative_error
+        end if
+        relative_error = abs_error / max(abs_reference, 1.0e-10)
+        max_error = max(max_error, relative_error)
+    end do
+    do i = 1, n
+        central_diff = (cx_forward(i) - cx_backward(i)) / (2.0e0 * h)
+        ad_result = cx_d(i)
+        abs_error = abs(central_diff - ad_result)
+        abs_reference = abs(ad_result)
+        error_bound = 1.0e-3 + 1.0e-3 * abs_reference
+        if (abs_error > error_bound) then
+          has_large_errors = .true.
+          relative_error = abs_error / max(abs_reference, 1.0e-10)
+          write(*,*) 'Large error in output CX(', i, '):'
           write(*,*) '  Central diff: ', central_diff
           write(*,*) '  AD result:   ', ad_result
           write(*,*) '  Absolute error:', abs_error

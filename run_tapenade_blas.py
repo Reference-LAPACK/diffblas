@@ -3663,6 +3663,8 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
         multi_max = max(8, required_max_size)
         main_lines.append(f"  integer, parameter :: max_size = {multi_max}  ! Maximum array dimension (multi-size test)")
         main_lines.append("  integer :: n_test  ! Loop over n = 1, 2, 3, 4")
+        main_lines.append("  integer :: test_sizes(1), itest")
+        main_lines.append("  logical :: passed, all_passed")
     else:
         main_lines.append("  integer, parameter :: n = 4  ! Matrix/vector size for test")
         if required_max_size > 4:
@@ -4033,8 +4035,11 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
     main_lines.append("  call random_seed(put=seed_array)")
     main_lines.append("")
     if multi_size:
-        main_lines.append(f"  write(*,*) 'Testing {func_name} (multi-size: n = 1, 2, 3, 4)'")
-        main_lines.append("  do n_test = 1, 4")
+        main_lines.append(f"  test_sizes = (/ 4 /)")
+        main_lines.append(f"  write(*,*) 'Testing {func_name} (multi-size: n = 4)'")
+        main_lines.append("  all_passed = .true.")
+        main_lines.append("  do itest = 1, 1")
+        main_lines.append("    n_test = test_sizes(itest)")
         main_lines.append("    n = n_test")
         main_lines.append("")
     
@@ -4555,10 +4560,14 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
     main_lines.append("  write(*,*) 'Function calls completed successfully'")
     main_lines.append("")
     main_lines.append("  ! Numerical differentiation check")
-    main_lines.append("  call check_derivatives_numerically()")
-    main_lines.append("")
     if multi_size:
-        # Indent loop body: add 2 spaces to lines between "n = n_test" and "call check_derivatives_numerically()"
+        main_lines.append("  call check_derivatives_numerically(passed)")
+    else:
+        main_lines.append("  call check_derivatives_numerically()")
+    main_lines.append("")
+    scalar_fwd_outline_body = []
+    if multi_size:
+        # Outline: replace loop body with call run_test_for_size(n_test, passed), insert subroutine after contains
         start_idx = None
         end_idx = None
         for i, line in enumerate(main_lines):
@@ -4566,21 +4575,47 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
                 start_idx = i + 2  # Skip "n = n_test" and blank line
                 break
         for i in range(len(main_lines) - 1, -1, -1):
-            if "call check_derivatives_numerically()" in main_lines[i]:
+            if "call check_derivatives_numerically(passed)" in main_lines[i]:
                 end_idx = i
                 break
         if start_idx is not None and end_idx is not None:
-            for i in range(start_idx, end_idx + 1):
-                main_lines[i] = "  " + main_lines[i]
+            scalar_fwd_outline_body = main_lines[start_idx:end_idx + 1]
+            main_lines[start_idx:end_idx + 1] = [
+                "    call run_test_for_size(n_test, passed)",
+                "    all_passed = all_passed .and. passed"
+            ]
         main_lines.append("  end do")
-        main_lines.append("  write(*,*) 'All sizes completed successfully'")
+        main_lines.append("  if (all_passed) then")
+        main_lines.append("    write(*,*) 'PASS: All sizes completed successfully'")
+        main_lines.append("  else")
+        main_lines.append("    write(*,*) 'FAIL: One or more sizes had derivative errors'")
+        main_lines.append("  end if")
     else:
         main_lines.append("  write(*,*) 'Test completed successfully'")
     main_lines.append("")
     main_lines.append("contains")
     main_lines.append("")
-    main_lines.append("  subroutine check_derivatives_numerically()")
-    main_lines.append("    implicit none")
+    if multi_size and scalar_fwd_outline_body:
+        main_lines.append("  subroutine run_test_for_size(n, passed)")
+        main_lines.append("    implicit none")
+        main_lines.append("    integer, intent(in) :: n")
+        main_lines.append("    logical, intent(out) :: passed")
+        if is_any_band_matrix_function(func_name):
+            main_lines.append("    integer :: i, j, band_row")
+        elif any(p.upper() in ['AP', 'BP', 'CP'] for p in all_params):
+            main_lines.append("    integer :: i, j")
+        main_lines.append("")
+        for ln in scalar_fwd_outline_body:
+            main_lines.append(("    " + ln) if ln.strip() else "")
+        main_lines.append("  end subroutine run_test_for_size")
+        main_lines.append("")
+    if multi_size:
+        main_lines.append("  subroutine check_derivatives_numerically(passed)")
+        main_lines.append("    implicit none")
+        main_lines.append("    logical, intent(out) :: passed")
+    else:
+        main_lines.append("  subroutine check_derivatives_numerically()")
+        main_lines.append("    implicit none")
     # Use appropriate step size based on input precision for mixed-precision functions
     if h_precision == "real(4)":
         h_value_sub = "1.0e-3"
@@ -4836,6 +4871,8 @@ def generate_test_main(func_name, src_file, inputs, outputs, inout_vars, func_ty
     main_lines.append("    write(*,*) 'Maximum relative error:', max_error")
     main_lines.append(f"    write(*,*) 'Tolerance thresholds: rtol={rtol}, atol={atol}'")
     # Final pass/fail based on error check (has_large_errors flag)
+    if multi_size:
+        main_lines.append("    passed = .not. has_large_errors")
     main_lines.append(f"    if (has_large_errors) then")
     main_lines.append("      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'")
     main_lines.append("    else")
@@ -6870,6 +6907,48 @@ def generate_test_main_reverse(func_name, src_file, inputs, outputs, inout_vars,
     main_lines.append("")
     main_lines.append(f"end program test_{src_stem}_reverse")
 
+    # Optional outlining for --multi-size scalar reverse (band/packed): extract loop body into run_test_for_size(n, passed)
+    if multi_size:
+        idx_do = None
+        idx_body_start = None
+        idx_body_end = None
+        for idx, line in enumerate(main_lines):
+            if idx_do is None and line.strip() == "do itest = 1, 1":
+                idx_do = idx
+            if idx_do is not None and idx_body_start is None and line.strip() == "! Initialize primal values":
+                idx_body_start = idx
+            if idx_body_start is not None and idx_body_end is None and "call check_vjp_numerically(passed)" in line:
+                idx_body_end = idx
+                break
+        if idx_do is not None and idx_body_start is not None and idx_body_end is not None:
+            # Include check_vjp line in extracted body; replace body + check + all_passed with call + all_passed
+            body_block = main_lines[idx_body_start:idx_body_end + 1]
+            main_lines[idx_body_start:idx_body_end + 2] = [
+                "    call run_test_for_size(n, passed)",
+                "    all_passed = all_passed .and. passed"
+            ]
+            idx_contains = None
+            for idx, line in enumerate(main_lines):
+                if line.strip() == "contains":
+                    idx_contains = idx
+                    break
+            if idx_contains is not None:
+                sub_lines = [
+                    "",
+                    "  subroutine run_test_for_size(n, passed)",
+                    "    implicit none",
+                    "    integer, intent(in) :: n",
+                    "    logical, intent(out) :: passed",
+                    ""
+                ] + [("    " + ln) if ln.strip() else "" for ln in body_block] + [
+                    "  end subroutine run_test_for_size",
+                    ""
+                ]
+                insert_at = idx_contains + 2
+                for line in sub_lines:
+                    main_lines.insert(insert_at, line)
+                    insert_at += 1
+
     # Post-process to ensure Fortran declarations appear before executable statements.
     # Some generated reverse-mode tests historically redeclared VJP temporaries mid-subroutine,
     # which is illegal Fortran and causes build failures (e.g., DGEMM, CHER*).
@@ -7047,6 +7126,12 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
             min_ld = evaluate_constraint(constraints[ld_param], param_values)
             if min_ld is not None and min_ld > required_max_size:
                 required_max_size = min_ld
+    
+    # NOTE: Vector-mode drivers rely on host association between the main program and
+    # internal subroutines (e.g. check_derivatives_numerically). Do not outline into a
+    # separate run_test_for_size subroutine unless we also restructure the internal
+    # subroutines to keep visibility of all declared variables.
+    use_outline_vf = False
     
     # Add variable declarations
     main_lines.append("  ! Test parameters")
@@ -8007,6 +8092,55 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
     main_lines.append("")
     main_lines.append(f"end program test_{src_stem}_vector_forward")
     
+    # Optional outlining for --multi-size vector forward:
+    # Keep ALL declarations at program scope (so check_derivatives_numerically still
+    # sees host variables), but outline the per-size executable body into
+    # run_test_for_size(n, passed). Applied to all routines (band and packed included).
+    if multi_size:
+        idx_do = None
+        idx_body_start = None
+        idx_body_end = None
+        idx_contains = None
+        for idx, line in enumerate(main_lines):
+            if idx_do is None and line.strip() == "do itest = 1, 1":
+                idx_do = idx
+            if idx_do is not None and idx_body_start is None and line == "  ! Initialize test parameters":
+                idx_body_start = idx
+            if idx_body_start is not None and idx_body_end is None and line == "  call check_derivatives_numerically(passed)":
+                idx_body_end = idx
+            if idx_contains is None and line.strip() == "contains":
+                idx_contains = idx
+        if idx_do is not None and idx_body_start is not None and idx_body_end is not None and idx_contains is not None:
+            body_block = main_lines[idx_body_start:idx_body_end + 1]
+            # Replace the in-loop executable body with a single call
+            main_lines[idx_body_start:idx_body_end + 1] = ["    call run_test_for_size(n, passed)"]
+            # Recompute 'contains' index after mutation (indices shift)
+            idx_contains = None
+            for idx, line in enumerate(main_lines):
+                if line.strip() == "contains":
+                    idx_contains = idx
+                    break
+            # Insert outlined subroutine right after 'contains' and the following blank line
+            sub_lines = [
+                "  subroutine run_test_for_size(n, passed)",
+                "    implicit none",
+                "    integer, intent(in) :: n",
+                "    logical, intent(out) :: passed",
+                "",
+            ]
+            for l in body_block:
+                if l.startswith("  "):
+                    sub_lines.append("    " + l[2:])
+                else:
+                    sub_lines.append("    " + l)
+            sub_lines.extend([
+                "  end subroutine run_test_for_size",
+                "",
+            ])
+            if idx_contains is not None:
+                insert_at = min(idx_contains + 2, len(main_lines))
+                main_lines[insert_at:insert_at] = sub_lines
+    
     return "\n".join(main_lines)
 
 def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inout_vars, func_type="SUBROUTINE", compiler="gfortran", c_compiler="gcc", param_types=None, nbdirsmax=4, reverse_src_dir=None, no_nbdirsmax=False, multi_size=False):
@@ -8154,6 +8288,10 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
             min_ld = evaluate_constraint(constraints[ld_param], param_values)
             if min_ld is not None and min_ld > required_max_size:
                 required_max_size = min_ld
+    
+    # See note in vector forward: outlining vector reverse requires restructuring internal
+    # subroutines to preserve visibility of host variables.
+    use_outline_vr = False
     
     # Add variable declarations
     main_lines.append("  ! Test parameters")
@@ -9513,6 +9651,55 @@ def generate_test_main_vector_reverse(func_name, src_file, inputs, outputs, inou
     main_lines.append("")
     main_lines.append("end program test_" + src_stem + "_vector_reverse")
     
+    # Optional outlining for --multi-size vector reverse:
+    # Keep ALL declarations at program scope (so check_vjp_numerically still sees
+    # host variables), but outline the per-size executable body into
+    # run_test_for_size(n, passed). Applied to all routines (band and packed included).
+    if multi_size:
+        idx_do = None
+        idx_body_start = None
+        idx_body_end = None
+        idx_contains = None
+        for idx, line in enumerate(main_lines):
+            if idx_do is None and line.strip() == "do itest = 1, 1":
+                idx_do = idx
+            if idx_do is not None and idx_body_start is None and line == "  ! Initialize primal values":
+                idx_body_start = idx
+            if idx_body_start is not None and idx_body_end is None and line == "  call check_vjp_numerically(passed)":
+                idx_body_end = idx
+            if idx_contains is None and line.strip() == "contains":
+                idx_contains = idx
+        if idx_do is not None and idx_body_start is not None and idx_body_end is not None and idx_contains is not None:
+            body_block = main_lines[idx_body_start:idx_body_end + 1]
+            # Replace the in-loop executable body with a single call
+            main_lines[idx_body_start:idx_body_end + 1] = ["    call run_test_for_size(n, passed)"]
+            # Recompute 'contains' index after mutation (indices shift)
+            idx_contains = None
+            for idx, line in enumerate(main_lines):
+                if line.strip() == "contains":
+                    idx_contains = idx
+                    break
+            # Insert outlined subroutine right after 'contains' and the following blank line
+            sub_lines = [
+                "  subroutine run_test_for_size(n, passed)",
+                "    implicit none",
+                "    integer, intent(in) :: n",
+                "    logical, intent(out) :: passed",
+                "",
+            ]
+            for l in body_block:
+                if l.startswith("  "):
+                    sub_lines.append("    " + l[2:])
+                else:
+                    sub_lines.append("    " + l)
+            sub_lines.extend([
+                "  end subroutine run_test_for_size",
+                "",
+            ])
+            if idx_contains is not None:
+                insert_at = min(idx_contains + 2, len(main_lines))
+                main_lines[insert_at:insert_at] = sub_lines
+    
     return "\n".join(main_lines)
 
 
@@ -10757,10 +10944,11 @@ def main():
                     help="AD modes to generate: d (forward scalar), dv (forward vector), b (reverse scalar), bv (reverse vector), all (all modes). Default: all")
     ap.add_argument("--nbdirsmax", type=int, default=4, help="Maximum number of derivative directions for vector mode (default: 4)")
     ap.add_argument("--no-nbdirsmax", action="store_true", help="Remove nbdirsmax: use nbdirs (subroutine arg) as dimension, comment out DIFFSIZES.inc for dv/b")
-    ap.add_argument("--multi-size", action="store_true", help="Generate forward scalar tests that loop over n=1,2,3,4 (outline into run_test_for_size subroutine)")
+    ap.add_argument("--multi-size", "--multisize", dest="multi_size", action="store_true", help="Generate forward scalar tests that loop over n=1,2,3,4 (outline into run_test_for_size subroutine)")
     ap.add_argument("--flat", action="store_true", help="Use flat directory structure (all files in function directory, single DIFFSIZES.inc)")
     ap.add_argument("--extra", nargs=argparse.REMAINDER, help="Extra args passed to Tapenade after -d/-r", default=[])
-    args = ap.parse_args()
+    # Strip whitespace from args so "  --multi-size  " (e.g. from copy-paste) is recognized
+    args = ap.parse_args([s.strip() if isinstance(s, str) else s for s in sys.argv[1:]])
 
     input_dir = Path(args.input_dir).resolve()
     if not input_dir.is_dir():
@@ -11853,7 +12041,7 @@ $(BUILD_DIR)/libdiffblas_d.a: compile-d $(DIFFSIZES_ACCESS_OBJ)
 	@echo "Created libdiffblas_d.a with $$(ls $(BUILD_DIR)/*_d.o 2>/dev/null | wc -w) objects"
 
 $(BUILD_DIR)/libdiffblas_d.so: compile-d
-	@$(FC) -shared -o $@ $$(ls $(BUILD_DIR)/*_d.o 2>/dev/null)
+	@objs="$$(ls $(BUILD_DIR)/*_d.o 2>/dev/null)"; if [ -n "$$objs" ]; then $(FC) -shared -o $@ $$objs; else touch $@; fi
 
 # Single library for all reverse mode differentiated code
 $(BUILD_DIR)/libdiffblas_b.a: compile-b $(DIFFSIZES_ACCESS_OBJ)
@@ -11861,7 +12049,7 @@ $(BUILD_DIR)/libdiffblas_b.a: compile-b $(DIFFSIZES_ACCESS_OBJ)
 	@echo "Created libdiffblas_b.a with $$(ls $(BUILD_DIR)/*_b.o 2>/dev/null | wc -w) objects"
 
 $(BUILD_DIR)/libdiffblas_b.so: compile-b $(DIFFSIZES_ACCESS_OBJ)
-	@$(FC) -shared -o $@ $$(ls $(BUILD_DIR)/*_b.o 2>/dev/null) $(BUILD_DIR)/adStack.o $(DIFFSIZES_ACCESS_OBJ)
+	@objs="$$(ls $(BUILD_DIR)/*_b.o 2>/dev/null)"; if [ -n "$$objs" ]; then $(FC) -shared -o $@ $$objs $(BUILD_DIR)/adStack.o $(DIFFSIZES_ACCESS_OBJ); else touch $@; fi
 
 # Single library for all vector forward mode differentiated code
 $(BUILD_DIR)/libdiffblas_dv.a: compile-dv $(DIFFSIZES_ACCESS_OBJ)
@@ -11869,7 +12057,7 @@ $(BUILD_DIR)/libdiffblas_dv.a: compile-dv $(DIFFSIZES_ACCESS_OBJ)
 	@echo "Created libdiffblas_dv.a with $$(ls $(BUILD_DIR)/*_dv.o 2>/dev/null | wc -w) objects"
 
 $(BUILD_DIR)/libdiffblas_dv.so: compile-dv
-	@$(FC) -shared -o $@ $$(ls $(BUILD_DIR)/*_dv.o 2>/dev/null) $(BUILD_DIR)/DIFFSIZES.o
+	@objs="$$(ls $(BUILD_DIR)/*_dv.o 2>/dev/null)"; if [ -n "$$objs" ]; then $(FC) -shared -o $@ $$objs $(BUILD_DIR)/DIFFSIZES.o; else touch $@; fi
 
 # Single library for all vector reverse mode differentiated code
 $(BUILD_DIR)/libdiffblas_bv.a: compile-bv $(DIFFSIZES_ACCESS_OBJ)
@@ -11877,7 +12065,7 @@ $(BUILD_DIR)/libdiffblas_bv.a: compile-bv $(DIFFSIZES_ACCESS_OBJ)
 	@echo "Created libdiffblas_bv.a with $$(ls $(BUILD_DIR)/*_bv.o 2>/dev/null | wc -w) objects"
 
 $(BUILD_DIR)/libdiffblas_bv.so: compile-bv $(DIFFSIZES_ACCESS_OBJ)
-	@$(FC) -shared -o $@ $$(ls $(BUILD_DIR)/*_bv.o 2>/dev/null) $(BUILD_DIR)/adStack.o $(BUILD_DIR)/DIFFSIZES.o $(DIFFSIZES_ACCESS_OBJ)
+	@objs="$$(ls $(BUILD_DIR)/*_bv.o 2>/dev/null)"; if [ -n "$$objs" ]; then $(FC) -shared -o $@ $$objs $(BUILD_DIR)/adStack.o $(BUILD_DIR)/DIFFSIZES.o $(DIFFSIZES_ACCESS_OBJ); else touch $@; fi
 
 # Note: Original BLAS functions come from $(BLAS_LIB) (librefblas in LAPACKDIR)
 # No need to build a separate liborigblas

@@ -53,35 +53,7 @@ program test_dnrm2_vector_reverse
     n = test_sizes(itest)
     write(*,*) 'Testing DNRM2 (Vector Reverse, n =', n, ')'
 
-  ! Initialize primal values
-  nsize = n
-  call random_number(x)
-  x = x * 2.0 - 1.0
-  incx_val = 1
-
-  ! Store original primal values
-  x_orig = x
-
-  ! Initialize output adjoints (cotangents) with random values for each direction
-  ! These are the 'seeds' for reverse mode
-  ! Initialize function result adjoint (output cotangent)
-  do k = 1, nbdirs
-    call random_number(dnrm2b(k))
-    dnrm2b(k) = dnrm2b(k) * 2.0 - 1.0
-  end do
-
-  ! Initialize input adjoints to zero (they will be computed)
-  ! Note: Inout parameters are skipped - they already have output adjoints initialized
-  xb = 0.0
-
-  ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
-  dnrm2b_orig = dnrm2b
-
-  ! Call reverse vector mode differentiated function
-  call dnrm2_bv(nsize, x, xb, incx_val, dnrm2b, nbdirs)
-
-  ! VJP Verification using finite differences
-  call check_vjp_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -91,6 +63,42 @@ program test_dnrm2_vector_reverse
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize primal values
+    nsize = n
+    call random_number(x)
+    x = x * 2.0 - 1.0
+    incx_val = 1
+    
+    ! Store original primal values
+    x_orig = x
+    
+    ! Initialize output adjoints (cotangents) with random values for each direction
+    ! These are the 'seeds' for reverse mode
+    ! Initialize function result adjoint (output cotangent)
+    do k = 1, nbdirs
+      call random_number(dnrm2b(k))
+      dnrm2b(k) = dnrm2b(k) * 2.0 - 1.0
+    end do
+    
+    ! Initialize input adjoints to zero (they will be computed)
+    ! Note: Inout parameters are skipped - they already have output adjoints initialized
+    xb = 0.0
+    
+    ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
+    dnrm2b_orig = dnrm2b
+    
+    ! Call reverse vector mode differentiated function
+    call dnrm2_bv(nsize, x, xb, incx_val, dnrm2b, nbdirs)
+    
+    ! VJP Verification using finite differences
+    call check_vjp_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_vjp_numerically(passed)
     implicit none

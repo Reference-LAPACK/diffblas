@@ -59,59 +59,7 @@ program test_caxpy_vector_reverse
     n = test_sizes(itest)
     write(*,*) 'Testing CAXPY (Vector Reverse, n =', n, ')'
 
-  ! Initialize primal values
-  nsize = n
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  ca = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    cx(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-  end do
-  incx_val = 1
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    cy(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-  end do
-  incy_val = 1
-
-  ! Store original primal values
-  ca_orig = ca
-  cx_orig = cx
-  cy_orig = cy
-
-  ! Initialize output adjoints (cotangents) with random values for each direction
-  ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirs
-    do i = 1, n
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      cyb(k,i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-    end do
-  end do
-
-  ! Initialize input adjoints to zero (they will be computed)
-  ! Note: Inout parameters are skipped - they already have output adjoints initialized
-  cab = 0.0
-  cxb = 0.0
-
-  ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
-  cyb_orig = cyb
-
-  ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
-  call set_ISIZE1OFCx(n)
-
-  ! Call reverse vector mode differentiated function
-  call caxpy_bv(nsize, ca, cab, cx, cxb, incx_val, cy, cyb, incy_val, nbdirs)
-
-  ! Reset ISIZE globals to uninitialized (-1) for completeness
-  call set_ISIZE1OFCx(-1)
-
-  ! VJP Verification using finite differences
-  call check_vjp_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -121,6 +69,66 @@ program test_caxpy_vector_reverse
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize primal values
+    nsize = n
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    ca = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+    do i = 1, n
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      cx(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+    end do
+    incx_val = 1
+    do i = 1, n
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      cy(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+    end do
+    incy_val = 1
+    
+    ! Store original primal values
+    ca_orig = ca
+    cx_orig = cx
+    cy_orig = cy
+    
+    ! Initialize output adjoints (cotangents) with random values for each direction
+    ! These are the 'seeds' for reverse mode
+    do k = 1, nbdirs
+      do i = 1, n
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        cyb(k,i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+      end do
+    end do
+    
+    ! Initialize input adjoints to zero (they will be computed)
+    ! Note: Inout parameters are skipped - they already have output adjoints initialized
+    cab = 0.0
+    cxb = 0.0
+    
+    ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
+    cyb_orig = cyb
+    
+    ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
+    ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
+    call set_ISIZE1OFCx(n)
+    
+    ! Call reverse vector mode differentiated function
+    call caxpy_bv(nsize, ca, cab, cx, cxb, incx_val, cy, cyb, incy_val, nbdirs)
+    
+    ! Reset ISIZE globals to uninitialized (-1) for completeness
+    call set_ISIZE1OFCx(-1)
+    
+    ! VJP Verification using finite differences
+    call check_vjp_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_vjp_numerically(passed)
     implicit none
@@ -196,6 +204,7 @@ contains
       ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
       ! For pure inputs: use adjoint directly
       vjp_ad = 0.0
+      vjp_ad = vjp_ad + real(conjg(ca_dir) * cab(k))
       ! Compute and sort products for cx
       n_products = n
       do i = 1, n
@@ -214,7 +223,6 @@ contains
       do i = 1, n_products
         vjp_ad = vjp_ad + temp_products(i)
       end do
-      vjp_ad = vjp_ad + real(conjg(ca_dir) * cab(k))
       
       ! Error check: |vjp_fd - vjp_ad| > atol + rtol * |vjp_ad|
       abs_error = abs(vjp_fd - vjp_ad)

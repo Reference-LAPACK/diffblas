@@ -65,56 +65,7 @@ program test_ssyrk_vector_reverse
     n = test_sizes(itest)
     write(*,*) 'Testing SSYRK (Vector Reverse, n =', n, ')'
 
-  ! Initialize primal values
-  uplo = 'U'
-  trans = 'N'
-  nsize = n
-  ksize = n
-  call random_number(alpha)
-  alpha = alpha * 2.0 - 1.0
-  call random_number(a)
-  a = a * 2.0 - 1.0
-  lda_val = lda
-  call random_number(beta)
-  beta = beta * 2.0 - 1.0
-  call random_number(c)
-  c = c * 2.0 - 1.0
-  ldc_val = ldc
-
-  ! Store original primal values
-  alpha_orig = alpha
-  a_orig = a
-  beta_orig = beta
-  c_orig = c
-
-  ! Initialize output adjoints (cotangents) with random values for each direction
-  ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirs
-    call random_number(cb(k,:,:))
-    cb(k,:,:) = cb(k,:,:) * 2.0 - 1.0
-  end do
-
-  ! Initialize input adjoints to zero (they will be computed)
-  ! Note: Inout parameters are skipped - they already have output adjoints initialized
-  alphab = 0.0
-  ab = 0.0
-  betab = 0.0
-
-  ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
-  cb_orig = cb
-
-  ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
-  call set_ISIZE2OFA(max_size)
-
-  ! Call reverse vector mode differentiated function
-  call ssyrk_bv(uplo, trans, nsize, ksize, alpha, alphab, a, ab, lda_val, beta, betab, c, cb, ldc_val, nbdirs)
-
-  ! Reset ISIZE globals to uninitialized (-1) for completeness
-  call set_ISIZE2OFA(-1)
-
-  ! VJP Verification using finite differences
-  call check_vjp_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -124,6 +75,63 @@ program test_ssyrk_vector_reverse
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize primal values
+    uplo = 'U'
+    trans = 'N'
+    nsize = n
+    ksize = n
+    call random_number(alpha)
+    alpha = alpha * 2.0 - 1.0
+    call random_number(a)
+    a = a * 2.0 - 1.0
+    lda_val = lda
+    call random_number(beta)
+    beta = beta * 2.0 - 1.0
+    call random_number(c)
+    c = c * 2.0 - 1.0
+    ldc_val = ldc
+    
+    ! Store original primal values
+    alpha_orig = alpha
+    a_orig = a
+    beta_orig = beta
+    c_orig = c
+    
+    ! Initialize output adjoints (cotangents) with random values for each direction
+    ! These are the 'seeds' for reverse mode
+    do k = 1, nbdirs
+      call random_number(cb(k,:,:))
+      cb(k,:,:) = cb(k,:,:) * 2.0 - 1.0
+    end do
+    
+    ! Initialize input adjoints to zero (they will be computed)
+    ! Note: Inout parameters are skipped - they already have output adjoints initialized
+    alphab = 0.0
+    ab = 0.0
+    betab = 0.0
+    
+    ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
+    cb_orig = cb
+    
+    ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
+    ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
+    call set_ISIZE2OFA(max_size)
+    
+    ! Call reverse vector mode differentiated function
+    call ssyrk_bv(uplo, trans, nsize, ksize, alpha, alphab, a, ab, lda_val, beta, betab, c, cb, ldc_val, nbdirs)
+    
+    ! Reset ISIZE globals to uninitialized (-1) for completeness
+    call set_ISIZE2OFA(-1)
+    
+    ! VJP Verification using finite differences
+    call check_vjp_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_vjp_numerically(passed)
     implicit none

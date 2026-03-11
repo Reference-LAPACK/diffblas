@@ -42,53 +42,7 @@ program test_dcopy_vector_forward
     n = test_sizes(itest)
     write(*,*) 'Testing DCOPY (Vector Forward, n =', n, ')'
 
-  ! Initialize test parameters
-  nsize = n
-  incx_val = 1
-  incy_val = 1
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
-  seed_array = 42
-  call random_seed(put=seed_array)
-
-  call random_number(dx)
-  dx = dx * 2.0d0 - 1.0d0  ! Scale to [-1,1]
-  call random_number(dy)
-  dy = dy * 2.0d0 - 1.0d0  ! Scale to [-1,1]
-
-  ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirs
-    call random_number(dx_dv(idir,:))
-    dx_dv(idir,:) = dx_dv(idir,:) * 2.0d0 - 1.0d0
-  end do
-  do idir = 1, nbdirs
-    call random_number(dy_dv(idir,:))
-    dy_dv(idir,:) = dy_dv(idir,:) * 2.0d0 - 1.0d0
-  end do
-
-  write(*,*) 'Testing DCOPY (Vector Forward Mode)'
-  ! Store original values before any function calls (critical for INOUT parameters)
-  dx_orig = dx
-  dx_dv_orig = dx_dv
-  dy_orig = dy
-  dy_dv_orig = dy_dv
-
-  ! Call the vector mode differentiated function
-
-  ! Set ISIZE globals required by differentiated routine
-  call set_ISIZE1OFDy(max_size)
-
-  call dcopy_dv(nsize, dx, dx_dv, incx_val, dy, dy_dv, incy_val, nbdirs)
-
-  ! Reset ISIZE globals to uninitialized (-1)
-  call set_ISIZE1OFDy(-1)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically(passed)
+    call run_test_for_size(n, passed)
   all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -98,6 +52,60 @@ program test_dcopy_vector_forward
   end if
 
 contains
+
+  subroutine run_test_for_size(n, passed)
+    implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    ! Initialize test parameters
+    nsize = n
+    incx_val = 1
+    incy_val = 1
+    
+    ! Initialize test data with random numbers
+    ! Initialize random seed for reproducible results
+    seed_array = 42
+    call random_seed(put=seed_array)
+    
+    call random_number(dx)
+    dx = dx * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+    call random_number(dy)
+    dy = dy * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+    
+    ! Initialize input derivatives to random values (exactly like scalar mode)
+    do idir = 1, nbdirs
+      call random_number(dx_dv(idir,:))
+      dx_dv(idir,:) = dx_dv(idir,:) * 2.0d0 - 1.0d0
+    end do
+    do idir = 1, nbdirs
+      call random_number(dy_dv(idir,:))
+      dy_dv(idir,:) = dy_dv(idir,:) * 2.0d0 - 1.0d0
+    end do
+    
+    write(*,*) 'Testing DCOPY (Vector Forward Mode)'
+    ! Store original values before any function calls (critical for INOUT parameters)
+    dx_orig = dx
+    dx_dv_orig = dx_dv
+    dy_orig = dy
+    dy_dv_orig = dy_dv
+    
+    ! Call the vector mode differentiated function
+    
+    ! Set ISIZE globals required by differentiated routine
+    call set_ISIZE1OFDy(max_size)
+    
+    call dcopy_dv(nsize, dx, dx_dv, incx_val, dy, dy_dv, incy_val, nbdirs)
+    
+    ! Reset ISIZE globals to uninitialized (-1)
+    call set_ISIZE1OFDy(-1)
+    
+    ! Print results and compare
+    write(*,*) 'Function calls completed successfully'
+    
+    ! Numerical differentiation check
+    call check_derivatives_numerically(passed)
+  end subroutine run_test_for_size
 
   subroutine check_derivatives_numerically(passed)
     implicit none
