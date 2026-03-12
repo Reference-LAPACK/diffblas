@@ -45,12 +45,12 @@ contains
     integer :: incx
 
     ! Derivative variables
-    real(8) :: da_d
     complex(8), dimension(n) :: zx_d
+    real(8) :: da_d
 
     ! Array restoration and derivative storage
-    real(8) :: da_orig, da_d_orig
     complex(8), dimension(n) :: zx_orig, zx_d_orig
+    real(8) :: da_orig, da_d_orig
     real(8) :: temp_re, temp_im  ! For complex random init
     integer :: i, j
 
@@ -66,19 +66,19 @@ contains
     end do
 
     ! Initialize input derivatives
-    call random_number(da_d)
-    da_d = da_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     do i = 1, n
       call random_number(temp_re)
       call random_number(temp_im)
       zx_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
     end do
+    call random_number(da_d)
+    da_d = da_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
     ! Store _orig and _d_orig
-    da_d_orig = da_d
     zx_d_orig = zx_d
-    da_orig = da
+    da_d_orig = da_d
     zx_orig = zx
+    da_orig = da
 
     write(*,*) 'Testing ZDSCAL (n =', n, ')'
     zx_orig = zx

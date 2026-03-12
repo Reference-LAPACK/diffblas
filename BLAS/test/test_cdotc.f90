@@ -47,13 +47,13 @@ contains
 
     ! Derivative variables
     complex(4), dimension(n) :: cy_d
-    complex(4), dimension(n) :: cx_d
     complex(4) :: cdotc_d_result  ! Derivative of function result (avoid name clash with func_d)
+    complex(4), dimension(n) :: cx_d
 
     ! Array restoration and derivative storage
     complex(4), dimension(n) :: cy_orig, cy_d_orig
-    complex(4), dimension(n) :: cx_orig, cx_d_orig
     complex(4) :: cdotc_orig  ! Function result (no _d_orig - use _d_result)
+    complex(4), dimension(n) :: cx_orig, cx_d_orig
     real(4) :: temp_re, temp_im  ! For complex random init
     integer :: i, j
 
@@ -88,8 +88,8 @@ contains
     cy_d_orig = cy_d
     cx_d_orig = cx_d
     cy_orig = cy
-    cx_orig = cx
     cdotc_orig = cdotc(nsize, cx, 1, cy, 1)
+    cx_orig = cx
 
     write(*,*) 'Testing CDOTC (n =', n, ')'
 

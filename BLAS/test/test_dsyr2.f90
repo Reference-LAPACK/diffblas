@@ -106,19 +106,19 @@ contains
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, uplo, nsize, lda_val, a_orig, alpha_orig, x_orig, y_orig, a_d_orig, alpha_d_orig, x_d_orig, y_d_orig, a_d, passed)
+    call check_derivatives_numerically(n, uplo, nsize, lda_val, x_orig, alpha_orig, a_orig, y_orig, x_d_orig, alpha_d_orig, a_d_orig, y_d_orig, a_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, uplo, nsize, lda_val, a_orig, alpha_orig, x_orig, y_orig, a_d_orig, alpha_d_orig, x_d_orig, y_d_orig, a_d, passed)
+  subroutine check_derivatives_numerically(n, uplo, nsize, lda_val, x_orig, alpha_orig, a_orig, y_orig, x_d_orig, alpha_d_orig, a_d_orig, y_d_orig, a_d, passed)
     implicit none
     integer, intent(in) :: n
     character, intent(in) :: uplo
     integer, intent(in) :: nsize
     integer, intent(in) :: lda_val
-    real(8), intent(in) :: a_orig(n,n), a_d_orig(n,n)
-    real(8), intent(in) :: alpha_orig, alpha_d_orig
     real(8), intent(in) :: x_orig(n), x_d_orig(n)
+    real(8), intent(in) :: alpha_orig, alpha_d_orig
+    real(8), intent(in) :: a_orig(n,n), a_d_orig(n,n)
     real(8), intent(in) :: y_orig(n), y_d_orig(n)
     real(8), intent(in) :: a_d(n,n)
     logical, intent(out) :: passed
@@ -130,9 +130,9 @@ contains
     logical :: has_large_errors
     real(8), dimension(n,n) :: a_forward, a_backward
     integer :: i, j
-    real(8), dimension(n,n) :: a
-    real(8) :: alpha
     real(8), dimension(n) :: x
+    real(8) :: alpha
+    real(8), dimension(n,n) :: a
     real(8), dimension(n) :: y
 
     max_error = 0.0e0
@@ -142,17 +142,17 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    a = a_orig + h * a_d_orig
-    alpha = alpha_orig + h * alpha_d_orig
     x = x_orig + h * x_d_orig
+    alpha = alpha_orig + h * alpha_d_orig
+    a = a_orig + h * a_d_orig
     y = y_orig + h * y_d_orig
     call dsyr2(uplo, nsize, alpha, x, 1, y, 1, a, lda_val)
     a_forward = a
 
     ! Backward perturbation: f(x - h)
-    a = a_orig - h * a_d_orig
-    alpha = alpha_orig - h * alpha_d_orig
     x = x_orig - h * x_d_orig
+    alpha = alpha_orig - h * alpha_d_orig
+    a = a_orig - h * a_d_orig
     y = y_orig - h * y_d_orig
     call dsyr2(uplo, nsize, alpha, x, 1, y, 1, a, lda_val)
     a_backward = a

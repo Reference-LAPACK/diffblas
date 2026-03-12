@@ -1,200 +1,94 @@
-! Test program for STRSM vector forward mode differentiation
-! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirs=4
-
+! Test program for STRSM vector forward (BLAS3 outlined)
 program test_strsm_vector_forward
   implicit none
-  integer, parameter :: nbdirs = 4
-
   external :: strsm
   external :: strsm_dv
-
-  ! Test parameters
-  integer :: n  ! Current size (set in loop)
-  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-  integer :: i, j, idir  ! Loop counters
-  integer :: test_sizes(1), itest
+  integer :: nbdirs, n_test, test_sizes(1), i
+  integer :: seed_array(33)
   logical :: passed, all_passed
-  integer :: seed_array(33)  ! Random seed
-  real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
-
-  character :: side
-  character :: uplo
-  character :: transa
-  character :: diag
-  integer :: msize
-  integer :: nsize
-  real(4) :: alpha
-  real(4), dimension(max_size,max_size) :: a
-  integer :: lda_val
-  real(4), dimension(max_size,max_size) :: b
-  integer :: ldb_val
-
-  ! Vector mode derivative variables (type-promoted)
-  ! Scalars become arrays(nbdirs), arrays gain extra dimension
-  real(4), dimension(nbdirs) :: alpha_dv
-  real(4), dimension(nbdirs,max_size,max_size) :: a_dv
-  real(4), dimension(nbdirs,max_size,max_size) :: b_dv
-  ! Declare variables for storing original values
-  real(4) :: alpha_orig
-  real(4), dimension(nbdirs) :: alpha_dv_orig
-  real(4), dimension(max_size,max_size) :: a_orig
-  real(4), dimension(nbdirs,max_size,max_size) :: a_dv_orig
-  real(4), dimension(max_size,max_size) :: b_orig
-  real(4), dimension(nbdirs,max_size,max_size) :: b_dv_orig
-
+  seed_array = 42
+  call random_seed(put=seed_array)
   test_sizes = (/ 4 /)
-  write(*,*) 'Testing STRSM (Vector Forward, multi-size: n = 4)'
   all_passed = .true.
-  do itest = 1, 1
-    n = test_sizes(itest)
-    write(*,*) 'Testing STRSM (Vector Forward, n =', n, ')'
-
-    call run_test_for_size(n, passed)
-  all_passed = all_passed .and. passed
+  do i = 1, 1
+    n_test = test_sizes(i)
+    nbdirs = n_test
+    call run_test_for_size(n_test, passed, nbdirs)
+    all_passed = all_passed .and. passed
   end do
-  if (all_passed) then
-    write(*,*) 'PASS: Vector forward mode - all sizes completed successfully'
-  else
-    write(*,*) 'FAIL: Vector forward mode - one or more sizes had derivative errors'
-  end if
-
+  if (all_passed) write(*,*) 'PASS: BLAS3 vector forward'
+  if (.not. all_passed) write(*,*) 'FAIL: BLAS3 vector forward'
 contains
-
-  subroutine run_test_for_size(n, passed)
-    implicit none
-    integer, intent(in) :: n
+  subroutine run_test_for_size(n, passed, nbdirs)
+    integer, intent(in) :: n, nbdirs
     logical, intent(out) :: passed
-
-    ! Initialize test parameters
+    integer :: msize, nsize, ksize, lda_val, ldb_val, ldc_val
+    character :: side, uplo, transa
+    character :: diag
+    real(4) :: alpha, beta
+    real(4), dimension(n,n) :: a, b, c
+    real(4), dimension(nbdirs) :: alpha_dv, beta_dv
+    real(4), dimension(nbdirs,n,n) :: a_dv, b_dv, c_dv
+    real(4), dimension(nbdirs,n,n) :: b_dv_seed
+    real(4), dimension(n,n) :: b_orig, b_plus, b_minus
+    real(4), dimension(n,n) :: a_t, b_t
+    real(4), parameter :: h = 1.0e-3
+    real(4) :: max_err, abs_err, ref_c
+    integer :: ii, jj, idir, k
+    real(4) :: tr, ti
     msize = n
     nsize = n
-    lda_val = lda
-    ldb_val = ldb
-    
-    ! Initialize test data with random numbers
-    ! Initialize random seed for reproducible results
-    seed_array = 42
-    call random_seed(put=seed_array)
-    
+    ksize = n
+    lda_val = n
+    ldb_val = n
+    ldc_val = n
     side = 'L'
-    uplo = 'U'
+    uplo = 'L'
     transa = 'N'
     diag = 'N'
+    write(*,*) 'Testing STRSM (Vector Forward, n =', n, ')'
     call random_number(alpha)
-    alpha = alpha * 2.0 - 1.0  ! Scale to [-1,1]
+    alpha = alpha * 2.0d0 - 1.0d0
+    call random_number(beta)
+    beta = beta * 2.0d0 - 1.0d0
     call random_number(a)
-    a = a * 2.0 - 1.0  ! Scale to [-1,1]
+    a = a * 2.0d0 - 1.0d0
     call random_number(b)
-    b = b * 2.0 - 1.0  ! Scale to [-1,1]
-    
-    ! Initialize input derivatives to random values (exactly like scalar mode)
-    do idir = 1, nbdirs
-      call random_number(temp_real)
-      alpha_dv(idir) = temp_real * 2.0 - 1.0
-    end do
-    do idir = 1, nbdirs
-      call random_number(a_dv(idir,:,:))
-      a_dv(idir,:,:) = a_dv(idir,:,:) * 2.0 - 1.0
-    end do
-    do idir = 1, nbdirs
-      call random_number(b_dv(idir,:,:))
-      b_dv(idir,:,:) = b_dv(idir,:,:) * 2.0 - 1.0
-    end do
-    
-    write(*,*) 'Testing STRSM (Vector Forward Mode)'
-    ! Store original values before any function calls (critical for INOUT parameters)
-    alpha_orig = alpha
-    alpha_dv_orig = alpha_dv
-    a_orig = a
-    a_dv_orig = a_dv
+    b = b * 2.0d0 - 1.0d0
+    call random_number(alpha_dv)
+    alpha_dv = alpha_dv * 2.0d0 - 1.0d0
+    call random_number(beta_dv)
+    beta_dv = beta_dv * 2.0d0 - 1.0d0
+    call random_number(a_dv)
+    a_dv = a_dv * 2.0d0 - 1.0d0
+    call random_number(b_dv)
+    b_dv = b_dv * 2.0d0 - 1.0d0
     b_orig = b
-    b_dv_orig = b_dv
-    
-    ! Call the vector mode differentiated function
-    
+    b_dv_seed = b_dv
     call strsm_dv(side, uplo, transa, diag, msize, nsize, alpha, alpha_dv, a, a_dv, lda_val, b, b_dv, ldb_val, nbdirs)
-    
-    ! Print results and compare
-    write(*,*) 'Function calls completed successfully'
-    
-    ! Numerical differentiation check
-    call check_derivatives_numerically(passed)
-  end subroutine run_test_for_size
-
-  subroutine check_derivatives_numerically(passed)
-    implicit none
-    logical, intent(out) :: passed
-    real(4), parameter :: h = 1.0e-3  ! Step size for finite differences
-    real(4) :: relative_error, max_error
-    real(4) :: abs_error, abs_reference, error_bound
-    real(4) :: central_diff, ad_result
-    integer :: i, j, idir
-    logical :: has_large_errors
-    real(4), dimension(max_size,max_size) :: b_forward, b_backward
-    
-    max_error = 0.0e0
-    has_large_errors = .false.
-    
-    write(*,*) 'Checking vector derivatives against numerical differentiation:'
-    write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirs
-    
-    ! Test each derivative direction separately
-    do idir = 1, nbdirs
-      
-      ! Forward perturbation: f(x + h * direction)
-      alpha = alpha_orig + h * alpha_dv_orig(idir)
-      a = a_orig + h * a_dv_orig(idir,:,:)
-      b = b_orig + h * b_dv_orig(idir,:,:)
-      call strsm(side, uplo, transa, diag, msize, nsize, alpha, a, lda_val, b, ldb_val)
-      b_forward = b
-      
-      ! Backward perturbation: f(x - h * direction)
-      alpha = alpha_orig - h * alpha_dv_orig(idir)
-      a = a_orig - h * a_dv_orig(idir,:,:)
-      b = b_orig - h * b_dv_orig(idir,:,:)
-      call strsm(side, uplo, transa, diag, msize, nsize, alpha, a, lda_val, b, ldb_val)
-      b_backward = b
-      
-      ! Compute central differences and compare with AD results
-      do j = 1, min(2, nsize)  ! Check only first few elements
-        do i = 1, min(2, nsize)
-          ! Central difference: (f(x+h) - f(x-h)) / (2h)
-          central_diff = (b_forward(i,j) - b_backward(i,j)) / (2.0e0 * h)
-          ! AD result
-          ad_result = b_dv(idir,i,j)
-          ! Error check: |a - b| > atol + rtol * |b|
-          abs_error = abs(central_diff - ad_result)
-          abs_reference = abs(ad_result)
-          error_bound = 2.0e-3 + 2.0e-3 * abs_reference
-          if (abs_error > error_bound) then
-            has_large_errors = .true.
-            relative_error = abs_error / max(abs_reference, 1.0e-10)
-            write(*,*) '  Large error in direction', idir, ' output B(', i, ',', j, '):'
-            write(*,*) '    Central diff: ', central_diff
-            write(*,*) '    AD result:   ', ad_result
-            write(*,*) '    Absolute error:', abs_error
-            write(*,*) '    Error bound:', error_bound
-            write(*,*) '    Relative error:', relative_error
-          end if
-          ! Track max error for reporting (normalized)
-          relative_error = abs_error / max(abs_reference, 1.0e-10)
-          max_error = max(max_error, relative_error)
+    ! Finite-difference check per direction k: (output(+h) - output(-h))/(2h) vs c_dv(k,:,:)
+    passed = .true.
+    do k = 1, nbdirs
+      a_t = a + h * a_dv(k,:,:)
+      b_plus = b_orig + h * b_dv_seed(k,:,:)
+      call strsm(side, uplo, transa, diag, msize, nsize, alpha + h*alpha_dv(k), a_t, lda_val, b_plus, ldb_val)
+      a_t = a - h * a_dv(k,:,:)
+      b_minus = b_orig - h * b_dv_seed(k,:,:)
+      call strsm(side, uplo, transa, diag, msize, nsize, alpha - h*alpha_dv(k), a_t, lda_val, b_minus, ldb_val)
+      max_err = 0.0d0
+      do jj = 1, n
+        do ii = 1, n
+          abs_err = abs((b_plus(ii,jj) - b_minus(ii,jj)) / (2.0d0 * h) - b_dv(k,ii,jj))
+          if (abs_err > max_err) max_err = abs_err
         end do
       end do
+      ref_c = maxval(abs(b_dv(k,:,:))) + 1.0d0
+      if (max_err > 1.0e-3 * ref_c) then
+        passed = .false.
+        write(*,*) '  direction k=', k, ' max_err=', max_err, ' ref_c=', ref_c, ' tol=', (1.0e-3)*ref_c
+      end if
     end do
-    
-    write(*,*) 'Maximum relative error across all directions:', max_error
-    write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
-    passed = .not. has_large_errors
-    if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in vector derivatives (outside tolerance)'
-    else
-      write(*,*) 'PASS: Vector derivatives are within tolerance (rtol + atol)'
-    end if
-    
-  end subroutine check_derivatives_numerically
-
+    if (.not. passed) write(*,*) 'FAIL: BLAS3 vector forward FD check'
+    if (passed) write(*,*) 'PASS: BLAS3 vector forward FD check'
+  end subroutine run_test_for_size
 end program test_strsm_vector_forward

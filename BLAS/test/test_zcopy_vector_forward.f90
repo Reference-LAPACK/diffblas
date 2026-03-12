@@ -1,49 +1,32 @@
 ! Test program for ZCOPY vector forward mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*8 precision with nbdirs=4
+! Using REAL*8 precision with nbdirs=n
+! Multi-size test with outlined run_test_for_size(n) - arrays declared to size n
 
 program test_zcopy_vector_forward
   implicit none
-  integer, parameter :: nbdirs = 4
 
   external :: zcopy
   external :: zcopy_dv
 
-  ! Test parameters
-  integer :: n  ! Current size (set in loop)
-  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-  integer :: i, j, idir  ! Loop counters
-  integer :: test_sizes(1), itest
+  integer :: nbdirs
+  integer :: n_test
+  integer :: seed_array(33)
+  integer :: test_sizes(1)
+  integer :: i
   logical :: passed, all_passed
-  integer :: seed_array(33)  ! Random seed
-  real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
 
-  integer :: nsize
-  complex(8), dimension(max_size) :: zx
-  integer :: incx_val
-  complex(8), dimension(max_size) :: zy
-  integer :: incy_val
-
-  ! Vector mode derivative variables (type-promoted)
-  ! Scalars become arrays(nbdirs), arrays gain extra dimension
-  complex(8), dimension(nbdirs,max_size) :: zx_dv
-  complex(8), dimension(nbdirs,max_size) :: zy_dv
-  ! Declare variables for storing original values
-  complex(8), dimension(max_size) :: zx_orig
-  complex(8), dimension(nbdirs,max_size) :: zx_dv_orig
-  complex(8), dimension(max_size) :: zy_orig
-  complex(8), dimension(nbdirs,max_size) :: zy_dv_orig
+  seed_array = 42
+  call random_seed(put=seed_array)
 
   test_sizes = (/ 4 /)
   write(*,*) 'Testing ZCOPY (Vector Forward, multi-size: n = 4)'
   all_passed = .true.
-  do itest = 1, 1
-    n = test_sizes(itest)
-    write(*,*) 'Testing ZCOPY (Vector Forward, n =', n, ')'
-
-    call run_test_for_size(n, passed)
-  all_passed = all_passed .and. passed
+  do i = 1, 1
+    n_test = test_sizes(i)
+    nbdirs = test_sizes(i)
+    call run_test_for_size(n_test, passed, nbdirs)
+    all_passed = all_passed .and. passed
   end do
   if (all_passed) then
     write(*,*) 'PASS: Vector forward mode - all sizes completed successfully'
@@ -53,131 +36,107 @@ program test_zcopy_vector_forward
 
 contains
 
-  subroutine run_test_for_size(n, passed)
+  subroutine run_test_for_size(n, passed, nbdirs)
     implicit none
     integer, intent(in) :: n
     logical, intent(out) :: passed
+    integer, intent(in) :: nbdirs
 
-    ! Initialize test parameters
+    integer :: nsize, incx_val, incy_val
+    complex(8), dimension(n) :: x, y
+    complex(8), dimension(nbdirs,n) :: x_dv, y_dv
+    complex(8), dimension(n) :: x_orig, y_orig
+    complex(8), dimension(nbdirs,n) :: x_dv_orig, y_dv_orig
+    integer :: idir, i
+    real(4) :: temp_real, temp_imag
+
     nsize = n
     incx_val = 1
     incy_val = 1
-    
-    ! Initialize test data with random numbers
-    ! Initialize random seed for reproducible results
-    seed_array = 42
-    call random_seed(put=seed_array)
-    
-    do i = 1, max_size
+
+    do i = 1, n
       call random_number(temp_real)
       call random_number(temp_imag)
-      zx(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-    do i = 1, max_size
+      x(i) = cmplx(temp_real*2.0 - 1.0, temp_imag*2.0 - 1.0, kind=kind(x))
       call random_number(temp_real)
       call random_number(temp_imag)
-      zy(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      y(i) = cmplx(temp_real*2.0 - 1.0, temp_imag*2.0 - 1.0, kind=kind(y))
     end do
-    
-    ! Initialize input derivatives to random values (exactly like scalar mode)
+
     do idir = 1, nbdirs
-      do i = 1, max_size
+      do i = 1, n
         call random_number(temp_real)
         call random_number(temp_imag)
-        zx_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-      end do
-    end do
-    do idir = 1, nbdirs
-      do i = 1, max_size
+        x_dv(idir,i) = cmplx(temp_real*2.0 - 1.0, temp_imag*2.0 - 1.0, kind=kind(x_dv))
         call random_number(temp_real)
         call random_number(temp_imag)
-        zy_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+        y_dv(idir,i) = cmplx(temp_real*2.0 - 1.0, temp_imag*2.0 - 1.0, kind=kind(y_dv))
       end do
     end do
-    
-    write(*,*) 'Testing ZCOPY (Vector Forward Mode)'
-    ! Store original values before any function calls (critical for INOUT parameters)
-    zx_orig = zx
-    zx_dv_orig = zx_dv
-    zy_orig = zy
-    zy_dv_orig = zy_dv
-    
-    ! Call the vector mode differentiated function
-    
-    ! Set ISIZE globals required by differentiated routine
-    call set_ISIZE1OFZy(max_size)
-    
-    call zcopy_dv(nsize, zx, zx_dv, incx_val, zy, zy_dv, incy_val, nbdirs)
-    
-    ! Reset ISIZE globals to uninitialized (-1)
+
+    x_orig = x
+    x_dv_orig = x_dv
+    y_orig = y
+    y_dv_orig = y_dv
+
+    write(*,*) 'Testing ZCOPY (Vector Forward, n =', n, ')'
+
+    call set_ISIZE1OFZy(n)
+
+    call zcopy_dv(nsize, x, x_dv, incx_val, y, y_dv, incy_val, nbdirs)
+
     call set_ISIZE1OFZy(-1)
-    
-    ! Print results and compare
+
     write(*,*) 'Function calls completed successfully'
-    
-    ! Numerical differentiation check
-    call check_derivatives_numerically(passed)
+
+    call check_derivatives_numerically(n, nbdirs, nsize, incx_val, incy_val, x_orig, x_dv_orig, y_orig, y_dv_orig, y_dv, passed)
+
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(passed)
+  subroutine check_derivatives_numerically(n, nbdirs, nsize, incx_val, incy_val, x_orig, x_dv_orig, y_orig, y_dv_orig, y_dv, passed)
     implicit none
+    integer, intent(in) :: n, nbdirs
+    integer, intent(in) :: nsize, incx_val, incy_val
+    complex(8), intent(in) :: x_orig(n), x_dv_orig(nbdirs,n)
+    complex(8), intent(in) :: y_orig(n), y_dv_orig(nbdirs,n)
+    complex(8), intent(in) :: y_dv(nbdirs,n)
     logical, intent(out) :: passed
-    real(8), parameter :: h = 1.0e-7  ! Step size for finite differences
-    real(8) :: relative_error, max_error
-    real(8) :: abs_error, abs_reference, error_bound
+
+    real(8), parameter :: h = 1.0e-7
+    real(8) :: relative_error, max_error, abs_error, abs_reference, error_bound
     complex(8) :: central_diff, ad_result
-    integer :: i, j, idir
     logical :: has_large_errors
-    complex(8), dimension(max_size) :: zy_forward, zy_backward
-    
+    complex(8), dimension(n) :: y_forward, y_backward
+    integer :: i, idir
+    complex(8), dimension(n) :: x, y
+
     max_error = 0.0e0
     has_large_errors = .false.
-    
+
     write(*,*) 'Checking vector derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirs
-    
-    ! Test each derivative direction separately
+
     do idir = 1, nbdirs
-      
-      ! Forward perturbation: f(x + h * direction)
-      zx = zx_orig + cmplx(h, 0.0) * zx_dv_orig(idir,:)
-      zy = zy_orig + cmplx(h, 0.0) * zy_dv_orig(idir,:)
-      call zcopy(nsize, zx, incx_val, zy, incy_val)
-      zy_forward = zy
-      
-      ! Backward perturbation: f(x - h * direction)
-      zx = zx_orig - cmplx(h, 0.0) * zx_dv_orig(idir,:)
-      zy = zy_orig - cmplx(h, 0.0) * zy_dv_orig(idir,:)
-      call zcopy(nsize, zx, incx_val, zy, incy_val)
-      zy_backward = zy
-      
-      ! Compute central differences and compare with AD results
-      do i = 1, min(2, nsize)  ! Check only first few elements
-        ! Central difference: (f(x+h) - f(x-h)) / (2h)
-        central_diff = (zy_forward(i) - zy_backward(i)) / (2.0e0 * h)
-        ! AD result
-        ad_result = zy_dv(idir,i)
-        ! Error check: |a - b| > atol + rtol * |b|
+      x = x_orig + h * x_dv_orig(idir,:)
+      y = y_orig
+      call zcopy(nsize, x, incx_val, y, incy_val)
+      y_forward = y
+      x = x_orig - h * x_dv_orig(idir,:)
+      y = y_orig
+      call zcopy(nsize, x, incx_val, y, incy_val)
+      y_backward = y
+      do i = 1, min(4, n)
+        central_diff = (y_forward(i) - y_backward(i)) / (2.0e0 * h)
+        ad_result = y_dv(idir,i)
         abs_error = abs(central_diff - ad_result)
         abs_reference = abs(ad_result)
         error_bound = 1.0e-5 + 1.0e-5 * abs_reference
-        if (abs_error > error_bound) then
-          has_large_errors = .true.
-          relative_error = abs_error / max(abs_reference, 1.0e-10)
-          write(*,*) '  Large error in direction', idir, ' output ZY(', i, '):'
-          write(*,*) '    Central diff: ', central_diff
-          write(*,*) '    AD result:   ', ad_result
-          write(*,*) '    Absolute error:', abs_error
-          write(*,*) '    Error bound:', error_bound
-          write(*,*) '    Relative error:', relative_error
-        end if
-        ! Track max error for reporting (normalized)
+        if (abs_error > error_bound) has_large_errors = .true.
         relative_error = abs_error / max(abs_reference, 1.0e-10)
         max_error = max(max_error, relative_error)
       end do
     end do
-    
+
     write(*,*) 'Maximum relative error across all directions:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
     passed = .not. has_large_errors
@@ -186,7 +145,7 @@ contains
     else
       write(*,*) 'PASS: Vector derivatives are within tolerance (rtol + atol)'
     end if
-    
+
   end subroutine check_derivatives_numerically
 
 end program test_zcopy_vector_forward

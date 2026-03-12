@@ -1,64 +1,32 @@
 ! Test program for CDOTU vector reverse mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirs=4
+! Using REAL*4 precision with nbdirs=n
+! Multi-size test with outlined run_test_for_size(n) - arrays declared to size n
 
 program test_cdotu_vector_reverse
   implicit none
-  integer, parameter :: nbdirs = 4
 
   complex(4), external :: cdotu
   external :: cdotu_bv
 
-  ! Test parameters
-  integer :: n  ! Current size (set in loop)
-  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-  integer :: i, j, k  ! Loop counters
-  integer :: test_sizes(1), itest
+  integer :: nbdirs
+  integer :: n_test
+  integer :: seed_array(33)
+  integer :: test_sizes(1)
+  integer :: i
   logical :: passed, all_passed
-  integer :: seed_array(33)  ! Random seed
-  real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
 
-  integer :: nsize
-  complex(4), dimension(max_size) :: cx
-  integer :: incx_val
-  complex(4), dimension(max_size) :: cy
-  integer :: incy_val
-
-  ! Adjoint variables (reverse vector mode)
-  ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
-  !                  input adjoints are OUTPUT (computed gradients)
-  complex(4), dimension(nbdirs,max_size) :: cxb
-  complex(4), dimension(nbdirs,max_size) :: cyb
-  complex(4), dimension(nbdirs) :: cdotub
-
-  ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  complex(4), dimension(nbdirs) :: cdotub_orig
-
-  ! Storage for original values (for VJP verification)
-  complex(4), dimension(max_size) :: cx_orig
-  complex(4), dimension(max_size) :: cy_orig
-
-  ! Variables for VJP verification via finite differences
-  real(4), parameter :: h = 1.0e-3
-  real(4) :: vjp_ad, vjp_fd, relative_error, max_error, abs_error, abs_reference, error_bound
-  logical :: has_large_errors
-  real(4), dimension(max_size*max_size) :: temp_products  ! For sorted summation
-  integer :: n_products
-
-  ! Initialize random seed for reproducibility
   seed_array = 42
   call random_seed(put=seed_array)
 
   test_sizes = (/ 4 /)
-  write(*,*) 'Testing CDOTU (Vector Reverse, multi-size: n = 4)'
+  write(*,*) 'Testing CDOTU (Vector Reverse, multi-size: n =', test_sizes(1), ')'
   all_passed = .true.
-  do itest = 1, 1
-    n = test_sizes(itest)
-    write(*,*) 'Testing CDOTU (Vector Reverse, n =', n, ')'
-
-    call run_test_for_size(n, passed)
-  all_passed = all_passed .and. passed
+  do i = 1, 1
+    n_test = test_sizes(i)
+    nbdirs = test_sizes(i)
+    call run_test_for_size(n_test, passed, nbdirs)
+    all_passed = all_passed .and. passed
   end do
   if (all_passed) then
     write(*,*) 'PASS: Vector reverse mode - all sizes completed successfully'
@@ -68,144 +36,103 @@ program test_cdotu_vector_reverse
 
 contains
 
-  subroutine run_test_for_size(n, passed)
+  subroutine run_test_for_size(n, passed, nbdirs)
     implicit none
     integer, intent(in) :: n
     logical, intent(out) :: passed
+    integer, intent(in) :: nbdirs
 
-    ! Initialize primal values
+    integer :: nsize, incx_val, incy_val
+    complex(4), dimension(n) :: x, y
+    complex(4), dimension(nbdirs,n) :: xb, yb
+    complex(4), dimension(nbdirs) :: result_b, result_b_seed
+    complex(4), dimension(n) :: x_orig, y_orig
+    integer :: k, i
+    real(4) :: temp_real, temp_imag
+
     nsize = n
-    do i = 1, n
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      cx(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-    end do
     incx_val = 1
+    incy_val = 1
+
     do i = 1, n
       call random_number(temp_real)
       call random_number(temp_imag)
-      cy(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+      x(i) = cmplx(temp_real*2.0 - 1.0, temp_imag*2.0 - 1.0, kind=kind(x))
+      y(i) = cmplx(temp_real*2.0 - 1.0, temp_imag*2.0 - 1.0, kind=kind(y))
     end do
-    incy_val = 1
-    
-    ! Store original primal values
-    cx_orig = cx
-    cy_orig = cy
-    
-    ! Initialize output adjoints (cotangents) with random values for each direction
-    ! These are the 'seeds' for reverse mode
-    ! Initialize function result adjoint (output cotangent)
+
+    x_orig = x
+    y_orig = y
+
     do k = 1, nbdirs
       call random_number(temp_real)
       call random_number(temp_imag)
-      cdotub(k) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+      result_b(k) = cmplx(temp_real*2.0 - 1.0, temp_imag*2.0 - 1.0, kind=kind(result_b))
     end do
-    
-    ! Initialize input adjoints to zero (they will be computed)
-    ! Note: Inout parameters are skipped - they already have output adjoints initialized
-    cxb = 0.0
-    cyb = 0.0
-    
-    ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
-    cdotub_orig = cdotub
-    
-    ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-    ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
+    result_b_seed = result_b
+
+    xb = 0.0d0
+    yb = 0.0d0
+
+    write(*,*) 'Testing CDOTU (Vector Reverse, n =', n, ')'
+
     call set_ISIZE1OFCx(n)
     call set_ISIZE1OFCy(n)
-    
-    ! Call reverse vector mode differentiated function
-    call cdotu_bv(nsize, cx, cxb, incx_val, cy, cyb, incy_val, cdotub, nbdirs)
-    
-    ! Reset ISIZE globals to uninitialized (-1) for completeness
+
+    call cdotu_bv(nsize, x, xb, incx_val, y, yb, incy_val, result_b, nbdirs)
+
     call set_ISIZE1OFCx(-1)
     call set_ISIZE1OFCy(-1)
-    
-    ! VJP Verification using finite differences
-    call check_vjp_numerically(passed)
+
+    call check_vjp_numerically(n, nbdirs, nsize, incx_val, incy_val, x_orig, y_orig, result_b_seed, xb, yb, passed)
+
   end subroutine run_test_for_size
 
-  subroutine check_vjp_numerically(passed)
+  subroutine check_vjp_numerically(n, nbdirs, nsize, incx_val, incy_val, x_orig, y_orig, result_b_seed, xb, yb, passed)
     implicit none
+    integer, intent(in) :: n, nbdirs
+    integer, intent(in) :: nsize, incx_val, incy_val
+    complex(4), intent(in) :: x_orig(n), y_orig(n)
+    complex(4), intent(in) :: result_b_seed(nbdirs)
+    complex(4), intent(in) :: xb(nbdirs,n), yb(nbdirs,n)
     logical, intent(out) :: passed
-    
-    ! Direction vectors for VJP testing
-    complex(4), dimension(max_size) :: cx_dir
-    complex(4), dimension(max_size) :: cy_dir
-    complex(4) :: cdotu_plus, cdotu_minus
-    
+
+    real(4), parameter :: h = 1.0e-3
+    real(4) :: vjp_ad, vjp_fd, relative_error, max_error, abs_error, abs_reference, error_bound
+    complex(4), dimension(n) :: x_dir, y_dir
+    complex(4) :: result_forward, result_backward, result_central_diff
+    complex(4), dimension(n) :: x, y
+    integer :: i, k
+    real(4) :: temp_real, temp_imag
+    logical :: has_large_errors
+
     max_error = 0.0d0
     has_large_errors = .false.
-    
-    write(*,*) 'Function calls completed successfully'
-    
-    write(*,*) 'Checking derivatives against numerical differentiation:'
-    write(*,*) 'Step size h =', h
-    
-    ! Test each differentiation direction separately
+
     do k = 1, nbdirs
-      
-      ! Initialize random direction vectors for all inputs
       do i = 1, n
         call random_number(temp_real)
         call random_number(temp_imag)
-        cx_dir(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+        x_dir(i) = cmplx(temp_real*2.0 - 1.0, temp_imag*2.0 - 1.0, kind=kind(x_dir))
+        y_dir(i) = cmplx(temp_real*2.0 - 1.0, temp_imag*2.0 - 1.0, kind=kind(y_dir))
       end do
+      x = x_orig + h * x_dir
+      y = y_orig + h * y_dir
+      result_forward = cdotu(nsize, x, incx_val, y, incy_val)
+      x = x_orig - h * x_dir
+      y = y_orig - h * y_dir
+      result_backward = cdotu(nsize, x, incx_val, y, incy_val)
+      result_central_diff = (result_forward - result_backward) / (2.0d0 * h)
+      vjp_fd = real(conjg(result_b_seed(k)) * result_central_diff)
+      vjp_ad = 0.0d0
       do i = 1, n
-        call random_number(temp_real)
-        call random_number(temp_imag)
-        cy_dir(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+        vjp_ad = vjp_ad + real(conjg(x_dir(i)) * xb(k,i))
+        vjp_ad = vjp_ad + real(conjg(y_dir(i)) * yb(k,i))
       end do
-      
-      ! Forward perturbation: f(x + h*dir)
-      cx = cx_orig + cmplx(h, 0.0) * cx_dir
-      cy = cy_orig + cmplx(h, 0.0) * cy_dir
-      cdotu_plus = cdotu(nsize, cx, incx_val, cy, incy_val)
-      
-      ! Backward perturbation: f(x - h*dir)
-      cx = cx_orig - cmplx(h, 0.0) * cx_dir
-      cy = cy_orig - cmplx(h, 0.0) * cy_dir
-      cdotu_minus = cdotu(nsize, cx, incx_val, cy, incy_val)
-      
-      ! Compute central differences and VJP verification
-      ! VJP check: direction^T @ adjoint should equal finite difference
-      
-      ! Compute finite difference VJP (central difference)
-      ! For functions: vjp_fd = adjoint * central_diff
-      vjp_fd = real(conjg(cdotub(k)) * (cdotu_plus - cdotu_minus) / (2.0 * h))
-      
-      ! Right side: direction^T @ computed_adjoint (with sorted summation)
-      ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
-      ! For pure inputs: use adjoint directly
-      vjp_ad = 0.0
-      ! Compute and sort products for cy
-      n_products = n
-      do i = 1, n
-        temp_products(i) = real(conjg(cy_dir(i)) * cyb(k,i))
-      end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_ad = vjp_ad + temp_products(i)
-      end do
-      ! Compute and sort products for cx
-      n_products = n
-      do i = 1, n
-        temp_products(i) = real(conjg(cx_dir(i)) * cxb(k,i))
-      end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_ad = vjp_ad + temp_products(i)
-      end do
-      
-      ! Error check: |vjp_fd - vjp_ad| > atol + rtol * |vjp_ad|
       abs_error = abs(vjp_fd - vjp_ad)
       abs_reference = abs(vjp_ad)
       error_bound = 1.0e-3 + 1.0e-3 * abs_reference
-      if (abs_error > error_bound) then
-        has_large_errors = .true.
-      end if
-      
-      ! Compute relative error for reporting
+      if (abs_error > error_bound) has_large_errors = .true.
       if (abs_reference > 1.0e-10) then
         relative_error = abs_error / abs_reference
       else
@@ -213,40 +140,16 @@ contains
       end if
       if (relative_error > max_error) max_error = relative_error
     end do
-    
-    write(*,*) ''
+
     write(*,*) 'Maximum relative error:', max_error
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    write(*,*) 'Tolerance: rtol=1.0e-3, atol=1.0e-3'
     passed = .not. has_large_errors
     if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
+      write(*,*) 'FAIL: VJP errors outside tolerance'
     else
-      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
+      write(*,*) 'PASS: VJP within tolerance'
     end if
-    
-  end subroutine check_vjp_numerically
 
-  subroutine sort_array(arr, n)
-    implicit none
-    integer, intent(in) :: n
-    real(4), dimension(n), intent(inout) :: arr
-    integer :: i, j, min_idx
-    real(4) :: temp
-    
-    ! Simple selection sort
-    do i = 1, n-1
-      min_idx = i
-      do j = i+1, n
-        if (abs(arr(j)) < abs(arr(min_idx))) then
-          min_idx = j
-        end if
-      end do
-      if (min_idx /= i) then
-        temp = arr(i)
-        arr(i) = arr(min_idx)
-        arr(min_idx) = temp
-      end if
-    end do
-  end subroutine sort_array
+  end subroutine check_vjp_numerically
 
 end program test_cdotu_vector_reverse

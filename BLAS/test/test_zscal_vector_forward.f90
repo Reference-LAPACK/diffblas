@@ -1,48 +1,32 @@
 ! Test program for ZSCAL vector forward mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*8 precision with nbdirs=4
+! Using REAL*8 precision with nbdirs=n
+! Multi-size test with outlined run_test_for_size(n) - arrays declared to size n
 
 program test_zscal_vector_forward
   implicit none
-  integer, parameter :: nbdirs = 4
 
   external :: zscal
   external :: zscal_dv
 
-  ! Test parameters
-  integer :: n  ! Current size (set in loop)
-  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-  integer :: i, j, idir  ! Loop counters
-  integer :: test_sizes(1), itest
+  integer :: nbdirs
+  integer :: n_test
+  integer :: seed_array(33)
+  integer :: test_sizes(1)
+  integer :: i
   logical :: passed, all_passed
-  integer :: seed_array(33)  ! Random seed
-  real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
 
-  integer :: nsize
-  complex(8) :: za
-  complex(8), dimension(max_size) :: zx
-  integer :: incx_val
-
-  ! Vector mode derivative variables (type-promoted)
-  ! Scalars become arrays(nbdirs), arrays gain extra dimension
-  complex(8), dimension(nbdirs) :: za_dv
-  complex(8), dimension(nbdirs,max_size) :: zx_dv
-  ! Declare variables for storing original values
-  complex(8) :: za_orig
-  complex(8), dimension(nbdirs) :: za_dv_orig
-  complex(8), dimension(max_size) :: zx_orig
-  complex(8), dimension(nbdirs,max_size) :: zx_dv_orig
+  seed_array = 42
+  call random_seed(put=seed_array)
 
   test_sizes = (/ 4 /)
   write(*,*) 'Testing ZSCAL (Vector Forward, multi-size: n = 4)'
   all_passed = .true.
-  do itest = 1, 1
-    n = test_sizes(itest)
-    write(*,*) 'Testing ZSCAL (Vector Forward, n =', n, ')'
-
-    call run_test_for_size(n, passed)
-  all_passed = all_passed .and. passed
+  do i = 1, 1
+    n_test = test_sizes(i)
+    nbdirs = test_sizes(i)
+    call run_test_for_size(n_test, passed, nbdirs)
+    all_passed = all_passed .and. passed
   end do
   if (all_passed) then
     write(*,*) 'PASS: Vector forward mode - all sizes completed successfully'
@@ -52,120 +36,110 @@ program test_zscal_vector_forward
 
 contains
 
-  subroutine run_test_for_size(n, passed)
+  subroutine run_test_for_size(n, passed, nbdirs)
     implicit none
     integer, intent(in) :: n
     logical, intent(out) :: passed
+    integer, intent(in) :: nbdirs
 
-    ! Initialize test parameters
+    integer :: nsize, incx_val
+    complex(8) :: alpha
+    complex(8), dimension(n) :: x
+    complex(8), dimension(nbdirs) :: alpha_dv
+    complex(8), dimension(nbdirs,n) :: x_dv
+    complex(8) :: alpha_orig
+    complex(8), dimension(n) :: x_orig
+    complex(8), dimension(nbdirs) :: alpha_dv_orig
+    complex(8), dimension(nbdirs,n) :: x_dv_orig
+    integer :: idir, i
+    real(4) :: temp_real, temp_imag
+
     nsize = n
     incx_val = 1
-    
-    ! Initialize test data with random numbers
-    ! Initialize random seed for reproducible results
-    seed_array = 42
-    call random_seed(put=seed_array)
-    
+
     call random_number(temp_real)
     call random_number(temp_imag)
-    za = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    do i = 1, max_size
+    alpha = cmplx(temp_real*2.0 - 1.0, temp_imag*2.0 - 1.0, kind=kind(alpha))
+    do i = 1, n
       call random_number(temp_real)
       call random_number(temp_imag)
-      zx(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      x(i) = cmplx(temp_real*2.0 - 1.0, temp_imag*2.0 - 1.0, kind=kind(x))
     end do
-    
-    ! Initialize input derivatives to random values (exactly like scalar mode)
+
     do idir = 1, nbdirs
       call random_number(temp_real)
       call random_number(temp_imag)
-      za_dv(idir) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      alpha_dv(idir) = cmplx(temp_real*2.0 - 1.0, temp_imag*2.0 - 1.0, kind=kind(alpha_dv))
     end do
     do idir = 1, nbdirs
-      do i = 1, max_size
+      do i = 1, n
         call random_number(temp_real)
         call random_number(temp_imag)
-        zx_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+        x_dv(idir,i) = cmplx(temp_real*2.0 - 1.0, temp_imag*2.0 - 1.0, kind=kind(x_dv))
       end do
     end do
-    
-    write(*,*) 'Testing ZSCAL (Vector Forward Mode)'
-    ! Store original values before any function calls (critical for INOUT parameters)
-    za_orig = za
-    za_dv_orig = za_dv
-    zx_orig = zx
-    zx_dv_orig = zx_dv
-    
-    ! Call the vector mode differentiated function
-    
-    call zscal_dv(nsize, za, za_dv, zx, zx_dv, incx_val, nbdirs)
-    
-    ! Print results and compare
+
+    alpha_orig = alpha
+    alpha_dv_orig = alpha_dv
+    x_orig = x
+    x_dv_orig = x_dv
+
+    write(*,*) 'Testing ZSCAL (Vector Forward, n =', n, ')'
+
+    call zscal_dv(nsize, alpha, alpha_dv, x, x_dv, incx_val, nbdirs)
+
     write(*,*) 'Function calls completed successfully'
-    
-    ! Numerical differentiation check
-    call check_derivatives_numerically(passed)
+
+    call check_derivatives_numerically(n, nbdirs, nsize, incx_val, alpha_orig, alpha_dv_orig, x_orig, x_dv_orig, x_dv, passed)
+
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(passed)
+  subroutine check_derivatives_numerically(n, nbdirs, nsize, incx_val, alpha_orig, alpha_dv_orig, x_orig, x_dv_orig, x_dv, passed)
     implicit none
+    integer, intent(in) :: n, nbdirs
+    integer, intent(in) :: nsize, incx_val
+    complex(8), intent(in) :: alpha_orig
+    complex(8), intent(in) :: alpha_dv_orig(nbdirs)
+    complex(8), intent(in) :: x_orig(n), x_dv_orig(nbdirs,n)
+    complex(8), intent(in) :: x_dv(nbdirs,n)
     logical, intent(out) :: passed
-    real(8), parameter :: h = 1.0e-7  ! Step size for finite differences
-    real(8) :: relative_error, max_error
-    real(8) :: abs_error, abs_reference, error_bound
+
+    real(8), parameter :: h = 1.0e-7
+    real(8) :: relative_error, max_error, abs_error, abs_reference, error_bound
     complex(8) :: central_diff, ad_result
-    integer :: i, j, idir
     logical :: has_large_errors
-    complex(8), dimension(max_size) :: zx_forward, zx_backward
-    
+    complex(8), dimension(n) :: x_forward, x_backward
+    integer :: i, idir
+    complex(8) :: alpha
+    complex(8), dimension(n) :: x
+
     max_error = 0.0e0
     has_large_errors = .false.
-    
+
     write(*,*) 'Checking vector derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirs
-    
-    ! Test each derivative direction separately
+
     do idir = 1, nbdirs
-      
-      ! Forward perturbation: f(x + h * direction)
-      za = za_orig + cmplx(h, 0.0) * za_dv_orig(idir)
-      zx = zx_orig + cmplx(h, 0.0) * zx_dv_orig(idir,:)
-      call zscal(nsize, za, zx, incx_val)
-      zx_forward = zx
-      
-      ! Backward perturbation: f(x - h * direction)
-      za = za_orig - cmplx(h, 0.0) * za_dv_orig(idir)
-      zx = zx_orig - cmplx(h, 0.0) * zx_dv_orig(idir,:)
-      call zscal(nsize, za, zx, incx_val)
-      zx_backward = zx
-      
-      ! Compute central differences and compare with AD results
-      do i = 1, min(2, nsize)  ! Check only first few elements
-        ! Central difference: (f(x+h) - f(x-h)) / (2h)
-        central_diff = (zx_forward(i) - zx_backward(i)) / (2.0e0 * h)
-        ! AD result
-        ad_result = zx_dv(idir,i)
-        ! Error check: |a - b| > atol + rtol * |b|
+      alpha = alpha_orig + h * alpha_dv_orig(idir)
+      x = x_orig + h * x_dv_orig(idir,:)
+      call zscal(nsize, alpha, x, incx_val)
+      x_forward = x
+      alpha = alpha_orig - h * alpha_dv_orig(idir)
+      x = x_orig - h * x_dv_orig(idir,:)
+      call zscal(nsize, alpha, x, incx_val)
+      x_backward = x
+      do i = 1, min(4, n)
+        central_diff = (x_forward(i) - x_backward(i)) / (2.0e0 * h)
+        ad_result = x_dv(idir,i)
         abs_error = abs(central_diff - ad_result)
         abs_reference = abs(ad_result)
         error_bound = 1.0e-5 + 1.0e-5 * abs_reference
-        if (abs_error > error_bound) then
-          has_large_errors = .true.
-          relative_error = abs_error / max(abs_reference, 1.0e-10)
-          write(*,*) '  Large error in direction', idir, ' output ZX(', i, '):'
-          write(*,*) '    Central diff: ', central_diff
-          write(*,*) '    AD result:   ', ad_result
-          write(*,*) '    Absolute error:', abs_error
-          write(*,*) '    Error bound:', error_bound
-          write(*,*) '    Relative error:', relative_error
-        end if
-        ! Track max error for reporting (normalized)
+        if (abs_error > error_bound) has_large_errors = .true.
         relative_error = abs_error / max(abs_reference, 1.0e-10)
         max_error = max(max_error, relative_error)
       end do
     end do
-    
+
     write(*,*) 'Maximum relative error across all directions:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
     passed = .not. has_large_errors
@@ -174,7 +148,7 @@ contains
     else
       write(*,*) 'PASS: Vector derivatives are within tolerance (rtol + atol)'
     end if
-    
+
   end subroutine check_derivatives_numerically
 
 end program test_zscal_vector_forward

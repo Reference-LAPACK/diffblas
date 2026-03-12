@@ -46,14 +46,14 @@ contains
     integer :: incy
 
     ! Derivative variables
-    real(4) :: sdot_d_result  ! Derivative of function result (avoid name clash with func_d)
     real(4), dimension(n) :: sx_d
     real(4), dimension(n) :: sy_d
+    real(4) :: sdot_d_result  ! Derivative of function result (avoid name clash with func_d)
 
     ! Array restoration and derivative storage
-    real(4) :: sdot_orig  ! Function result (no _d_orig - use _d_result)
     real(4), dimension(n) :: sx_orig, sx_d_orig
     real(4), dimension(n) :: sy_orig, sy_d_orig
+    real(4) :: sdot_orig  ! Function result (no _d_orig - use _d_result)
     integer :: i, j
 
     nsize = n
@@ -74,9 +74,9 @@ contains
     ! Store _orig and _d_orig
     sx_d_orig = sx_d
     sy_d_orig = sy_d
-    sdot_orig = sdot(nsize, sx, 1, sy, 1)
     sx_orig = sx
     sy_orig = sy
+    sdot_orig = sdot(nsize, sx, 1, sy, 1)
 
     write(*,*) 'Testing SDOT (n =', n, ')'
 

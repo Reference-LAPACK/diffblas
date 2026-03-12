@@ -44,12 +44,12 @@ contains
     integer :: incx
 
     ! Derivative variables
-    real(8) :: dasum_d_result  ! Derivative of function result (avoid name clash with func_d)
     real(8), dimension(n) :: dx_d
+    real(8) :: dasum_d_result  ! Derivative of function result (avoid name clash with func_d)
 
     ! Array restoration and derivative storage
-    real(8) :: dasum_orig  ! Function result (no _d_orig - use _d_result)
     real(8), dimension(n) :: dx_orig, dx_d_orig
+    real(8) :: dasum_orig  ! Function result (no _d_orig - use _d_result)
     integer :: i, j
 
     nsize = n
@@ -64,8 +64,8 @@ contains
 
     ! Store _orig and _d_orig
     dx_d_orig = dx_d
-    dasum_orig = dasum(nsize, dx, 1)
     dx_orig = dx
+    dasum_orig = dasum(nsize, dx, 1)
 
     write(*,*) 'Testing DASUM (n =', n, ')'
 

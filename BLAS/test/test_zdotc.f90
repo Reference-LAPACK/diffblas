@@ -46,14 +46,14 @@ contains
     integer :: incy
 
     ! Derivative variables
-    complex(8) :: zdotc_d_result  ! Derivative of function result (avoid name clash with func_d)
     complex(8), dimension(n) :: zx_d
     complex(8), dimension(n) :: zy_d
+    complex(8) :: zdotc_d_result  ! Derivative of function result (avoid name clash with func_d)
 
     ! Array restoration and derivative storage
-    complex(8) :: zdotc_orig  ! Function result (no _d_orig - use _d_result)
     complex(8), dimension(n) :: zx_orig, zx_d_orig
     complex(8), dimension(n) :: zy_orig, zy_d_orig
+    complex(8) :: zdotc_orig  ! Function result (no _d_orig - use _d_result)
     real(8) :: temp_re, temp_im  ! For complex random init
     integer :: i, j
 
@@ -87,9 +87,9 @@ contains
     ! Store _orig and _d_orig
     zx_d_orig = zx_d
     zy_d_orig = zy_d
-    zdotc_orig = zdotc(nsize, zx, 1, zy, 1)
     zx_orig = zx
     zy_orig = zy
+    zdotc_orig = zdotc(nsize, zx, 1, zy, 1)
 
     write(*,*) 'Testing ZDOTC (n =', n, ')'
 
@@ -99,16 +99,16 @@ contains
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, nsize, zy_orig, zx_orig, zdotc_orig, zy_d_orig, zx_d_orig, zdotc_d_result, passed)
+    call check_derivatives_numerically(n, nsize, zx_orig, zy_orig, zdotc_orig, zx_d_orig, zy_d_orig, zdotc_d_result, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, nsize, zy_orig, zx_orig, zdotc_orig, zy_d_orig, zx_d_orig, zdotc_d_result, passed)
+  subroutine check_derivatives_numerically(n, nsize, zx_orig, zy_orig, zdotc_orig, zx_d_orig, zy_d_orig, zdotc_d_result, passed)
     implicit none
     integer, intent(in) :: n
     integer, intent(in) :: nsize
-    complex(8), intent(in) :: zy_orig(n), zy_d_orig(n)
     complex(8), intent(in) :: zx_orig(n), zx_d_orig(n)
+    complex(8), intent(in) :: zy_orig(n), zy_d_orig(n)
     complex(8), intent(in) :: zdotc_orig
     complex(8), intent(in) :: zdotc_d_result
     logical, intent(out) :: passed
@@ -120,8 +120,8 @@ contains
     logical :: has_large_errors
     complex(8) :: zdotc_forward, zdotc_backward  ! Function result for FD check
     integer :: i, j
-    complex(8), dimension(n) :: zy
     complex(8), dimension(n) :: zx
+    complex(8), dimension(n) :: zy
 
     max_error = 0.0e0
     has_large_errors = .false.
@@ -130,13 +130,13 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    zy = zy_orig + h * zy_d_orig
     zx = zx_orig + h * zx_d_orig
+    zy = zy_orig + h * zy_d_orig
     zdotc_forward = zdotc(nsize, zx, 1, zy, 1)
 
     ! Backward perturbation: f(x - h)
-    zy = zy_orig - h * zy_d_orig
     zx = zx_orig - h * zx_d_orig
+    zy = zy_orig - h * zy_d_orig
     zdotc_backward = zdotc(nsize, zx, 1, zy, 1)
 
     ! Compute central differences and compare with AD results

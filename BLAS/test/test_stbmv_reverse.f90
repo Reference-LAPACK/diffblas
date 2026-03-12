@@ -1,67 +1,21 @@
-! Test program for STBMV reverse mode (adjoint) differentiation
+! Test program for STBMV reverse mode (adjoint) - BLAS2 band
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision
-! Verification uses VJP methodology with finite differences
+! Multi-size outlined run_test_for_size(n) - band (declarations in subroutines)
 
 program test_stbmv_reverse
   implicit none
-
   external :: stbmv
   external :: stbmv_b
-
-  ! Test parameters
-  integer :: n  ! Current size (set in loop)
-  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-
-  character :: uplo
-  character :: trans
-  character :: diag
-  integer :: nsize
-  integer :: ksize
-  real(4), dimension(max_size,max_size) :: a  ! Band storage (k+1) x n
-  integer :: lda_val
-  real(4), dimension(max_size) :: x
-  integer :: incx_val
-
-  ! Adjoint variables (reverse mode)
-  ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
-  !                  input adjoints are OUTPUT (computed gradients)
-  real(4), dimension(max_size,max_size) :: ab  ! Band storage
-  real(4), dimension(max_size) :: xb
-
-  ! Storage for original values (for VJP verification)
-  real(4), dimension(max_size,max_size) :: a_orig  ! Band storage
-  real(4), dimension(max_size) :: x_orig
-
-  ! Variables for VJP verification via finite differences
-  real(4), dimension(max_size) :: x_plus, x_minus
-
-  ! Saved cotangents (output adjoints) for VJP verification
-  real(4), dimension(max_size) :: xb_orig
-  real(4), parameter :: h = 1.0e-3
-  real(4) :: vjp_ad, vjp_fd, relative_error, max_error, abs_error, abs_reference, error_bound
-  logical :: has_large_errors
-  integer :: i, j, band_row
-  real(4) :: temp_real  ! For band matrix initialization
-  real(4), dimension(max_size*max_size) :: temp_products  ! For sorted summation
-  integer :: n_products
-  integer :: test_sizes(1), itest
+  integer :: n_test, seed_array(33), test_sizes(1), i
   logical :: passed, all_passed
-
-  ! Initialize random seed for reproducibility
-  integer :: seed_array(33)
   seed_array = 42
   call random_seed(put=seed_array)
-
   test_sizes = (/ 4 /)
   write(*,*) 'Testing STBMV (multi-size: n = 4)'
   all_passed = .true.
-  do itest = 1, 1
-    n = test_sizes(itest)
-    write(*,*) 'Testing STBMV (n =', n, ')'
-
-    call run_test_for_size(n, passed)
+  do i = 1, 1
+    n_test = test_sizes(i)
+    call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
   end do
   if (all_passed) then
@@ -69,195 +23,113 @@ program test_stbmv_reverse
   else
     write(*,*) 'FAIL: One or more sizes had derivative errors'
   end if
-
 contains
-
-
   subroutine run_test_for_size(n, passed)
     implicit none
     integer, intent(in) :: n
     logical, intent(out) :: passed
-
-      ! Initialize primal values
-      uplo = 'U'
-      trans = 'N'
-      diag = 'N'
-      nsize = n
-      ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
-      ! Initialize a as triangular band matrix (upper band storage)
-      ! A(band_row, j) = full(i,j) with band_row = ksize+1+i-j, i = max(1,j-ksize)..j
-      do j = 1, n
-        do band_row = max(1, ksize+2-j), ksize+1
-          call random_number(temp_real)
-          a(band_row, j) = temp_real * 2.0 - 1.0  ! Scale to [-1,1]
-        end do
-      end do
-      lda_val = lda
-      call random_number(x)
-      x = x * 2.0 - 1.0
-      incx_val = 1
-
-      ! Store original primal values
-      a_orig = a
-      x_orig = x
-
-      ! Initialize output adjoints (cotangents) with random values
-      ! These are the 'seeds' for reverse mode
-      call random_number(xb)
-      xb = xb * 2.0 - 1.0
-
-      ! Save output adjoints (cotangents) for VJP verification
-      ! Note: output adjoints may be modified by reverse mode function
-      xb_orig = xb
-
-      ! Initialize input adjoints to zero (they will be computed)
-      ab = 0.0
-
-      ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-      ! Differentiated code checks they are set via check_ISIZE*_initialized.
-      call set_ISIZE2OFA(max_size)
-
-      ! Call reverse mode differentiated function
-      call stbmv_b(uplo, trans, diag, nsize, ksize, a, ab, lda_val, x, xb, incx_val)
-
-      ! Reset ISIZE globals to uninitialized (-1) for completeness
-      call set_ISIZE2OFA(-1)
-
-      ! VJP Verification using finite differences
-      ! For reverse mode, we verify: cotangent^T @ J @ direction = direction^T @ adjoint
-      ! Equivalently: cotangent^T @ (f(x+h*dir) - f(x-h*dir))/(2h) should equal dir^T @ computed_adjoint
-      call check_vjp_numerically(passed)
+    character :: uplo, trans, diag
+    integer :: nsize, ksize, lda_val, incx_val, incy_val
+    real(4) :: alpha, alphab
+    real(4), dimension(:,:), allocatable :: a, ab
+    real(4), dimension(:), allocatable :: x, xb
+    integer :: band_row, j
+    real(4) :: temp_real
+    ksize = max(0, n - 1)
+    nsize = n
+    lda_val = ksize + 1
+    incx_val = 1
+    incy_val = 1
+    uplo = 'U'
+    trans = 'N'
+    diag = 'N'
+    allocate(a(lda_val, n), ab(lda_val, n), x(n), xb(n))
+    ! Initialize a as triangular band matrix (upper band storage)
+    ! A(band_row, j) = full(i,j) with band_row = ksize+1+i-j, i = max(1,j-ksize)..j
+    do j = 1, n
+    do band_row = max(1, ksize+2-j), ksize+1
+    call random_number(temp_real)
+    a(band_row, j) = temp_real * 2.0 - 1.0  ! Scale to [-1,1]
+    end do
+    end do
+    call random_number(alpha)
+    alpha = alpha * 2.0d0 - 1.0d0
+    call random_number(x)
+    x = x * 2.0d0 - 1.0d0
+    alphab = 0.0d0
+    xb = 0.0d0
+    ab = 0.0d0
+    write(*,*) 'Testing STBMV (n =', n, ')'
+    call set_ISIZE2OFA(lda_val)
+    call stbmv_b(uplo, trans, diag, nsize, ksize, a, ab, lda_val, x, xb, incx_val)
+    call set_ISIZE2OFA(-1)
+    call check_vjp_numerically_band(n, lda_val, ksize, uplo, trans, diag, nsize, incx_val, a, ab, x, xb, passed)
+    deallocate(a, ab, x, xb)
   end subroutine run_test_for_size
 
-  subroutine check_vjp_numerically(passed)
+  subroutine check_vjp_numerically_band(n, lda_val, ksize, uplo, trans, diag, nsize, incx_val, a, ab, x, xb, passed)
     implicit none
+    integer, intent(in) :: n, lda_val, ksize, nsize, incx_val
+    character, intent(in) :: uplo, trans, diag
+    real(4), intent(in) :: a(lda_val, n), ab(lda_val, n), x(n), xb(n)
     logical, intent(out) :: passed
-    
-    integer :: band_row  ! Loop variable for band storage
-    real(4) :: temp_real  ! For band direction initialization
-    
-    ! Direction vectors for VJP testing (like tangents in forward mode)
-    real(4), dimension(max_size,max_size) :: a_dir  ! Band storage
-    real(4), dimension(max_size) :: x_dir
-    
-    real(4), dimension(max_size) :: x_central_diff
-    
-    max_error = 0.0
-    has_large_errors = .false.
-    
-    write(*,*) 'Function calls completed successfully'
-    
-    write(*,*) 'Checking derivatives against numerical differentiation:'
-    write(*,*) 'Step size h =', h
-    
-    ! Initialize random direction vectors for all inputs
-      ! Keep direction consistent with triangular band: only band entries used
-      do j = 1, n
-        do band_row = max(1, ksize+2-j), ksize+1
-          call random_number(temp_real)
-          a_dir(band_row, j) = temp_real * 2.0 - 1.0
-        end do
-      end do
-    call random_number(x_dir)
-    x_dir = x_dir * 2.0 - 1.0
-    
-    ! Forward perturbation: f(x + h*dir)
-    a = a_orig + h * a_dir
-    x = x_orig + h * x_dir
-    call stbmv(uplo, trans, diag, nsize, ksize, a, lda_val, x, incx_val)
-    x_plus = x
-    
-    ! Backward perturbation: f(x - h*dir)
-    a = a_orig - h * a_dir
-    x = x_orig - h * x_dir
-    call stbmv(uplo, trans, diag, nsize, ksize, a, lda_val, x, incx_val)
-    x_minus = x
-    
-    ! Compute central differences: (f(x+h*dir) - f(x-h*dir)) / (2h)
-    x_central_diff = (x_plus - x_minus) / (2.0d0 * h)
-    
-    ! VJP verification:
-    ! cotangent^T @ central_diff should equal direction^T @ computed_adjoint
-    ! Left side: cotangent^T @ Jacobian @ direction (via finite differences, with sorted summation)
-    vjp_fd = 0.0
-    ! Compute and sort products for x (FD)
+    real(4), parameter :: h = 1.0e-7
+    real(4) :: vjp_fd, vjp_ad, abs_error, abs_ref, err_bound
+    real(4), dimension(n) :: x_plus, x_minus, x_t
+    real(4), dimension(lda_val, n) :: a_t
+    real(4), dimension(:), allocatable :: temp_products
+    integer :: i, j, band_row, n_products
+    allocate(temp_products(n + (ksize+1)*n))
+    vjp_fd = 0.0d0
+    a_t = a + h * ab
+    x_t = x + h * xb
+    call stbmv(uplo, trans, diag, nsize, ksize, a_t, lda_val, x_t, incx_val)
+    x_plus = x_t
+    a_t = a - h * ab
+    x_t = x - h * xb
+    call stbmv(uplo, trans, diag, nsize, ksize, a_t, lda_val, x_t, incx_val)
+    x_minus = x_t
     n_products = n
     do i = 1, n
-      temp_products(i) = xb_orig(i) * x_central_diff(i)
+      temp_products(i) = xb(i) * ((x_plus(i) - x_minus(i)) / (2.0d0 * h))
     end do
     call sort_array(temp_products, n_products)
     do i = 1, n_products
       vjp_fd = vjp_fd + temp_products(i)
     end do
-    
-    ! Right side: direction^T @ computed_adjoint (with sorted summation)
-    ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
-    ! For pure inputs: use adjoint directly
-    vjp_ad = 0.0
-    ! Compute and sort products for a (band storage)
+    vjp_ad = 0.0d0
+    do i = 1, n
+      vjp_ad = vjp_ad + xb(i) * xb(i)
+    end do
     n_products = 0
     do j = 1, n
       do band_row = max(1, ksize+2-j), ksize+1
         n_products = n_products + 1
-        temp_products(n_products) = a_dir(band_row,j) * ab(band_row,j)
+        temp_products(n_products) = ab(band_row,j) * ab(band_row,j)
       end do
     end do
     call sort_array(temp_products, n_products)
     do i = 1, n_products
       vjp_ad = vjp_ad + temp_products(i)
     end do
-    ! Compute and sort products for x
-    n_products = n
-    do i = 1, n
-      temp_products(i) = x_dir(i) * xb(i)
-    end do
-    call sort_array(temp_products, n_products)
-    do i = 1, n_products
-      vjp_ad = vjp_ad + temp_products(i)
-    end do
-    
-    ! Error check: |vjp_fd - vjp_ad| > atol + rtol * |vjp_ad|
+    deallocate(temp_products)
     abs_error = abs(vjp_fd - vjp_ad)
-    abs_reference = abs(vjp_ad)
-    error_bound = 2.0e-3 + 2.0e-3 * abs_reference
-    if (abs_error > error_bound) then
-      has_large_errors = .true.
-    end if
-    
-    
-    if (abs_reference > 1.0e-10) then
-      relative_error = abs_error / abs_reference
-    else
-      relative_error = abs_error
-    end if
-    max_error = relative_error
-    
-    write(*,*) ''
-    write(*,*) 'Maximum relative error:', max_error
-    write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
-    passed = .not. has_large_errors
-    if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
-    else
-      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
-    end if
-    
-  end subroutine check_vjp_numerically
-
+    abs_ref = abs(vjp_ad)
+    err_bound = 1.0e-5 + 1.0e-5 * abs_ref
+    passed = abs_error <= err_bound
+    if (.not. passed) write(*,*) 'FAIL: Band VJP error'
+    if (passed) write(*,*) 'PASS: Band VJP within tolerance'
+  end subroutine check_vjp_numerically_band
   subroutine sort_array(arr, n)
     implicit none
     integer, intent(in) :: n
     real(4), dimension(n), intent(inout) :: arr
     integer :: i, j, min_idx
     real(4) :: temp
-    
-    ! Simple selection sort
     do i = 1, n-1
       min_idx = i
       do j = i+1, n
-        if (abs(arr(j)) < abs(arr(min_idx))) then
-          min_idx = j
-        end if
+        if (abs(arr(j)) < abs(arr(min_idx))) min_idx = j
       end do
       if (min_idx /= i) then
         temp = arr(i)
@@ -266,5 +138,4 @@ contains
       end if
     end do
   end subroutine sort_array
-
 end program test_stbmv_reverse

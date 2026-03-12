@@ -89,8 +89,8 @@ contains
     zy_orig = zy
 
     write(*,*) 'Testing ZSWAP (n =', n, ')'
-    zy_orig = zy
     zx_orig = zx
+    zy_orig = zy
 
     ! Call the differentiated function
     call zswap_d(nsize, zx, zx_d, 1, zy, zy_d, 1)
@@ -98,18 +98,18 @@ contains
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, nsize, zy_orig, zx_orig, zy_d_orig, zx_d_orig, zy_d, zx_d, passed)
+    call check_derivatives_numerically(n, nsize, zx_orig, zy_orig, zx_d_orig, zy_d_orig, zx_d, zy_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, nsize, zy_orig, zx_orig, zy_d_orig, zx_d_orig, zy_d, zx_d, passed)
+  subroutine check_derivatives_numerically(n, nsize, zx_orig, zy_orig, zx_d_orig, zy_d_orig, zx_d, zy_d, passed)
     implicit none
     integer, intent(in) :: n
     integer, intent(in) :: nsize
-    complex(8), intent(in) :: zy_orig(n), zy_d_orig(n)
     complex(8), intent(in) :: zx_orig(n), zx_d_orig(n)
-    complex(8), intent(in) :: zy_d(n)
+    complex(8), intent(in) :: zy_orig(n), zy_d_orig(n)
     complex(8), intent(in) :: zx_d(n)
+    complex(8), intent(in) :: zy_d(n)
     logical, intent(out) :: passed
 
     real(8), parameter :: h = 1.0e-6  ! Step size for finite differences
@@ -117,11 +117,11 @@ contains
     real(8) :: abs_error, abs_reference, error_bound
     real(8) :: central_diff, ad_result
     logical :: has_large_errors
-    complex(8), dimension(n) :: zy_forward, zy_backward
     complex(8), dimension(n) :: zx_forward, zx_backward
+    complex(8), dimension(n) :: zy_forward, zy_backward
     integer :: i, j
-    complex(8), dimension(n) :: zy
     complex(8), dimension(n) :: zx
+    complex(8), dimension(n) :: zy
 
     max_error = 0.0e0
     has_large_errors = .false.
@@ -130,39 +130,20 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    zy = zy_orig + h * zy_d_orig
     zx = zx_orig + h * zx_d_orig
+    zy = zy_orig + h * zy_d_orig
     call zswap(nsize, zx, 1, zy, 1)
-    zy_forward = zy
     zx_forward = zx
+    zy_forward = zy
 
     ! Backward perturbation: f(x - h)
-    zy = zy_orig - h * zy_d_orig
     zx = zx_orig - h * zx_d_orig
+    zy = zy_orig - h * zy_d_orig
     call zswap(nsize, zx, 1, zy, 1)
-    zy_backward = zy
     zx_backward = zx
+    zy_backward = zy
 
     ! Compute central differences and compare with AD results
-    do i = 1, n
-        central_diff = (zy_forward(i) - zy_backward(i)) / (2.0e0 * h)
-        ad_result = zy_d(i)
-        abs_error = abs(central_diff - ad_result)
-        abs_reference = abs(ad_result)
-        error_bound = 1.0e-5 + 1.0e-5 * abs_reference
-        if (abs_error > error_bound) then
-          has_large_errors = .true.
-          relative_error = abs_error / max(abs_reference, 1.0e-10)
-          write(*,*) 'Large error in output ZY(', i, '):'
-          write(*,*) '  Central diff: ', central_diff
-          write(*,*) '  AD result:   ', ad_result
-          write(*,*) '  Absolute error:', abs_error
-          write(*,*) '  Error bound:', error_bound
-          write(*,*) '  Relative error:', relative_error
-        end if
-        relative_error = abs_error / max(abs_reference, 1.0e-10)
-        max_error = max(max_error, relative_error)
-    end do
     do i = 1, n
         central_diff = (zx_forward(i) - zx_backward(i)) / (2.0e0 * h)
         ad_result = zx_d(i)
@@ -173,6 +154,25 @@ contains
           has_large_errors = .true.
           relative_error = abs_error / max(abs_reference, 1.0e-10)
           write(*,*) 'Large error in output ZX(', i, '):'
+          write(*,*) '  Central diff: ', central_diff
+          write(*,*) '  AD result:   ', ad_result
+          write(*,*) '  Absolute error:', abs_error
+          write(*,*) '  Error bound:', error_bound
+          write(*,*) '  Relative error:', relative_error
+        end if
+        relative_error = abs_error / max(abs_reference, 1.0e-10)
+        max_error = max(max_error, relative_error)
+    end do
+    do i = 1, n
+        central_diff = (zy_forward(i) - zy_backward(i)) / (2.0e0 * h)
+        ad_result = zy_d(i)
+        abs_error = abs(central_diff - ad_result)
+        abs_reference = abs(ad_result)
+        error_bound = 1.0e-5 + 1.0e-5 * abs_reference
+        if (abs_error > error_bound) then
+          has_large_errors = .true.
+          relative_error = abs_error / max(abs_reference, 1.0e-10)
+          write(*,*) 'Large error in output ZY(', i, '):'
           write(*,*) '  Central diff: ', central_diff
           write(*,*) '  AD result:   ', ad_result
           write(*,*) '  Absolute error:', abs_error

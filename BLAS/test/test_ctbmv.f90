@@ -1,228 +1,120 @@
 ! Test program for CTBMV differentiation
 ! Generated automatically by run_tapenade_blas.py
 ! Using REAL*4 precision
+! Multi-size outlined run_test_for_size(n) - BLAS2 band (declarations in subroutines)
 
 program test_ctbmv
   implicit none
-
   external :: ctbmv
   external :: ctbmv_d
-
-  ! Test parameters
-  integer, parameter :: max_size = 8  ! Maximum array dimension (multi-size test)
-  integer :: n_test  ! Loop over n = 1, 2, 3, 4
-  integer :: test_sizes(1), itest
+  integer :: n_test, seed_array(33), test_sizes(1), i
   logical :: passed, all_passed
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-
-  character :: uplo
-  character :: trans
-  character :: diag
-  integer :: nsize
-  integer :: ksize
-  complex(4), dimension(max_size,max_size) :: a  ! Band storage (k+1) x n
-  integer :: lda_val
-  complex(4), dimension(max_size) :: x
-  integer :: incx_val
-
-  ! Derivative variables
-  complex(4), dimension(max_size,max_size) :: a_d
-  complex(4), dimension(max_size) :: x_d
-
-  ! Storage variables for inout parameters
-  complex(4), dimension(max_size) :: x_output
-
-  ! Array restoration variables for numerical differentiation
-  complex(4), dimension(max_size,max_size) :: a_orig  ! Band storage
-  complex(4), dimension(max_size) :: x_orig
-
-  ! Variables for central difference computation
-  complex(4), dimension(max_size) :: x_forward, x_backward
-  ! Scalar variables for central difference computation
-  complex(4) :: central_diff, ad_result
-  logical :: has_large_errors
-
-  ! Variables for storing original derivative values
-  complex(4), dimension(max_size,max_size) :: a_d_orig
-  complex(4), dimension(max_size) :: x_d_orig
-
-  ! Temporary variables for matrix initialization
-  real(4) :: temp_real, temp_imag
-  integer :: i, j, band_row
-  integer :: n  ! Current size (set in loop)
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
-  integer :: seed_array(33)
   seed_array = 42
   call random_seed(put=seed_array)
-
   test_sizes = (/ 4 /)
   write(*,*) 'Testing CTBMV (multi-size: n = 4)'
   all_passed = .true.
-  do itest = 1, 1
-    n_test = test_sizes(itest)
-    n = n_test
-
+  do i = 1, 1
+    n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
-
   end do
   if (all_passed) then
     write(*,*) 'PASS: All sizes completed successfully'
   else
     write(*,*) 'FAIL: One or more sizes had derivative errors'
   end if
-
 contains
-
   subroutine run_test_for_size(n, passed)
     implicit none
     integer, intent(in) :: n
     logical, intent(out) :: passed
-    integer :: i, j, band_row
-
-      uplo = 'U'
-      trans = 'N'
-      diag = 'N'
-      nsize = n
-      ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
-      ! Initialize a as triangular band matrix (upper band storage)
-      do j = 1, n
-        do band_row = max(1, ksize+2-j), ksize+1
-          call random_number(temp_real)
-          call random_number(temp_imag)
-          a(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-        end do
-      end do
-      lda_val = lda  ! LDA must be at least ( k + 1 )
-      do i = 1, n
-        call random_number(temp_real)
-        call random_number(temp_imag)
-        x(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-      end do
-      incx_val = 1  ! INCX 1
-
-      ! Initialize input derivatives to random values
-      ! Initialize a_d as triangular band matrix (upper band storage)
-      do j = 1, n
-        do band_row = max(1, ksize+2-j), ksize+1
-          call random_number(temp_real)
-          call random_number(temp_imag)
-          a_d(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-        end do
-      end do
-      do i = 1, n
-        call random_number(temp_real)
-        call random_number(temp_imag)
-        x_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-      end do
-
-      ! Store initial derivative values after random initialization
-      a_d_orig = a_d
-      x_d_orig = x_d
-
-      ! Store original values for central difference computation
-      a_orig = a
-      x_orig = x
-
-      write(*,*) 'Testing CTBMV'
-      ! Store input values of inout parameters before first function call
-      x_orig = x
-
-      ! Re-initialize data for differentiated function
-      ! Only reinitialize inout parameters - keep input-only parameters unchanged
-
-      ! uplo already has correct value from original call
-      ! trans already has correct value from original call
-      ! diag already has correct value from original call
-      nsize = n
-      ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
-      ! a already has correct value from original call
-      lda_val = lda  ! LDA must be at least ( k + 1 )
-      x = x_orig
-      incx_val = 1  ! INCX 1
-
-      ! Call the differentiated function
-      call ctbmv_d(uplo, trans, diag, nsize, ksize, a, a_d, lda_val, x, x_d, incx_val)
-
-      ! Print results and compare
-      write(*,*) 'Function calls completed successfully'
-
-      ! Numerical differentiation check
-      call check_derivatives_numerically(passed)
+    character :: uplo, trans, diag
+    integer :: nsize, ksize, lda_val, incx_val, incy_val
+    complex(4) :: alpha, alpha_d, alpha_orig, alpha_d_seed
+    complex(4), dimension(:,:), allocatable :: a, a_d, a_orig, a_d_seed
+    complex(4), dimension(:), allocatable :: x, x_d, x_orig, x_d_seed
+    integer :: band_row, j
+    real(4) :: temp_real, temp_imag
+    ksize = max(0, n - 1)
+    nsize = n
+    lda_val = ksize + 1
+    incx_val = 1
+    incy_val = 1
+    uplo = 'U'
+    trans = 'N'
+    diag = 'N'
+    allocate(a(lda_val, n), a_d(lda_val, n), a_orig(lda_val, n), a_d_seed(lda_val, n))
+    allocate(x(n), x_d(n), x_orig(n), x_d_seed(n))
+    ! Initialize a as triangular band matrix (upper band storage)
+    do j = 1, n
+    do band_row = max(1, ksize+2-j), ksize+1
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    a(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end do
+    end do
+    ! Keep direction consistent with triangular band: only band entries used
+    do j = 1, n
+    do band_row = max(1, ksize+2-j), ksize+1
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    a_d(band_row, j) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+    end do
+    end do
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    alpha = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(alpha))
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    alpha_d = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(alpha_d))
+    do j = 1, n
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      x(j) = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(x))
+      x_d(j) = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(x_d))
+    end do
+    write(*,*) 'Testing CTBMV (n =', n, ')'
+    a_orig = a
+    a_d_seed = a_d
+    x_orig = x
+    x_d_seed = x_d
+    alpha_orig = alpha
+    alpha_d_seed = alpha_d
+    call ctbmv_d(uplo, trans, diag, nsize, ksize, a, a_d, lda_val, x, x_d, incx_val)
+    call check_derivatives_numerically_band(n, lda_val, ksize, uplo, trans, diag, nsize, incx_val, a_orig, a_d_seed, x_orig, x_d_seed, x_d, passed)
+    deallocate(a, a_d, a_orig, a_d_seed, x, x_d, x_orig, x_d_seed)
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(passed)
+  subroutine check_derivatives_numerically_band(n, lda_val, ksize, uplo, trans, diag, nsize, incx_val, a_orig, a_d_seed, x_orig, x_d_seed, x_d_out, passed)
     implicit none
+    integer, intent(in) :: n, lda_val, ksize, nsize, incx_val
+    character, intent(in) :: uplo, trans, diag
+    complex(4), intent(in) :: a_orig(lda_val, n), a_d_seed(lda_val, n), x_orig(n), x_d_seed(n), x_d_out(n)
     logical, intent(out) :: passed
-    real(4), parameter :: h = 1.0e-3  ! Step size for finite differences
-    real(4) :: relative_error, max_error
-    real(4) :: output_orig, output_pert
-    real(4) :: numerical_result, analytical_result
-    real(4) :: abs_error, abs_reference, error_bound
-    integer :: i, j
-    
-    max_error = 0.0e0
-    has_large_errors = .false.
-    
-    write(*,*) 'Checking derivatives against numerical differentiation:'
-    write(*,*) 'Step size h =', h
-    
-    ! Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3
-    
-    ! Original values already stored in main program
-    
-    ! Central difference computation: f(x + h) - f(x - h) / (2h)
-    ! Forward perturbation: f(x + h)
-    a = a_orig + cmplx(h, 0.0) * a_d_orig
-    x = x_orig + cmplx(h, 0.0) * x_d_orig
-    call ctbmv(uplo, trans, diag, nsize, ksize, a, lda_val, x, incx_val)
-    ! Store forward perturbation results
-    x_forward = x
-    
-    ! Backward perturbation: f(x - h)
-    a = a_orig - cmplx(h, 0.0) * a_d_orig
-    x = x_orig - cmplx(h, 0.0) * x_d_orig
-    call ctbmv(uplo, trans, diag, nsize, ksize, a, lda_val, x, incx_val)
-    ! Store backward perturbation results
-    x_backward = x
-    
-    ! Compute central differences and compare with AD results
-    ! Check derivatives for output X
-    do i = 1, min(2, n)  ! Check only first few elements
-      ! Central difference: (f(x+h) - f(x-h)) / (2h)
-      central_diff = (x_forward(i) - x_backward(i)) / (2.0e0 * h)
-      ! AD result
-      ad_result = x_d(i)
-      ! Error check: |a - b| > atol + rtol * |b|
-      abs_error = abs(central_diff - ad_result)
-      abs_reference = abs(ad_result)
-      error_bound = 1.0e-3 + 1.0e-3 * abs_reference
-      if (abs_error > error_bound) then
-        has_large_errors = .true.
-        relative_error = abs_error / max(abs_reference, 1.0e-10)
-        write(*,*) 'Large error in output X(', i, '):'
-        write(*,*) '  Central diff: ', central_diff
-        write(*,*) '  AD result:   ', ad_result
-        write(*,*) '  Absolute error:', abs_error
-        write(*,*) '  Error bound:', error_bound
-        write(*,*) '  Relative error:', relative_error
-      end if
-      ! Track max error for reporting (normalized)
-      relative_error = abs_error / max(abs_reference, 1.0e-10)
-      max_error = max(max_error, relative_error)
+    real(4), parameter :: h = 1.0e-3
+    real(4) :: abs_error, abs_ref, err_bound
+    complex(4), dimension(n) :: x_fwd, x_bwd, x_t
+    complex(4), dimension(lda_val, n) :: a_t
+    integer :: ii
+    logical :: has_err
+    has_err = .false.
+    a_t = a_orig + h * a_d_seed
+    x_t = x_orig + h * x_d_seed
+    call ctbmv(uplo, trans, diag, nsize, ksize, a_t, lda_val, x_t, incx_val)
+    x_fwd = x_t
+    a_t = a_orig - h * a_d_seed
+    x_t = x_orig - h * x_d_seed
+    call ctbmv(uplo, trans, diag, nsize, ksize, a_t, lda_val, x_t, incx_val)
+    x_bwd = x_t
+    do ii = 1, min(3, n)
+      abs_error = abs((x_fwd(ii) - x_bwd(ii)) / (2.0e0 * h) - x_d_out(ii))
+      abs_ref = abs(x_d_out(ii))
+      err_bound = 1.0e-3 + 1.0e-3 * abs_ref
+      if (abs_error > err_bound) has_err = .true.
     end do
-    
-    write(*,*) 'Maximum relative error:', max_error
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
-    passed = .not. has_large_errors
-    if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
-    else
-      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
-    end if
-    
-  end subroutine check_derivatives_numerically
-
+    passed = .not. has_err
+    if (has_err) write(*,*) 'FAIL: Band scalar derivatives'
+    if (.not. has_err) write(*,*) 'PASS: Band scalar derivatives'
+  end subroutine check_derivatives_numerically_band
 end program test_ctbmv

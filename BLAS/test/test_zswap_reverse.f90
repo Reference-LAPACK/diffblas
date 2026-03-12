@@ -117,8 +117,8 @@ contains
     complex(8), dimension(n) :: zx_dir
     complex(8), dimension(n) :: zy_dir
 
-    complex(8), dimension(n) :: zy_plus, zy_minus, zy_central_diff
     complex(8), dimension(n) :: zx_plus, zx_minus, zx_central_diff
+    complex(8), dimension(n) :: zy_plus, zy_minus, zy_central_diff
 
     complex(8), dimension(n) :: zx
     complex(8), dimension(n) :: zy
@@ -144,22 +144,22 @@ contains
     zx = zx_orig + cmplx(h, 0.0) * zx_dir
     zy = zy_orig + cmplx(h, 0.0) * zy_dir
     call zswap(nsize, zx, incx_val, zy, incy_val)
-    zy_plus = zy
     zx_plus = zx
+    zy_plus = zy
 
     zx = zx_orig - cmplx(h, 0.0) * zx_dir
     zy = zy_orig - cmplx(h, 0.0) * zy_dir
     call zswap(nsize, zx, incx_val, zy, incy_val)
-    zy_minus = zy
     zx_minus = zx
+    zy_minus = zy
 
-    zy_central_diff = (zy_plus - zy_minus) / (2.0 * h)
     zx_central_diff = (zx_plus - zx_minus) / (2.0 * h)
+    zy_central_diff = (zy_plus - zy_minus) / (2.0 * h)
 
     vjp_fd = 0.0
     n_products = n
     do i = 1, n
-      temp_products(i) = real(conjg(zyb_orig(i)) * zy_central_diff(i))
+      temp_products(i) = real(conjg(zxb_orig(i)) * zx_central_diff(i))
     end do
     call sort_array(temp_products, n_products)
     do i = 1, n_products
@@ -167,7 +167,7 @@ contains
     end do
     n_products = n
     do i = 1, n
-      temp_products(i) = real(conjg(zxb_orig(i)) * zx_central_diff(i))
+      temp_products(i) = real(conjg(zyb_orig(i)) * zy_central_diff(i))
     end do
     call sort_array(temp_products, n_products)
     do i = 1, n_products

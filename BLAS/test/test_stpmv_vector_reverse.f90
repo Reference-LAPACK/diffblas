@@ -1,212 +1,125 @@
 ! Test program for STPMV vector reverse mode differentiation
-! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirs=4
+! Multi-size outlined run_test_for_size(n) - TPMV/TPSV packed triangular
 
 program test_stpmv_vector_reverse
   implicit none
-  integer, parameter :: nbdirs = 4
-
   external :: stpmv
   external :: stpmv_bv
-
-  ! Test parameters
-  integer :: n  ! Current size (set in loop)
-  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-  integer :: i, j, k  ! Loop counters
-  integer :: test_sizes(1), itest
+  integer :: nbdirs, n_test, seed_array(33), test_sizes(1), i
   logical :: passed, all_passed
-  integer :: seed_array(33)  ! Random seed
-  real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
-
-  character :: uplo
-  character :: trans
-  character :: diag
-  integer :: nsize
-  real(4), dimension(max_size*(max_size+1)/2) :: ap
-  real(4), dimension(max_size) :: x
-  integer :: incx_val
-
-  ! Adjoint variables (reverse vector mode)
-  ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
-  !                  input adjoints are OUTPUT (computed gradients)
-  real(4), dimension(nbdirs,max_size*(max_size+1)/2) :: apb
-  real(4), dimension(nbdirs,max_size) :: xb
-
-  ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  real(4), dimension(nbdirs,max_size) :: xb_orig
-
-  ! Storage for original values (for VJP verification)
-  real(4), dimension((max_size*(max_size+1))/2) :: ap_orig
-  real(4), dimension(max_size) :: x_orig
-
-  ! Variables for VJP verification via finite differences
-  real(4), parameter :: h = 1.0e-3
-  real(4) :: vjp_ad, vjp_fd, relative_error, max_error, abs_error, abs_reference, error_bound
-  logical :: has_large_errors
-  real(4), dimension(max_size*max_size) :: temp_products  ! For sorted summation
-  integer :: n_products
-
-  ! Initialize random seed for reproducibility
   seed_array = 42
   call random_seed(put=seed_array)
-
   test_sizes = (/ 4 /)
-  write(*,*) 'Testing STPMV (Vector Reverse, multi-size: n = 4)'
+  write(*,*) 'Testing STPMV (Vector Reverse, multi-size: n =', test_sizes(1), ')'
   all_passed = .true.
-  do itest = 1, 1
-    n = test_sizes(itest)
-    write(*,*) 'Testing STPMV (Vector Reverse, n =', n, ')'
-
-    call run_test_for_size(n, passed)
-  all_passed = all_passed .and. passed
+  do i = 1, 1
+    n_test = test_sizes(i)
+    nbdirs = test_sizes(i)
+    call run_test_for_size(n_test, passed, nbdirs)
+    all_passed = all_passed .and. passed
   end do
-  if (all_passed) then
-    write(*,*) 'PASS: Vector reverse mode - all sizes completed successfully'
-  else
-    write(*,*) 'FAIL: Vector reverse mode - one or more sizes had derivative errors'
-  end if
-
+  if (all_passed) write(*,*) 'PASS: Vector reverse - all sizes completed successfully'
+  if (.not. all_passed) write(*,*) 'FAIL: Vector reverse - one or more sizes had derivative errors'
 contains
-
-  subroutine run_test_for_size(n, passed)
-    implicit none
-    integer, intent(in) :: n
+  subroutine run_test_for_size(n, passed, nbdirs)
+    integer, intent(in) :: n, nbdirs
     logical, intent(out) :: passed
-
-    ! Initialize primal values
-    uplo = 'U'
+    character :: uplo, trans, diag
+    integer :: nsize, incx_val, npack
+    real(4), allocatable :: ap(:), x(:)
+    real(4), allocatable :: apb(:,:), xb(:,:)
+    real(4), allocatable :: ap_orig(:), x_orig(:), xb_orig(:,:)
+    integer :: idir, ii
+    real(4) :: tr, ti
+    uplo = 'L'
     trans = 'N'
     diag = 'N'
     nsize = n
-    call random_number(ap)
-    ap = ap * 2.0 - 1.0
-    call random_number(x)
-    x = x * 2.0 - 1.0
     incx_val = 1
-    
-    ! Store original primal values
+    npack = (n * (n + 1)) / 2
+    allocate(ap(npack), x(n), apb(nbdirs, npack), xb(nbdirs, n))
+    allocate(ap_orig(npack), x_orig(n), xb_orig(nbdirs, n))
+    call random_number(ap)
+    ap = ap * 2.0d0 - 1.0d0
+    call random_number(x)
+    x = x * 2.0d0 - 1.0d0
+    do idir = 1, nbdirs
+      call random_number(xb(idir,:))
+      xb(idir,:) = xb(idir,:) * 2.0d0 - 1.0d0
+    end do
     ap_orig = ap
     x_orig = x
-    
-    ! Initialize output adjoints (cotangents) with random values for each direction
-    ! These are the 'seeds' for reverse mode
-    do k = 1, nbdirs
-      call random_number(xb(k,:))
-      xb(k,:) = xb(k,:) * 2.0 - 1.0
-    end do
-    
-    ! Initialize input adjoints to zero (they will be computed)
-    ! Note: Inout parameters are skipped - they already have output adjoints initialized
-    apb = 0.0
-    
-    ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
     xb_orig = xb
-    
-    ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-    ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
-    call set_ISIZE1OFAp(n)
-    
-    ! Call reverse vector mode differentiated function
+    apb = 0.0d0
+    write(*,*) 'Testing STPMV (Vector Reverse, n =', n, ')'
+    call set_ISIZE1OFAp(npack)
+    ! xb holds seed (direction on output x); _bv overwrites xb with adjoint
     call stpmv_bv(uplo, trans, diag, nsize, ap, apb, x, xb, incx_val, nbdirs)
-    
-    ! Reset ISIZE globals to uninitialized (-1) for completeness
     call set_ISIZE1OFAp(-1)
-    
-    ! VJP Verification using finite differences
-    call check_vjp_numerically(passed)
+    write(*,*) 'Function calls completed successfully'
+    write(*,*) 'Checking derivatives against numerical differentiation:'
+    write(*,*) 'Step size h =', 1.0e-3
+
+    call check_vjp_numerically(n, npack, nbdirs, uplo, trans, diag, nsize, incx_val, ap_orig, x_orig, xb_orig, apb, xb, passed)
+    if (allocated(ap)) deallocate(ap)
+    if (allocated(apb)) deallocate(apb)
+    if (allocated(x)) deallocate(x)
+    if (allocated(xb)) deallocate(xb)
+    if (allocated(ap_orig)) deallocate(ap_orig)
+    if (allocated(x_orig)) deallocate(x_orig)
+    if (allocated(xb_orig)) deallocate(xb_orig)
   end subroutine run_test_for_size
 
-  subroutine check_vjp_numerically(passed)
+  subroutine check_vjp_numerically(n, npack, nbdirs, uplo, trans, diag, nsize, incx_val, ap_orig, x_orig, xb_orig, apb, xb, passed)
     implicit none
+    integer, intent(in) :: n, npack, nbdirs, nsize, incx_val
+    character, intent(in) :: uplo, trans, diag
+    real(4), intent(in) :: ap_orig(npack), x_orig(n), xb_orig(nbdirs,n)
+    real(4), intent(in) :: apb(nbdirs,npack), xb(nbdirs,n)
     logical, intent(out) :: passed
-    
-    ! Direction vectors for VJP testing
-    real(4), dimension(max_size*(max_size+1)/2) :: ap_dir
-    real(4), dimension(max_size) :: x_dir
-    real(4), dimension(max_size) :: x_plus, x_minus, x_central_diff
-    
+    real(4), parameter :: h = 1.0e-3
+    real(4) :: vjp_ad, vjp_fd, relative_error, max_error, abs_error, abs_reference, error_bound
+    real(4), allocatable :: ap(:), x(:), ap_dir(:), x_dir(:), x_plus(:), x_minus(:)
+    real(4), dimension(n) :: temp_real_fd
+    integer :: k, i, ii, n_products
+    real(4) :: temp_real, temp_imag
+    logical :: has_large_errors
+    allocate(ap(npack), x(n), ap_dir(npack), x_dir(n), x_plus(n), x_minus(n))
     max_error = 0.0d0
     has_large_errors = .false.
-    
-    write(*,*) 'Function calls completed successfully'
-    
-    write(*,*) 'Checking derivatives against numerical differentiation:'
-    write(*,*) 'Step size h =', h
-    
-    ! Test each differentiation direction separately
     do k = 1, nbdirs
-      
-      ! Initialize random direction vectors for all inputs
       call random_number(ap_dir)
-      ap_dir = ap_dir * 2.0 - 1.0
+      ap_dir = ap_dir * 2.0d0 - 1.0d0
       call random_number(x_dir)
-      x_dir = x_dir * 2.0 - 1.0
-      
-      ! Forward perturbation: f(x + h*dir)
+      x_dir = x_dir * 2.0d0 - 1.0d0
       ap = ap_orig + h * ap_dir
       x = x_orig + h * x_dir
       call stpmv(uplo, trans, diag, nsize, ap, x, incx_val)
       x_plus = x
-      
-      ! Backward perturbation: f(x - h*dir)
       ap = ap_orig - h * ap_dir
       x = x_orig - h * x_dir
       call stpmv(uplo, trans, diag, nsize, ap, x, incx_val)
       x_minus = x
-      
-      ! Compute central differences and VJP verification
-      ! VJP check: direction^T @ adjoint should equal finite difference
-      
-      ! Compute central differences: (f(x+h*dir) - f(x-h*dir)) / (2h)
-      x_central_diff = (x_plus - x_minus) / (2.0 * h)
-      
-      ! VJP verification:
-      ! cotangent^T @ central_diff should equal direction^T @ computed_adjoint
-      ! Left side: cotangent^T @ Jacobian @ direction (via finite differences, with sorted summation)
-      vjp_fd = 0.0
-      ! Compute and sort products for x (FD)
+      vjp_fd = 0.0e0
       n_products = n
       do i = 1, n
-        temp_products(i) = xb_orig(k,i) * x_central_diff(i)
+        temp_real_fd(i) = xb_orig(k,i) * (x_plus(i) - x_minus(i)) / (2.0e0 * h)
       end do
-      call sort_array(temp_products, n_products)
+      call sort_array(temp_real_fd, n_products)
       do i = 1, n_products
-        vjp_fd = vjp_fd + temp_products(i)
+        vjp_fd = vjp_fd + temp_real_fd(i)
       end do
-      
-      ! Right side: direction^T @ computed_adjoint (with sorted summation)
-      ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
-      ! For pure inputs: use adjoint directly
-      vjp_ad = 0.0
-      ! Compute and sort products for x
-      n_products = n
-      do i = 1, n
-        temp_products(i) = x_dir(i) * xb(k,i)
+      vjp_ad = 0.0d0
+      do ii = 1, npack
+        vjp_ad = vjp_ad + ap_dir(ii) * apb(k,ii)
       end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_ad = vjp_ad + temp_products(i)
+      do ii = 1, n
+        vjp_ad = vjp_ad + x_dir(ii) * xb(k,ii)
       end do
-      ! Compute and sort products for ap
-      n_products = max_size*(max_size+1)/2
-      do i = 1, max_size*(max_size+1)/2
-        temp_products(i) = ap_dir(i) * apb(k,i)
-      end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_ad = vjp_ad + temp_products(i)
-      end do
-      
-      ! Error check: |vjp_fd - vjp_ad| > atol + rtol * |vjp_ad|
       abs_error = abs(vjp_fd - vjp_ad)
       abs_reference = abs(vjp_ad)
-      error_bound = 2.0e-3 + 2.0e-3 * abs_reference
-      if (abs_error > error_bound) then
-        has_large_errors = .true.
-      end if
-      
-      ! Compute relative error for reporting
+      error_bound = 1.0e-3 + 1.0e-3 * abs_reference
+      if (abs_error > error_bound) has_large_errors = .true.
       if (abs_reference > 1.0e-10) then
         relative_error = abs_error / abs_reference
       else
@@ -214,17 +127,15 @@ contains
       end if
       if (relative_error > max_error) max_error = relative_error
     end do
-    
-    write(*,*) ''
+    deallocate(ap, x, ap_dir, x_dir, x_plus, x_minus)
     write(*,*) 'Maximum relative error:', max_error
-    write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
+    write(*,*) 'Tolerance thresholds: rtol=atol=', 1.0e-3
     passed = .not. has_large_errors
     if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
+      write(*,*) 'FAIL: Large errors in derivatives'
     else
       write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if
-    
   end subroutine check_vjp_numerically
 
   subroutine sort_array(arr, n)
@@ -233,14 +144,10 @@ contains
     real(4), dimension(n), intent(inout) :: arr
     integer :: i, j, min_idx
     real(4) :: temp
-    
-    ! Simple selection sort
     do i = 1, n-1
       min_idx = i
       do j = i+1, n
-        if (abs(arr(j)) < abs(arr(min_idx))) then
-          min_idx = j
-        end if
+        if (abs(arr(j)) < abs(arr(min_idx))) min_idx = j
       end do
       if (min_idx /= i) then
         temp = arr(i)
@@ -249,5 +156,4 @@ contains
       end if
     end do
   end subroutine sort_array
-
 end program test_stpmv_vector_reverse

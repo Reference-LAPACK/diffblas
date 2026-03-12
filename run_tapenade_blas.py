@@ -16670,10 +16670,19 @@ def generate_test_main_vector_forward(func_name, src_file, inputs, outputs, inou
     fu = func_name.upper()
     # Base function name (e.g. CAXPY from caxpy_dv) for type decisions when parsing _dv/_d files
     base_func_name = src_stem.upper().split('_')[0] if '_' in src_stem else src_stem.upper()
-    
-    # Special-case BLAS1 ASUM/NRM2 vector forward: use BLAS/test-style drivers.
-    if fu in {"SASUM", "DASUM", "SNRM2", "DNRM2"} and not multi_size:
-        # Precision already encoded in func_name prefix
+
+    # BLAS1 ASUM/NRM2 vector forward (DASUM/DNRM2/SASUM/SNRM2) are FUNCTIONs f(x)->scalar
+    # with a single input vector. The generic vector-forward main generator plus any
+    # checker augmentation logic is written around BLAS2/BLAS3 subroutines and has
+    # historically produced malformed Fortran for this BLAS1 FUNCTION case (no CONTAINS,
+    # duplicate IMPLICIT NONE, misplaced declarations in test_*asum_vector_forward.f90).
+    # To mirror the already working BLAS/test drivers and keep the structure simple, we
+    # route these four routines through a dedicated generator that emits:
+    #   - program + implicit none + declarations
+    #   - a single CONTAINS
+    #   - internal run_test_for_size and check_derivatives_numerically
+    # with a per-direction finite-difference check on the scalar function value.
+    if fu in {"SASUM", "DASUM", "SNRM2", "DNRM2"}:
         precision_name = "REAL*4" if fu.startswith("S") else "REAL*8"
         return _generate_blas1_asum_nrm2_vector_forward(func_name, src_file, precision_name, nbdirsmax)
 
@@ -18206,6 +18215,163 @@ def _generate_blas1_asum_nrm2_vector_reverse(func_name, src_file, precision_type
     lines.append("  end subroutine sort_array")
     lines.append("")
     lines.append(f"end program test_{prog_name}_vector_reverse")
+    return "\n".join(lines)
+
+
+def _generate_blas1_asum_nrm2_vector_forward(func_name, src_file, precision_name, nbdirsmax):
+    """
+    Vector-forward test driver for BLAS1 ASUM/NRM2 (SASUM/DASUM/SNRM2/DNRM2).
+
+    These routines are FUNCTIONs f(x)->scalar with a single input vector, so their
+    natural finite-difference check is on the scalar function value. The generic
+    vector-forward main + checker augmentation is tuned for BLAS2/BLAS3 subroutines
+    and does not produce valid Fortran for this BLAS1 FUNCTION case (it breaks the
+    program/CONTAINS/subroutine structure and can duplicate IMPLICIT NONE). We instead
+    mirror the BLAS/test drivers:
+      - program + implicit none + declarations
+      - a single CONTAINS
+      - internal run_test_for_size and check_derivatives_numerically
+    with nbdirs directions and the usual FD vs AD comparison per direction.
+    """
+    prog_name = src_file.stem
+    fu = func_name.upper()
+
+    if fu in {"DASUM", "DNRM2"}:
+        prec = "real(8)"
+        h_val = "1.0e-7"
+        rtol_atol = "1.0e-5"
+    else:
+        prec = "real(4)"
+        h_val = "1.0e-3"
+        rtol_atol = "2.0e-3"
+
+    if fu in {"DASUM", "SASUM"}:
+        vec = "dx" if fu == "DASUM" else "sx"
+        base = "dasum" if fu == "DASUM" else "sasum"
+        label = "DASUM" if fu == "DASUM" else "SASUM"
+    else:
+        vec = "x"
+        base = "dnrm2" if fu == "DNRM2" else "snrm2"
+        label = "DNRM2" if fu == "DNRM2" else "SNRM2"
+
+    lines = []
+    lines.append(f"! Test program for {func_name} vector forward mode differentiation")
+    lines.append("! Generated automatically by run_tapenade_blas.py")
+    lines.append(f"! Using {precision_name} precision with nbdirs={nbdirsmax}")
+    lines.append("")
+    lines.append(f"program test_{prog_name}_vector_forward")
+    lines.append("  implicit none")
+    lines.append(f"  integer, parameter :: nbdirs = {nbdirsmax}")
+    lines.append("")
+    lines.append(f"  {prec}, external :: {func_name.lower()}")
+    lines.append(f"  external :: {func_name.lower()}_dv")
+    lines.append("")
+    lines.append("  ! Test parameters")
+    lines.append("  integer :: n")
+    lines.append("  integer, parameter :: max_size = 100")
+    lines.append("  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size")
+    lines.append("  integer :: i, j, idir")
+    lines.append("  integer :: test_sizes(1), itest")
+    lines.append("  logical :: passed, all_passed")
+    lines.append("  integer :: seed_array(33)")
+    lines.append("  real(4) :: temp_real, temp_imag")
+    lines.append("")
+    lines.append("  integer :: nsize")
+    lines.append(f"  {prec}, dimension(max_size) :: {vec}")
+    lines.append("  integer :: incx_val")
+    lines.append("")
+    lines.append("  ! Vector mode derivative variables")
+    lines.append(f"  {prec}, dimension(nbdirs,max_size) :: {vec}_dv")
+    lines.append(f"  {prec}, dimension(max_size) :: {vec}_orig")
+    lines.append(f"  {prec}, dimension(nbdirs,max_size) :: {vec}_dv_orig")
+    lines.append("")
+    lines.append("  ! Function result variables")
+    lines.append(f"  {prec} :: {base}_result")
+    lines.append(f"  {prec}, dimension(nbdirs) :: {base}_dv_result")
+    lines.append("")
+    lines.append("  test_sizes = (/ 4 /)")
+    lines.append(f"  write(*,*) 'Testing {label} (Vector Forward, multi-size: n = 4)'")
+    lines.append("  all_passed = .true.")
+    lines.append("  do itest = 1, 1")
+    lines.append("    n = test_sizes(itest)")
+    lines.append(f"    write(*,*) 'Testing {label} (Vector Forward, n =', n, ')'")
+    lines.append("")
+    lines.append("    call run_test_for_size(n, passed)")
+    lines.append("    all_passed = all_passed .and. passed")
+    lines.append("  end do")
+    lines.append("  if (all_passed) then")
+    lines.append("    write(*,*) 'PASS: Vector forward mode - all sizes completed successfully'")
+    lines.append("  else")
+    lines.append("    write(*,*) 'FAIL: Vector forward mode - one or more sizes had derivative errors'")
+    lines.append("  end if")
+    lines.append("")
+    lines.append("contains")
+    lines.append("")
+    lines.append("  subroutine run_test_for_size(n, passed)")
+    lines.append("    implicit none")
+    lines.append("    integer, intent(in) :: n")
+    lines.append("    logical, intent(out) :: passed")
+    lines.append("")
+    lines.append("    nsize = n")
+    lines.append("    incx_val = 1")
+    lines.append("    seed_array = 42")
+    lines.append("    call random_seed(put=seed_array)")
+    lines.append(f"    call random_number({vec})")
+    lines.append(f"    {vec} = {vec} * 2.0 - 1.0")
+    lines.append("    do idir = 1, nbdirs")
+    lines.append(f"      call random_number({vec}_dv(idir,:))")
+    lines.append(f"      {vec}_dv(idir,:) = {vec}_dv(idir,:) * 2.0 - 1.0")
+    lines.append("    end do")
+    lines.append(f"    write(*,*) 'Testing {label} (Vector Forward Mode)'")
+    lines.append(f"    {vec}_orig = {vec}")
+    lines.append(f"    {vec}_dv_orig = {vec}_dv")
+    lines.append(f"    call {func_name.lower()}_dv(nsize, {vec}, {vec}_dv, incx_val, {base}_result, {base}_dv_result, nbdirs)")
+    lines.append("    call check_derivatives_numerically(passed)")
+    lines.append("  end subroutine run_test_for_size")
+    lines.append("")
+    lines.append("  subroutine check_derivatives_numerically(passed)")
+    lines.append("    implicit none")
+    lines.append("    logical, intent(out) :: passed")
+    lines.append(f"    {prec}, parameter :: h = {h_val}")
+    lines.append(f"    {prec} :: relative_error, max_error")
+    lines.append(f"    {prec} :: abs_error, abs_reference, error_bound")
+    lines.append(f"    {prec} :: central_diff, ad_result")
+    lines.append("    integer :: i, j, idir")
+    lines.append("    logical :: has_large_errors")
+    lines.append(f"    {prec} :: {base}_forward, {base}_backward")
+    lines.append("")
+    lines.append("    max_error = 0.0e0")
+    lines.append("    has_large_errors = .false.")
+    lines.append("    write(*,*) 'Checking vector derivatives against numerical differentiation:'")
+    lines.append("    write(*,*) 'Step size h =', h")
+    lines.append("    write(*,*) 'Number of directions:', nbdirs")
+    lines.append("    do idir = 1, nbdirs")
+    lines.append(f"      {vec} = {vec}_orig + h * {vec}_dv_orig(idir,:)")
+    lines.append(f"      {base}_forward = {func_name.lower()}(nsize, {vec}, incx_val)")
+    lines.append(f"      {vec} = {vec}_orig - h * {vec}_dv_orig(idir,:)")
+    lines.append(f"      {base}_backward = {func_name.lower()}(nsize, {vec}, incx_val)")
+    lines.append(f"      central_diff = ({base}_forward - {base}_backward) / (2.0e0 * h)")
+    lines.append(f"      ad_result = {base}_dv_result(idir)")
+    lines.append("      abs_error = abs(central_diff - ad_result)")
+    lines.append("      abs_reference = abs(ad_result)")
+    lines.append(f"      error_bound = {rtol_atol} + {rtol_atol} * abs_reference")
+    lines.append("      if (abs_error > error_bound) then")
+    lines.append("        has_large_errors = .true.")
+    lines.append("      end if")
+    lines.append("      relative_error = abs_error / max(abs_reference, 1.0e-10)")
+    lines.append("      max_error = max(max_error, relative_error)")
+    lines.append("    end do")
+    lines.append(f"    write(*,*) 'Maximum relative error across all directions:', max_error")
+    lines.append(f"    write(*,*) 'Tolerance thresholds: rtol={rtol_atol}, atol={rtol_atol}'")
+    lines.append("    passed = .not. has_large_errors")
+    lines.append("    if (has_large_errors) then")
+    lines.append("      write(*,*) 'FAIL: Large errors detected in vector derivatives (outside tolerance)'")
+    lines.append("    else")
+    lines.append("      write(*,*) 'PASS: Vector derivatives are within tolerance (rtol + atol)'")
+    lines.append("    end if")
+    lines.append("  end subroutine check_derivatives_numerically")
+    lines.append("")
+    lines.append(f"end program test_{prog_name}_vector_forward")
     return "\n".join(lines)
 
 

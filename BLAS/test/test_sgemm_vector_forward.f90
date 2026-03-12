@@ -1,66 +1,32 @@
 ! Test program for SGEMM vector forward mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirs=4
+! Using REAL*4 precision with nbdirs=n
+! Multi-size test with outlined run_test_for_size(n) - arrays declared to size n
 
 program test_sgemm_vector_forward
   implicit none
-  integer, parameter :: nbdirs = 4
 
   external :: sgemm
   external :: sgemm_dv
 
-  ! Test parameters
-  integer :: n  ! Current size (set in loop)
-  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-  integer :: i, j, idir  ! Loop counters
-  integer :: test_sizes(1), itest
+  integer :: nbdirs
+  integer :: n_test
+  integer :: seed_array(33)
+  integer :: test_sizes(1)
+  integer :: i
   logical :: passed, all_passed
-  integer :: seed_array(33)  ! Random seed
-  real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
 
-  character :: transa
-  character :: transb
-  integer :: msize
-  integer :: nsize
-  integer :: ksize
-  real(4) :: alpha
-  real(4), dimension(max_size,max_size) :: a
-  integer :: lda_val
-  real(4), dimension(max_size,max_size) :: b
-  integer :: ldb_val
-  real(4) :: beta
-  real(4), dimension(max_size,max_size) :: c
-  integer :: ldc_val
-
-  ! Vector mode derivative variables (type-promoted)
-  ! Scalars become arrays(nbdirs), arrays gain extra dimension
-  real(4), dimension(nbdirs) :: alpha_dv
-  real(4), dimension(nbdirs,max_size,max_size) :: a_dv
-  real(4), dimension(nbdirs,max_size,max_size) :: b_dv
-  real(4), dimension(nbdirs) :: beta_dv
-  real(4), dimension(nbdirs,max_size,max_size) :: c_dv
-  ! Declare variables for storing original values
-  real(4) :: alpha_orig
-  real(4), dimension(nbdirs) :: alpha_dv_orig
-  real(4), dimension(max_size,max_size) :: a_orig
-  real(4), dimension(nbdirs,max_size,max_size) :: a_dv_orig
-  real(4), dimension(max_size,max_size) :: b_orig
-  real(4), dimension(nbdirs,max_size,max_size) :: b_dv_orig
-  real(4) :: beta_orig
-  real(4), dimension(nbdirs) :: beta_dv_orig
-  real(4), dimension(max_size,max_size) :: c_orig
-  real(4), dimension(nbdirs,max_size,max_size) :: c_dv_orig
+  seed_array = 42
+  call random_seed(put=seed_array)
 
   test_sizes = (/ 4 /)
   write(*,*) 'Testing SGEMM (Vector Forward, multi-size: n = 4)'
   all_passed = .true.
-  do itest = 1, 1
-    n = test_sizes(itest)
-    write(*,*) 'Testing SGEMM (Vector Forward, n =', n, ')'
-
-    call run_test_for_size(n, passed)
-  all_passed = all_passed .and. passed
+  do i = 1, 1
+    n_test = test_sizes(i)
+    nbdirs = test_sizes(i)
+    call run_test_for_size(n_test, passed, nbdirs)
+    all_passed = all_passed .and. passed
   end do
   if (all_passed) then
     write(*,*) 'PASS: Vector forward mode - all sizes completed successfully'
@@ -70,61 +36,66 @@ program test_sgemm_vector_forward
 
 contains
 
-  subroutine run_test_for_size(n, passed)
+  subroutine run_test_for_size(n, passed, nbdirs)
     implicit none
     integer, intent(in) :: n
     logical, intent(out) :: passed
+    integer, intent(in) :: nbdirs
 
-    ! Initialize test parameters
+    character :: transa, transb
+    integer :: msize, nsize, ksize, lda_val, ldb_val, ldc_val
+    real(4) :: alpha, beta
+    real(4), dimension(n,n) :: a, b, c
+    real(4), dimension(nbdirs) :: alpha_dv, beta_dv
+    real(4), dimension(nbdirs,n,n) :: a_dv, b_dv, c_dv
+    real(4) :: alpha_orig, beta_orig
+    real(4), dimension(nbdirs) :: alpha_dv_orig, beta_dv_orig
+    real(4), dimension(n,n) :: a_orig, b_orig, c_orig
+    real(4), dimension(nbdirs,n,n) :: a_dv_orig, b_dv_orig, c_dv_orig
+    integer :: idir, ii, jj
+    real(4) :: temp_real, temp_imag
+
+    transa = 'N'
+    transb = 'N'
     msize = n
     nsize = n
     ksize = n
-    lda_val = lda
-    ldb_val = ldb
-    ldc_val = ldc
-    
-    ! Initialize test data with random numbers
-    ! Initialize random seed for reproducible results
-    seed_array = 42
-    call random_seed(put=seed_array)
-    
-    transa = 'N'
-    transb = 'N'
+    lda_val = n
+    ldb_val = n
+    ldc_val = n
+
     call random_number(alpha)
-    alpha = alpha * 2.0 - 1.0  ! Scale to [-1,1]
+    alpha = alpha * 2.0d0 - 1.0d0
     call random_number(a)
-    a = a * 2.0 - 1.0  ! Scale to [-1,1]
+    a = a * 2.0d0 - 1.0d0
     call random_number(b)
-    b = b * 2.0 - 1.0  ! Scale to [-1,1]
+    b = b * 2.0d0 - 1.0d0
     call random_number(beta)
-    beta = beta * 2.0 - 1.0  ! Scale to [-1,1]
+    beta = beta * 2.0d0 - 1.0d0
     call random_number(c)
-    c = c * 2.0 - 1.0  ! Scale to [-1,1]
-    
-    ! Initialize input derivatives to random values (exactly like scalar mode)
+    c = c * 2.0d0 - 1.0d0
+
     do idir = 1, nbdirs
       call random_number(temp_real)
-      alpha_dv(idir) = temp_real * 2.0 - 1.0
+      alpha_dv(idir) = temp_real * 2.0d0 - 1.0d0
     end do
     do idir = 1, nbdirs
       call random_number(a_dv(idir,:,:))
-      a_dv(idir,:,:) = a_dv(idir,:,:) * 2.0 - 1.0
+      a_dv(idir,:,:) = a_dv(idir,:,:) * 2.0d0 - 1.0d0
     end do
     do idir = 1, nbdirs
       call random_number(b_dv(idir,:,:))
-      b_dv(idir,:,:) = b_dv(idir,:,:) * 2.0 - 1.0
+      b_dv(idir,:,:) = b_dv(idir,:,:) * 2.0d0 - 1.0d0
     end do
     do idir = 1, nbdirs
       call random_number(temp_real)
-      beta_dv(idir) = temp_real * 2.0 - 1.0
+      beta_dv(idir) = temp_real * 2.0d0 - 1.0d0
     end do
     do idir = 1, nbdirs
       call random_number(c_dv(idir,:,:))
-      c_dv(idir,:,:) = c_dv(idir,:,:) * 2.0 - 1.0
+      c_dv(idir,:,:) = c_dv(idir,:,:) * 2.0d0 - 1.0d0
     end do
-    
-    write(*,*) 'Testing SGEMM (Vector Forward Mode)'
-    ! Store original values before any function calls (critical for INOUT parameters)
+
     alpha_orig = alpha
     alpha_dv_orig = alpha_dv
     a_orig = a
@@ -135,40 +106,46 @@ contains
     beta_dv_orig = beta_dv
     c_orig = c
     c_dv_orig = c_dv
-    
-    ! Call the vector mode differentiated function
-    
+
+    write(*,*) 'Testing SGEMM (Vector Forward, n =', n, ')'
+
     call sgemm_dv(transa, transb, msize, nsize, ksize, alpha, alpha_dv, a, a_dv, lda_val, b, b_dv, ldb_val, beta, beta_dv, c, c_dv, ldc_val, nbdirs)
-    
-    ! Print results and compare
+
     write(*,*) 'Function calls completed successfully'
-    
-    ! Numerical differentiation check
-    call check_derivatives_numerically(passed)
+
+    call check_derivatives_numerically(n, nbdirs, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, alpha_orig, alpha_dv_orig, a_orig, a_dv_orig, b_orig, b_dv_orig, beta_orig, beta_dv_orig, c_orig, c_dv_orig, c_dv, passed)
+
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(passed)
+  subroutine check_derivatives_numerically(n, nbdirs, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, alpha_orig, alpha_dv_orig, a_orig, a_dv_orig, b_orig, b_dv_orig, beta_orig, beta_dv_orig, c_orig, c_dv_orig, c_dv, passed)
     implicit none
+    integer, intent(in) :: n, nbdirs
+    character, intent(in) :: transa, transb
+    integer, intent(in) :: msize, nsize, ksize, lda_val, ldb_val, ldc_val
+    real(4), intent(in) :: alpha_orig, beta_orig
+    real(4), intent(in) :: alpha_dv_orig(nbdirs), beta_dv_orig(nbdirs)
+    real(4), intent(in) :: a_orig(n,n), a_dv_orig(nbdirs,n,n)
+    real(4), intent(in) :: b_orig(n,n), b_dv_orig(nbdirs,n,n)
+    real(4), intent(in) :: c_orig(n,n), c_dv_orig(nbdirs,n,n)
+    real(4), intent(in) :: c_dv(nbdirs,n,n)
     logical, intent(out) :: passed
-    real(4), parameter :: h = 1.0e-3  ! Step size for finite differences
-    real(4) :: relative_error, max_error
-    real(4) :: abs_error, abs_reference, error_bound
+
+    real(4), parameter :: h = 1.0e-3
+    real(4) :: relative_error, max_error, abs_error, abs_reference, error_bound
     real(4) :: central_diff, ad_result
-    integer :: i, j, idir
     logical :: has_large_errors
-    real(4), dimension(max_size,max_size) :: c_forward, c_backward
-    
+    real(4), dimension(n,n) :: c_forward, c_backward
+    integer :: i, j, idir
+    real(4) :: alpha, beta
+    real(4), dimension(n,n) :: a, b, c
+
     max_error = 0.0e0
     has_large_errors = .false.
-    
+
     write(*,*) 'Checking vector derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirs
-    
-    ! Test each derivative direction separately
+
     do idir = 1, nbdirs
-      
-      ! Forward perturbation: f(x + h * direction)
       alpha = alpha_orig + h * alpha_dv_orig(idir)
       a = a_orig + h * a_dv_orig(idir,:,:)
       b = b_orig + h * b_dv_orig(idir,:,:)
@@ -176,8 +153,6 @@ contains
       c = c_orig + h * c_dv_orig(idir,:,:)
       call sgemm(transa, transb, msize, nsize, ksize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)
       c_forward = c
-      
-      ! Backward perturbation: f(x - h * direction)
       alpha = alpha_orig - h * alpha_dv_orig(idir)
       a = a_orig - h * a_dv_orig(idir,:,:)
       b = b_orig - h * b_dv_orig(idir,:,:)
@@ -185,44 +160,34 @@ contains
       c = c_orig - h * c_dv_orig(idir,:,:)
       call sgemm(transa, transb, msize, nsize, ksize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)
       c_backward = c
-      
-      ! Compute central differences and compare with AD results
-      do j = 1, min(2, nsize)  ! Check only first few elements
-        do i = 1, min(2, nsize)
-          ! Central difference: (f(x+h) - f(x-h)) / (2h)
+      do j = 1, min(2, n)
+        do i = 1, min(2, n)
           central_diff = (c_forward(i,j) - c_backward(i,j)) / (2.0e0 * h)
-          ! AD result
           ad_result = c_dv(idir,i,j)
-          ! Error check: |a - b| > atol + rtol * |b|
           abs_error = abs(central_diff - ad_result)
           abs_reference = abs(ad_result)
-          error_bound = 2.0e-3 + 2.0e-3 * abs_reference
+          error_bound = 1.0e-3 + 1.0e-3 * abs_reference
           if (abs_error > error_bound) then
             has_large_errors = .true.
-            relative_error = abs_error / max(abs_reference, 1.0e-10)
-            write(*,*) '  Large error in direction', idir, ' output C(', i, ',', j, '):'
-            write(*,*) '    Central diff: ', central_diff
-            write(*,*) '    AD result:   ', ad_result
-            write(*,*) '    Absolute error:', abs_error
-            write(*,*) '    Error bound:', error_bound
-            write(*,*) '    Relative error:', relative_error
+    write(*,*) '  Large error in direction', idir, ' output C(', i, ',', j, '):'
+    write(*,*) '    Central diff: ', central_diff
+    write(*,*) '    AD result:   ', ad_result
           end if
-          ! Track max error for reporting (normalized)
           relative_error = abs_error / max(abs_reference, 1.0e-10)
           max_error = max(max_error, relative_error)
         end do
       end do
     end do
-    
+
     write(*,*) 'Maximum relative error across all directions:', max_error
-    write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
     passed = .not. has_large_errors
     if (has_large_errors) then
       write(*,*) 'FAIL: Large errors detected in vector derivatives (outside tolerance)'
     else
       write(*,*) 'PASS: Vector derivatives are within tolerance (rtol + atol)'
     end if
-    
+
   end subroutine check_derivatives_numerically
 
 end program test_sgemm_vector_forward

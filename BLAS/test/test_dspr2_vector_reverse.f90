@@ -1,287 +1,136 @@
 ! Test program for DSPR2 vector reverse mode differentiation
-! Generated automatically by run_tapenade_blas.py
-! Using REAL*8 precision with nbdirs=4
+! Multi-size outlined run_test_for_size(n) - SPR/SPR2 packed
 
 program test_dspr2_vector_reverse
   implicit none
-  integer, parameter :: nbdirs = 4
-
   external :: dspr2
   external :: dspr2_bv
-
-  ! Test parameters
-  integer :: n  ! Current size (set in loop)
-  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-  integer :: i, j, k  ! Loop counters
-  integer :: test_sizes(1), itest
+  integer :: nbdirs, n_test, seed_array(33), test_sizes(1), i
   logical :: passed, all_passed
-  integer :: seed_array(33)  ! Random seed
-  real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
-
-  character :: uplo
-  integer :: nsize
-  real(8) :: alpha
-  real(8), dimension(max_size) :: x
-  integer :: incx_val
-  real(8), dimension(max_size) :: y
-  integer :: incy_val
-  real(8), dimension(max_size*(max_size+1)/2) :: ap
-
-  ! Adjoint variables (reverse vector mode)
-  ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
-  !                  input adjoints are OUTPUT (computed gradients)
-  real(8), dimension(nbdirs) :: alphab
-  real(8), dimension(nbdirs,max_size) :: xb
-  real(8), dimension(nbdirs,max_size) :: yb
-  real(8), dimension(nbdirs,max_size*(max_size+1)/2) :: apb
-
-  ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  real(8), dimension(nbdirs,(max_size*(max_size+1))/2) :: apb_orig
-
-  ! Storage for original values (for VJP verification)
-  real(8) :: alpha_orig
-  real(8), dimension(max_size) :: x_orig
-  real(8), dimension(max_size) :: y_orig
-  real(8), dimension((max_size*(max_size+1))/2) :: ap_orig
-
-  ! Variables for VJP verification via finite differences
-  real(8), parameter :: h = 1.0e-7
-  real(8) :: vjp_ad, vjp_fd, relative_error, max_error, abs_error, abs_reference, error_bound
-  logical :: has_large_errors
-  real(8), dimension(max_size*max_size) :: temp_products  ! For sorted summation
-  integer :: n_products
-
-  ! Initialize random seed for reproducibility
   seed_array = 42
   call random_seed(put=seed_array)
-
   test_sizes = (/ 4 /)
-  write(*,*) 'Testing DSPR2 (Vector Reverse, multi-size: n = 4)'
+  write(*,*) 'Testing DSPR2 (Vector Reverse, multi-size: n =', test_sizes(1), ')'
   all_passed = .true.
-  do itest = 1, 1
-    n = test_sizes(itest)
-    write(*,*) 'Testing DSPR2 (Vector Reverse, n =', n, ')'
-
-    call run_test_for_size(n, passed)
-  all_passed = all_passed .and. passed
+  do i = 1, 1
+    n_test = test_sizes(i)
+    nbdirs = test_sizes(i)
+    call run_test_for_size(n_test, passed, nbdirs)
+    all_passed = all_passed .and. passed
   end do
-  if (all_passed) then
-    write(*,*) 'PASS: Vector reverse mode - all sizes completed successfully'
-  else
-    write(*,*) 'FAIL: Vector reverse mode - one or more sizes had derivative errors'
-  end if
-
+  if (all_passed) write(*,*) 'PASS: Vector reverse - all sizes completed successfully'
+  if (.not. all_passed) write(*,*) 'FAIL: Vector reverse - one or more sizes had derivative errors'
 contains
-
-  subroutine run_test_for_size(n, passed)
-    implicit none
-    integer, intent(in) :: n
+  subroutine run_test_for_size(n, passed, nbdirs)
+    integer, intent(in) :: n, nbdirs
     logical, intent(out) :: passed
-
-    ! Initialize primal values
-    uplo = 'U'
+    character :: uplo
+    integer :: nsize, incx_val, incy_val, npack
+    real(8) :: alpha
+    real(8), dimension(n) :: x
+    real(8), allocatable :: ap(:)
+    real(8), dimension(nbdirs) :: alphab
+    real(8), dimension(nbdirs,n) :: xb
+    real(8), allocatable :: apb(:,:)
+    real(8), dimension(n) :: y
+    real(8), dimension(nbdirs,n) :: yb
+    real(8), allocatable :: apb_orig(:,:)
+    integer :: k, ii
+    real(4) :: tr, ti
+    uplo = 'L'
     nsize = n
-    call random_number(alpha)
-    alpha = alpha * 2.0 - 1.0
-    call random_number(x)
-    x = x * 2.0 - 1.0
     incx_val = 1
-    call random_number(y)
-    y = y * 2.0 - 1.0
     incy_val = 1
+    npack = (n * (n + 1)) / 2
+    allocate(ap(npack), apb(nbdirs, npack), apb_orig(nbdirs, npack))
+    call random_number(tr)
+    alpha = tr * 2.0d0 - 1.0d0
+    call random_number(x)
+    x = x * 2.0d0 - 1.0d0
+    call random_number(y)
+    y = y * 2.0d0 - 1.0d0
     call random_number(ap)
-    ap = ap * 2.0 - 1.0
-    
-    ! Store original primal values
-    alpha_orig = alpha
-    x_orig = x
-    y_orig = y
-    ap_orig = ap
-    
-    ! Initialize output adjoints (cotangents) with random values for each direction
-    ! These are the 'seeds' for reverse mode
+    ap = ap * 2.0d0 - 1.0d0
     do k = 1, nbdirs
       call random_number(apb(k,:))
-      apb(k,:) = apb(k,:) * 2.0 - 1.0
+      apb(k,:) = apb(k,:) * 2.0d0 - 1.0d0
     end do
-    
-    ! Initialize input adjoints to zero (they will be computed)
-    ! Note: Inout parameters are skipped - they already have output adjoints initialized
-    alphab = 0.0
-    xb = 0.0
-    yb = 0.0
-    
-    ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
     apb_orig = apb
-    
-    ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-    ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
+    alphab = 0.0d0
+    xb = 0.0d0
+    yb = 0.0d0
+    write(*,*) 'Testing DSPR2 (Vector Reverse, n =', n, ')'
     call set_ISIZE1OFX(n)
     call set_ISIZE1OFY(n)
-    
-    ! Call reverse vector mode differentiated function
     call dspr2_bv(uplo, nsize, alpha, alphab, x, xb, incx_val, y, yb, incy_val, ap, apb, nbdirs)
-    
-    ! Reset ISIZE globals to uninitialized (-1) for completeness
     call set_ISIZE1OFX(-1)
     call set_ISIZE1OFY(-1)
-    
-    ! VJP Verification using finite differences
-    call check_vjp_numerically(passed)
+    call check_vjp_spr_spr2(n, npack, nbdirs, uplo, nsize, incx_val, incy_val, alpha, x, ap, apb_orig, alphab, xb, apb, passed, y=y, yb=yb)
+    deallocate(ap, apb, apb_orig)
   end subroutine run_test_for_size
-
-  subroutine check_vjp_numerically(passed)
-    implicit none
+  subroutine check_vjp_spr_spr2(n, npack, nbdirs, uplo, nsize, incx_val, incy_val, alpha, x, ap, apb_orig, alphab, xb, apb, passed, y, yb)
+    integer, intent(in) :: n, npack, nbdirs
+    character, intent(in) :: uplo
+    integer, intent(in) :: nsize, incx_val, incy_val
+    real(8), intent(in) :: alpha, x(n)
+    real(8), intent(in) :: ap(npack)
+    real(8), intent(in) :: apb_orig(nbdirs,npack)
+    real(8), intent(in) :: alphab(nbdirs), xb(nbdirs,n)
+    real(8), intent(in) :: apb(nbdirs,npack)
     logical, intent(out) :: passed
-    
-    ! Direction vectors for VJP testing
+    real(8), intent(in), optional :: y(n), yb(nbdirs,n)
+    real(8), parameter :: h = 1.0e-7
+    real(8) :: vjp_fd, vjp_ad, re, err_bnd
+    real(4) :: tr, ti
     real(8) :: alpha_dir
-    real(8), dimension(max_size) :: x_dir
-    real(8), dimension(max_size) :: y_dir
-    real(8), dimension(max_size*(max_size+1)/2) :: ap_dir
-    real(8), dimension(max_size*(max_size+1)/2) :: ap_plus, ap_minus, ap_central_diff
-    
-    max_error = 0.0d0
-    has_large_errors = .false.
-    
-    write(*,*) 'Function calls completed successfully'
-    
-    write(*,*) 'Checking derivatives against numerical differentiation:'
-    write(*,*) 'Step size h =', h
-    
-    ! Test each differentiation direction separately
+    real(8), dimension(n) :: x_dir, x_t
+    real(8), dimension(npack) :: ap_dir, ap_t, ap_plus, ap_minus, ap_cdiff
+    real(8), dimension(n) :: y_dir, y_t
+    integer :: k, ii
+    logical :: has_err
+    has_err = .false.
     do k = 1, nbdirs
-      
-      ! Initialize random direction vectors for all inputs
-      call random_number(alpha_dir)
-      alpha_dir = alpha_dir * 2.0 - 1.0
+      call random_number(tr)
+      call random_number(ti)
+      alpha_dir = tr * 2.0d0 - 1.0d0
       call random_number(x_dir)
-      x_dir = x_dir * 2.0 - 1.0
-      call random_number(y_dir)
-      y_dir = y_dir * 2.0 - 1.0
+      x_dir = x_dir * 2.0d0 - 1.0d0
+      if (present(y)) then
+        call random_number(y_dir)
+        y_dir = y_dir * 2.0d0 - 1.0d0
+      end if
       call random_number(ap_dir)
-      ap_dir = ap_dir * 2.0 - 1.0
-      
-      ! Forward perturbation: f(x + h*dir)
-      alpha = alpha_orig + h * alpha_dir
-      x = x_orig + h * x_dir
-      y = y_orig + h * y_dir
-      ap = ap_orig + h * ap_dir
-      call dspr2(uplo, nsize, alpha, x, incx_val, y, incy_val, ap)
-      ap_plus = ap
-      
-      ! Backward perturbation: f(x - h*dir)
-      alpha = alpha_orig - h * alpha_dir
-      x = x_orig - h * x_dir
-      y = y_orig - h * y_dir
-      ap = ap_orig - h * ap_dir
-      call dspr2(uplo, nsize, alpha, x, incx_val, y, incy_val, ap)
-      ap_minus = ap
-      
-      ! Compute central differences and VJP verification
-      ! VJP check: direction^T @ adjoint should equal finite difference
-      
-      ! Compute central differences: (f(x+h*dir) - f(x-h*dir)) / (2h)
-      ap_central_diff = (ap_plus - ap_minus) / (2.0d0 * h)
-      
-      ! VJP verification:
-      ! cotangent^T @ central_diff should equal direction^T @ computed_adjoint
-      ! Left side: cotangent^T @ Jacobian @ direction (via finite differences, with sorted summation)
-      vjp_fd = 0.0d0
-      ! Compute and sort products for ap (FD)
-      n_products = max_size*(max_size+1)/2
-      do i = 1, max_size*(max_size+1)/2
-        temp_products(i) = apb_orig(k,i) * ap_central_diff(i)
-      end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_fd = vjp_fd + temp_products(i)
-      end do
-      
-      ! Right side: direction^T @ computed_adjoint (with sorted summation)
-      ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
-      ! For pure inputs: use adjoint directly
-      vjp_ad = 0.0d0
-      vjp_ad = vjp_ad + alpha_dir * alphab(k)
-      ! Compute and sort products for x
-      n_products = n
-      do i = 1, n
-        temp_products(i) = x_dir(i) * xb(k,i)
-      end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_ad = vjp_ad + temp_products(i)
-      end do
-      ! Compute and sort products for y
-      n_products = n
-      do i = 1, n
-        temp_products(i) = y_dir(i) * yb(k,i)
-      end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_ad = vjp_ad + temp_products(i)
-      end do
-      ! Compute and sort products for ap
-      n_products = max_size*(max_size+1)/2
-      do i = 1, max_size*(max_size+1)/2
-        temp_products(i) = ap_dir(i) * apb(k,i)
-      end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_ad = vjp_ad + temp_products(i)
-      end do
-      
-      ! Error check: |vjp_fd - vjp_ad| > atol + rtol * |vjp_ad|
-      abs_error = abs(vjp_fd - vjp_ad)
-      abs_reference = abs(vjp_ad)
-      error_bound = 1.0e-5 + 1.0e-5 * abs_reference
-      if (abs_error > error_bound) then
-        has_large_errors = .true.
-      end if
-      
-      ! Compute relative error for reporting
-      if (abs_reference > 1.0e-10) then
-        relative_error = abs_error / abs_reference
+      ap_dir = ap_dir * 2.0d0 - 1.0d0
+      ap_t = ap + h * ap_dir
+      x_t = x + h * x_dir
+      if (present(y)) y_t = y + h * y_dir
+      if (present(y)) then
+        call dspr2(uplo, nsize, alpha + h*alpha_dir, x_t, incx_val, y_t, incy_val, ap_t)
       else
-        relative_error = abs_error
+        call dspr2(uplo, nsize, alpha + h*alpha_dir, x_t, incx_val, ap_t)
       end if
-      if (relative_error > max_error) max_error = relative_error
-    end do
-    
-    write(*,*) ''
-    write(*,*) 'Maximum relative error:', max_error
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
-    passed = .not. has_large_errors
-    if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
-    else
-      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
-    end if
-    
-  end subroutine check_vjp_numerically
-
-  subroutine sort_array(arr, n)
-    implicit none
-    integer, intent(in) :: n
-    real(8), dimension(n), intent(inout) :: arr
-    integer :: i, j, min_idx
-    real(8) :: temp
-    
-    ! Simple selection sort
-    do i = 1, n-1
-      min_idx = i
-      do j = i+1, n
-        if (abs(arr(j)) < abs(arr(min_idx))) then
-          min_idx = j
-        end if
-      end do
-      if (min_idx /= i) then
-        temp = arr(i)
-        arr(i) = arr(min_idx)
-        arr(min_idx) = temp
+      ap_plus = ap_t
+      ap_t = ap - h * ap_dir
+      x_t = x - h * x_dir
+      if (present(y)) y_t = y - h * y_dir
+      if (present(y)) then
+        call dspr2(uplo, nsize, alpha - h*alpha_dir, x_t, incx_val, y_t, incy_val, ap_t)
+      else
+        call dspr2(uplo, nsize, alpha - h*alpha_dir, x_t, incx_val, ap_t)
       end if
+      ap_minus = ap_t
+      ap_cdiff = (ap_plus - ap_minus) / (2.0e0 * h)
+      vjp_fd = sum(apb_orig(k,:) * ap_cdiff)
+      vjp_ad = alpha_dir * alphab(k)
+      vjp_ad = vjp_ad + sum(x_dir*xb(k,:))
+      vjp_ad = vjp_ad + sum(ap_dir*apb(k,:))
+      if (present(y)) then
+        vjp_ad = vjp_ad + sum(y_dir*yb(k,:))
+      end if
+      re = abs(vjp_fd - vjp_ad)
+      err_bnd = 1.0e-5 + 1.0e-5 * abs(vjp_ad)
+      if (re > err_bnd) has_err = .true.
     end do
-  end subroutine sort_array
-
+    passed = .not. has_err
+  end subroutine check_vjp_spr_spr2
 end program test_dspr2_vector_reverse

@@ -123,18 +123,18 @@ contains
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, msize, nsize, lda_val, a_orig, alpha_orig, x_orig, y_orig, a_d_orig, alpha_d_orig, x_d_orig, y_d_orig, a_d, passed)
+    call check_derivatives_numerically(n, msize, nsize, lda_val, alpha_orig, a_orig, x_orig, y_orig, alpha_d_orig, a_d_orig, x_d_orig, y_d_orig, a_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, msize, nsize, lda_val, a_orig, alpha_orig, x_orig, y_orig, a_d_orig, alpha_d_orig, x_d_orig, y_d_orig, a_d, passed)
+  subroutine check_derivatives_numerically(n, msize, nsize, lda_val, alpha_orig, a_orig, x_orig, y_orig, alpha_d_orig, a_d_orig, x_d_orig, y_d_orig, a_d, passed)
     implicit none
     integer, intent(in) :: n
     integer, intent(in) :: msize
     integer, intent(in) :: nsize
     integer, intent(in) :: lda_val
-    complex(4), intent(in) :: a_orig(n,n), a_d_orig(n,n)
     complex(4), intent(in) :: alpha_orig, alpha_d_orig
+    complex(4), intent(in) :: a_orig(n,n), a_d_orig(n,n)
     complex(4), intent(in) :: x_orig(n), x_d_orig(n)
     complex(4), intent(in) :: y_orig(n), y_d_orig(n)
     complex(4), intent(in) :: a_d(n,n)
@@ -147,8 +147,8 @@ contains
     logical :: has_large_errors
     complex(4), dimension(n,n) :: a_forward, a_backward
     integer :: i, j
-    complex(4), dimension(n,n) :: a
     complex(4) :: alpha
+    complex(4), dimension(n,n) :: a
     complex(4), dimension(n) :: x
     complex(4), dimension(n) :: y
 
@@ -159,16 +159,16 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    a = a_orig + h * a_d_orig
     alpha = alpha_orig + h * alpha_d_orig
+    a = a_orig + h * a_d_orig
     x = x_orig + h * x_d_orig
     y = y_orig + h * y_d_orig
     call cgeru(msize, nsize, alpha, x, 1, y, 1, a, lda_val)
     a_forward = a
 
     ! Backward perturbation: f(x - h)
-    a = a_orig - h * a_d_orig
     alpha = alpha_orig - h * alpha_d_orig
+    a = a_orig - h * a_d_orig
     x = x_orig - h * x_d_orig
     y = y_orig - h * y_d_orig
     call cgeru(msize, nsize, alpha, x, 1, y, 1, a, lda_val)

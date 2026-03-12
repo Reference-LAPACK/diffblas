@@ -51,18 +51,18 @@ contains
     integer :: incy
 
     ! Derivative variables
-    complex(8), dimension(n,n) :: a_d
-    complex(8) :: alpha_d
     complex(8), dimension(n) :: x_d
-    complex(8), dimension(n) :: y_d
     complex(8) :: beta_d
+    complex(8) :: alpha_d
+    complex(8), dimension(n,n) :: a_d
+    complex(8), dimension(n) :: y_d
 
     ! Array restoration and derivative storage
-    complex(8), dimension(n,n) :: a_orig, a_d_orig
-    complex(8) :: alpha_orig, alpha_d_orig
     complex(8), dimension(n) :: x_orig, x_d_orig
-    complex(8), dimension(n) :: y_orig, y_d_orig
     complex(8) :: beta_orig, beta_d_orig
+    complex(8) :: alpha_orig, alpha_d_orig
+    complex(8), dimension(n,n) :: a_orig, a_d_orig
+    complex(8), dimension(n) :: y_orig, y_d_orig
     real(8) :: temp_re, temp_im  ! For complex random init
     integer :: i, j
 
@@ -93,37 +93,37 @@ contains
     end do
 
     ! Initialize input derivatives
-    call random_number(temp_re)
-    call random_number(temp_im)
-    a_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
-    call random_number(temp_re)
-    call random_number(temp_im)
-    alpha_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
     do i = 1, n
       call random_number(temp_re)
       call random_number(temp_im)
       x_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
     end do
+    call random_number(temp_re)
+    call random_number(temp_im)
+    beta_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
+    call random_number(temp_re)
+    call random_number(temp_im)
+    alpha_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
+    call random_number(temp_re)
+    call random_number(temp_im)
+    a_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
     do i = 1, n
       call random_number(temp_re)
       call random_number(temp_im)
       y_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
     end do
-    call random_number(temp_re)
-    call random_number(temp_im)
-    beta_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
 
     ! Store _orig and _d_orig
-    a_d_orig = a_d
-    alpha_d_orig = alpha_d
     x_d_orig = x_d
-    y_d_orig = y_d
     beta_d_orig = beta_d
-    a_orig = a
-    alpha_orig = alpha
+    alpha_d_orig = alpha_d
+    a_d_orig = a_d
+    y_d_orig = y_d
     x_orig = x
-    y_orig = y
     beta_orig = beta
+    alpha_orig = alpha
+    a_orig = a
+    y_orig = y
 
     write(*,*) 'Testing ZHEMV (n =', n, ')'
     y_orig = y
@@ -134,21 +134,21 @@ contains
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, uplo, nsize, lda_val, a_orig, alpha_orig, x_orig, y_orig, beta_orig, a_d_orig, alpha_d_orig, x_d_orig, y_d_orig, beta_d_orig, y_d, passed)
+    call check_derivatives_numerically(n, uplo, nsize, lda_val, x_orig, beta_orig, alpha_orig, a_orig, y_orig, x_d_orig, beta_d_orig, alpha_d_orig, a_d_orig, y_d_orig, y_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, uplo, nsize, lda_val, a_orig, alpha_orig, x_orig, y_orig, beta_orig, a_d_orig, alpha_d_orig, x_d_orig, y_d_orig, beta_d_orig, y_d, passed)
+  subroutine check_derivatives_numerically(n, uplo, nsize, lda_val, x_orig, beta_orig, alpha_orig, a_orig, y_orig, x_d_orig, beta_d_orig, alpha_d_orig, a_d_orig, y_d_orig, y_d, passed)
     implicit none
     integer, intent(in) :: n
     character, intent(in) :: uplo
     integer, intent(in) :: nsize
     integer, intent(in) :: lda_val
-    complex(8), intent(in) :: a_orig(n,n), a_d_orig(n,n)
-    complex(8), intent(in) :: alpha_orig, alpha_d_orig
     complex(8), intent(in) :: x_orig(n), x_d_orig(n)
-    complex(8), intent(in) :: y_orig(n), y_d_orig(n)
     complex(8), intent(in) :: beta_orig, beta_d_orig
+    complex(8), intent(in) :: alpha_orig, alpha_d_orig
+    complex(8), intent(in) :: a_orig(n,n), a_d_orig(n,n)
+    complex(8), intent(in) :: y_orig(n), y_d_orig(n)
     complex(8), intent(in) :: y_d(n)
     logical, intent(out) :: passed
 
@@ -159,11 +159,11 @@ contains
     logical :: has_large_errors
     complex(8), dimension(n) :: y_forward, y_backward
     integer :: i, j
-    complex(8), dimension(n,n) :: a
-    complex(8) :: alpha
     complex(8), dimension(n) :: x
-    complex(8), dimension(n) :: y
     complex(8) :: beta
+    complex(8) :: alpha
+    complex(8), dimension(n,n) :: a
+    complex(8), dimension(n) :: y
 
     max_error = 0.0e0
     has_large_errors = .false.
@@ -172,20 +172,20 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    a = a_orig + h * a_d_orig
-    alpha = alpha_orig + h * alpha_d_orig
     x = x_orig + h * x_d_orig
-    y = y_orig + h * y_d_orig
     beta = beta_orig + h * beta_d_orig
+    alpha = alpha_orig + h * alpha_d_orig
+    a = a_orig + h * a_d_orig
+    y = y_orig + h * y_d_orig
     call zhemv(uplo, nsize, alpha, a, lda_val, x, 1, beta, y, 1)
     y_forward = y
 
     ! Backward perturbation: f(x - h)
-    a = a_orig - h * a_d_orig
-    alpha = alpha_orig - h * alpha_d_orig
     x = x_orig - h * x_d_orig
-    y = y_orig - h * y_d_orig
     beta = beta_orig - h * beta_d_orig
+    alpha = alpha_orig - h * alpha_d_orig
+    a = a_orig - h * a_d_orig
+    y = y_orig - h * y_d_orig
     call zhemv(uplo, nsize, alpha, a, lda_val, x, 1, beta, y, 1)
     y_backward = y
 

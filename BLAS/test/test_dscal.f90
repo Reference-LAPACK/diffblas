@@ -45,12 +45,12 @@ contains
     integer :: incx
 
     ! Derivative variables
-    real(8) :: da_d
     real(8), dimension(n) :: dx_d
+    real(8) :: da_d
 
     ! Array restoration and derivative storage
-    real(8) :: da_orig, da_d_orig
     real(8), dimension(n) :: dx_orig, dx_d_orig
+    real(8) :: da_orig, da_d_orig
     integer :: i, j
 
     nsize = n
@@ -62,16 +62,16 @@ contains
     dx = dx * 2.0d0 - 1.0d0  ! Scale to [-1,1]
 
     ! Initialize input derivatives
-    call random_number(da_d)
-    da_d = da_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(dx_d)
     dx_d = dx_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(da_d)
+    da_d = da_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
     ! Store _orig and _d_orig
-    da_d_orig = da_d
     dx_d_orig = dx_d
-    da_orig = da
+    da_d_orig = da_d
     dx_orig = dx
+    da_orig = da
 
     write(*,*) 'Testing DSCAL (n =', n, ')'
     dx_orig = dx

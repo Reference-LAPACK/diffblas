@@ -17,7 +17,7 @@ program test_snrm2_vector_forward
   integer :: test_sizes(1), itest
   logical :: passed, all_passed
   integer :: seed_array(33)  ! Random seed
-  real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
+  real(4) :: temp_real, temp_imag  ! Temporary variables for initialization
 
   integer :: nsize
   real(4), dimension(max_size) :: x
@@ -42,7 +42,7 @@ program test_snrm2_vector_forward
     write(*,*) 'Testing SNRM2 (Vector Forward, n =', n, ')'
 
     call run_test_for_size(n, passed)
-  all_passed = all_passed .and. passed
+    all_passed = all_passed .and. passed
   end do
   if (all_passed) then
     write(*,*) 'PASS: Vector forward mode - all sizes completed successfully'
@@ -60,33 +60,29 @@ contains
     ! Initialize test parameters
     nsize = n
     incx_val = 1
-    
+
     ! Initialize test data with random numbers
     ! Initialize random seed for reproducible results
     seed_array = 42
     call random_seed(put=seed_array)
-    
+
     call random_number(x)
     x = x * 2.0 - 1.0  ! Scale to [-1,1]
-    
+
     ! Initialize input derivatives to random values (exactly like scalar mode)
     do idir = 1, nbdirs
       call random_number(x_dv(idir,:))
       x_dv(idir,:) = x_dv(idir,:) * 2.0 - 1.0
     end do
-    
+
     write(*,*) 'Testing SNRM2 (Vector Forward Mode)'
-    ! Store original values before any function calls (critical for INOUT parameters)
+    ! Store original values before any function calls
     x_orig = x
     x_dv_orig = x_dv
-    
+
     ! Call the vector mode differentiated function
-    
     call snrm2_dv(nsize, x, x_dv, incx_val, snrm2_result, snrm2_dv_result, nbdirs)
-    
-    ! Print results and compare
-    write(*,*) 'Function calls completed successfully'
-    
+
     ! Numerical differentiation check
     call check_derivatives_numerically(passed)
   end subroutine run_test_for_size
@@ -101,49 +97,38 @@ contains
     integer :: i, j, idir
     logical :: has_large_errors
     real(4) :: snrm2_forward, snrm2_backward
-    
+
     max_error = 0.0e0
     has_large_errors = .false.
-    
+
     write(*,*) 'Checking vector derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
     write(*,*) 'Number of directions:', nbdirs
-    
+
     ! Test each derivative direction separately
     do idir = 1, nbdirs
-      
+
       ! Forward perturbation: f(x + h * direction)
       x = x_orig + h * x_dv_orig(idir,:)
       snrm2_forward = snrm2(nsize, x, incx_val)
-      
+
       ! Backward perturbation: f(x - h * direction)
       x = x_orig - h * x_dv_orig(idir,:)
       snrm2_backward = snrm2(nsize, x, incx_val)
-      
-      ! Compute central differences and compare with AD results
-      ! Central difference: (f(x+h) - f(x-h)) / (2h)
+
+      ! Central difference and AD comparison
       central_diff = (snrm2_forward - snrm2_backward) / (2.0e0 * h)
-      ! AD result
       ad_result = snrm2_dv_result(idir)
-      ! Error check: |a - b| > atol + rtol * |b|
       abs_error = abs(central_diff - ad_result)
       abs_reference = abs(ad_result)
       error_bound = 2.0e-3 + 2.0e-3 * abs_reference
       if (abs_error > error_bound) then
         has_large_errors = .true.
-        relative_error = abs_error / max(abs_reference, 1.0e-10)
-        write(*,*) '  Large error in direction', idir, ' output SNRM2:'
-        write(*,*) '    Central diff: ', central_diff
-        write(*,*) '    AD result:   ', ad_result
-        write(*,*) '    Absolute error:', abs_error
-        write(*,*) '    Error bound:', error_bound
-        write(*,*) '    Relative error:', relative_error
       end if
-      ! Track max error for reporting (normalized)
       relative_error = abs_error / max(abs_reference, 1.0e-10)
       max_error = max(max_error, relative_error)
     end do
-    
+
     write(*,*) 'Maximum relative error across all directions:', max_error
     write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
     passed = .not. has_large_errors
@@ -152,7 +137,6 @@ contains
     else
       write(*,*) 'PASS: Vector derivatives are within tolerance (rtol + atol)'
     end if
-    
   end subroutine check_derivatives_numerically
 
 end program test_snrm2_vector_forward

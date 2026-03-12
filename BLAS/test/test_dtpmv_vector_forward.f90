@@ -1,178 +1,110 @@
 ! Test program for DTPMV vector forward mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*8 precision with nbdirs=4
+! Multi-size outlined run_test_for_size(n) - TPMV/TPSV packed triangular
 
 program test_dtpmv_vector_forward
   implicit none
-  integer, parameter :: nbdirs = 4
-
   external :: dtpmv
   external :: dtpmv_dv
-
-  ! Test parameters
-  integer :: n  ! Current size (set in loop)
-  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-  integer :: i, j, idir  ! Loop counters
-  integer :: test_sizes(1), itest
+  integer :: nbdirs, n_test, seed_array(33), test_sizes(1), i
   logical :: passed, all_passed
-  integer :: seed_array(33)  ! Random seed
-  real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
-
-  character :: uplo
-  character :: trans
-  character :: diag
-  integer :: nsize
-  real(8), dimension((max_size*(max_size+1))/2) :: ap
-  real(8), dimension(max_size) :: x
-  integer :: incx_val
-
-  ! Vector mode derivative variables (type-promoted)
-  ! Scalars become arrays(nbdirs), arrays gain extra dimension
-  real(8), dimension(nbdirs,(max_size*(max_size+1))/2) :: ap_dv
-  real(8), dimension(nbdirs,max_size) :: x_dv
-  ! Declare variables for storing original values
-  real(8), dimension((max_size*(max_size+1))/2) :: ap_orig
-  real(8), dimension(nbdirs,(max_size*(max_size+1))/2) :: ap_dv_orig
-  real(8), dimension(max_size) :: x_orig
-  real(8), dimension(nbdirs,max_size) :: x_dv_orig
-
+  seed_array = 42
+  call random_seed(put=seed_array)
   test_sizes = (/ 4 /)
   write(*,*) 'Testing DTPMV (Vector Forward, multi-size: n = 4)'
   all_passed = .true.
-  do itest = 1, 1
-    n = test_sizes(itest)
-    write(*,*) 'Testing DTPMV (Vector Forward, n =', n, ')'
-
-    call run_test_for_size(n, passed)
-  all_passed = all_passed .and. passed
+  do i = 1, 1
+    n_test = test_sizes(i)
+    nbdirs = test_sizes(i)
+    call run_test_for_size(n_test, passed, nbdirs)
+    all_passed = all_passed .and. passed
   end do
-  if (all_passed) then
-    write(*,*) 'PASS: Vector forward mode - all sizes completed successfully'
-  else
-    write(*,*) 'FAIL: Vector forward mode - one or more sizes had derivative errors'
-  end if
-
+  if (all_passed) write(*,*) 'PASS: Vector forward - all sizes OK'
+  if (.not. all_passed) write(*,*) 'FAIL: Vector forward - derivative errors'
 contains
-
-  subroutine run_test_for_size(n, passed)
+  subroutine run_test_for_size(n, passed, nbdirs)
     implicit none
-    integer, intent(in) :: n
+    integer, intent(in) :: n, nbdirs
     logical, intent(out) :: passed
-
-    ! Initialize test parameters
-    nsize = n
-    incx_val = 1
-    
-    ! Initialize test data with random numbers
-    ! Initialize random seed for reproducible results
-    seed_array = 42
-    call random_seed(put=seed_array)
-    
+    character :: uplo, trans, diag
+    integer :: nsize, incx_val, npack
+    real(8), allocatable :: ap(:), x(:)
+    real(8), allocatable :: ap_dv(:,:), x_dv(:,:)
+    real(8), allocatable :: ap_orig(:), x_orig(:)
+    real(8), allocatable :: ap_dv_seed(:,:), x_dv_seed(:,:)
+    integer :: idir, ii
+    real(4) :: tr, ti
     uplo = 'U'
     trans = 'N'
     diag = 'N'
+    nsize = n
+    incx_val = 1
+    npack = (n * (n + 1)) / 2
+    allocate(ap(npack), x(n), ap_dv(nbdirs, npack), x_dv(nbdirs, n))
+    allocate(ap_orig(npack), x_orig(n), ap_dv_seed(nbdirs, npack), x_dv_seed(nbdirs, n))
     call random_number(ap)
-    ap = ap * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+    ap = ap * 2.0d0 - 1.0d0
     call random_number(x)
-    x = x * 2.0d0 - 1.0d0  ! Scale to [-1,1]
-    
-    ! Initialize input derivatives to random values (exactly like scalar mode)
+    x = x * 2.0d0 - 1.0d0
     do idir = 1, nbdirs
       call random_number(ap_dv(idir,:))
       ap_dv(idir,:) = ap_dv(idir,:) * 2.0d0 - 1.0d0
-    end do
-    do idir = 1, nbdirs
       call random_number(x_dv(idir,:))
       x_dv(idir,:) = x_dv(idir,:) * 2.0d0 - 1.0d0
     end do
-    
-    write(*,*) 'Testing DTPMV (Vector Forward Mode)'
-    ! Store original values before any function calls (critical for INOUT parameters)
+
+    write(*,*) 'Testing DTPMV (Vector Forward, n =', n, ')'
     ap_orig = ap
-    ap_dv_orig = ap_dv
     x_orig = x
-    x_dv_orig = x_dv
-    
-    ! Call the vector mode differentiated function
-    
+    ap_dv_seed = ap_dv
+    x_dv_seed = x_dv
     call dtpmv_dv(uplo, trans, diag, nsize, ap, ap_dv, x, x_dv, incx_val, nbdirs)
-    
-    ! Print results and compare
-    write(*,*) 'Function calls completed successfully'
-    
-    ! Numerical differentiation check
-    call check_derivatives_numerically(passed)
+    call check_derivatives_numerically(n, npack, nbdirs, uplo, trans, diag, nsize, incx_val, ap_orig, ap_dv_seed, x_orig, x_dv_seed, x_dv, passed)
+    deallocate(ap, x, ap_dv, x_dv, ap_orig, x_orig, ap_dv_seed, x_dv_seed)
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(passed)
-    implicit none
+  subroutine check_derivatives_numerically(n, npack, nbdirs, uplo, trans, diag, nsize, incx_val, ap_orig, ap_dv_seed, x_orig, x_dv_seed, x_dv, passed)
+    integer, intent(in) :: n, npack, nbdirs
+    character, intent(in) :: uplo, trans, diag
+    integer, intent(in) :: nsize, incx_val
+    real(8), intent(in) :: ap_orig(npack), ap_dv_seed(nbdirs,npack), x_orig(n), x_dv_seed(nbdirs,n), x_dv(nbdirs,n)
     logical, intent(out) :: passed
-    real(8), parameter :: h = 1.0e-7  ! Step size for finite differences
-    real(8) :: relative_error, max_error
-    real(8) :: abs_error, abs_reference, error_bound
-    real(8) :: central_diff, ad_result
-    integer :: i, j, idir
-    logical :: has_large_errors
-    real(8), dimension(max_size) :: x_forward, x_backward
-    
-    max_error = 0.0e0
-    has_large_errors = .false.
-    
-    write(*,*) 'Checking vector derivatives against numerical differentiation:'
+    real(8), parameter :: h = 1.0e-7
+    real(8) :: abs_error, abs_ref, err_bound, relative_error, max_error
+    real(8), dimension(npack) :: ap_t
+    real(8), dimension(n) :: x_t, x_plus, x_minus
+    integer :: idir, ii
+    logical :: has_err
+    has_err = .false.
+    max_error = 0.0d0
+    write(*,*) 'Checking derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirs
-    
-    ! Test each derivative direction separately
     do idir = 1, nbdirs
-      
-      ! Forward perturbation: f(x + h * direction)
-      ap = ap_orig + h * ap_dv_orig(idir,:)
-      x = x_orig + h * x_dv_orig(idir,:)
-      call dtpmv(uplo, trans, diag, nsize, ap, x, incx_val)
-      x_forward = x
-      
-      ! Backward perturbation: f(x - h * direction)
-      ap = ap_orig - h * ap_dv_orig(idir,:)
-      x = x_orig - h * x_dv_orig(idir,:)
-      call dtpmv(uplo, trans, diag, nsize, ap, x, incx_val)
-      x_backward = x
-      
-      ! Compute central differences and compare with AD results
-      do i = 1, min(2, nsize)  ! Check only first few elements
-        ! Central difference: (f(x+h) - f(x-h)) / (2h)
-        central_diff = (x_forward(i) - x_backward(i)) / (2.0e0 * h)
-        ! AD result
-        ad_result = x_dv(idir,i)
-        ! Error check: |a - b| > atol + rtol * |b|
-        abs_error = abs(central_diff - ad_result)
-        abs_reference = abs(ad_result)
-        error_bound = 1.0e-5 + 1.0e-5 * abs_reference
-        if (abs_error > error_bound) then
-          has_large_errors = .true.
-          relative_error = abs_error / max(abs_reference, 1.0e-10)
-          write(*,*) '  Large error in direction', idir, ' output X(', i, '):'
-          write(*,*) '    Central diff: ', central_diff
-          write(*,*) '    AD result:   ', ad_result
-          write(*,*) '    Absolute error:', abs_error
-          write(*,*) '    Error bound:', error_bound
-          write(*,*) '    Relative error:', relative_error
+      ap_t = ap_orig + h * ap_dv_seed(idir,:)
+      x_t = x_orig + h * x_dv_seed(idir,:)
+      call dtpmv(uplo, trans, diag, nsize, ap_t, x_t, incx_val)
+      x_plus = x_t
+      ap_t = ap_orig - h * ap_dv_seed(idir,:)
+      x_t = x_orig - h * x_dv_seed(idir,:)
+      call dtpmv(uplo, trans, diag, nsize, ap_t, x_t, incx_val)
+      x_minus = x_t
+      do ii = 1, min(2, n)
+        abs_error = abs((x_plus(ii) - x_minus(ii)) / (2.0d0 * h) - x_dv(idir,ii))
+        abs_ref = abs(x_dv(idir,ii))
+        err_bound = 1.0e-5 + 1.0e-5 * abs_ref
+        if (abs_error > err_bound) then
+          has_err = .true.
+          relative_error = abs_error / max(abs_ref, 1.0e-10)
+          write(*,*) 'Large error direction', idir, ' X(', ii, '): abs_err=', abs_error, ' rel_err=', relative_error
         end if
-        ! Track max error for reporting (normalized)
-        relative_error = abs_error / max(abs_reference, 1.0e-10)
+        relative_error = abs_error / max(abs_ref, 1.0e-10)
         max_error = max(max_error, relative_error)
       end do
     end do
-    
-    write(*,*) 'Maximum relative error across all directions:', max_error
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
-    passed = .not. has_large_errors
-    if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in vector derivatives (outside tolerance)'
-    else
-      write(*,*) 'PASS: Vector derivatives are within tolerance (rtol + atol)'
-    end if
-    
+    write(*,*) 'Maximum relative error:', max_error
+    write(*,*) 'Tolerance: rtol=atol=1.0e-5'
+    passed = .not. has_err
+    if (has_err) write(*,*) 'FAIL: TPMV/TPSV vector derivatives'
+    if (.not. has_err) write(*,*) 'PASS: TPMV/TPSV vector derivatives'
   end subroutine check_derivatives_numerically
-
 end program test_dtpmv_vector_forward

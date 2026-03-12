@@ -1,64 +1,32 @@
 ! Test program for SDOT vector reverse mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirs=4
+! Using REAL*4 precision with nbdirs=n
+! Multi-size test with outlined run_test_for_size(n) - arrays declared to size n
 
 program test_sdot_vector_reverse
   implicit none
-  integer, parameter :: nbdirs = 4
 
   real(4), external :: sdot
   external :: sdot_bv
 
-  ! Test parameters
-  integer :: n  ! Current size (set in loop)
-  integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-  integer :: i, j, k  ! Loop counters
-  integer :: test_sizes(1), itest
+  integer :: nbdirs
+  integer :: n_test
+  integer :: seed_array(33)
+  integer :: test_sizes(1)
+  integer :: i
   logical :: passed, all_passed
-  integer :: seed_array(33)  ! Random seed
-  real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
 
-  integer :: nsize
-  real(4), dimension(max_size) :: sx
-  integer :: incx_val
-  real(4), dimension(max_size) :: sy
-  integer :: incy_val
-
-  ! Adjoint variables (reverse vector mode)
-  ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
-  !                  input adjoints are OUTPUT (computed gradients)
-  real(4), dimension(nbdirs,max_size) :: sxb
-  real(4), dimension(nbdirs,max_size) :: syb
-  real(4), dimension(nbdirs) :: sdotb
-
-  ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  real(4), dimension(nbdirs) :: sdotb_orig
-
-  ! Storage for original values (for VJP verification)
-  real(4), dimension(max_size) :: sx_orig
-  real(4), dimension(max_size) :: sy_orig
-
-  ! Variables for VJP verification via finite differences
-  real(4), parameter :: h = 1.0e-3
-  real(4) :: vjp_ad, vjp_fd, relative_error, max_error, abs_error, abs_reference, error_bound
-  logical :: has_large_errors
-  real(4), dimension(max_size*max_size) :: temp_products  ! For sorted summation
-  integer :: n_products
-
-  ! Initialize random seed for reproducibility
   seed_array = 42
   call random_seed(put=seed_array)
 
   test_sizes = (/ 4 /)
-  write(*,*) 'Testing SDOT (Vector Reverse, multi-size: n = 4)'
+  write(*,*) 'Testing SDOT (Vector Reverse, multi-size: n =', test_sizes(1), ')'
   all_passed = .true.
-  do itest = 1, 1
-    n = test_sizes(itest)
-    write(*,*) 'Testing SDOT (Vector Reverse, n =', n, ')'
-
-    call run_test_for_size(n, passed)
-  all_passed = all_passed .and. passed
+  do i = 1, 1
+    n_test = test_sizes(i)
+    nbdirs = test_sizes(i)
+    call run_test_for_size(n_test, passed, nbdirs)
+    all_passed = all_passed .and. passed
   end do
   if (all_passed) then
     write(*,*) 'PASS: Vector reverse mode - all sizes completed successfully'
@@ -68,131 +36,98 @@ program test_sdot_vector_reverse
 
 contains
 
-  subroutine run_test_for_size(n, passed)
+  subroutine run_test_for_size(n, passed, nbdirs)
     implicit none
     integer, intent(in) :: n
     logical, intent(out) :: passed
+    integer, intent(in) :: nbdirs
 
-    ! Initialize primal values
+    integer :: nsize, incx_val, incy_val
+    real(4), dimension(n) :: x, y
+    real(4), dimension(nbdirs,n) :: xb, yb
+    real(4), dimension(nbdirs) :: result_b, result_b_seed
+    real(4), dimension(n) :: x_orig, y_orig
+    integer :: k, i
+    real(4) :: temp_real, temp_imag
+
     nsize = n
-    call random_number(sx)
-    sx = sx * 2.0 - 1.0
     incx_val = 1
-    call random_number(sy)
-    sy = sy * 2.0 - 1.0
     incy_val = 1
-    
-    ! Store original primal values
-    sx_orig = sx
-    sy_orig = sy
-    
-    ! Initialize output adjoints (cotangents) with random values for each direction
-    ! These are the 'seeds' for reverse mode
-    ! Initialize function result adjoint (output cotangent)
+
+    call random_number(x)
+    x = x * 2.0d0 - 1.0d0
+    call random_number(y)
+    y = y * 2.0d0 - 1.0d0
+
+    x_orig = x
+    y_orig = y
+
     do k = 1, nbdirs
-      call random_number(sdotb(k))
-      sdotb(k) = sdotb(k) * 2.0 - 1.0
+      call random_number(temp_real)
+      result_b(k) = temp_real * 2.0d0 - 1.0d0
     end do
-    
-    ! Initialize input adjoints to zero (they will be computed)
-    ! Note: Inout parameters are skipped - they already have output adjoints initialized
-    sxb = 0.0
-    syb = 0.0
-    
-    ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
-    sdotb_orig = sdotb
-    
-    ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-    ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
+    result_b_seed = result_b
+
+    xb = 0.0d0
+    yb = 0.0d0
+
+    write(*,*) 'Testing SDOT (Vector Reverse, n =', n, ')'
+
     call set_ISIZE1OFSx(n)
     call set_ISIZE1OFSy(n)
-    
-    ! Call reverse vector mode differentiated function
-    call sdot_bv(nsize, sx, sxb, incx_val, sy, syb, incy_val, sdotb, nbdirs)
-    
-    ! Reset ISIZE globals to uninitialized (-1) for completeness
+
+    call sdot_bv(nsize, x, xb, incx_val, y, yb, incy_val, result_b, nbdirs)
+
     call set_ISIZE1OFSx(-1)
     call set_ISIZE1OFSy(-1)
-    
-    ! VJP Verification using finite differences
-    call check_vjp_numerically(passed)
+
+    call check_vjp_numerically(n, nbdirs, nsize, incx_val, incy_val, x_orig, y_orig, result_b_seed, xb, yb, passed)
+
   end subroutine run_test_for_size
 
-  subroutine check_vjp_numerically(passed)
+  subroutine check_vjp_numerically(n, nbdirs, nsize, incx_val, incy_val, x_orig, y_orig, result_b_seed, xb, yb, passed)
     implicit none
+    integer, intent(in) :: n, nbdirs
+    integer, intent(in) :: nsize, incx_val, incy_val
+    real(4), intent(in) :: x_orig(n), y_orig(n)
+    real(4), intent(in) :: result_b_seed(nbdirs)
+    real(4), intent(in) :: xb(nbdirs,n), yb(nbdirs,n)
     logical, intent(out) :: passed
-    
-    ! Direction vectors for VJP testing
-    real(4), dimension(max_size) :: sx_dir
-    real(4), dimension(max_size) :: sy_dir
-    real(4) :: sdot_plus, sdot_minus
-    
+
+    real(4), parameter :: h = 1.0e-3
+    real(4) :: vjp_ad, vjp_fd, relative_error, max_error, abs_error, abs_reference, error_bound
+    real(4), dimension(n) :: x_dir, y_dir
+    real(4) :: result_forward, result_backward, result_central_diff
+    real(4), dimension(n) :: x, y
+    integer :: i, k
+    real(4) :: temp_real, temp_imag
+    logical :: has_large_errors
+
     max_error = 0.0d0
     has_large_errors = .false.
-    
-    write(*,*) 'Function calls completed successfully'
-    
-    write(*,*) 'Checking derivatives against numerical differentiation:'
-    write(*,*) 'Step size h =', h
-    
-    ! Test each differentiation direction separately
+
     do k = 1, nbdirs
-      
-      ! Initialize random direction vectors for all inputs
-      call random_number(sx_dir)
-      sx_dir = sx_dir * 2.0 - 1.0
-      call random_number(sy_dir)
-      sy_dir = sy_dir * 2.0 - 1.0
-      
-      ! Forward perturbation: f(x + h*dir)
-      sx = sx_orig + h * sx_dir
-      sy = sy_orig + h * sy_dir
-      sdot_plus = sdot(nsize, sx, incx_val, sy, incy_val)
-      
-      ! Backward perturbation: f(x - h*dir)
-      sx = sx_orig - h * sx_dir
-      sy = sy_orig - h * sy_dir
-      sdot_minus = sdot(nsize, sx, incx_val, sy, incy_val)
-      
-      ! Compute central differences and VJP verification
-      ! VJP check: direction^T @ adjoint should equal finite difference
-      
-      ! Compute finite difference VJP (central difference)
-      ! For functions: vjp_fd = adjoint * central_diff
-      vjp_fd = sdotb(k) * (sdot_plus - sdot_minus) / (2.0 * h)
-      
-      ! Right side: direction^T @ computed_adjoint (with sorted summation)
-      ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
-      ! For pure inputs: use adjoint directly
-      vjp_ad = 0.0
-      ! Compute and sort products for sx
-      n_products = n
+      call random_number(x_dir)
+      x_dir = x_dir * 2.0d0 - 1.0d0
+      call random_number(y_dir)
+      y_dir = y_dir * 2.0d0 - 1.0d0
+      x = x_orig + h * x_dir
+      y = y_orig + h * y_dir
+      result_forward = sdot(nsize, x, incx_val, y, incy_val)
+      x = x_orig - h * x_dir
+      y = y_orig - h * y_dir
+      result_backward = sdot(nsize, x, incx_val, y, incy_val)
+      result_central_diff = (result_forward - result_backward) / (2.0d0 * h)
+      vjp_fd = result_b_seed(k) * result_central_diff
+      vjp_ad = 0.0d0
       do i = 1, n
-        temp_products(i) = sx_dir(i) * sxb(k,i)
+        vjp_ad = vjp_ad + x_dir(i) * xb(k,i)
+        vjp_ad = vjp_ad + y_dir(i) * yb(k,i)
       end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_ad = vjp_ad + temp_products(i)
-      end do
-      ! Compute and sort products for sy
-      n_products = n
-      do i = 1, n
-        temp_products(i) = sy_dir(i) * syb(k,i)
-      end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_ad = vjp_ad + temp_products(i)
-      end do
-      
-      ! Error check: |vjp_fd - vjp_ad| > atol + rtol * |vjp_ad|
       abs_error = abs(vjp_fd - vjp_ad)
       abs_reference = abs(vjp_ad)
-      error_bound = 2.0e-3 + 2.0e-3 * abs_reference
-      if (abs_error > error_bound) then
-        has_large_errors = .true.
-      end if
-      
-      ! Compute relative error for reporting
+      error_bound = 1.0e-3 + 1.0e-3 * abs_reference
+      if (abs_error > error_bound) has_large_errors = .true.
       if (abs_reference > 1.0e-10) then
         relative_error = abs_error / abs_reference
       else
@@ -200,40 +135,16 @@ contains
       end if
       if (relative_error > max_error) max_error = relative_error
     end do
-    
-    write(*,*) ''
+
     write(*,*) 'Maximum relative error:', max_error
-    write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
+    write(*,*) 'Tolerance: rtol=1.0e-3, atol=1.0e-3'
     passed = .not. has_large_errors
     if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
+      write(*,*) 'FAIL: VJP errors outside tolerance'
     else
-      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
+      write(*,*) 'PASS: VJP within tolerance'
     end if
-    
-  end subroutine check_vjp_numerically
 
-  subroutine sort_array(arr, n)
-    implicit none
-    integer, intent(in) :: n
-    real(4), dimension(n), intent(inout) :: arr
-    integer :: i, j, min_idx
-    real(4) :: temp
-    
-    ! Simple selection sort
-    do i = 1, n-1
-      min_idx = i
-      do j = i+1, n
-        if (abs(arr(j)) < abs(arr(min_idx))) then
-          min_idx = j
-        end if
-      end do
-      if (min_idx /= i) then
-        temp = arr(i)
-        arr(i) = arr(min_idx)
-        arr(min_idx) = temp
-      end if
-    end do
-  end subroutine sort_array
+  end subroutine check_vjp_numerically
 
 end program test_sdot_vector_reverse
