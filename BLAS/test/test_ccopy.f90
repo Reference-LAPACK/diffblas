@@ -46,12 +46,12 @@ contains
     integer :: incy
 
     ! Derivative variables
-    complex(4), dimension(n) :: cy_d
     complex(4), dimension(n) :: cx_d
+    complex(4), dimension(n) :: cy_d
 
     ! Array restoration and derivative storage
-    complex(4), dimension(n) :: cy_orig, cy_d_orig
     complex(4), dimension(n) :: cx_orig, cx_d_orig
+    complex(4), dimension(n) :: cy_orig, cy_d_orig
     real(4) :: temp_re, temp_im  ! For complex random init
     integer :: i, j
 
@@ -74,19 +74,19 @@ contains
     do i = 1, n
       call random_number(temp_re)
       call random_number(temp_im)
-      cy_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
+      cx_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
     end do
     do i = 1, n
       call random_number(temp_re)
       call random_number(temp_im)
-      cx_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
+      cy_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
     end do
 
     ! Store _orig and _d_orig
-    cy_d_orig = cy_d
     cx_d_orig = cx_d
-    cy_orig = cy
+    cy_d_orig = cy_d
     cx_orig = cx
+    cy_orig = cy
 
     write(*,*) 'Testing CCOPY (n =', n, ')'
 
@@ -169,7 +169,7 @@ contains
     write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
     passed = .not. has_large_errors
     if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
       write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if

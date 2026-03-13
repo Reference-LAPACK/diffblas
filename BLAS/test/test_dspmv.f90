@@ -90,9 +90,17 @@ contains
       if (abs_error > max_err) max_err = abs_error
     end do
     abs_ref = maxval(abs(y_d)) + 1.0d0
+    write(*,*) 'Function calls completed successfully'
+    write(*,*) 'Checking derivatives against numerical differentiation:'
+    write(*,*) 'Step size h =', h
+    write(*,*) 'Maximum relative error:', max_err / abs_ref
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
     passed = (max_err <= 1.0e-5 * abs_ref)
-    if (.not. passed) write(*,*) 'FAIL: SPMV scalar forward max_err =', max_err
-    if (passed) write(*,*) 'PASS: SPMV scalar forward FD check'
+    if (.not. passed) then
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
+    else
+      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
+    end if
     deallocate(ap, ap_d, ap_t, ap_orig)
   end subroutine run_test_for_size
 end program test_dspmv

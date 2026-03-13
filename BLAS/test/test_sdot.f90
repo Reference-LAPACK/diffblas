@@ -47,13 +47,13 @@ contains
 
     ! Derivative variables
     real(4), dimension(n) :: sx_d
-    real(4), dimension(n) :: sy_d
     real(4) :: sdot_d_result  ! Derivative of function result (avoid name clash with func_d)
+    real(4), dimension(n) :: sy_d
 
     ! Array restoration and derivative storage
     real(4), dimension(n) :: sx_orig, sx_d_orig
-    real(4), dimension(n) :: sy_orig, sy_d_orig
     real(4) :: sdot_orig  ! Function result (no _d_orig - use _d_result)
+    real(4), dimension(n) :: sy_orig, sy_d_orig
     integer :: i, j
 
     nsize = n
@@ -75,8 +75,8 @@ contains
     sx_d_orig = sx_d
     sy_d_orig = sy_d
     sx_orig = sx
-    sy_orig = sy
     sdot_orig = sdot(nsize, sx, 1, sy, 1)
+    sy_orig = sy
 
     write(*,*) 'Testing SDOT (n =', n, ')'
 
@@ -149,7 +149,7 @@ contains
     write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
     passed = .not. has_large_errors
     if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
       write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if

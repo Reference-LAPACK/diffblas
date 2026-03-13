@@ -56,15 +56,15 @@ contains
     ! Derivative variables
     real(8), dimension(n,n) :: c_d
     real(8) :: beta_d
-    real(8), dimension(n,n) :: b_d
     real(8) :: alpha_d
+    real(8), dimension(n,n) :: b_d
     real(8), dimension(n,n) :: a_d
 
     ! Array restoration and derivative storage
     real(8), dimension(n,n) :: c_orig, c_d_orig
     real(8) :: beta_orig, beta_d_orig
-    real(8), dimension(n,n) :: b_orig, b_d_orig
     real(8) :: alpha_orig, alpha_d_orig
+    real(8), dimension(n,n) :: b_orig, b_d_orig
     real(8), dimension(n,n) :: a_orig, a_d_orig
     integer :: i, j
 
@@ -93,23 +93,23 @@ contains
     c_d = c_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(beta_d)
     beta_d = beta_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-    call random_number(b_d)
-    b_d = b_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(alpha_d)
     alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(b_d)
+    b_d = b_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(a_d)
     a_d = a_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
     ! Store _orig and _d_orig
     c_d_orig = c_d
     beta_d_orig = beta_d
-    b_d_orig = b_d
     alpha_d_orig = alpha_d
+    b_d_orig = b_d
     a_d_orig = a_d
     c_orig = c
     beta_orig = beta
-    b_orig = b
     alpha_orig = alpha
+    b_orig = b
     a_orig = a
 
     write(*,*) 'Testing DGEMM (n =', n, ')'
@@ -121,11 +121,11 @@ contains
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, c_orig, beta_orig, b_orig, alpha_orig, a_orig, c_d_orig, beta_d_orig, b_d_orig, alpha_d_orig, a_d_orig, c_d, passed)
+    call check_derivatives_numerically(n, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, beta_orig, alpha_orig, b_orig, c_orig, a_orig, beta_d_orig, alpha_d_orig, b_d_orig, c_d_orig, a_d_orig, c_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, c_orig, beta_orig, b_orig, alpha_orig, a_orig, c_d_orig, beta_d_orig, b_d_orig, alpha_d_orig, a_d_orig, c_d, passed)
+  subroutine check_derivatives_numerically(n, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, beta_orig, alpha_orig, b_orig, c_orig, a_orig, beta_d_orig, alpha_d_orig, b_d_orig, c_d_orig, a_d_orig, c_d, passed)
     implicit none
     integer, intent(in) :: n
     character, intent(in) :: transa
@@ -136,10 +136,10 @@ contains
     integer, intent(in) :: lda_val
     integer, intent(in) :: ldb_val
     integer, intent(in) :: ldc_val
-    real(8), intent(in) :: c_orig(n,n), c_d_orig(n,n)
     real(8), intent(in) :: beta_orig, beta_d_orig
-    real(8), intent(in) :: b_orig(n,n), b_d_orig(n,n)
     real(8), intent(in) :: alpha_orig, alpha_d_orig
+    real(8), intent(in) :: b_orig(n,n), b_d_orig(n,n)
+    real(8), intent(in) :: c_orig(n,n), c_d_orig(n,n)
     real(8), intent(in) :: a_orig(n,n), a_d_orig(n,n)
     real(8), intent(in) :: c_d(n,n)
     logical, intent(out) :: passed
@@ -151,10 +151,10 @@ contains
     logical :: has_large_errors
     real(8), dimension(n,n) :: c_forward, c_backward
     integer :: i, j
-    real(8), dimension(n,n) :: c
     real(8) :: beta
-    real(8), dimension(n,n) :: b
     real(8) :: alpha
+    real(8), dimension(n,n) :: b
+    real(8), dimension(n,n) :: c
     real(8), dimension(n,n) :: a
 
     max_error = 0.0e0
@@ -164,19 +164,19 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    c = c_orig + h * c_d_orig
     beta = beta_orig + h * beta_d_orig
-    b = b_orig + h * b_d_orig
     alpha = alpha_orig + h * alpha_d_orig
+    b = b_orig + h * b_d_orig
+    c = c_orig + h * c_d_orig
     a = a_orig + h * a_d_orig
     call dgemm(transa, transb, msize, nsize, ksize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)
     c_forward = c
 
     ! Backward perturbation: f(x - h)
-    c = c_orig - h * c_d_orig
     beta = beta_orig - h * beta_d_orig
-    b = b_orig - h * b_d_orig
     alpha = alpha_orig - h * alpha_d_orig
+    b = b_orig - h * b_d_orig
+    c = c_orig - h * c_d_orig
     a = a_orig - h * a_d_orig
     call dgemm(transa, transb, msize, nsize, ksize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)
     c_backward = c
@@ -208,7 +208,7 @@ contains
     write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
     passed = .not. has_large_errors
     if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
       write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if

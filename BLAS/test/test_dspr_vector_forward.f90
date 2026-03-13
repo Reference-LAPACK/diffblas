@@ -19,8 +19,8 @@ program test_dspr_vector_forward
     call run_test_for_size(n_test, passed, nbdirs)
     all_passed = all_passed .and. passed
   end do
-  if (all_passed) write(*,*) 'PASS: Vector forward - all sizes OK'
-  if (.not. all_passed) write(*,*) 'FAIL: Vector forward - derivative errors'
+  if (all_passed) write(*,*) 'PASS: All sizes completed successfully'
+  if (.not. all_passed) write(*,*) 'FAIL: One or more sizes had derivative errors'
 contains
   subroutine run_test_for_size(n, passed, nbdirs)
     implicit none
@@ -78,13 +78,17 @@ contains
     real(8), intent(in) :: ap_orig(npack), ap_dv(nbdirs,npack), ap_dv_seed(nbdirs,npack)
     logical, intent(out) :: passed
     real(8), parameter :: h = 1.0e-7
-    real(8) :: abs_error, abs_ref, err_bound
+    real(8) :: abs_error, abs_ref, err_bound, max_error, relative_error
     real(8), dimension(npack) :: ap_fwd, ap_bwd, ap_t
     real(8) :: alpha_t
     real(8), dimension(n) :: x_t
     integer :: idir, ii
     logical :: has_err
     has_err = .false.
+    max_error = 0.0e0
+    write(*,*) 'Function calls completed successfully'
+    write(*,*) 'Checking derivatives against numerical differentiation:'
+    write(*,*) 'Step size h =', h
     do idir = 1, nbdirs
       alpha_t = alpha + h * alpha_dv(idir)
       x_t = x + h * x_dv(idir,:)
@@ -101,11 +105,18 @@ contains
         abs_ref = abs(ap_dv(idir,ii))
         err_bound = 1.0e-5 + 1.0e-5 * abs_ref
         if (abs_error > err_bound) has_err = .true.
+        relative_error = abs_error / max(abs_ref, 1.0e-10)
+        if (relative_error > max_error) max_error = relative_error
       end do
     end do
+    write(*,*) 'Maximum relative error:', max_error
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
     passed = .not. has_err
-    if (has_err) write(*,*) 'FAIL: SPR/SPR2 vector derivatives'
-    if (.not. has_err) write(*,*) 'PASS: SPR/SPR2 vector derivatives'
+    if (has_err) then
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
+    else
+      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
+    end if
   end subroutine check_derivatives_numerically
 
 end program test_dspr_vector_forward

@@ -35,6 +35,7 @@ contains
     complex(4), allocatable :: ap_orig(:), ap_plus(:), ap_minus(:), x_orig(:), x_plus(:), x_minus(:), xb_dir(:), apb_dir(:)
     integer :: ii
     real(4) :: tr, ti
+    write(*,*) 'Testing CTPMV (n =', n, ')'
     uplo = 'U'
     trans = 'N'
     diag = 'N'
@@ -81,7 +82,7 @@ contains
     complex(4), intent(in) :: ap_orig(npack), x_orig(n), xb_dir(n), apb_dir(npack), xb_adj(n), apb_adj(npack)
     logical, intent(out) :: passed
     real(4), parameter :: h = 1.0e-3
-    real(4) :: vjp_fd, vjp_ad, abs_error, abs_reference, error_bound
+    real(4) :: vjp_fd, vjp_ad, abs_error, abs_reference, error_bound, relative_error
     complex(4) :: ap_t(npack), x_t(n), x_plus(n), x_minus(n)
     integer :: i, j
     vjp_fd = 0.0d0
@@ -125,8 +126,20 @@ contains
     abs_error = abs(vjp_fd - vjp_ad)
     abs_reference = abs(vjp_ad)
     error_bound = 1.0e-3 + 1.0e-3 * abs_reference
+    relative_error = 0.0d0
+    if (abs_reference > 1.0d-10) then
+      relative_error = abs_error / abs_reference
+    end if
+    write(*,*) 'Function calls completed successfully'
+    write(*,*) 'Checking derivatives against numerical differentiation:'
+    write(*,*) 'Step size h =', h
+    write(*,*) 'Maximum relative error:', relative_error
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
     passed = abs_error <= error_bound
-    if (.not. passed) write(*,*) 'FAIL: TPMV/TPSV VJP error'
-    if (passed) write(*,*) 'PASS: TPMV/TPSV derivatives within tolerance'
+    if (.not. passed) then
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
+    else
+      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
+    end if
   end subroutine check_vjp_numerically
 end program test_ctpmv_reverse

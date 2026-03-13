@@ -9,6 +9,7 @@ program test_zsyr2k_vector_forward
   seed_array = 42
   call random_seed(put=seed_array)
   test_sizes = (/ 4 /)
+  write(*,*) 'Testing ZSYR2K (Vector Forward, multi-size: n = 4)'
   all_passed = .true.
   do i = 1, 1
     n_test = test_sizes(i)
@@ -16,8 +17,8 @@ program test_zsyr2k_vector_forward
     call run_test_for_size(n_test, passed, nbdirs)
     all_passed = all_passed .and. passed
   end do
-  if (all_passed) write(*,*) 'PASS: BLAS3 vector forward'
-  if (.not. all_passed) write(*,*) 'FAIL: BLAS3 vector forward'
+  if (all_passed) write(*,*) 'PASS: All sizes completed successfully'
+  if (.not. all_passed) write(*,*) 'FAIL: One or more sizes had derivative errors'
 contains
   subroutine run_test_for_size(n, passed, nbdirs)
     integer, intent(in) :: n, nbdirs
@@ -32,7 +33,7 @@ contains
     complex(8), dimension(n,n) :: c_orig, c_plus, c_minus
     complex(8), dimension(n,n) :: a_t, b_t
     real(8), parameter :: h = 1.0e-7
-    real(8) :: max_err, abs_err, ref_c
+    real(8) :: max_err, abs_err, ref_c, max_err_over_dirs, worst_ref_c, relative_error
     integer :: ii, jj, idir, k
     real(4) :: tr, ti
     msize = n
@@ -104,8 +105,11 @@ contains
     c_orig = c
     c_dv_seed = c_dv
     call zsyr2k_dv(uplo, transa, nsize, ksize, alpha, alpha_dv, a, a_dv, lda_val, b, b_dv, ldb_val, beta, beta_dv, c, c_dv, ldc_val, nbdirs)
+    write(*,*) 'Function calls completed successfully'
     ! Finite-difference check per direction k: (output(+h) - output(-h))/(2h) vs c_dv(k,:,:)
     passed = .true.
+    max_err_over_dirs = 0.0d0
+    worst_ref_c = 1.0d0
     do k = 1, nbdirs
       a_t = a + h * a_dv(k,:,:)
       b_t = b + h * b_dv(k,:,:)
@@ -127,8 +131,18 @@ contains
         passed = .false.
         write(*,*) '  direction k=', k, ' max_err=', max_err, ' ref_c=', ref_c, ' tol=', (1.0e-5)*ref_c
       end if
+      if (max_err > max_err_over_dirs) then
+        max_err_over_dirs = max_err
+        worst_ref_c = ref_c
+      end if
     end do
-    if (.not. passed) write(*,*) 'FAIL: BLAS3 vector forward FD check'
-    if (passed) write(*,*) 'PASS: BLAS3 vector forward FD check'
+    relative_error = 0.0d0
+    if (worst_ref_c > 1.0d-10) relative_error = max_err_over_dirs / worst_ref_c
+    write(*,*) 'Checking derivatives against numerical differentiation:'
+    write(*,*) 'Step size h =', h
+    write(*,*) 'Maximum relative error:', relative_error
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
+    if (.not. passed) write(*,*) 'FAIL: Derivatives are outside tolerance'
+    if (passed) write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
   end subroutine run_test_for_size
 end program test_zsyr2k_vector_forward

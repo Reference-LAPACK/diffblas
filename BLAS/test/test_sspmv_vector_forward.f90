@@ -19,8 +19,8 @@ program test_sspmv_vector_forward
     call run_test_for_size(n_test, passed, nbdirs)
     all_passed = all_passed .and. passed
   end do
-  if (all_passed) write(*,*) 'PASS: Vector forward - all sizes OK'
-  if (.not. all_passed) write(*,*) 'FAIL: Vector forward - derivative errors'
+  if (all_passed) write(*,*) 'PASS: All sizes completed successfully'
+  if (.not. all_passed) write(*,*) 'FAIL: One or more sizes had derivative errors'
 contains
   subroutine run_test_for_size(n, passed, nbdirs)
     implicit none
@@ -38,6 +38,7 @@ contains
     real(4), parameter :: h = 1.0e-3
     real(4) :: max_err, abs_ref
     integer :: ii
+    write(*,*) 'Testing SSPMV (Vector Forward, n =', n, ')'
     uplo = 'U'
     nsize = n
     incx_val = 1
@@ -83,9 +84,17 @@ contains
       end do
     end do
     abs_ref = maxval(abs(y_dv)) + 1.0d0
+    write(*,*) 'Function calls completed successfully'
+    write(*,*) 'Checking derivatives against numerical differentiation:'
+    write(*,*) 'Step size h =', h
+    write(*,*) 'Maximum relative error:', max_err / abs_ref
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
     passed = (max_err <= 1.0e-3 * abs_ref)
-    if (.not. passed) write(*,*) 'FAIL: SPMV vector forward FD max_err =', max_err
-    if (passed) write(*,*) 'PASS: SPMV vector forward FD check'
+    if (.not. passed) then
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
+    else
+      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
+    end if
     deallocate(ap, ap_dv, ap_orig, ap_t)
   end subroutine run_test_for_size
 end program test_sspmv_vector_forward

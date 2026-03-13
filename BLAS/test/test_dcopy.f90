@@ -46,12 +46,12 @@ contains
     integer :: incy
 
     ! Derivative variables
-    real(8), dimension(n) :: dx_d
     real(8), dimension(n) :: dy_d
+    real(8), dimension(n) :: dx_d
 
     ! Array restoration and derivative storage
-    real(8), dimension(n) :: dx_orig, dx_d_orig
     real(8), dimension(n) :: dy_orig, dy_d_orig
+    real(8), dimension(n) :: dx_orig, dx_d_orig
     integer :: i, j
 
     nsize = n
@@ -64,16 +64,16 @@ contains
     dy = dy * 2.0d0 - 1.0d0  ! Scale to [-1,1]
 
     ! Initialize input derivatives
-    call random_number(dx_d)
-    dx_d = dx_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(dy_d)
     dy_d = dy_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(dx_d)
+    dx_d = dx_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
     ! Store _orig and _d_orig
-    dx_d_orig = dx_d
     dy_d_orig = dy_d
-    dx_orig = dx
+    dx_d_orig = dx_d
     dy_orig = dy
+    dx_orig = dx
 
     write(*,*) 'Testing DCOPY (n =', n, ')'
 
@@ -156,7 +156,7 @@ contains
     write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
     passed = .not. has_large_errors
     if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
       write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if

@@ -19,8 +19,8 @@ program test_dspmv_vector_reverse
     call run_test_for_size(n_test, passed, nbdirs)
     all_passed = all_passed .and. passed
   end do
-  if (all_passed) write(*,*) 'PASS: Vector reverse - all sizes OK'
-  if (.not. all_passed) write(*,*) 'FAIL: Vector reverse - derivative errors'
+  if (all_passed) write(*,*) 'PASS: All sizes completed successfully'
+  if (.not. all_passed) write(*,*) 'FAIL: One or more sizes had derivative errors'
 contains
   subroutine run_test_for_size(n, passed, nbdirs)
     implicit none
@@ -38,6 +38,7 @@ contains
     real(8), parameter :: h = 1.0e-7
     real(8) :: vjp_fd, vjp_ad, re, err_bnd
     integer :: ii
+    write(*,*) 'Testing DSPMV (Vector Reverse, n =', n, ')'
     uplo = 'U'
     nsize = n
     incx_val = 1
@@ -82,9 +83,17 @@ contains
       re = max(re, abs(vjp_fd - vjp_ad))
     end do
     err_bnd = 1.0e-5 + 1.0e-5 * 1.0d0
+    write(*,*) 'Function calls completed successfully'
+    write(*,*) 'Checking derivatives against numerical differentiation:'
+    write(*,*) 'Step size h =', h
+    write(*,*) 'Maximum relative error:', re
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
     passed = (re <= err_bnd)
-    if (.not. passed) write(*,*) 'FAIL: SPMV vector reverse VJP error =', re
-    if (passed) write(*,*) 'PASS: SPMV vector reverse VJP check'
+    if (.not. passed) then
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
+    else
+      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
+    end if
     deallocate(ap, apb, ap_orig, ap_t, x_orig)
   end subroutine run_test_for_size
 end program test_dspmv_vector_reverse

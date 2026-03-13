@@ -62,6 +62,7 @@ contains
     call set_ISIZE1OFX(n)
     call dspr_b(uplo, nsize, alpha, alphab, x, xb, incx_val, ap, apb)
     call set_ISIZE1OFX(-1)
+    write(*,*) 'Function calls completed successfully'
     call check_vjp_numerically(n, npack, uplo, nsize, incx_val, incy_val, alpha_orig, x_orig, ap_orig, apb_orig, alphab, xb, apb, passed)
     deallocate(ap, apb, ap_orig, ap_plus, ap_minus, apb_orig)
   end subroutine run_test_for_size
@@ -77,7 +78,7 @@ contains
     logical, intent(out) :: passed
     real(8), intent(in), optional :: y_orig(n), yb(n)
     real(8), parameter :: h = 1.0e-7
-    real(8) :: vjp_fd, vjp_ad, abs_error, abs_reference, error_bound
+    real(8) :: vjp_fd, vjp_ad, abs_error, abs_reference, error_bound, relative_error
     real(8) :: alpha_dir
     real(8), dimension(n) :: x_dir, x_t
     real(8), dimension(npack) :: ap_dir, ap_t, ap_plus, ap_minus, ap_central_diff
@@ -130,10 +131,19 @@ contains
     end do
     abs_error = abs(vjp_fd - vjp_ad)
     abs_reference = abs(vjp_ad)
+    relative_error = 0.0d0
+    if (abs_reference > 1.0d-10) relative_error = abs_error / abs_reference
     error_bound = 1.0e-5 + 1.0e-5 * abs_reference
+    write(*,*) 'Checking derivatives against numerical differentiation:'
+    write(*,*) 'Step size h =', h
+    write(*,*) 'Maximum relative error:', relative_error
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
     passed = abs_error <= error_bound
-    if (.not. passed) write(*,*) 'FAIL: VJP error'
-    if (passed) write(*,*) 'PASS: Derivatives within tolerance'
+    if (.not. passed) then
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
+    else
+      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
+    end if
   end subroutine check_vjp_numerically
 
   subroutine sort_array(arr, n)

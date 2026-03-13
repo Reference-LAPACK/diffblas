@@ -18,8 +18,8 @@ program test_ztpmv_vector_reverse
     call run_test_for_size(n_test, passed, nbdirs)
     all_passed = all_passed .and. passed
   end do
-  if (all_passed) write(*,*) 'PASS: Vector reverse - all sizes completed successfully'
-  if (.not. all_passed) write(*,*) 'FAIL: Vector reverse - one or more sizes had derivative errors'
+  if (all_passed) write(*,*) 'PASS: All sizes completed successfully'
+  if (.not. all_passed) write(*,*) 'FAIL: One or more sizes had derivative errors'
 contains
   subroutine run_test_for_size(n, passed, nbdirs)
     integer, intent(in) :: n, nbdirs
@@ -144,10 +144,10 @@ contains
     end do
     deallocate(ap, x, ap_dir, x_dir, x_plus, x_minus)
     write(*,*) 'Maximum relative error:', max_error
-    write(*,*) 'Tolerance thresholds: rtol=atol=', 1.0e-5
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
     passed = .not. has_large_errors
     if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors in derivatives'
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
       write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if

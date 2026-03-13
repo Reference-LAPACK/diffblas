@@ -45,9 +45,9 @@ program test_dasum_vector_forward
     all_passed = all_passed .and. passed
   end do
   if (all_passed) then
-    write(*,*) 'PASS: Vector forward mode - all sizes completed successfully'
+    write(*,*) 'PASS: All sizes completed successfully'
   else
-    write(*,*) 'FAIL: Vector forward mode - one or more sizes had derivative errors'
+    write(*,*) 'FAIL: One or more sizes had derivative errors'
   end if
 
 contains
@@ -75,13 +75,13 @@ contains
       dx_dv(idir,:) = dx_dv(idir,:) * 2.0 - 1.0
     end do
 
-    write(*,*) 'Testing DASUM (Vector Forward Mode)'
     ! Store original values before any function calls
     dx_orig = dx
     dx_dv_orig = dx_dv
 
     ! Call the vector mode differentiated function
     call dasum_dv(nsize, dx, dx_dv, incx_val, dasum_result, dasum_dv_result, nbdirs)
+    write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
     call check_derivatives_numerically(passed)
@@ -101,9 +101,8 @@ contains
     max_error = 0.0e0
     has_large_errors = .false.
 
-    write(*,*) 'Checking vector derivatives against numerical differentiation:'
+    write(*,*) 'Checking derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirs
 
     ! Test each derivative direction separately
     do idir = 1, nbdirs
@@ -129,13 +128,13 @@ contains
       max_error = max(max_error, relative_error)
     end do
 
-    write(*,*) 'Maximum relative error across all directions:', max_error
+    write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
     passed = .not. has_large_errors
     if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in vector derivatives (outside tolerance)'
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
-      write(*,*) 'PASS: Vector derivatives are within tolerance (rtol + atol)'
+      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if
   end subroutine check_derivatives_numerically
 

@@ -44,12 +44,12 @@ contains
     integer :: incx
 
     ! Derivative variables
-    real(8), dimension(n) :: dx_d
     real(8) :: dasum_d_result  ! Derivative of function result (avoid name clash with func_d)
+    real(8), dimension(n) :: dx_d
 
     ! Array restoration and derivative storage
-    real(8), dimension(n) :: dx_orig, dx_d_orig
     real(8) :: dasum_orig  ! Function result (no _d_orig - use _d_result)
+    real(8), dimension(n) :: dx_orig, dx_d_orig
     integer :: i, j
 
     nsize = n
@@ -64,8 +64,8 @@ contains
 
     ! Store _orig and _d_orig
     dx_d_orig = dx_d
-    dx_orig = dx
     dasum_orig = dasum(nsize, dx, 1)
+    dx_orig = dx
 
     write(*,*) 'Testing DASUM (n =', n, ')'
 
@@ -134,7 +134,7 @@ contains
     write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
     passed = .not. has_large_errors
     if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
       write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if

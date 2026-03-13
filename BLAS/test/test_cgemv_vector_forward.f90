@@ -29,9 +29,9 @@ program test_cgemv_vector_forward
     all_passed = all_passed .and. passed
   end do
   if (all_passed) then
-    write(*,*) 'PASS: Vector forward mode - all sizes completed successfully'
+    write(*,*) 'PASS: All sizes completed successfully'
   else
-    write(*,*) 'FAIL: Vector forward mode - one or more sizes had derivative errors'
+    write(*,*) 'FAIL: One or more sizes had derivative errors'
   end if
 
 contains
@@ -171,7 +171,7 @@ contains
     max_error = 0.0e0
     has_large_errors = .false.
 
-    write(*,*) 'Checking vector derivatives against numerical differentiation:'
+    write(*,*) 'Checking derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
 
     do idir = 1, nbdirs
@@ -201,13 +201,13 @@ contains
       end do
     end do
 
-    write(*,*) 'Maximum relative error across all directions:', max_error
+    write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
     passed = .not. has_large_errors
     if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in vector derivatives (outside tolerance)'
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
-      write(*,*) 'PASS: Vector derivatives are within tolerance (rtol + atol)'
+      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if
 
   end subroutine check_derivatives_numerically

@@ -18,8 +18,8 @@ program test_zsyr2k
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
   end do
-  if (all_passed) write(*,*) 'PASS: All sizes OK'
-  if (.not. all_passed) write(*,*) 'FAIL: Derivative errors'
+  if (all_passed) write(*,*) 'PASS: All sizes completed successfully'
+  if (.not. all_passed) write(*,*) 'FAIL: One or more sizes had derivative errors'
 contains
   subroutine run_test_for_size(n, passed)
     implicit none
@@ -31,7 +31,7 @@ contains
     complex(8), dimension(n,n) :: a, a_d, b, b_d, c, c_d
     complex(8), dimension(n,n) :: c_orig, c_plus, c_minus
     real(8), parameter :: h = 1.0e-7
-    real(8) :: max_err, abs_err, ref_c
+    real(8) :: max_err, abs_err, ref_c, relative_error
     integer :: ii, jj
     real(4) :: tr, ti
     msize = n
@@ -83,6 +83,8 @@ contains
     c_d = 0.0d0
     c_orig = c
     call zsyr2k_d(uplo, transa, nsize, ksize, alpha, alpha_d, a, a_d, lda_val, b, b_d, ldb_val, beta, beta_d, c, c_d, ldc_val)
+    write(*,*) 'Testing ZSYR2K (n =', n, ')'
+    write(*,*) 'Function calls completed successfully'
     ! Finite-difference check: (output(alpha+h) - output(alpha-h))/(2h) vs derivative
     c_plus = c_orig
     call zsyr2k(uplo, transa, nsize, ksize, alpha + h, a, lda_val, b, ldb_val, beta, c_plus, ldc_val)
@@ -96,8 +98,17 @@ contains
       end do
     end do
     ref_c = maxval(abs(c_d)) + 1.0d0
+    relative_error = 0.0d0
+    if (ref_c > 1.0d-10) relative_error = max_err / ref_c
+    write(*,*) 'Checking derivatives against numerical differentiation:'
+    write(*,*) 'Step size h =', h
+    write(*,*) 'Maximum relative error:', relative_error
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
     passed = (max_err <= 1.0e-5 * ref_c)
-    if (.not. passed) write(*,*) 'FAIL: BLAS3 scalar forward FD max_err =', max_err
-    if (passed) write(*,*) 'PASS: BLAS3 scalar forward FD check'
+    if (.not. passed) then
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
+    else
+      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
+    end if
   end subroutine run_test_for_size
 end program test_zsyr2k

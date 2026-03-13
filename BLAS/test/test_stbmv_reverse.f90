@@ -33,6 +33,7 @@ contains
     real(4) :: alpha, alphab
     real(4), dimension(:,:), allocatable :: a, ab
     real(4), dimension(:), allocatable :: x, xb
+    real(4), dimension(:), allocatable :: xb_seed
     integer :: band_row, j
     real(4) :: temp_real
     ksize = max(0, n - 1)
@@ -44,6 +45,7 @@ contains
     trans = 'N'
     diag = 'N'
     allocate(a(lda_val, n), ab(lda_val, n), x(n), xb(n))
+    allocate(xb_seed(n))
     ! Initialize a as triangular band matrix (upper band storage)
     ! A(band_row, j) = full(i,j) with band_row = ksize+1+i-j, i = max(1,j-ksize)..j
     do j = 1, n
@@ -57,56 +59,85 @@ contains
     call random_number(x)
     x = x * 2.0d0 - 1.0d0
     alphab = 0.0d0
-    xb = 0.0d0
     ab = 0.0d0
+    ! Seed for reverse mode: output adjoint xb is the seed (d(scalar)/d(x))
+    call random_number(xb)
+    xb = xb * 2.0d0 - 1.0d0
+    xb_seed = xb
     write(*,*) 'Testing STBMV (n =', n, ')'
     call set_ISIZE2OFA(lda_val)
     call stbmv_b(uplo, trans, diag, nsize, ksize, a, ab, lda_val, x, xb, incx_val)
     call set_ISIZE2OFA(-1)
-    call check_vjp_numerically_band(n, lda_val, ksize, uplo, trans, diag, nsize, incx_val, a, ab, x, xb, passed)
+    write(*,*) 'Function calls completed successfully'
+    call check_vjp_numerically_band(n, lda_val, ksize, uplo, trans, diag, nsize, incx_val, a, ab, x, xb_seed, xb, passed)
     deallocate(a, ab, x, xb)
+    deallocate(xb_seed)
   end subroutine run_test_for_size
 
-  subroutine check_vjp_numerically_band(n, lda_val, ksize, uplo, trans, diag, nsize, incx_val, a, ab, x, xb, passed)
+  subroutine check_vjp_numerically_band(n, lda_val, ksize, uplo, trans, diag, nsize, incx_val, a, ab, x, xb_seed, xb, passed)
     implicit none
     integer, intent(in) :: n, lda_val, ksize, nsize, incx_val
     character, intent(in) :: uplo, trans, diag
-    real(4), intent(in) :: a(lda_val, n), ab(lda_val, n), x(n), xb(n)
+    real(4), intent(in) :: a(lda_val, n), ab(lda_val, n), x(n), xb_seed(n), xb(n)
     logical, intent(out) :: passed
-    real(4), parameter :: h = 1.0e-7
-    real(4) :: vjp_fd, vjp_ad, abs_error, abs_ref, err_bound
-    real(4), dimension(n) :: x_plus, x_minus, x_t
-    real(4), dimension(lda_val, n) :: a_t
+    real(4), parameter :: h = 1.0e-3
+    real(4) :: vjp_fd, vjp_ad, abs_error, abs_ref, err_bound, relative_error
+    real(4), dimension(n) :: x_plus, x_minus, x_t, x_dir
+    real(4), dimension(lda_val, n) :: a_t, a_dir
     real(4), dimension(:), allocatable :: temp_products
     integer :: i, j, band_row, n_products
-    allocate(temp_products(n + (ksize+1)*n))
-    vjp_fd = 0.0d0
-    a_t = a + h * ab
-    x_t = x + h * xb
+    allocate(temp_products(n + n + (ksize+1)*n))
+    ! Random direction for FD (direction^T @ adjoint)
+    do j = 1, n
+      do band_row = max(1, ksize+2-j), ksize+1
+        call random_number(a_dir(band_row, j))
+        a_dir(band_row, j) = a_dir(band_row, j) * 2.0d0 - 1.0d0
+      end do
+    end do
+    call random_number(x_dir)
+    x_dir = x_dir * 2.0d0 - 1.0d0
+    ! Forward perturbation: f(a + h*a_dir, x + h*x_dir)
+    a_t = a
+    do j = 1, n
+      do band_row = max(1, ksize+2-j), ksize+1
+        a_t(band_row, j) = a(band_row, j) + h * a_dir(band_row, j)
+      end do
+    end do
+    x_t = x + h * x_dir
     call stbmv(uplo, trans, diag, nsize, ksize, a_t, lda_val, x_t, incx_val)
     x_plus = x_t
-    a_t = a - h * ab
-    x_t = x - h * xb
+    ! Backward perturbation: f(a - h*a_dir, x - h*x_dir)
+    a_t = a
+    do j = 1, n
+      do band_row = max(1, ksize+2-j), ksize+1
+        a_t(band_row, j) = a(band_row, j) - h * a_dir(band_row, j)
+      end do
+    end do
+    x_t = x - h * x_dir
     call stbmv(uplo, trans, diag, nsize, ksize, a_t, lda_val, x_t, incx_val)
     x_minus = x_t
+    ! VJP(FD) = xb_seed^T @ (x_plus-x_minus)/(2h)
+    vjp_fd = 0.0d0
     n_products = n
     do i = 1, n
-      temp_products(i) = xb(i) * ((x_plus(i) - x_minus(i)) / (2.0d0 * h))
+      temp_products(i) = xb_seed(i) * ((x_plus(i) - x_minus(i)) / (2.0d0 * h))
     end do
     call sort_array(temp_products, n_products)
     do i = 1, n_products
       vjp_fd = vjp_fd + temp_products(i)
     end do
+    ! VJP(AD) = direction^T @ adjoint
     vjp_ad = 0.0d0
-    do i = 1, n
-      vjp_ad = vjp_ad + xb(i) * xb(i)
-    end do
     n_products = 0
     do j = 1, n
       do band_row = max(1, ksize+2-j), ksize+1
         n_products = n_products + 1
-        temp_products(n_products) = ab(band_row,j) * ab(band_row,j)
+        temp_products(n_products) = a_dir(band_row,j) * ab(band_row,j)
       end do
+    end do
+    do i = 1, n
+      n_products = n_products + 1
+      temp_products(n_products) = x_dir(i) * xb(i)
     end do
     call sort_array(temp_products, n_products)
     do i = 1, n_products
@@ -115,10 +146,19 @@ contains
     deallocate(temp_products)
     abs_error = abs(vjp_fd - vjp_ad)
     abs_ref = abs(vjp_ad)
-    err_bound = 1.0e-5 + 1.0e-5 * abs_ref
+    err_bound = 1.0e-3 + 1.0e-3 * abs_ref
+    relative_error = 0.0d0
+    if (abs_ref > 1.0d-10) relative_error = abs_error / abs_ref
+    write(*,*) 'Checking derivatives against numerical differentiation:'
+    write(*,*) 'Step size h =', h
+    write(*,*) 'Maximum relative error:', relative_error
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
     passed = abs_error <= err_bound
-    if (.not. passed) write(*,*) 'FAIL: Band VJP error'
-    if (passed) write(*,*) 'PASS: Band VJP within tolerance'
+    if (.not. passed) then
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
+    else
+      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
+    end if
   end subroutine check_vjp_numerically_band
   subroutine sort_array(arr, n)
     implicit none

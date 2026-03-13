@@ -103,8 +103,8 @@ contains
     real(8), dimension(n) :: dx_dir
     real(8), dimension(n) :: dy_dir
 
-    real(8), dimension(n) :: dx_plus, dx_minus, dx_central_diff
     real(8), dimension(n) :: dy_plus, dy_minus, dy_central_diff
+    real(8), dimension(n) :: dx_plus, dx_minus, dx_central_diff
 
     real(8), dimension(n) :: dx
     real(8), dimension(n) :: dy
@@ -124,22 +124,22 @@ contains
     dx = dx_orig + h * dx_dir
     dy = dy_orig + h * dy_dir
     call dswap(nsize, dx, incx_val, dy, incy_val)
-    dx_plus = dx
     dy_plus = dy
+    dx_plus = dx
 
     dx = dx_orig - h * dx_dir
     dy = dy_orig - h * dy_dir
     call dswap(nsize, dx, incx_val, dy, incy_val)
-    dx_minus = dx
     dy_minus = dy
+    dx_minus = dx
 
-    dx_central_diff = (dx_plus - dx_minus) / (2.0 * h)
     dy_central_diff = (dy_plus - dy_minus) / (2.0 * h)
+    dx_central_diff = (dx_plus - dx_minus) / (2.0 * h)
 
     vjp_fd = 0.0
     n_products = n
     do i = 1, n
-      temp_products(i) = dxb_orig(i) * dx_central_diff(i)
+      temp_products(i) = dyb_orig(i) * dy_central_diff(i)
     end do
     call sort_array(temp_products, n_products)
     do i = 1, n_products
@@ -147,7 +147,7 @@ contains
     end do
     n_products = n
     do i = 1, n
-      temp_products(i) = dyb_orig(i) * dy_central_diff(i)
+      temp_products(i) = dxb_orig(i) * dx_central_diff(i)
     end do
     call sort_array(temp_products, n_products)
     do i = 1, n_products
@@ -182,13 +182,11 @@ contains
       relative_error = abs_error
     end if
     max_error = relative_error
-
-    write(*,*) ''
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
     passed = .not. has_large_errors
     if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
       write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if

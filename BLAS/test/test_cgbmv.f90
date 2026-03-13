@@ -105,6 +105,7 @@ contains
     beta_orig = beta
     beta_d_seed = beta_d
     call cgbmv_d(trans, msize, nsize, kl, ku, alpha, alpha_d, a, a_d, lda_val, x, x_d, incx_val, beta, beta_d, y, y_d, incy_val)
+    write(*,*) 'Function calls completed successfully'
     call check_derivatives_numerically_band_gbmv(n, lda_val, msize, nsize, kl, ku, trans, incx_val, incy_val, alpha_orig, alpha_d_seed, beta_orig, beta_d_seed, a_orig, a_d_seed, x_orig, x_d_seed, y_orig, y_d_seed, y_d, passed)
     deallocate(a, a_d, a_orig, a_d_seed, x, x_d, x_orig, x_d_seed)
     deallocate(y, y_d, y_orig, y_d_seed)
@@ -118,36 +119,56 @@ contains
     complex(4), intent(in) :: a_orig(lda_val, n), a_d_seed(lda_val, n), x_orig(n), x_d_seed(n), y_orig(n), y_d_seed(n), y_d_out(n)
     logical, intent(out) :: passed
     real(4), parameter :: h = 1.0e-3
-    real(4) :: abs_error, abs_ref, err_bound
+    real(4) :: abs_error, abs_ref, err_bound, max_error, relative_error
     complex(4), dimension(n) :: y_fwd, y_bwd, y_t
     complex(4) :: alpha_t, beta_t
     complex(4), dimension(n) :: x_t
     complex(4), dimension(lda_val, n) :: a_t
-    integer :: ii
+    integer :: ii, j, band_row
     logical :: has_err
     has_err = .false.
+    max_error = 0.0e0
     alpha_t = alpha_orig + h * alpha_d_seed
     beta_t = beta_orig + h * beta_d_seed
-    a_t = a_orig + h * a_d_seed
+    a_t = a_orig
+    do j = 1, n
+      do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)
+        a_t(band_row, j) = a_orig(band_row, j) + h * a_d_seed(band_row, j)
+      end do
+    end do
     x_t = x_orig + h * x_d_seed
     y_t = y_orig + h * y_d_seed
     call cgbmv(trans, msize, nsize, kl, ku, alpha_t, a_t, lda_val, x_t, incx_val, beta_t, y_t, incy_val)
     y_fwd = y_t
     alpha_t = alpha_orig - h * alpha_d_seed
     beta_t = beta_orig - h * beta_d_seed
-    a_t = a_orig - h * a_d_seed
+    a_t = a_orig
+    do j = 1, n
+      do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)
+        a_t(band_row, j) = a_orig(band_row, j) - h * a_d_seed(band_row, j)
+      end do
+    end do
     x_t = x_orig - h * x_d_seed
     y_t = y_orig - h * y_d_seed
     call cgbmv(trans, msize, nsize, kl, ku, alpha_t, a_t, lda_val, x_t, incx_val, beta_t, y_t, incy_val)
     y_bwd = y_t
-    do ii = 1, min(3, n)
+    write(*,*) 'Checking derivatives against numerical differentiation:'
+    write(*,*) 'Step size h =', h
+    do ii = 1, n
       abs_error = abs((y_fwd(ii) - y_bwd(ii)) / (2.0e0 * h) - y_d_out(ii))
       abs_ref = abs(y_d_out(ii))
       err_bound = 1.0e-3 + 1.0e-3 * abs_ref
       if (abs_error > err_bound) has_err = .true.
+      relative_error = abs_error / max(abs_ref, 1.0e-10)
+      if (relative_error > max_error) max_error = relative_error
     end do
+    write(*,*) 'Maximum relative error:', max_error
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
     passed = .not. has_err
-    if (has_err) write(*,*) 'FAIL: Band scalar derivatives'
-    if (.not. has_err) write(*,*) 'PASS: Band scalar derivatives'
+    if (has_err) then
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
+    else
+      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
+    end if
   end subroutine check_derivatives_numerically_band_gbmv
 end program test_cgbmv

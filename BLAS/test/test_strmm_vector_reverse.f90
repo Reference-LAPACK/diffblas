@@ -17,8 +17,8 @@ program test_strmm_vector_reverse
     call run_test_for_size(n_test, passed, nbdirs)
     all_passed = all_passed .and. passed
   end do
-  if (all_passed) write(*,*) 'PASS: Vector reverse - all sizes completed successfully'
-  if (.not. all_passed) write(*,*) 'FAIL: Vector reverse - one or more sizes had derivative errors'
+  if (all_passed) write(*,*) 'PASS: All sizes completed successfully'
+  if (.not. all_passed) write(*,*) 'FAIL: One or more sizes had derivative errors'
 contains
   subroutine run_test_for_size(n, passed, nbdirs)
     integer, intent(in) :: n, nbdirs
@@ -106,10 +106,9 @@ contains
       ref_c = abs(vjp_ad) + 1.0d0
       if (abs_error > 1.0e-3 * ref_c) passed = .false.
     end do
-    write(*,*) ''
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
-    if (.not. passed) write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
+    if (.not. passed) write(*,*) 'FAIL: Derivatives are outside tolerance'
     if (passed) write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
   end subroutine run_test_for_size
 end program test_strmm_vector_reverse

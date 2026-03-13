@@ -117,8 +117,8 @@ contains
     complex(4), dimension(n) :: cx_dir
     complex(4), dimension(n) :: cy_dir
 
-    complex(4), dimension(n) :: cy_plus, cy_minus, cy_central_diff
     complex(4), dimension(n) :: cx_plus, cx_minus, cx_central_diff
+    complex(4), dimension(n) :: cy_plus, cy_minus, cy_central_diff
 
     complex(4), dimension(n) :: cx
     complex(4), dimension(n) :: cy
@@ -144,22 +144,22 @@ contains
     cx = cx_orig + cmplx(h, 0.0) * cx_dir
     cy = cy_orig + cmplx(h, 0.0) * cy_dir
     call cswap(nsize, cx, incx_val, cy, incy_val)
-    cy_plus = cy
     cx_plus = cx
+    cy_plus = cy
 
     cx = cx_orig - cmplx(h, 0.0) * cx_dir
     cy = cy_orig - cmplx(h, 0.0) * cy_dir
     call cswap(nsize, cx, incx_val, cy, incy_val)
-    cy_minus = cy
     cx_minus = cx
+    cy_minus = cy
 
-    cy_central_diff = (cy_plus - cy_minus) / (2.0 * h)
     cx_central_diff = (cx_plus - cx_minus) / (2.0 * h)
+    cy_central_diff = (cy_plus - cy_minus) / (2.0 * h)
 
     vjp_fd = 0.0
     n_products = n
     do i = 1, n
-      temp_products(i) = real(conjg(cyb_orig(i)) * cy_central_diff(i))
+      temp_products(i) = real(conjg(cxb_orig(i)) * cx_central_diff(i))
     end do
     call sort_array(temp_products, n_products)
     do i = 1, n_products
@@ -167,7 +167,7 @@ contains
     end do
     n_products = n
     do i = 1, n
-      temp_products(i) = real(conjg(cxb_orig(i)) * cx_central_diff(i))
+      temp_products(i) = real(conjg(cyb_orig(i)) * cy_central_diff(i))
     end do
     call sort_array(temp_products, n_products)
     do i = 1, n_products
@@ -202,13 +202,11 @@ contains
       relative_error = abs_error
     end if
     max_error = relative_error
-
-    write(*,*) ''
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
     passed = .not. has_large_errors
     if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
       write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if

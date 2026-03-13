@@ -37,6 +37,7 @@ contains
     real(4), parameter :: h = 1.0e-3
     real(4) :: vjp_fd, vjp_ad, re, err_bnd, max_error
     integer :: ii
+    write(*,*) 'Testing SSPMV (n =', n, ')'
     uplo = 'U'
     nsize = n
     incx_val = 1
@@ -83,7 +84,7 @@ contains
     real(4), intent(in) :: alphab, betab, apb(npack), xb(n), yb_seed(n), yb(n)
     logical, intent(out) :: passed
     real(4) :: alpha_t, beta_t, ap_t(npack), x_t(n), y_t(n)
-    real(4) :: vjp_fd, vjp_ad, re, err_bnd
+    real(4) :: vjp_fd, vjp_ad, re, err_bnd, relative_error
     real(4), parameter :: h = 1.0e-3
     integer :: i
     vjp_fd = 0.0d0
@@ -105,8 +106,18 @@ contains
     vjp_ad = alphab*alphab + betab*betab + sum(apb*apb) + sum(xb*xb) + sum(yb_seed*yb)
     re = abs(vjp_fd - vjp_ad)
     err_bnd = 1.0e-3 + 1.0e-3 * abs(vjp_ad)
+    relative_error = 0.0d0
+    if (abs(vjp_ad) > 1.0d-10) relative_error = re / abs(vjp_ad)
+    write(*,*) 'Function calls completed successfully'
+    write(*,*) 'Checking derivatives against numerical differentiation:'
+    write(*,*) 'Step size h =', h
+    write(*,*) 'Maximum relative error:', relative_error
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
     passed = (re <= err_bnd)
-    if (.not. passed) write(*,*) 'FAIL: SPMV scalar reverse VJP error =', re
-    if (passed) write(*,*) 'PASS: SPMV scalar reverse VJP check'
+    if (.not. passed) then
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
+    else
+      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
+    end if
   end subroutine check_vjp_spmv
 end program test_sspmv_reverse

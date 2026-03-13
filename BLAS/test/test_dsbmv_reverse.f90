@@ -34,7 +34,7 @@ contains
     real(8) :: beta, betab
     real(8), dimension(:,:), allocatable :: a, ab
     real(8), dimension(:), allocatable :: x, xb
-    real(8), dimension(:), allocatable :: y, yb
+    real(8), dimension(:), allocatable :: y, yb, yb_seed
     integer :: band_row, j
     real(4) :: temp_real
     ksize = max(0, n - 1)
@@ -46,7 +46,7 @@ contains
     trans = 'N'
     diag = 'N'
     allocate(a(lda_val, n), ab(lda_val, n), x(n), xb(n))
-    allocate(y(n), yb(n))
+    allocate(y(n), yb(n), yb_seed(n))
     ! Initialize a as symmetric band matrix (upper band storage)
     ! A(band_row, j) = full(i,j) with band_row = ksize+1+i-j, i = max(1,j-ksize)..j
     do j = 1, n
@@ -64,71 +64,109 @@ contains
     call random_number(y)
     y = y * 2.0d0 - 1.0d0
     alphab = 0.0d0
-    xb = 0.0d0
     ab = 0.0d0
-    yb = 0.0d0
+    xb = 0.0d0
+    ! Seed for reverse mode: output adjoint yb is the seed (d(scalar)/d(y))
+    call random_number(yb)
+    yb = yb * 2.0d0 - 1.0d0
+    yb_seed = yb
     write(*,*) 'Testing DSBMV (n =', n, ')'
     call set_ISIZE1OFX(n)
     call set_ISIZE2OFA(lda_val)
     call dsbmv_b(uplo, nsize, ksize, alpha, alphab, a, ab, lda_val, x, xb, incx_val, beta, betab, y, yb, incy_val)
     call set_ISIZE1OFX(-1)
     call set_ISIZE2OFA(-1)
-    call check_vjp_numerically_band(n, lda_val, ksize, uplo, nsize, incx_val, incy_val, alpha, alphab, beta, betab, a, ab, x, xb, y, yb, passed)
+    write(*,*) 'Function calls completed successfully'
+    call check_vjp_numerically_band(n, lda_val, ksize, uplo, nsize, incx_val, incy_val, alpha, alphab, beta, betab, a, ab, x, xb, y, yb_seed, yb, passed)
     deallocate(a, ab, x, xb)
-    deallocate(y, yb)
+    deallocate(y, yb, yb_seed)
   end subroutine run_test_for_size
 
-  subroutine check_vjp_numerically_band(n, lda_val, ksize, uplo, nsize, incx_val, incy_val, alpha, alphab, beta, betab, a, ab, x, xb, y, yb, passed)
+  subroutine check_vjp_numerically_band(n, lda_val, ksize, uplo, nsize, incx_val, incy_val, alpha, alphab, beta, betab, a, ab, x, xb, y, yb_seed, yb, passed)
     implicit none
     integer, intent(in) :: n, lda_val, ksize, nsize, incx_val, incy_val
     character, intent(in) :: uplo
     real(8), intent(in) :: alpha, alphab, beta, betab
-    real(8), intent(in) :: a(lda_val, n), ab(lda_val, n), x(n), xb(n), y(n), yb(n)
+    real(8), intent(in) :: a(lda_val, n), ab(lda_val, n), x(n), xb(n), y(n), yb_seed(n), yb(n)
     logical, intent(out) :: passed
     real(8), parameter :: h = 1.0e-7
-    real(8) :: vjp_fd, vjp_ad, abs_error, abs_ref, err_bound
-    real(8), dimension(n) :: y_plus, y_minus, y_t
-    real(8) :: alpha_t
-    real(8), dimension(n) :: x_t
-    real(8), dimension(lda_val, n) :: a_t
+    real(8) :: vjp_fd, vjp_ad, abs_error, abs_ref, err_bound, relative_error
+    real(8), dimension(n) :: y_plus, y_minus, y_t, y_central_diff
+    real(8) :: alpha_t, beta_t, alpha_dir, beta_dir
+    real(8), dimension(n) :: x_t, x_dir, y_dir
+    real(8), dimension(lda_val, n) :: a_t, a_dir
     real(8), dimension(:), allocatable :: temp_products
     integer :: i, j, band_row, n_products
-    allocate(temp_products(n + (ksize+1)*n + 2))
-    alpha_t = alpha + h * alphab
-    a_t = a + h * ab
-    x_t = x + h * xb
-    y_t = y + h * yb
-    call dsbmv(uplo, nsize, ksize, alpha_t, a_t, lda_val, x_t, incx_val, beta, y_t, incy_val)
+    allocate(temp_products(n + n + n + (ksize+1)*n + 2))
+    ! Random direction for FD (direction^T @ adjoint)
+    call random_number(alpha_dir)
+    alpha_dir = alpha_dir * 2.0d0 - 1.0d0
+    call random_number(beta_dir)
+    beta_dir = beta_dir * 2.0d0 - 1.0d0
+    do j = 1, n
+      do band_row = max(1, ksize+2-j), ksize+1
+        call random_number(a_dir(band_row, j))
+        a_dir(band_row, j) = a_dir(band_row, j) * 2.0d0 - 1.0d0
+      end do
+    end do
+    call random_number(x_dir)
+    x_dir = x_dir * 2.0d0 - 1.0d0
+    call random_number(y_dir)
+    y_dir = y_dir * 2.0d0 - 1.0d0
+    ! Forward perturbation: f(inputs + h*direction)
+    alpha_t = alpha + h * alpha_dir
+    beta_t = beta + h * beta_dir
+    a_t = a
+    do j = 1, n
+      do band_row = max(1, ksize+2-j), ksize+1
+        a_t(band_row, j) = a(band_row, j) + h * a_dir(band_row, j)
+      end do
+    end do
+    x_t = x + h * x_dir
+    y_t = y + h * y_dir
+    call dsbmv(uplo, nsize, ksize, alpha_t, a_t, lda_val, x_t, incx_val, beta_t, y_t, incy_val)
     y_plus = y_t
-    alpha_t = alpha - h * alphab
-    a_t = a - h * ab
-    x_t = x - h * xb
-    y_t = y - h * yb
-    call dsbmv(uplo, nsize, ksize, alpha_t, a_t, lda_val, x_t, incx_val, beta, y_t, incy_val)
+    ! Backward perturbation: f(inputs - h*direction)
+    alpha_t = alpha - h * alpha_dir
+    beta_t = beta - h * beta_dir
+    a_t = a
+    do j = 1, n
+      do band_row = max(1, ksize+2-j), ksize+1
+        a_t(band_row, j) = a(band_row, j) - h * a_dir(band_row, j)
+      end do
+    end do
+    x_t = x - h * x_dir
+    y_t = y - h * y_dir
+    call dsbmv(uplo, nsize, ksize, alpha_t, a_t, lda_val, x_t, incx_val, beta_t, y_t, incy_val)
     y_minus = y_t
+    y_central_diff = (y_plus - y_minus) / (2.0d0 * h)
     vjp_fd = 0.0d0
     n_products = n
     do i = 1, n
-      temp_products(i) = yb(i) * ((y_plus(i) - y_minus(i)) / (2.0d0 * h))
+      temp_products(i) = yb_seed(i) * y_central_diff(i)
     end do
     call sort_array(temp_products, n_products)
     do i = 1, n_products
       vjp_fd = vjp_fd + temp_products(i)
     end do
+    ! VJP(AD) = direction^T @ adjoint
     vjp_ad = 0.0d0
-    vjp_ad = vjp_ad + alphab * alphab
-    do i = 1, n
-      vjp_ad = vjp_ad + xb(i) * xb(i)
-    end do
-    do i = 1, n
-      vjp_ad = vjp_ad + yb(i) * yb(i)
-    end do
+    vjp_ad = vjp_ad + alpha_dir * alphab
+    vjp_ad = vjp_ad + beta_dir * betab
     n_products = 0
     do j = 1, n
       do band_row = max(1, ksize+2-j), ksize+1
         n_products = n_products + 1
-        temp_products(n_products) = ab(band_row,j) * ab(band_row,j)
+        temp_products(n_products) = a_dir(band_row,j) * ab(band_row,j)
       end do
+    end do
+    do i = 1, n
+      n_products = n_products + 1
+      temp_products(n_products) = x_dir(i) * xb(i)
+    end do
+    do i = 1, n
+      n_products = n_products + 1
+      temp_products(n_products) = y_dir(i) * yb(i)
     end do
     call sort_array(temp_products, n_products)
     do i = 1, n_products
@@ -137,10 +175,19 @@ contains
     abs_error = abs(vjp_fd - vjp_ad)
     abs_ref = abs(vjp_ad)
     err_bound = 1.0e-5 + 1.0e-5 * abs_ref
-    passed = abs_error <= err_bound
+    relative_error = 0.0d0
+    if (abs_ref > 1.0d-10) relative_error = abs_error / abs_ref
     deallocate(temp_products)
-    if (.not. passed) write(*,*) 'FAIL: Band VJP error'
-    if (passed) write(*,*) 'PASS: Band VJP within tolerance'
+    write(*,*) 'Checking derivatives against numerical differentiation:'
+    write(*,*) 'Step size h =', h
+    write(*,*) 'Maximum relative error:', relative_error
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
+    passed = abs_error <= err_bound
+    if (.not. passed) then
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
+    else
+      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
+    end if
   end subroutine check_vjp_numerically_band
   subroutine sort_array(arr, n)
     implicit none

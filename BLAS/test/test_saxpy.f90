@@ -48,13 +48,13 @@ contains
 
     ! Derivative variables
     real(4), dimension(n) :: sx_d
-    real(4) :: sa_d
     real(4), dimension(n) :: sy_d
+    real(4) :: sa_d
 
     ! Array restoration and derivative storage
     real(4), dimension(n) :: sx_orig, sx_d_orig
-    real(4) :: sa_orig, sa_d_orig
     real(4), dimension(n) :: sy_orig, sy_d_orig
+    real(4) :: sa_orig, sa_d_orig
     integer :: i, j
 
     nsize = n
@@ -71,18 +71,18 @@ contains
     ! Initialize input derivatives
     call random_number(sx_d)
     sx_d = sx_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-    call random_number(sa_d)
-    sa_d = sa_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(sy_d)
     sy_d = sy_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(sa_d)
+    sa_d = sa_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
     ! Store _orig and _d_orig
     sx_d_orig = sx_d
-    sa_d_orig = sa_d
     sy_d_orig = sy_d
+    sa_d_orig = sa_d
     sx_orig = sx
-    sa_orig = sa
     sy_orig = sy
+    sa_orig = sa
 
     write(*,*) 'Testing SAXPY (n =', n, ')'
     sy_orig = sy
@@ -93,17 +93,17 @@ contains
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, nsize, sx_orig, sa_orig, sy_orig, sx_d_orig, sa_d_orig, sy_d_orig, sy_d, passed)
+    call check_derivatives_numerically(n, nsize, sx_orig, sy_orig, sa_orig, sx_d_orig, sy_d_orig, sa_d_orig, sy_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, nsize, sx_orig, sa_orig, sy_orig, sx_d_orig, sa_d_orig, sy_d_orig, sy_d, passed)
+  subroutine check_derivatives_numerically(n, nsize, sx_orig, sy_orig, sa_orig, sx_d_orig, sy_d_orig, sa_d_orig, sy_d, passed)
     implicit none
     integer, intent(in) :: n
     integer, intent(in) :: nsize
     real(4), intent(in) :: sx_orig(n), sx_d_orig(n)
-    real(4), intent(in) :: sa_orig, sa_d_orig
     real(4), intent(in) :: sy_orig(n), sy_d_orig(n)
+    real(4), intent(in) :: sa_orig, sa_d_orig
     real(4), intent(in) :: sy_d(n)
     logical, intent(out) :: passed
 
@@ -115,8 +115,8 @@ contains
     real(4), dimension(n) :: sy_forward, sy_backward
     integer :: i, j
     real(4), dimension(n) :: sx
-    real(4) :: sa
     real(4), dimension(n) :: sy
+    real(4) :: sa
 
     max_error = 0.0e0
     has_large_errors = .false.
@@ -126,15 +126,15 @@ contains
 
     ! Forward perturbation: f(x + h)
     sx = sx_orig + h * sx_d_orig
-    sa = sa_orig + h * sa_d_orig
     sy = sy_orig + h * sy_d_orig
+    sa = sa_orig + h * sa_d_orig
     call saxpy(nsize, sa, sx, 1, sy, 1)
     sy_forward = sy
 
     ! Backward perturbation: f(x - h)
     sx = sx_orig - h * sx_d_orig
-    sa = sa_orig - h * sa_d_orig
     sy = sy_orig - h * sy_d_orig
+    sa = sa_orig - h * sa_d_orig
     call saxpy(nsize, sa, sx, 1, sy, 1)
     sy_backward = sy
 
@@ -163,7 +163,7 @@ contains
     write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
     passed = .not. has_large_errors
     if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
       write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if

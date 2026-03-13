@@ -20,8 +20,8 @@ program test_ssyr2_vector_reverse
     call run_test_for_size(n_test, passed, nbdirs)
     all_passed = all_passed .and. passed
   end do
-  if (all_passed) write(*,*) 'PASS: Vector reverse - all sizes completed successfully'
-  if (.not. all_passed) write(*,*) 'FAIL: Vector reverse - one or more sizes had derivative errors'
+  if (all_passed) write(*,*) 'PASS: All sizes completed successfully'
+  if (.not. all_passed) write(*,*) 'FAIL: One or more sizes had derivative errors'
 contains
   subroutine run_test_for_size(n, passed, nbdirs)
     integer, intent(in) :: n, nbdirs
@@ -179,11 +179,10 @@ contains
       err_bnd = 1.0e-3 + 1.0e-3 * abs(vjp_ad)
       if (re > err_bnd) has_err = .true.
     end do
-    write(*,*) ''
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
     passed = .not. has_err
-    if (.not. passed) write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
+    if (.not. passed) write(*,*) 'FAIL: Derivatives are outside tolerance'
     if (passed) write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
   end subroutine check_vjp_syr_syr2
 end program test_ssyr2_vector_reverse

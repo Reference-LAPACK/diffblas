@@ -51,17 +51,17 @@ contains
     integer :: incy
 
     ! Derivative variables
-    real(8), dimension(n) :: x_d
     real(8) :: beta_d
     real(8) :: alpha_d
     real(8), dimension(n,n) :: a_d
+    real(8), dimension(n) :: x_d
     real(8), dimension(n) :: y_d
 
     ! Array restoration and derivative storage
-    real(8), dimension(n) :: x_orig, x_d_orig
     real(8) :: beta_orig, beta_d_orig
     real(8) :: alpha_orig, alpha_d_orig
     real(8), dimension(n,n) :: a_orig, a_d_orig
+    real(8), dimension(n) :: x_orig, x_d_orig
     real(8), dimension(n) :: y_orig, y_d_orig
     integer :: i, j
 
@@ -83,27 +83,27 @@ contains
     y = y * 2.0d0 - 1.0d0  ! Scale to [-1,1]
 
     ! Initialize input derivatives
-    call random_number(x_d)
-    x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(beta_d)
     beta_d = beta_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(alpha_d)
     alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(a_d)
     a_d = a_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(x_d)
+    x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(y_d)
     y_d = y_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
     ! Store _orig and _d_orig
-    x_d_orig = x_d
     beta_d_orig = beta_d
     alpha_d_orig = alpha_d
     a_d_orig = a_d
+    x_d_orig = x_d
     y_d_orig = y_d
-    x_orig = x
     beta_orig = beta
     alpha_orig = alpha
     a_orig = a
+    x_orig = x
     y_orig = y
 
     write(*,*) 'Testing DSYMV (n =', n, ')'
@@ -115,20 +115,20 @@ contains
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, uplo, nsize, lda_val, x_orig, beta_orig, alpha_orig, a_orig, y_orig, x_d_orig, beta_d_orig, alpha_d_orig, a_d_orig, y_d_orig, y_d, passed)
+    call check_derivatives_numerically(n, uplo, nsize, lda_val, beta_orig, alpha_orig, a_orig, x_orig, y_orig, beta_d_orig, alpha_d_orig, a_d_orig, x_d_orig, y_d_orig, y_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, uplo, nsize, lda_val, x_orig, beta_orig, alpha_orig, a_orig, y_orig, x_d_orig, beta_d_orig, alpha_d_orig, a_d_orig, y_d_orig, y_d, passed)
+  subroutine check_derivatives_numerically(n, uplo, nsize, lda_val, beta_orig, alpha_orig, a_orig, x_orig, y_orig, beta_d_orig, alpha_d_orig, a_d_orig, x_d_orig, y_d_orig, y_d, passed)
     implicit none
     integer, intent(in) :: n
     character, intent(in) :: uplo
     integer, intent(in) :: nsize
     integer, intent(in) :: lda_val
-    real(8), intent(in) :: x_orig(n), x_d_orig(n)
     real(8), intent(in) :: beta_orig, beta_d_orig
     real(8), intent(in) :: alpha_orig, alpha_d_orig
     real(8), intent(in) :: a_orig(n,n), a_d_orig(n,n)
+    real(8), intent(in) :: x_orig(n), x_d_orig(n)
     real(8), intent(in) :: y_orig(n), y_d_orig(n)
     real(8), intent(in) :: y_d(n)
     logical, intent(out) :: passed
@@ -140,10 +140,10 @@ contains
     logical :: has_large_errors
     real(8), dimension(n) :: y_forward, y_backward
     integer :: i, j
-    real(8), dimension(n) :: x
     real(8) :: beta
     real(8) :: alpha
     real(8), dimension(n,n) :: a
+    real(8), dimension(n) :: x
     real(8), dimension(n) :: y
 
     max_error = 0.0e0
@@ -153,19 +153,19 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    x = x_orig + h * x_d_orig
     beta = beta_orig + h * beta_d_orig
     alpha = alpha_orig + h * alpha_d_orig
     a = a_orig + h * a_d_orig
+    x = x_orig + h * x_d_orig
     y = y_orig + h * y_d_orig
     call dsymv(uplo, nsize, alpha, a, lda_val, x, 1, beta, y, 1)
     y_forward = y
 
     ! Backward perturbation: f(x - h)
-    x = x_orig - h * x_d_orig
     beta = beta_orig - h * beta_d_orig
     alpha = alpha_orig - h * alpha_d_orig
     a = a_orig - h * a_d_orig
+    x = x_orig - h * x_d_orig
     y = y_orig - h * y_d_orig
     call dsymv(uplo, nsize, alpha, a, lda_val, x, 1, beta, y, 1)
     y_backward = y
@@ -195,7 +195,7 @@ contains
     write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
     passed = .not. has_large_errors
     if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
       write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if

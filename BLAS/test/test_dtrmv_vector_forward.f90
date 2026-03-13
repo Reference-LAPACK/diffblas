@@ -29,9 +29,9 @@ program test_dtrmv_vector_forward
     all_passed = all_passed .and. passed
   end do
   if (all_passed) then
-    write(*,*) 'PASS: Vector forward mode - all sizes completed successfully'
+    write(*,*) 'PASS: All sizes completed successfully'
   else
-    write(*,*) 'FAIL: Vector forward mode - one or more sizes had derivative errors'
+    write(*,*) 'FAIL: One or more sizes had derivative errors'
   end if
 
 contains
@@ -127,6 +127,10 @@ contains
     max_error = 0.0e0
     has_large_errors = .false.
 
+    write(*,*) 'Function calls completed successfully'
+    write(*,*) 'Checking derivatives against numerical differentiation:'
+    write(*,*) 'Step size h =', h
+
     do idir = 1, nbdirs
       a = a_orig + h * a_dv_orig(idir,:,:)
       x = x_orig + h * x_dv_orig(idir,:)
@@ -149,12 +153,12 @@ contains
     end do
 
     write(*,*) 'Maximum relative error:', max_error
-    write(*,*) 'Tolerance: rtol=atol=1.0e-5'
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
     passed = .not. has_large_errors
     if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors in vector derivatives'
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
-      write(*,*) 'PASS: Vector derivatives within tolerance'
+      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if
 
   end subroutine check_derivatives_numerically

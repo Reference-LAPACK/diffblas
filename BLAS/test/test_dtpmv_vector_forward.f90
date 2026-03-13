@@ -19,8 +19,8 @@ program test_dtpmv_vector_forward
     call run_test_for_size(n_test, passed, nbdirs)
     all_passed = all_passed .and. passed
   end do
-  if (all_passed) write(*,*) 'PASS: Vector forward - all sizes OK'
-  if (.not. all_passed) write(*,*) 'FAIL: Vector forward - derivative errors'
+  if (all_passed) write(*,*) 'PASS: All sizes completed successfully'
+  if (.not. all_passed) write(*,*) 'FAIL: One or more sizes had derivative errors'
 contains
   subroutine run_test_for_size(n, passed, nbdirs)
     implicit none
@@ -59,6 +59,7 @@ contains
     ap_dv_seed = ap_dv
     x_dv_seed = x_dv
     call dtpmv_dv(uplo, trans, diag, nsize, ap, ap_dv, x, x_dv, incx_val, nbdirs)
+    write(*,*) 'Function calls completed successfully'
     call check_derivatives_numerically(n, npack, nbdirs, uplo, trans, diag, nsize, incx_val, ap_orig, ap_dv_seed, x_orig, x_dv_seed, x_dv, passed)
     deallocate(ap, x, ap_dv, x_dv, ap_orig, x_orig, ap_dv_seed, x_dv_seed)
   end subroutine run_test_for_size
@@ -102,9 +103,12 @@ contains
       end do
     end do
     write(*,*) 'Maximum relative error:', max_error
-    write(*,*) 'Tolerance: rtol=atol=1.0e-5'
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
     passed = .not. has_err
-    if (has_err) write(*,*) 'FAIL: TPMV/TPSV vector derivatives'
-    if (.not. has_err) write(*,*) 'PASS: TPMV/TPSV vector derivatives'
+    if (has_err) then
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
+    else
+      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
+    end if
   end subroutine check_derivatives_numerically
 end program test_dtpmv_vector_forward

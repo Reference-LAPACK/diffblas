@@ -18,8 +18,8 @@ program test_sspr_vector_reverse
     call run_test_for_size(n_test, passed, nbdirs)
     all_passed = all_passed .and. passed
   end do
-  if (all_passed) write(*,*) 'PASS: Vector reverse - all sizes completed successfully'
-  if (.not. all_passed) write(*,*) 'FAIL: Vector reverse - one or more sizes had derivative errors'
+  if (all_passed) write(*,*) 'PASS: All sizes completed successfully'
+  if (.not. all_passed) write(*,*) 'FAIL: One or more sizes had derivative errors'
 contains
   subroutine run_test_for_size(n, passed, nbdirs)
     integer, intent(in) :: n, nbdirs
@@ -58,6 +58,7 @@ contains
     call set_ISIZE1OFX(n)
     call sspr_bv(uplo, nsize, alpha, alphab, x, xb, incx_val, ap, apb, nbdirs)
     call set_ISIZE1OFX(-1)
+    write(*,*) 'Function calls completed successfully'
     call check_vjp_spr_spr2(n, npack, nbdirs, uplo, nsize, incx_val, incy_val, alpha, x, ap, apb_orig, alphab, xb, apb, passed)
     deallocate(ap, apb, apb_orig)
   end subroutine run_test_for_size
@@ -73,7 +74,7 @@ contains
     logical, intent(out) :: passed
     real(4), intent(in), optional :: y(n), yb(nbdirs,n)
     real(4), parameter :: h = 1.0e-3
-    real(4) :: vjp_fd, vjp_ad, re, err_bnd
+    real(4) :: vjp_fd, vjp_ad, re, err_bnd, max_re
     real(4) :: tr, ti
     real(4) :: alpha_dir
     real(4), dimension(n) :: x_dir, x_t
@@ -82,6 +83,9 @@ contains
     integer :: k, ii
     logical :: has_err
     has_err = .false.
+    max_re = 0.0d0
+    write(*,*) 'Checking derivatives against numerical differentiation:'
+    write(*,*) 'Step size h =', h
     do k = 1, nbdirs
       call random_number(tr)
       call random_number(ti)
@@ -115,9 +119,17 @@ contains
         vjp_ad = vjp_ad + sum(y_dir*yb(k,:))
       end if
       re = abs(vjp_fd - vjp_ad)
+      if (re > max_re) max_re = re
       err_bnd = 1.0e-3 + 1.0e-3 * abs(vjp_ad)
       if (re > err_bnd) has_err = .true.
     end do
+    write(*,*) 'Maximum relative error:', max_re
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
     passed = .not. has_err
+    if (has_err) then
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
+    else
+      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
+    end if
   end subroutine check_vjp_spr_spr2
 end program test_sspr_vector_reverse

@@ -45,12 +45,12 @@ contains
     integer :: incx
 
     ! Derivative variables
-    complex(8), dimension(n) :: zx_d
     complex(8) :: za_d
+    complex(8), dimension(n) :: zx_d
 
     ! Array restoration and derivative storage
-    complex(8), dimension(n) :: zx_orig, zx_d_orig
     complex(8) :: za_orig, za_d_orig
+    complex(8), dimension(n) :: zx_orig, zx_d_orig
     real(8) :: temp_re, temp_im  ! For complex random init
     integer :: i, j
 
@@ -67,20 +67,20 @@ contains
     end do
 
     ! Initialize input derivatives
+    call random_number(temp_re)
+    call random_number(temp_im)
+    za_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
     do i = 1, n
       call random_number(temp_re)
       call random_number(temp_im)
       zx_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
     end do
-    call random_number(temp_re)
-    call random_number(temp_im)
-    za_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
 
     ! Store _orig and _d_orig
-    zx_d_orig = zx_d
     za_d_orig = za_d
-    zx_orig = zx
+    zx_d_orig = zx_d
     za_orig = za
+    zx_orig = zx
 
     write(*,*) 'Testing ZSCAL (n =', n, ')'
     zx_orig = zx
@@ -91,16 +91,16 @@ contains
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, nsize, zx_orig, za_orig, zx_d_orig, za_d_orig, zx_d, passed)
+    call check_derivatives_numerically(n, nsize, za_orig, zx_orig, za_d_orig, zx_d_orig, zx_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, nsize, zx_orig, za_orig, zx_d_orig, za_d_orig, zx_d, passed)
+  subroutine check_derivatives_numerically(n, nsize, za_orig, zx_orig, za_d_orig, zx_d_orig, zx_d, passed)
     implicit none
     integer, intent(in) :: n
     integer, intent(in) :: nsize
-    complex(8), intent(in) :: zx_orig(n), zx_d_orig(n)
     complex(8), intent(in) :: za_orig, za_d_orig
+    complex(8), intent(in) :: zx_orig(n), zx_d_orig(n)
     complex(8), intent(in) :: zx_d(n)
     logical, intent(out) :: passed
 
@@ -111,8 +111,8 @@ contains
     logical :: has_large_errors
     complex(8), dimension(n) :: zx_forward, zx_backward
     integer :: i, j
-    complex(8), dimension(n) :: zx
     complex(8) :: za
+    complex(8), dimension(n) :: zx
 
     max_error = 0.0e0
     has_large_errors = .false.
@@ -121,14 +121,14 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    zx = zx_orig + h * zx_d_orig
     za = za_orig + h * za_d_orig
+    zx = zx_orig + h * zx_d_orig
     call zscal(nsize, za, zx, 1)
     zx_forward = zx
 
     ! Backward perturbation: f(x - h)
-    zx = zx_orig - h * zx_d_orig
     za = za_orig - h * za_d_orig
+    zx = zx_orig - h * zx_d_orig
     call zscal(nsize, za, zx, 1)
     zx_backward = zx
 
@@ -157,7 +157,7 @@ contains
     write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
     passed = .not. has_large_errors
     if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
       write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if

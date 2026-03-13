@@ -23,8 +23,8 @@ program test_dsyr_vector_forward
     call run_test_for_size(n_test, passed, nbdirs)
     all_passed = all_passed .and. passed
   end do
-  if (all_passed) write(*,*) 'PASS: Vector forward - all sizes OK'
-  if (.not. all_passed) write(*,*) 'FAIL: Vector forward - derivative errors'
+  if (all_passed) write(*,*) 'PASS: All sizes completed successfully'
+  if (.not. all_passed) write(*,*) 'FAIL: One or more sizes had derivative errors'
 
 contains
 
@@ -107,14 +107,16 @@ contains
     real(8), intent(in) :: a_orig(n,n), a_dv_seed(nbdirs,n,n), a_dv(nbdirs,n,n)
     logical, intent(out) :: passed
     real(8), parameter :: h = 1.0e-7
-    real(8) :: abs_error, abs_ref, err_bound
     real(8), dimension(n,n) :: a_fwd, a_bwd
     real(8) :: alpha_t
     real(8), dimension(n) :: x_t
     real(8), dimension(n,n) :: a_t
     integer :: idir, i, j
     logical :: has_err
+    real(8) :: abs_error, abs_ref, err_bound, max_error, relative_error
     has_err = .false.
+    max_error = 0.0d0
+    write(*,*) 'Function calls completed successfully'
     write(*,*) 'Checking derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
     do idir = 1, nbdirs
@@ -134,12 +136,17 @@ contains
           abs_ref = abs(a_dv(idir,i,j))
           err_bound = 1.0e-5 + 1.0e-5 * abs_ref
           if (abs_error > err_bound) has_err = .true.
+          relative_error = 0.0d0
+          if (abs_ref > 1.0d-10) relative_error = abs_error / abs_ref
+          if (relative_error > max_error) max_error = relative_error
         end do
       end do
     end do
     passed = .not. has_err
-    if (has_err) write(*,*) 'FAIL: SYR/SYR2 vector derivatives'
-    if (.not. has_err) write(*,*) 'PASS: SYR/SYR2 vector derivatives'
+    write(*,*) 'Maximum relative error:', max_error
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
+    if (has_err) write(*,*) 'FAIL: Derivatives are outside tolerance'
+    if (.not. has_err) write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
   end subroutine check_derivatives_numerically
 
 end program test_dsyr_vector_forward

@@ -163,9 +163,6 @@ contains
     vjp_ad_b = sum(real(conjg(b_dir) * bb))
     vjp_ad_c = sum(real(conjg(c_dir) * cb))
     vjp_ad = vjp_ad + vjp_ad_a + vjp_ad_b + vjp_ad_c
-    write(*,*) 'VJP components: fd=', vjp_fd, ' ad=', vjp_ad
-    write(*,*) '  ad_alpha=', vjp_ad_alpha, ' ad_beta=', vjp_ad_beta
-    write(*,*) '  ad_A=', vjp_ad_a, ' ad_B=', vjp_ad_b, ' ad_C=', vjp_ad_c
     abs_error = abs(vjp_fd - vjp_ad)
     abs_reference = abs(vjp_ad)
     if (abs_reference > 1.0e-10) then
@@ -175,10 +172,9 @@ contains
     end if
     ref_c = abs(vjp_ad) + 1.0d0
     passed = (abs_error <= 1.0e-3 * ref_c)
-    write(*,*) ''
     write(*,*) 'Maximum relative error:', relative_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
-    if (.not. passed) write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
+    if (.not. passed) write(*,*) 'FAIL: Derivatives are outside tolerance'
     if (passed) write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
   end subroutine run_test_for_size
 end program test_chemm_reverse

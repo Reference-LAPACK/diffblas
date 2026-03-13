@@ -29,9 +29,9 @@ program test_zhemv_vector_reverse
     all_passed = all_passed .and. passed
   end do
   if (all_passed) then
-    write(*,*) 'PASS: Vector reverse mode - all sizes completed successfully'
+    write(*,*) 'PASS: All sizes completed successfully'
   else
-    write(*,*) 'FAIL: Vector reverse mode - one or more sizes had derivative errors'
+    write(*,*) 'FAIL: One or more sizes had derivative errors'
   end if
 
 contains
@@ -155,6 +155,10 @@ contains
     max_error = 0.0d0
     has_large_errors = .false.
 
+    write(*,*) 'Function calls completed successfully'
+    write(*,*) 'Checking derivatives against numerical differentiation:'
+    write(*,*) 'Step size h =', h
+
     do k = 1, nbdirs
       call random_number(temp_real)
       call random_number(temp_imag)
@@ -245,7 +249,7 @@ contains
     write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
     passed = .not. has_large_errors
     if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
       write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if

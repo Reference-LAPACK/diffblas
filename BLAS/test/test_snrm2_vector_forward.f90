@@ -45,9 +45,9 @@ program test_snrm2_vector_forward
     all_passed = all_passed .and. passed
   end do
   if (all_passed) then
-    write(*,*) 'PASS: Vector forward mode - all sizes completed successfully'
+    write(*,*) 'PASS: All sizes completed successfully'
   else
-    write(*,*) 'FAIL: Vector forward mode - one or more sizes had derivative errors'
+    write(*,*) 'FAIL: One or more sizes had derivative errors'
   end if
 
 contains
@@ -75,13 +75,13 @@ contains
       x_dv(idir,:) = x_dv(idir,:) * 2.0 - 1.0
     end do
 
-    write(*,*) 'Testing SNRM2 (Vector Forward Mode)'
     ! Store original values before any function calls
     x_orig = x
     x_dv_orig = x_dv
 
     ! Call the vector mode differentiated function
     call snrm2_dv(nsize, x, x_dv, incx_val, snrm2_result, snrm2_dv_result, nbdirs)
+    write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
     call check_derivatives_numerically(passed)
@@ -101,9 +101,8 @@ contains
     max_error = 0.0e0
     has_large_errors = .false.
 
-    write(*,*) 'Checking vector derivatives against numerical differentiation:'
+    write(*,*) 'Checking derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirs
 
     ! Test each derivative direction separately
     do idir = 1, nbdirs
@@ -129,13 +128,13 @@ contains
       max_error = max(max_error, relative_error)
     end do
 
-    write(*,*) 'Maximum relative error across all directions:', max_error
+    write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
     passed = .not. has_large_errors
     if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in vector derivatives (outside tolerance)'
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
-      write(*,*) 'PASS: Vector derivatives are within tolerance (rtol + atol)'
+      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if
   end subroutine check_derivatives_numerically
 

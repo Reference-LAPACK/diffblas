@@ -72,6 +72,8 @@ contains
     ap_d_seed = ap_d
     x_d_seed = x_d
     call ctpmv_d(uplo, trans, diag, nsize, ap, ap_d, x, x_d, incx_val)
+    write(*,*) 'Testing CTPMV (n =', n, ')'
+    write(*,*) 'Function calls completed successfully'
     call check_derivatives_numerically(n, npack, uplo, trans, diag, nsize, incx_val, ap_orig, ap_d_seed, x_orig, x_d_seed, x_d, passed)
     deallocate(ap, ap_d, x, x_d, ap_t, x_t, x_plus, x_minus, ap_d_seed, x_d_seed, ap_orig, x_orig)
   end subroutine run_test_for_size
@@ -122,7 +124,7 @@ contains
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
     passed = .not. has_err
-    if (has_err) write(*,*) 'FAIL: TPMV/TPSV scalar derivatives'
-    if (.not. has_err) write(*,*) 'PASS: TPMV/TPSV scalar derivatives'
+    if (has_err) write(*,*) 'FAIL: Derivatives are outside tolerance'
+    if (.not. has_err) write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
   end subroutine check_derivatives_numerically
 end program test_ctpmv

@@ -34,7 +34,7 @@ contains
     complex(4) :: beta, betab
     complex(4), dimension(:,:), allocatable :: a, ab
     complex(4), dimension(:), allocatable :: x, xb
-    complex(4), dimension(:), allocatable :: y, yb
+    complex(4), dimension(:), allocatable :: y, yb, yb_seed
     integer :: band_row, j
     real(4) :: temp_real, temp_imag
     ksize = max(0, n - 1)
@@ -46,7 +46,7 @@ contains
     trans = 'N'
     diag = 'N'
     allocate(a(lda_val, n), ab(lda_val, n), x(n), xb(n))
-    allocate(y(n), yb(n))
+    allocate(y(n), yb(n), yb_seed(n))
     ! Initialize a as Hermitian band matrix (upper band storage, real diagonal)
     do j = 1, n
     do band_row = max(1, ksize+2-j), ksize+1
@@ -77,71 +77,125 @@ contains
       y(j) = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(y))
     end do
     alphab = 0.0d0
-    xb = 0.0d0
     ab = 0.0d0
-    yb = 0.0d0
+    xb = 0.0d0
+    ! Seed for reverse mode: output adjoint yb is the seed (d(scalar)/d(y))
+    do j = 1, n
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      yb(j) = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(yb))
+    end do
+    yb_seed = yb
     write(*,*) 'Testing CHBMV (n =', n, ')'
     call set_ISIZE1OFX(n)
     call set_ISIZE2OFA(lda_val)
     call chbmv_b(uplo, nsize, ksize, alpha, alphab, a, ab, lda_val, x, xb, incx_val, beta, betab, y, yb, incy_val)
     call set_ISIZE1OFX(-1)
     call set_ISIZE2OFA(-1)
-    call check_vjp_numerically_band(n, lda_val, ksize, uplo, nsize, incx_val, incy_val, alpha, alphab, beta, betab, a, ab, x, xb, y, yb, passed)
+    write(*,*) 'Function calls completed successfully'
+    call check_vjp_numerically_band(n, lda_val, ksize, uplo, nsize, incx_val, incy_val, alpha, alphab, beta, betab, a, ab, x, xb, y, yb_seed, yb, passed)
     deallocate(a, ab, x, xb)
-    deallocate(y, yb)
+    deallocate(y, yb, yb_seed)
   end subroutine run_test_for_size
 
-  subroutine check_vjp_numerically_band(n, lda_val, ksize, uplo, nsize, incx_val, incy_val, alpha, alphab, beta, betab, a, ab, x, xb, y, yb, passed)
+  subroutine check_vjp_numerically_band(n, lda_val, ksize, uplo, nsize, incx_val, incy_val, alpha, alphab, beta, betab, a, ab, x, xb, y, yb_seed, yb, passed)
     implicit none
     integer, intent(in) :: n, lda_val, ksize, nsize, incx_val, incy_val
     character, intent(in) :: uplo
     complex(4), intent(in) :: alpha, alphab, beta, betab
-    complex(4), intent(in) :: a(lda_val, n), ab(lda_val, n), x(n), xb(n), y(n), yb(n)
+    complex(4), intent(in) :: a(lda_val, n), ab(lda_val, n), x(n), xb(n), y(n), yb_seed(n), yb(n)
     logical, intent(out) :: passed
-    real(4), parameter :: h = 1.0e-7
-    real(4) :: vjp_fd, vjp_ad, abs_error, abs_ref, err_bound
-    complex(4), dimension(n) :: y_plus, y_minus, y_t
-    complex(4) :: alpha_t
-    complex(4), dimension(n) :: x_t
-    complex(4), dimension(lda_val, n) :: a_t
+    real(4), parameter :: h = 1.0e-3
+    real(4) :: vjp_fd, vjp_ad, abs_error, abs_ref, err_bound, relative_error
+    complex(4), dimension(n) :: y_plus, y_minus, y_t, y_central_diff
+    complex(4) :: alpha_t, beta_t, alpha_dir, beta_dir
+    complex(4), dimension(n) :: x_t, x_dir, y_dir
+    complex(4), dimension(lda_val, n) :: a_t, a_dir
     real(4), dimension(:), allocatable :: temp_products
+    real(kind(0.0d0)) :: tr, ti
     integer :: i, j, band_row, n_products
-    allocate(temp_products(n + (ksize+1)*n + 2))
-    alpha_t = alpha + h * alphab
-    a_t = a + h * ab
-    x_t = x + h * xb
-    y_t = y + h * yb
-    call chbmv(uplo, nsize, ksize, alpha_t, a_t, lda_val, x_t, incx_val, beta, y_t, incy_val)
+    allocate(temp_products(n + n + n + (ksize+1)*n + 2))
+    ! Random direction for FD (direction^T @ adjoint)
+    call random_number(tr)
+    call random_number(ti)
+    alpha_dir = cmplx(tr*2.0d0-1.0d0, ti*2.0d0-1.0d0, kind=kind(alpha_dir))
+    call random_number(tr)
+    call random_number(ti)
+    beta_dir = cmplx(tr*2.0d0-1.0d0, ti*2.0d0-1.0d0, kind=kind(beta_dir))
+    do j = 1, n
+      do band_row = max(1, ksize+2-j), ksize+1
+        if (band_row .eq. ksize+1) then
+          call random_number(tr)
+          a_dir(band_row, j) = cmplx(tr*2.0d0-1.0d0, 0.0d0, kind=kind(a_dir))
+        else
+          call random_number(tr)
+          call random_number(ti)
+          a_dir(band_row, j) = cmplx(tr*2.0d0-1.0d0, ti*2.0d0-1.0d0, kind=kind(a_dir))
+        end if
+      end do
+    end do
+    do i = 1, n
+      call random_number(tr)
+      call random_number(ti)
+      x_dir(i) = cmplx(tr*2.0d0-1.0d0, ti*2.0d0-1.0d0, kind=kind(x_dir))
+      call random_number(tr)
+      call random_number(ti)
+      y_dir(i) = cmplx(tr*2.0d0-1.0d0, ti*2.0d0-1.0d0, kind=kind(y_dir))
+    end do
+    ! Forward perturbation: f(inputs + h*direction)
+    alpha_t = alpha + h * alpha_dir
+    beta_t = beta + h * beta_dir
+    a_t = a
+    do j = 1, n
+      do band_row = max(1, ksize+2-j), ksize+1
+        a_t(band_row, j) = a(band_row, j) + h * a_dir(band_row, j)
+      end do
+    end do
+    x_t = x + h * x_dir
+    y_t = y + h * y_dir
+    call chbmv(uplo, nsize, ksize, alpha_t, a_t, lda_val, x_t, incx_val, beta_t, y_t, incy_val)
     y_plus = y_t
-    alpha_t = alpha - h * alphab
-    a_t = a - h * ab
-    x_t = x - h * xb
-    y_t = y - h * yb
-    call chbmv(uplo, nsize, ksize, alpha_t, a_t, lda_val, x_t, incx_val, beta, y_t, incy_val)
+    ! Backward perturbation: f(inputs - h*direction)
+    alpha_t = alpha - h * alpha_dir
+    beta_t = beta - h * beta_dir
+    a_t = a
+    do j = 1, n
+      do band_row = max(1, ksize+2-j), ksize+1
+        a_t(band_row, j) = a(band_row, j) - h * a_dir(band_row, j)
+      end do
+    end do
+    x_t = x - h * x_dir
+    y_t = y - h * y_dir
+    call chbmv(uplo, nsize, ksize, alpha_t, a_t, lda_val, x_t, incx_val, beta_t, y_t, incy_val)
     y_minus = y_t
+    y_central_diff = (y_plus - y_minus) / (2.0d0 * h)
     vjp_fd = 0.0d0
     n_products = n
     do i = 1, n
-      temp_products(i) = real(conjg(yb(i)) * ((y_plus(i) - y_minus(i)) / (2.0d0 * h)))
+      temp_products(i) = real(conjg(yb_seed(i)) * y_central_diff(i))
     end do
     call sort_array(temp_products, n_products)
     do i = 1, n_products
       vjp_fd = vjp_fd + temp_products(i)
     end do
+    ! VJP(AD) = direction^T @ adjoint
     vjp_ad = 0.0d0
-    vjp_ad = vjp_ad + real(conjg(alphab) * alphab)
-    do i = 1, n
-      vjp_ad = vjp_ad + real(conjg(xb(i)) * xb(i))
-    end do
-    do i = 1, n
-      vjp_ad = vjp_ad + real(conjg(yb(i)) * yb(i))
-    end do
+    vjp_ad = vjp_ad + real(conjg(alpha_dir) * alphab)
+    vjp_ad = vjp_ad + real(conjg(beta_dir) * betab)
     n_products = 0
     do j = 1, n
       do band_row = max(1, ksize+2-j), ksize+1
         n_products = n_products + 1
-        temp_products(n_products) = real(conjg(ab(band_row,j)) * ab(band_row,j))
+        temp_products(n_products) = real(conjg(a_dir(band_row,j)) * ab(band_row,j))
       end do
+    end do
+    do i = 1, n
+      n_products = n_products + 1
+      temp_products(n_products) = real(conjg(x_dir(i)) * xb(i))
+    end do
+    do i = 1, n
+      n_products = n_products + 1
+      temp_products(n_products) = real(conjg(y_dir(i)) * yb(i))
     end do
     call sort_array(temp_products, n_products)
     do i = 1, n_products
@@ -149,11 +203,20 @@ contains
     end do
     abs_error = abs(vjp_fd - vjp_ad)
     abs_ref = abs(vjp_ad)
-    err_bound = 1.0e-5 + 1.0e-5 * abs_ref
-    passed = abs_error <= err_bound
+    err_bound = 1.0e-3 + 1.0e-3 * abs_ref
+    relative_error = 0.0d0
+    if (abs_ref > 1.0d-10) relative_error = abs_error / abs_ref
     deallocate(temp_products)
-    if (.not. passed) write(*,*) 'FAIL: Band VJP error'
-    if (passed) write(*,*) 'PASS: Band VJP within tolerance'
+    write(*,*) 'Checking derivatives against numerical differentiation:'
+    write(*,*) 'Step size h =', h
+    write(*,*) 'Maximum relative error:', relative_error
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    passed = abs_error <= err_bound
+    if (.not. passed) then
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
+    else
+      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
+    end if
   end subroutine check_vjp_numerically_band
   subroutine sort_array(arr, n)
     implicit none

@@ -71,7 +71,7 @@ contains
     real(8), intent(in) :: ap_orig(npack), ap_d(npack), ap_d_seed(npack)
     logical, intent(out) :: passed
     real(8), parameter :: h = 1.0e-7
-    real(8) :: abs_error, abs_ref, err_bound
+    real(8) :: abs_error, abs_ref, err_bound, max_error, relative_error
     real(8), dimension(npack) :: ap_fwd, ap_bwd, ap_t
     real(8) :: alpha_t
     real(8), dimension(n) :: x_t
@@ -88,14 +88,28 @@ contains
     ap_t = ap_orig - h * ap_d_seed
     call dspr(uplo, nsize, alpha_t, x_t, incx_val, ap_t)
     ap_bwd = ap_t
-    do ii = 1, min(3, npack)
+    has_err = .false.
+    max_error = 0.0e0
+    write(*,*) 'Function calls completed successfully'
+    write(*,*) 'Checking derivatives against numerical differentiation:'
+    write(*,*) 'Step size h =', h
+    do ii = 1, npack
       abs_error = abs((ap_fwd(ii) - ap_bwd(ii)) / (2.0e0 * h) - ap_d(ii))
       abs_ref = abs(ap_d(ii))
       err_bound = 1.0e-5 + 1.0e-5 * abs_ref
+      if (abs_error > max_error) max_error = abs_error
       if (abs_error > err_bound) has_err = .true.
     end do
+    relative_error = 0.0e0
+    abs_ref = maxval(abs(ap_d)) + 1.0e0
+    if (abs_ref > 1.0e-10) relative_error = max_error / abs_ref
+    write(*,*) 'Maximum relative error:', relative_error
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
     passed = .not. has_err
-    if (has_err) write(*,*) 'FAIL: SPR/SPR2 scalar derivatives'
-    if (.not. has_err) write(*,*) 'PASS: SPR/SPR2 scalar derivatives'
+    if (has_err) then
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
+    else
+      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
+    end if
   end subroutine check_derivatives_numerically
 end program test_dspr
