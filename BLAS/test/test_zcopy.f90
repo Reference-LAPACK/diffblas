@@ -11,17 +11,17 @@ program test_zcopy
 
   integer :: n_test
   integer :: seed_array(33)
-  integer :: test_sizes(1)
+  integer :: test_sizes(3)
   integer :: i
   logical :: passed, all_passed
 
   seed_array = 42
   call random_seed(put=seed_array)
 
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing ZCOPY (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -46,12 +46,12 @@ contains
     integer :: incy
 
     ! Derivative variables
-    complex(8), dimension(n) :: zy_d
     complex(8), dimension(n) :: zx_d
+    complex(8), dimension(n) :: zy_d
 
     ! Array restoration and derivative storage
-    complex(8), dimension(n) :: zy_orig, zy_d_orig
     complex(8), dimension(n) :: zx_orig, zx_d_orig
+    complex(8), dimension(n) :: zy_orig, zy_d_orig
     real(8) :: temp_re, temp_im  ! For complex random init
     integer :: i, j
 
@@ -74,19 +74,19 @@ contains
     do i = 1, n
       call random_number(temp_re)
       call random_number(temp_im)
-      zy_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
+      zx_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
     end do
     do i = 1, n
       call random_number(temp_re)
       call random_number(temp_im)
-      zx_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
+      zy_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
     end do
 
     ! Store _orig and _d_orig
-    zy_d_orig = zy_d
     zx_d_orig = zx_d
-    zy_orig = zy
+    zy_d_orig = zy_d
     zx_orig = zx
+    zy_orig = zy
 
     write(*,*) 'Testing ZCOPY (n =', n, ')'
 
@@ -96,6 +96,7 @@ contains
 
     ! Call the differentiated function
     call zcopy_d(nsize, zx, zx_d, 1, zy, zy_d, 1)
+    zx_d = zx_d_orig
 
     ! Reset ISIZE globals to uninitialized (-1)
     call set_ISIZE1OFZy(-1)

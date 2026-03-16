@@ -11,17 +11,17 @@ program test_sgemm
 
   integer :: n_test
   integer :: seed_array(33)
-  integer :: test_sizes(1)
+  integer :: test_sizes(3)
   integer :: i
   logical :: passed, all_passed
 
   seed_array = 42
   call random_seed(put=seed_array)
 
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing SGEMM (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -54,18 +54,18 @@ contains
     integer :: ldc_val
 
     ! Derivative variables
-    real(4), dimension(n,n) :: c_d
-    real(4) :: beta_d
     real(4) :: alpha_d
-    real(4), dimension(n,n) :: b_d
+    real(4), dimension(n,n) :: c_d
     real(4), dimension(n,n) :: a_d
+    real(4), dimension(n,n) :: b_d
+    real(4) :: beta_d
 
     ! Array restoration and derivative storage
-    real(4), dimension(n,n) :: c_orig, c_d_orig
-    real(4) :: beta_orig, beta_d_orig
     real(4) :: alpha_orig, alpha_d_orig
-    real(4), dimension(n,n) :: b_orig, b_d_orig
+    real(4), dimension(n,n) :: c_orig, c_d_orig
     real(4), dimension(n,n) :: a_orig, a_d_orig
+    real(4), dimension(n,n) :: b_orig, b_d_orig
+    real(4) :: beta_orig, beta_d_orig
     integer :: i, j
 
     transa = 'N'
@@ -89,43 +89,47 @@ contains
     c = c * 2.0d0 - 1.0d0  ! Scale to [-1,1]
 
     ! Initialize input derivatives
-    call random_number(c_d)
-    c_d = c_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-    call random_number(beta_d)
-    beta_d = beta_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(alpha_d)
     alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-    call random_number(b_d)
-    b_d = b_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(c_d)
+    c_d = c_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(a_d)
     a_d = a_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(b_d)
+    b_d = b_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(beta_d)
+    beta_d = beta_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
     ! Store _orig and _d_orig
-    c_d_orig = c_d
-    beta_d_orig = beta_d
     alpha_d_orig = alpha_d
-    b_d_orig = b_d
+    c_d_orig = c_d
     a_d_orig = a_d
-    c_orig = c
-    beta_orig = beta
+    b_d_orig = b_d
+    beta_d_orig = beta_d
     alpha_orig = alpha
-    b_orig = b
+    c_orig = c
     a_orig = a
+    b_orig = b
+    beta_orig = beta
 
     write(*,*) 'Testing SGEMM (n =', n, ')'
     c_orig = c
 
     ! Call the differentiated function
     call sgemm_d(transa, transb, msize, nsize, ksize, alpha, alpha_d, a, a_d, lda_val, b, b_d, ldb_val, beta, beta_d, c, c_d, ldc_val)
+    alpha_d = alpha_d_orig
+    a_d = a_d_orig
+    b_d = b_d_orig
+    beta_d = beta_d_orig
 
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, beta_orig, alpha_orig, b_orig, c_orig, a_orig, beta_d_orig, alpha_d_orig, b_d_orig, c_d_orig, a_d_orig, c_d, passed)
+    call check_derivatives_numerically(n, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, alpha_orig, c_orig, beta_orig, b_orig, a_orig, alpha_d_orig, c_d_orig, beta_d_orig, b_d_orig, a_d_orig, c_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, beta_orig, alpha_orig, b_orig, c_orig, a_orig, beta_d_orig, alpha_d_orig, b_d_orig, c_d_orig, a_d_orig, c_d, passed)
+  subroutine check_derivatives_numerically(n, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, alpha_orig, c_orig, beta_orig, b_orig, a_orig, alpha_d_orig, c_d_orig, beta_d_orig, b_d_orig, a_d_orig, c_d, passed)
     implicit none
     integer, intent(in) :: n
     character, intent(in) :: transa
@@ -136,10 +140,10 @@ contains
     integer, intent(in) :: lda_val
     integer, intent(in) :: ldb_val
     integer, intent(in) :: ldc_val
-    real(4), intent(in) :: beta_orig, beta_d_orig
     real(4), intent(in) :: alpha_orig, alpha_d_orig
-    real(4), intent(in) :: b_orig(n,n), b_d_orig(n,n)
     real(4), intent(in) :: c_orig(n,n), c_d_orig(n,n)
+    real(4), intent(in) :: beta_orig, beta_d_orig
+    real(4), intent(in) :: b_orig(n,n), b_d_orig(n,n)
     real(4), intent(in) :: a_orig(n,n), a_d_orig(n,n)
     real(4), intent(in) :: c_d(n,n)
     logical, intent(out) :: passed
@@ -151,10 +155,10 @@ contains
     logical :: has_large_errors
     real(4), dimension(n,n) :: c_forward, c_backward
     integer :: i, j
-    real(4) :: beta
     real(4) :: alpha
-    real(4), dimension(n,n) :: b
     real(4), dimension(n,n) :: c
+    real(4) :: beta
+    real(4), dimension(n,n) :: b
     real(4), dimension(n,n) :: a
 
     max_error = 0.0e0
@@ -164,19 +168,19 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    beta = beta_orig + h * beta_d_orig
     alpha = alpha_orig + h * alpha_d_orig
-    b = b_orig + h * b_d_orig
     c = c_orig + h * c_d_orig
+    beta = beta_orig + h * beta_d_orig
+    b = b_orig + h * b_d_orig
     a = a_orig + h * a_d_orig
     call sgemm(transa, transb, msize, nsize, ksize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)
     c_forward = c
 
     ! Backward perturbation: f(x - h)
-    beta = beta_orig - h * beta_d_orig
     alpha = alpha_orig - h * alpha_d_orig
-    b = b_orig - h * b_d_orig
     c = c_orig - h * c_d_orig
+    beta = beta_orig - h * beta_d_orig
+    b = b_orig - h * b_d_orig
     a = a_orig - h * a_d_orig
     call sgemm(transa, transb, msize, nsize, ksize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)
     c_backward = c

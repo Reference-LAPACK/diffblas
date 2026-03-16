@@ -12,17 +12,17 @@ program test_zgemv_vector_forward
   integer :: nbdirs
   integer :: n_test
   integer :: seed_array(33)
-  integer :: test_sizes(1)
+  integer :: test_sizes(3)
   integer :: i
   logical :: passed, all_passed
 
   seed_array = 42
   call random_seed(put=seed_array)
 
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing ZGEMV (Vector Forward, multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     nbdirs = test_sizes(i)
     call run_test_for_size(n_test, passed, nbdirs)

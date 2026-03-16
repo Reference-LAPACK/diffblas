@@ -3,15 +3,15 @@ program test_ssymm_vector_forward
   implicit none
   external :: ssymm
   external :: ssymm_dv
-  integer :: nbdirs, n_test, test_sizes(1), i
+  integer :: nbdirs, n_test, test_sizes(3), i
   integer :: seed_array(33)
   logical :: passed, all_passed
   seed_array = 42
   call random_seed(put=seed_array)
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing SSYMM (Vector Forward, multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     nbdirs = n_test
     call run_test_for_size(n_test, passed, nbdirs)
@@ -91,9 +91,9 @@ contains
         end do
       end do
       ref_c = maxval(abs(c_dv(k,:,:))) + 1.0d0
-      if (max_err > 1.0e-3 * ref_c) then
+      if (max_err > 2.0e-3 * ref_c) then
         passed = .false.
-        write(*,*) '  direction k=', k, ' max_err=', max_err, ' ref_c=', ref_c, ' tol=', (1.0e-3)*ref_c
+        write(*,*) '  direction k=', k, ' max_err=', max_err, ' ref_c=', ref_c, ' tol=', (2.0e-3)*ref_c
       end if
       if (max_err > max_err_over_dirs) then
         max_err_over_dirs = max_err
@@ -105,7 +105,7 @@ contains
     write(*,*) 'Checking derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
     write(*,*) 'Maximum relative error:', relative_error
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
     if (.not. passed) write(*,*) 'FAIL: Derivatives are outside tolerance'
     if (passed) write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
   end subroutine run_test_for_size

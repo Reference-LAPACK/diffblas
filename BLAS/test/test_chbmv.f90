@@ -7,14 +7,14 @@ program test_chbmv
   implicit none
   external :: chbmv
   external :: chbmv_d
-  integer :: n_test, seed_array(33), test_sizes(1), i
+  integer :: n_test, seed_array(33), test_sizes(3), i
   logical :: passed, all_passed
   seed_array = 42
   call random_seed(put=seed_array)
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing CHBMV (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -111,6 +111,11 @@ contains
     beta_orig = beta
     beta_d_seed = beta_d
     call chbmv_d(uplo, nsize, ksize, alpha, alpha_d, a, a_d, lda_val, x, x_d, incx_val, beta, beta_d, y, y_d, incy_val)
+    ! Reset input derivative vars from seeds; output derivative (x_d or y_d) keeps AD result
+    a_d = a_d_seed
+    x_d = x_d_seed
+    alpha_d = alpha_d_seed
+    beta_d = beta_d_seed
     write(*,*) 'Function calls completed successfully'
     call check_derivatives_numerically_band(n, lda_val, ksize, uplo, nsize, incx_val, incy_val, alpha_orig, alpha_d_seed, beta_orig, beta_d_seed, a_orig, a_d_seed, x_orig, x_d_seed, y_orig, y_d_seed, y_d, passed)
     deallocate(a, a_d, a_orig, a_d_seed, x, x_d, x_orig, x_d_seed)

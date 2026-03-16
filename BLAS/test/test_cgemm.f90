@@ -11,17 +11,17 @@ program test_cgemm
 
   integer :: n_test
   integer :: seed_array(33)
-  integer :: test_sizes(1)
+  integer :: test_sizes(3)
   integer :: i
   logical :: passed, all_passed
 
   seed_array = 42
   call random_seed(put=seed_array)
 
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing CGEMM (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -54,18 +54,18 @@ contains
     integer :: ldc_val
 
     ! Derivative variables
-    complex(4), dimension(n,n) :: c_d
-    complex(4) :: beta_d
     complex(4) :: alpha_d
-    complex(4), dimension(n,n) :: b_d
+    complex(4), dimension(n,n) :: c_d
     complex(4), dimension(n,n) :: a_d
+    complex(4), dimension(n,n) :: b_d
+    complex(4) :: beta_d
 
     ! Array restoration and derivative storage
-    complex(4), dimension(n,n) :: c_orig, c_d_orig
-    complex(4) :: beta_orig, beta_d_orig
     complex(4) :: alpha_orig, alpha_d_orig
-    complex(4), dimension(n,n) :: b_orig, b_d_orig
+    complex(4), dimension(n,n) :: c_orig, c_d_orig
     complex(4), dimension(n,n) :: a_orig, a_d_orig
+    complex(4), dimension(n,n) :: b_orig, b_d_orig
+    complex(4) :: beta_orig, beta_d_orig
     real(4) :: temp_re, temp_im  ! For complex random init
     integer :: i, j
 
@@ -97,46 +97,50 @@ contains
     ! Initialize input derivatives
     call random_number(temp_re)
     call random_number(temp_im)
+    alpha_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
+    call random_number(temp_re)
+    call random_number(temp_im)
     c_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
     call random_number(temp_re)
     call random_number(temp_im)
-    beta_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
-    call random_number(temp_re)
-    call random_number(temp_im)
-    alpha_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
+    a_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
     call random_number(temp_re)
     call random_number(temp_im)
     b_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
     call random_number(temp_re)
     call random_number(temp_im)
-    a_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
+    beta_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
 
     ! Store _orig and _d_orig
-    c_d_orig = c_d
-    beta_d_orig = beta_d
     alpha_d_orig = alpha_d
-    b_d_orig = b_d
+    c_d_orig = c_d
     a_d_orig = a_d
-    c_orig = c
-    beta_orig = beta
+    b_d_orig = b_d
+    beta_d_orig = beta_d
     alpha_orig = alpha
-    b_orig = b
+    c_orig = c
     a_orig = a
+    b_orig = b
+    beta_orig = beta
 
     write(*,*) 'Testing CGEMM (n =', n, ')'
     c_orig = c
 
     ! Call the differentiated function
     call cgemm_d(transa, transb, msize, nsize, ksize, alpha, alpha_d, a, a_d, lda_val, b, b_d, ldb_val, beta, beta_d, c, c_d, ldc_val)
+    alpha_d = alpha_d_orig
+    a_d = a_d_orig
+    b_d = b_d_orig
+    beta_d = beta_d_orig
 
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, beta_orig, alpha_orig, b_orig, c_orig, a_orig, beta_d_orig, alpha_d_orig, b_d_orig, c_d_orig, a_d_orig, c_d, passed)
+    call check_derivatives_numerically(n, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, alpha_orig, c_orig, beta_orig, b_orig, a_orig, alpha_d_orig, c_d_orig, beta_d_orig, b_d_orig, a_d_orig, c_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, beta_orig, alpha_orig, b_orig, c_orig, a_orig, beta_d_orig, alpha_d_orig, b_d_orig, c_d_orig, a_d_orig, c_d, passed)
+  subroutine check_derivatives_numerically(n, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, alpha_orig, c_orig, beta_orig, b_orig, a_orig, alpha_d_orig, c_d_orig, beta_d_orig, b_d_orig, a_d_orig, c_d, passed)
     implicit none
     integer, intent(in) :: n
     character, intent(in) :: transa
@@ -147,10 +151,10 @@ contains
     integer, intent(in) :: lda_val
     integer, intent(in) :: ldb_val
     integer, intent(in) :: ldc_val
-    complex(4), intent(in) :: beta_orig, beta_d_orig
     complex(4), intent(in) :: alpha_orig, alpha_d_orig
-    complex(4), intent(in) :: b_orig(n,n), b_d_orig(n,n)
     complex(4), intent(in) :: c_orig(n,n), c_d_orig(n,n)
+    complex(4), intent(in) :: beta_orig, beta_d_orig
+    complex(4), intent(in) :: b_orig(n,n), b_d_orig(n,n)
     complex(4), intent(in) :: a_orig(n,n), a_d_orig(n,n)
     complex(4), intent(in) :: c_d(n,n)
     logical, intent(out) :: passed
@@ -162,10 +166,10 @@ contains
     logical :: has_large_errors
     complex(4), dimension(n,n) :: c_forward, c_backward
     integer :: i, j
-    complex(4) :: beta
     complex(4) :: alpha
-    complex(4), dimension(n,n) :: b
     complex(4), dimension(n,n) :: c
+    complex(4) :: beta
+    complex(4), dimension(n,n) :: b
     complex(4), dimension(n,n) :: a
 
     max_error = 0.0e0
@@ -175,19 +179,19 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    beta = beta_orig + h * beta_d_orig
     alpha = alpha_orig + h * alpha_d_orig
-    b = b_orig + h * b_d_orig
     c = c_orig + h * c_d_orig
+    beta = beta_orig + h * beta_d_orig
+    b = b_orig + h * b_d_orig
     a = a_orig + h * a_d_orig
     call cgemm(transa, transb, msize, nsize, ksize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)
     c_forward = c
 
     ! Backward perturbation: f(x - h)
-    beta = beta_orig - h * beta_d_orig
     alpha = alpha_orig - h * alpha_d_orig
-    b = b_orig - h * b_d_orig
     c = c_orig - h * c_d_orig
+    beta = beta_orig - h * beta_d_orig
+    b = b_orig - h * b_d_orig
     a = a_orig - h * a_d_orig
     call cgemm(transa, transb, msize, nsize, ksize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)
     c_backward = c

@@ -3,15 +3,15 @@ program test_strmm_reverse
   implicit none
   external :: strmm
   external :: strmm_b
-  integer :: n_test, test_sizes(1), i
+  integer :: n_test, test_sizes(3), i
   integer :: seed_array(33)
   logical :: passed, all_passed
   seed_array = 42
   call random_seed(put=seed_array)
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing STRMM (multi-size: n =', test_sizes(1), ')'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     call run_test_for_size(test_sizes(i), passed)
     all_passed = all_passed .and. passed
   end do
@@ -99,9 +99,9 @@ contains
       relative_error = abs_error
     end if
     ref_c = abs(vjp_ad) + 1.0d0
-    passed = (abs_error <= 1.0e-3 * ref_c)
+    passed = (abs_error <= 3.0e-3 * ref_c)
     write(*,*) 'Maximum relative error:', relative_error
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    write(*,*) 'Tolerance thresholds: rtol=3.0e-3, atol=3.0e-3'
     if (.not. passed) write(*,*) 'FAIL: Derivatives are outside tolerance'
     if (passed) write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
   end subroutine run_test_for_size

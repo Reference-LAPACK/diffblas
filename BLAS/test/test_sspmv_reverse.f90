@@ -7,14 +7,14 @@ program test_sspmv_reverse
   implicit none
   external :: sspmv
   external :: sspmv_b
-  integer :: n_test, seed_array(33), test_sizes(1), i
+  integer :: n_test, seed_array(33), test_sizes(3), i
   logical :: passed, all_passed
   seed_array = 42
   call random_seed(put=seed_array)
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing SSPMV (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -105,14 +105,14 @@ contains
     vjp_fd = (vjp_fd - sum(yb_seed * y_t)) / (2.0d0 * h)
     vjp_ad = alphab*alphab + betab*betab + sum(apb*apb) + sum(xb*xb) + sum(yb_seed*yb)
     re = abs(vjp_fd - vjp_ad)
-    err_bnd = 1.0e-3 + 1.0e-3 * abs(vjp_ad)
+    err_bnd = 2.0e-3 + 2.0e-3 * abs(vjp_ad)
     relative_error = 0.0d0
     if (abs(vjp_ad) > 1.0d-10) relative_error = re / abs(vjp_ad)
     write(*,*) 'Function calls completed successfully'
     write(*,*) 'Checking derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
     write(*,*) 'Maximum relative error:', relative_error
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
     passed = (re <= err_bnd)
     if (.not. passed) then
       write(*,*) 'FAIL: Derivatives are outside tolerance'

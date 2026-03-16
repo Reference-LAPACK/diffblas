@@ -11,17 +11,17 @@ program test_cdotc
 
   integer :: n_test
   integer :: seed_array(33)
-  integer :: test_sizes(1)
+  integer :: test_sizes(3)
   integer :: i
   logical :: passed, all_passed
 
   seed_array = 42
   call random_seed(put=seed_array)
 
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing CDOTC (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -46,13 +46,13 @@ contains
     integer :: incy
 
     ! Derivative variables
-    complex(4) :: cdotc_d_result  ! Derivative of function result (avoid name clash with func_d)
     complex(4), dimension(n) :: cx_d
+    complex(4) :: cdotc_d_result  ! Derivative of function result (avoid name clash with func_d)
     complex(4), dimension(n) :: cy_d
 
     ! Array restoration and derivative storage
-    complex(4) :: cdotc_orig  ! Function result (no _d_orig - use _d_result)
     complex(4), dimension(n) :: cx_orig, cx_d_orig
+    complex(4) :: cdotc_orig  ! Function result (no _d_orig - use _d_result)
     complex(4), dimension(n) :: cy_orig, cy_d_orig
     real(4) :: temp_re, temp_im  ! For complex random init
     integer :: i, j
@@ -87,14 +87,16 @@ contains
     ! Store _orig and _d_orig
     cx_d_orig = cx_d
     cy_d_orig = cy_d
-    cdotc_orig = cdotc(nsize, cx, 1, cy, 1)
     cx_orig = cx
+    cdotc_orig = cdotc(nsize, cx, 1, cy, 1)
     cy_orig = cy
 
     write(*,*) 'Testing CDOTC (n =', n, ')'
 
     ! Call the differentiated function
     cdotc_d_result = cdotc_d(nsize, cx, cx_d, 1, cy, cy_d, 1, cdotc_orig)
+    cx_d = cx_d_orig
+    cy_d = cy_d_orig
 
     write(*,*) 'Function calls completed successfully'
 

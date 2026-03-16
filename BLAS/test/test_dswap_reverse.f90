@@ -11,17 +11,17 @@ program test_dswap_reverse
 
   integer :: n_test
   integer :: seed_array(33)
-  integer :: test_sizes(1)
+  integer :: test_sizes(3)
   integer :: i
   logical :: passed, all_passed
 
   seed_array = 42
   call random_seed(put=seed_array)
 
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing DSWAP (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -103,8 +103,8 @@ contains
     real(8), dimension(n) :: dx_dir
     real(8), dimension(n) :: dy_dir
 
-    real(8), dimension(n) :: dy_plus, dy_minus, dy_central_diff
     real(8), dimension(n) :: dx_plus, dx_minus, dx_central_diff
+    real(8), dimension(n) :: dy_plus, dy_minus, dy_central_diff
 
     real(8), dimension(n) :: dx
     real(8), dimension(n) :: dy
@@ -124,22 +124,22 @@ contains
     dx = dx_orig + h * dx_dir
     dy = dy_orig + h * dy_dir
     call dswap(nsize, dx, incx_val, dy, incy_val)
-    dy_plus = dy
     dx_plus = dx
+    dy_plus = dy
 
     dx = dx_orig - h * dx_dir
     dy = dy_orig - h * dy_dir
     call dswap(nsize, dx, incx_val, dy, incy_val)
-    dy_minus = dy
     dx_minus = dx
+    dy_minus = dy
 
-    dy_central_diff = (dy_plus - dy_minus) / (2.0 * h)
     dx_central_diff = (dx_plus - dx_minus) / (2.0 * h)
+    dy_central_diff = (dy_plus - dy_minus) / (2.0 * h)
 
     vjp_fd = 0.0
     n_products = n
     do i = 1, n
-      temp_products(i) = dyb_orig(i) * dy_central_diff(i)
+      temp_products(i) = dxb_orig(i) * dx_central_diff(i)
     end do
     call sort_array(temp_products, n_products)
     do i = 1, n_products
@@ -147,7 +147,7 @@ contains
     end do
     n_products = n
     do i = 1, n
-      temp_products(i) = dxb_orig(i) * dx_central_diff(i)
+      temp_products(i) = dyb_orig(i) * dy_central_diff(i)
     end do
     call sort_array(temp_products, n_products)
     do i = 1, n_products

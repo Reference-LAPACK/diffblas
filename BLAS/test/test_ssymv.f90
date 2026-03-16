@@ -11,17 +11,17 @@ program test_ssymv
 
   integer :: n_test
   integer :: seed_array(33)
-  integer :: test_sizes(1)
+  integer :: test_sizes(3)
   integer :: i
   logical :: passed, all_passed
 
   seed_array = 42
   call random_seed(put=seed_array)
 
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing SSYMV (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -51,18 +51,18 @@ contains
     integer :: incy
 
     ! Derivative variables
-    real(4) :: beta_d
     real(4) :: alpha_d
-    real(4), dimension(n,n) :: a_d
-    real(4), dimension(n) :: x_d
+    real(4) :: beta_d
     real(4), dimension(n) :: y_d
+    real(4), dimension(n) :: x_d
+    real(4), dimension(n,n) :: a_d
 
     ! Array restoration and derivative storage
-    real(4) :: beta_orig, beta_d_orig
     real(4) :: alpha_orig, alpha_d_orig
-    real(4), dimension(n,n) :: a_orig, a_d_orig
-    real(4), dimension(n) :: x_orig, x_d_orig
+    real(4) :: beta_orig, beta_d_orig
     real(4), dimension(n) :: y_orig, y_d_orig
+    real(4), dimension(n) :: x_orig, x_d_orig
+    real(4), dimension(n,n) :: a_orig, a_d_orig
     integer :: i, j
 
     uplo = 'U'
@@ -83,53 +83,57 @@ contains
     y = y * 2.0d0 - 1.0d0  ! Scale to [-1,1]
 
     ! Initialize input derivatives
-    call random_number(beta_d)
-    beta_d = beta_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(alpha_d)
     alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-    call random_number(a_d)
-    a_d = a_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-    call random_number(x_d)
-    x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(beta_d)
+    beta_d = beta_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(y_d)
     y_d = y_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(x_d)
+    x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(a_d)
+    a_d = a_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
     ! Store _orig and _d_orig
-    beta_d_orig = beta_d
     alpha_d_orig = alpha_d
-    a_d_orig = a_d
-    x_d_orig = x_d
+    beta_d_orig = beta_d
     y_d_orig = y_d
-    beta_orig = beta
+    x_d_orig = x_d
+    a_d_orig = a_d
     alpha_orig = alpha
-    a_orig = a
-    x_orig = x
+    beta_orig = beta
     y_orig = y
+    x_orig = x
+    a_orig = a
 
     write(*,*) 'Testing SSYMV (n =', n, ')'
     y_orig = y
 
     ! Call the differentiated function
     call ssymv_d(uplo, nsize, alpha, alpha_d, a, a_d, lda_val, x, x_d, 1, beta, beta_d, y, y_d, 1)
+    alpha_d = alpha_d_orig
+    beta_d = beta_d_orig
+    x_d = x_d_orig
+    a_d = a_d_orig
 
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, uplo, nsize, lda_val, beta_orig, alpha_orig, a_orig, x_orig, y_orig, beta_d_orig, alpha_d_orig, a_d_orig, x_d_orig, y_d_orig, y_d, passed)
+    call check_derivatives_numerically(n, uplo, nsize, lda_val, alpha_orig, a_orig, x_orig, y_orig, beta_orig, alpha_d_orig, a_d_orig, x_d_orig, y_d_orig, beta_d_orig, y_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, uplo, nsize, lda_val, beta_orig, alpha_orig, a_orig, x_orig, y_orig, beta_d_orig, alpha_d_orig, a_d_orig, x_d_orig, y_d_orig, y_d, passed)
+  subroutine check_derivatives_numerically(n, uplo, nsize, lda_val, alpha_orig, a_orig, x_orig, y_orig, beta_orig, alpha_d_orig, a_d_orig, x_d_orig, y_d_orig, beta_d_orig, y_d, passed)
     implicit none
     integer, intent(in) :: n
     character, intent(in) :: uplo
     integer, intent(in) :: nsize
     integer, intent(in) :: lda_val
-    real(4), intent(in) :: beta_orig, beta_d_orig
     real(4), intent(in) :: alpha_orig, alpha_d_orig
     real(4), intent(in) :: a_orig(n,n), a_d_orig(n,n)
     real(4), intent(in) :: x_orig(n), x_d_orig(n)
     real(4), intent(in) :: y_orig(n), y_d_orig(n)
+    real(4), intent(in) :: beta_orig, beta_d_orig
     real(4), intent(in) :: y_d(n)
     logical, intent(out) :: passed
 
@@ -140,11 +144,11 @@ contains
     logical :: has_large_errors
     real(4), dimension(n) :: y_forward, y_backward
     integer :: i, j
-    real(4) :: beta
     real(4) :: alpha
     real(4), dimension(n,n) :: a
     real(4), dimension(n) :: x
     real(4), dimension(n) :: y
+    real(4) :: beta
 
     max_error = 0.0e0
     has_large_errors = .false.
@@ -153,20 +157,20 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    beta = beta_orig + h * beta_d_orig
     alpha = alpha_orig + h * alpha_d_orig
     a = a_orig + h * a_d_orig
     x = x_orig + h * x_d_orig
     y = y_orig + h * y_d_orig
+    beta = beta_orig + h * beta_d_orig
     call ssymv(uplo, nsize, alpha, a, lda_val, x, 1, beta, y, 1)
     y_forward = y
 
     ! Backward perturbation: f(x - h)
-    beta = beta_orig - h * beta_d_orig
     alpha = alpha_orig - h * alpha_d_orig
     a = a_orig - h * a_d_orig
     x = x_orig - h * x_d_orig
     y = y_orig - h * y_d_orig
+    beta = beta_orig - h * beta_d_orig
     call ssymv(uplo, nsize, alpha, a, lda_val, x, 1, beta, y, 1)
     y_backward = y
 

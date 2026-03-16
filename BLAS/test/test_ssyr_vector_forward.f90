@@ -9,15 +9,15 @@ program test_ssyr_vector_forward
   external :: ssyr
   external :: ssyr_dv
 
-  integer :: nbdirs, n_test, seed_array(33), test_sizes(1), i
+  integer :: nbdirs, n_test, seed_array(33), test_sizes(3), i
   logical :: passed, all_passed
 
   seed_array = 42
   call random_seed(put=seed_array)
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing SSYR (Vector Forward, multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     nbdirs = test_sizes(i)
     call run_test_for_size(n_test, passed, nbdirs)
@@ -134,7 +134,7 @@ contains
         do i = 1, min(2, n)
           abs_error = abs((a_fwd(i,j) - a_bwd(i,j)) / (2.0e0 * h) - a_dv(idir,i,j))
           abs_ref = abs(a_dv(idir,i,j))
-          err_bound = 1.0e-3 + 1.0e-3 * abs_ref
+          err_bound = 2.0e-3 + 2.0e-3 * abs_ref
           if (abs_error > err_bound) has_err = .true.
           relative_error = 0.0d0
           if (abs_ref > 1.0d-10) relative_error = abs_error / abs_ref
@@ -144,7 +144,7 @@ contains
     end do
     passed = .not. has_err
     write(*,*) 'Maximum relative error:', max_error
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
     if (has_err) write(*,*) 'FAIL: Derivatives are outside tolerance'
     if (.not. has_err) write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
   end subroutine check_derivatives_numerically

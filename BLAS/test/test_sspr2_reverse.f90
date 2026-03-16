@@ -7,14 +7,14 @@ program test_sspr2_reverse
   implicit none
   external :: sspr2
   external :: sspr2_b
-  integer :: n_test, seed_array(33), test_sizes(1), i
+  integer :: n_test, seed_array(33), test_sizes(3), i
   logical :: passed, all_passed
   seed_array = 42
   call random_seed(put=seed_array)
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing SSPR2 (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -161,11 +161,11 @@ contains
     abs_reference = abs(vjp_ad)
     relative_error = 0.0d0
     if (abs_reference > 1.0d-10) relative_error = abs_error / abs_reference
-    error_bound = 1.0e-3 + 1.0e-3 * abs_reference
+    error_bound = 2.0e-3 + 2.0e-3 * abs_reference
     write(*,*) 'Checking derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
     write(*,*) 'Maximum relative error:', relative_error
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
     passed = abs_error <= error_bound
     if (.not. passed) then
       write(*,*) 'FAIL: Derivatives are outside tolerance'

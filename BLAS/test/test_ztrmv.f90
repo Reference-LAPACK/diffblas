@@ -11,17 +11,17 @@ program test_ztrmv
 
   integer :: n_test
   integer :: seed_array(33)
-  integer :: test_sizes(1)
+  integer :: test_sizes(3)
   integer :: i
   logical :: passed, all_passed
 
   seed_array = 42
   call random_seed(put=seed_array)
 
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing ZTRMV (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -95,15 +95,16 @@ contains
 
     ! Call the differentiated function
     call ztrmv_d(uplo, trans, diag, nsize, a, a_d, lda_val, x, x_d, 1)
+    a_d = a_d_orig
 
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, trans, uplo, diag, nsize, lda_val, a_orig, x_orig, a_d_orig, x_d_orig, x_d, passed)
+    call check_derivatives_numerically(n, trans, uplo, diag, nsize, lda_val, x_orig, a_orig, x_d_orig, a_d_orig, x_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, trans, uplo, diag, nsize, lda_val, a_orig, x_orig, a_d_orig, x_d_orig, x_d, passed)
+  subroutine check_derivatives_numerically(n, trans, uplo, diag, nsize, lda_val, x_orig, a_orig, x_d_orig, a_d_orig, x_d, passed)
     implicit none
     integer, intent(in) :: n
     character, intent(in) :: trans
@@ -111,8 +112,8 @@ contains
     character, intent(in) :: diag
     integer, intent(in) :: nsize
     integer, intent(in) :: lda_val
-    complex(8), intent(in) :: a_orig(n,n), a_d_orig(n,n)
     complex(8), intent(in) :: x_orig(n), x_d_orig(n)
+    complex(8), intent(in) :: a_orig(n,n), a_d_orig(n,n)
     complex(8), intent(in) :: x_d(n)
     logical, intent(out) :: passed
 
@@ -123,8 +124,8 @@ contains
     logical :: has_large_errors
     complex(8), dimension(n) :: x_forward, x_backward
     integer :: i, j
-    complex(8), dimension(n,n) :: a
     complex(8), dimension(n) :: x
+    complex(8), dimension(n,n) :: a
 
     max_error = 0.0e0
     has_large_errors = .false.
@@ -133,14 +134,14 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    a = a_orig + h * a_d_orig
     x = x_orig + h * x_d_orig
+    a = a_orig + h * a_d_orig
     call ztrmv(uplo, trans, diag, nsize, a, lda_val, x, 1)
     x_forward = x
 
     ! Backward perturbation: f(x - h)
-    a = a_orig - h * a_d_orig
     x = x_orig - h * x_d_orig
+    a = a_orig - h * a_d_orig
     call ztrmv(uplo, trans, diag, nsize, a, lda_val, x, 1)
     x_backward = x
 

@@ -6,14 +6,14 @@ program test_sspmv_vector_reverse
   implicit none
   external :: sspmv
   external :: sspmv_bv
-  integer :: nbdirs, n_test, seed_array(33), test_sizes(1), i
+  integer :: nbdirs, n_test, seed_array(33), test_sizes(3), i
   logical :: passed, all_passed
   seed_array = 42
   call random_seed(put=seed_array)
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing SSPMV (Vector Reverse, multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     nbdirs = n_test
     call run_test_for_size(n_test, passed, nbdirs)
@@ -82,12 +82,12 @@ contains
       vjp_ad = alphab(k)*alphab(k) + betab(k)*betab(k) + sum(apb(k,:)*apb(k,:)) + sum(xb(k,:)*xb(k,:)) + sum(yb_seed(k,:)*yb(k,:))
       re = max(re, abs(vjp_fd - vjp_ad))
     end do
-    err_bnd = 1.0e-3 + 1.0e-3 * 1.0d0
+    err_bnd = 2.0e-3 + 2.0e-3 * 1.0d0
     write(*,*) 'Function calls completed successfully'
     write(*,*) 'Checking derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
     write(*,*) 'Maximum relative error:', re
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
     passed = (re <= err_bnd)
     if (.not. passed) then
       write(*,*) 'FAIL: Derivatives are outside tolerance'

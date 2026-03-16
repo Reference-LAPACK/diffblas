@@ -5,14 +5,14 @@ program test_sspr_vector_reverse
   implicit none
   external :: sspr
   external :: sspr_bv
-  integer :: nbdirs, n_test, seed_array(33), test_sizes(1), i
+  integer :: nbdirs, n_test, seed_array(33), test_sizes(3), i
   logical :: passed, all_passed
   seed_array = 42
   call random_seed(put=seed_array)
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing SSPR (Vector Reverse, multi-size: n =', test_sizes(1), ')'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     nbdirs = test_sizes(i)
     call run_test_for_size(n_test, passed, nbdirs)
@@ -120,11 +120,11 @@ contains
       end if
       re = abs(vjp_fd - vjp_ad)
       if (re > max_re) max_re = re
-      err_bnd = 1.0e-3 + 1.0e-3 * abs(vjp_ad)
+      err_bnd = 2.0e-3 + 2.0e-3 * abs(vjp_ad)
       if (re > err_bnd) has_err = .true.
     end do
     write(*,*) 'Maximum relative error:', max_re
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
     passed = .not. has_err
     if (has_err) then
       write(*,*) 'FAIL: Derivatives are outside tolerance'

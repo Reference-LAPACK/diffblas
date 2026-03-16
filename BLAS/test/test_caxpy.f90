@@ -11,17 +11,17 @@ program test_caxpy
 
   integer :: n_test
   integer :: seed_array(33)
-  integer :: test_sizes(1)
+  integer :: test_sizes(3)
   integer :: i
   logical :: passed, all_passed
 
   seed_array = 42
   call random_seed(put=seed_array)
 
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing CAXPY (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -48,13 +48,13 @@ contains
 
     ! Derivative variables
     complex(4), dimension(n) :: cx_d
-    complex(4), dimension(n) :: cy_d
     complex(4) :: ca_d
+    complex(4), dimension(n) :: cy_d
 
     ! Array restoration and derivative storage
     complex(4), dimension(n) :: cx_orig, cx_d_orig
-    complex(4), dimension(n) :: cy_orig, cy_d_orig
     complex(4) :: ca_orig, ca_d_orig
+    complex(4), dimension(n) :: cy_orig, cy_d_orig
     real(4) :: temp_re, temp_im  ! For complex random init
     integer :: i, j
 
@@ -82,42 +82,44 @@ contains
       call random_number(temp_im)
       cx_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
     end do
+    call random_number(temp_re)
+    call random_number(temp_im)
+    ca_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
     do i = 1, n
       call random_number(temp_re)
       call random_number(temp_im)
       cy_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
     end do
-    call random_number(temp_re)
-    call random_number(temp_im)
-    ca_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
 
     ! Store _orig and _d_orig
     cx_d_orig = cx_d
-    cy_d_orig = cy_d
     ca_d_orig = ca_d
+    cy_d_orig = cy_d
     cx_orig = cx
-    cy_orig = cy
     ca_orig = ca
+    cy_orig = cy
 
     write(*,*) 'Testing CAXPY (n =', n, ')'
     cy_orig = cy
 
     ! Call the differentiated function
     call caxpy_d(nsize, ca, ca_d, cx, cx_d, 1, cy, cy_d, 1)
+    cx_d = cx_d_orig
+    ca_d = ca_d_orig
 
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, nsize, cx_orig, cy_orig, ca_orig, cx_d_orig, cy_d_orig, ca_d_orig, cy_d, passed)
+    call check_derivatives_numerically(n, nsize, cy_orig, cx_orig, ca_orig, cy_d_orig, cx_d_orig, ca_d_orig, cy_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, nsize, cx_orig, cy_orig, ca_orig, cx_d_orig, cy_d_orig, ca_d_orig, cy_d, passed)
+  subroutine check_derivatives_numerically(n, nsize, cy_orig, cx_orig, ca_orig, cy_d_orig, cx_d_orig, ca_d_orig, cy_d, passed)
     implicit none
     integer, intent(in) :: n
     integer, intent(in) :: nsize
-    complex(4), intent(in) :: cx_orig(n), cx_d_orig(n)
     complex(4), intent(in) :: cy_orig(n), cy_d_orig(n)
+    complex(4), intent(in) :: cx_orig(n), cx_d_orig(n)
     complex(4), intent(in) :: ca_orig, ca_d_orig
     complex(4), intent(in) :: cy_d(n)
     logical, intent(out) :: passed
@@ -129,8 +131,8 @@ contains
     logical :: has_large_errors
     complex(4), dimension(n) :: cy_forward, cy_backward
     integer :: i, j
-    complex(4), dimension(n) :: cx
     complex(4), dimension(n) :: cy
+    complex(4), dimension(n) :: cx
     complex(4) :: ca
 
     max_error = 0.0e0
@@ -140,15 +142,15 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    cx = cx_orig + h * cx_d_orig
     cy = cy_orig + h * cy_d_orig
+    cx = cx_orig + h * cx_d_orig
     ca = ca_orig + h * ca_d_orig
     call caxpy(nsize, ca, cx, 1, cy, 1)
     cy_forward = cy
 
     ! Backward perturbation: f(x - h)
-    cx = cx_orig - h * cx_d_orig
     cy = cy_orig - h * cy_d_orig
+    cx = cx_orig - h * cx_d_orig
     ca = ca_orig - h * ca_d_orig
     call caxpy(nsize, ca, cx, 1, cy, 1)
     cy_backward = cy

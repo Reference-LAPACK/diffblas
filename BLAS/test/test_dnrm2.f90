@@ -11,17 +11,17 @@ program test_dnrm2
 
   integer :: n_test
   integer :: seed_array(33)
-  integer :: test_sizes(1)
+  integer :: test_sizes(3)
   integer :: i
   logical :: passed, all_passed
 
   seed_array = 42
   call random_seed(put=seed_array)
 
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing DNRM2 (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -71,6 +71,7 @@ contains
 
     ! Call the differentiated function
     dnrm2_d_result = dnrm2_d(nsize, x, x_d, 1, dnrm2_orig)
+    x_d = x_d_orig
 
     write(*,*) 'Function calls completed successfully'
 

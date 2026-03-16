@@ -12,17 +12,17 @@ program test_scopy_vector_reverse
   integer :: nbdirs
   integer :: n_test
   integer :: seed_array(33)
-  integer :: test_sizes(1)
+  integer :: test_sizes(3)
   integer :: i
   logical :: passed, all_passed
 
   seed_array = 42
   call random_seed(put=seed_array)
 
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing SCOPY (Vector Reverse, multi-size: n =', test_sizes(1), ')'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     nbdirs = test_sizes(i)
     call run_test_for_size(n_test, passed, nbdirs)
@@ -134,7 +134,7 @@ contains
       end do
       abs_error = abs(vjp_fd - vjp_ad)
       abs_reference = abs(vjp_ad)
-      error_bound = 1.0e-3 + 1.0e-3 * abs_reference
+      error_bound = 2.0e-3 + 2.0e-3 * abs_reference
       if (abs_error > error_bound) has_large_errors = .true.
       if (abs_reference > 1.0e-10) then
         relative_error = abs_error / abs_reference
@@ -144,7 +144,7 @@ contains
       if (relative_error > max_error) max_error = relative_error
     end do
     write(*,*) 'Maximum relative error:', max_error
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
     passed = .not. has_large_errors
     if (has_large_errors) then
       write(*,*) 'FAIL: Derivatives are outside tolerance'

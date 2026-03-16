@@ -11,17 +11,17 @@ program test_sscal
 
   integer :: n_test
   integer :: seed_array(33)
-  integer :: test_sizes(1)
+  integer :: test_sizes(3)
   integer :: i
   logical :: passed, all_passed
 
   seed_array = 42
   call random_seed(put=seed_array)
 
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing SSCAL (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -45,12 +45,12 @@ contains
     integer :: incx
 
     ! Derivative variables
-    real(4), dimension(n) :: sx_d
     real(4) :: sa_d
+    real(4), dimension(n) :: sx_d
 
     ! Array restoration and derivative storage
-    real(4), dimension(n) :: sx_orig, sx_d_orig
     real(4) :: sa_orig, sa_d_orig
+    real(4), dimension(n) :: sx_orig, sx_d_orig
     integer :: i, j
 
     nsize = n
@@ -62,36 +62,37 @@ contains
     sx = sx * 2.0d0 - 1.0d0  ! Scale to [-1,1]
 
     ! Initialize input derivatives
-    call random_number(sx_d)
-    sx_d = sx_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(sa_d)
     sa_d = sa_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(sx_d)
+    sx_d = sx_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
     ! Store _orig and _d_orig
-    sx_d_orig = sx_d
     sa_d_orig = sa_d
-    sx_orig = sx
+    sx_d_orig = sx_d
     sa_orig = sa
+    sx_orig = sx
 
     write(*,*) 'Testing SSCAL (n =', n, ')'
     sx_orig = sx
 
     ! Call the differentiated function
     call sscal_d(nsize, sa, sa_d, sx, sx_d, 1)
+    sa_d = sa_d_orig
 
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, nsize, sx_orig, sa_orig, sx_d_orig, sa_d_orig, sx_d, passed)
+    call check_derivatives_numerically(n, nsize, sa_orig, sx_orig, sa_d_orig, sx_d_orig, sx_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, nsize, sx_orig, sa_orig, sx_d_orig, sa_d_orig, sx_d, passed)
+  subroutine check_derivatives_numerically(n, nsize, sa_orig, sx_orig, sa_d_orig, sx_d_orig, sx_d, passed)
     implicit none
     integer, intent(in) :: n
     integer, intent(in) :: nsize
-    real(4), intent(in) :: sx_orig(n), sx_d_orig(n)
     real(4), intent(in) :: sa_orig, sa_d_orig
+    real(4), intent(in) :: sx_orig(n), sx_d_orig(n)
     real(4), intent(in) :: sx_d(n)
     logical, intent(out) :: passed
 
@@ -102,8 +103,8 @@ contains
     logical :: has_large_errors
     real(4), dimension(n) :: sx_forward, sx_backward
     integer :: i, j
-    real(4), dimension(n) :: sx
     real(4) :: sa
+    real(4), dimension(n) :: sx
 
     max_error = 0.0e0
     has_large_errors = .false.
@@ -112,14 +113,14 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    sx = sx_orig + h * sx_d_orig
     sa = sa_orig + h * sa_d_orig
+    sx = sx_orig + h * sx_d_orig
     call sscal(nsize, sa, sx, 1)
     sx_forward = sx
 
     ! Backward perturbation: f(x - h)
-    sx = sx_orig - h * sx_d_orig
     sa = sa_orig - h * sa_d_orig
+    sx = sx_orig - h * sx_d_orig
     call sscal(nsize, sa, sx, 1)
     sx_backward = sx
 

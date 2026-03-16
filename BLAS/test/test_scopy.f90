@@ -11,17 +11,17 @@ program test_scopy
 
   integer :: n_test
   integer :: seed_array(33)
-  integer :: test_sizes(1)
+  integer :: test_sizes(3)
   integer :: i
   logical :: passed, all_passed
 
   seed_array = 42
   call random_seed(put=seed_array)
 
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing SCOPY (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -46,12 +46,12 @@ contains
     integer :: incy
 
     ! Derivative variables
-    real(4), dimension(n) :: sx_d
     real(4), dimension(n) :: sy_d
+    real(4), dimension(n) :: sx_d
 
     ! Array restoration and derivative storage
-    real(4), dimension(n) :: sx_orig, sx_d_orig
     real(4), dimension(n) :: sy_orig, sy_d_orig
+    real(4), dimension(n) :: sx_orig, sx_d_orig
     integer :: i, j
 
     nsize = n
@@ -64,16 +64,16 @@ contains
     sy = sy * 2.0d0 - 1.0d0  ! Scale to [-1,1]
 
     ! Initialize input derivatives
-    call random_number(sx_d)
-    sx_d = sx_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(sy_d)
     sy_d = sy_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(sx_d)
+    sx_d = sx_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
     ! Store _orig and _d_orig
-    sx_d_orig = sx_d
     sy_d_orig = sy_d
-    sx_orig = sx
+    sx_d_orig = sx_d
     sy_orig = sy
+    sx_orig = sx
 
     write(*,*) 'Testing SCOPY (n =', n, ')'
 
@@ -83,6 +83,7 @@ contains
 
     ! Call the differentiated function
     call scopy_d(nsize, sx, sx_d, 1, sy, sy_d, 1)
+    sx_d = sx_d_orig
 
     ! Reset ISIZE globals to uninitialized (-1)
     call set_ISIZE1OFSy(-1)

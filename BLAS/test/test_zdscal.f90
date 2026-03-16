@@ -11,17 +11,17 @@ program test_zdscal
 
   integer :: n_test
   integer :: seed_array(33)
-  integer :: test_sizes(1)
+  integer :: test_sizes(3)
   integer :: i
   logical :: passed, all_passed
 
   seed_array = 42
   call random_seed(put=seed_array)
 
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing ZDSCAL (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -85,20 +85,21 @@ contains
 
     ! Call the differentiated function
     call zdscal_d(nsize, da, da_d, zx, zx_d, 1)
+    da_d = da_d_orig
 
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, nsize, da_orig, zx_orig, da_d_orig, zx_d_orig, zx_d, passed)
+    call check_derivatives_numerically(n, nsize, zx_orig, da_orig, zx_d_orig, da_d_orig, zx_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, nsize, da_orig, zx_orig, da_d_orig, zx_d_orig, zx_d, passed)
+  subroutine check_derivatives_numerically(n, nsize, zx_orig, da_orig, zx_d_orig, da_d_orig, zx_d, passed)
     implicit none
     integer, intent(in) :: n
     integer, intent(in) :: nsize
-    real(8), intent(in) :: da_orig, da_d_orig
     complex(8), intent(in) :: zx_orig(n), zx_d_orig(n)
+    real(8), intent(in) :: da_orig, da_d_orig
     complex(8), intent(in) :: zx_d(n)
     logical, intent(out) :: passed
 
@@ -109,8 +110,8 @@ contains
     logical :: has_large_errors
     complex(8), dimension(n) :: zx_forward, zx_backward
     integer :: i, j
-    real(8) :: da
     complex(8), dimension(n) :: zx
+    real(8) :: da
 
     max_error = 0.0e0
     has_large_errors = .false.
@@ -119,14 +120,14 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    da = da_orig + h * da_d_orig
     zx = zx_orig + h * zx_d_orig
+    da = da_orig + h * da_d_orig
     call zdscal(nsize, da, zx, 1)
     zx_forward = zx
 
     ! Backward perturbation: f(x - h)
-    da = da_orig - h * da_d_orig
     zx = zx_orig - h * zx_d_orig
+    da = da_orig - h * da_d_orig
     call zdscal(nsize, da, zx, 1)
     zx_backward = zx
 

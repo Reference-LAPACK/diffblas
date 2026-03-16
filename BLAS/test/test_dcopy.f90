@@ -11,17 +11,17 @@ program test_dcopy
 
   integer :: n_test
   integer :: seed_array(33)
-  integer :: test_sizes(1)
+  integer :: test_sizes(3)
   integer :: i
   logical :: passed, all_passed
 
   seed_array = 42
   call random_seed(put=seed_array)
 
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing DCOPY (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -46,12 +46,12 @@ contains
     integer :: incy
 
     ! Derivative variables
-    real(8), dimension(n) :: dy_d
     real(8), dimension(n) :: dx_d
+    real(8), dimension(n) :: dy_d
 
     ! Array restoration and derivative storage
-    real(8), dimension(n) :: dy_orig, dy_d_orig
     real(8), dimension(n) :: dx_orig, dx_d_orig
+    real(8), dimension(n) :: dy_orig, dy_d_orig
     integer :: i, j
 
     nsize = n
@@ -64,16 +64,16 @@ contains
     dy = dy * 2.0d0 - 1.0d0  ! Scale to [-1,1]
 
     ! Initialize input derivatives
-    call random_number(dy_d)
-    dy_d = dy_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(dx_d)
     dx_d = dx_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(dy_d)
+    dy_d = dy_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
     ! Store _orig and _d_orig
-    dy_d_orig = dy_d
     dx_d_orig = dx_d
-    dy_orig = dy
+    dy_d_orig = dy_d
     dx_orig = dx
+    dy_orig = dy
 
     write(*,*) 'Testing DCOPY (n =', n, ')'
 
@@ -83,6 +83,7 @@ contains
 
     ! Call the differentiated function
     call dcopy_d(nsize, dx, dx_d, 1, dy, dy_d, 1)
+    dx_d = dx_d_orig
 
     ! Reset ISIZE globals to uninitialized (-1)
     call set_ISIZE1OFDy(-1)

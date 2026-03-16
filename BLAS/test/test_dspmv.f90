@@ -7,14 +7,14 @@ program test_dspmv
   implicit none
   external :: dspmv
   external :: dspmv_d
-  integer :: n_test, seed_array(33), test_sizes(1), i
+  integer :: n_test, seed_array(33), test_sizes(3), i
   logical :: passed, all_passed
   seed_array = 42
   call random_seed(put=seed_array)
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing DSPMV (multi-size: n =', test_sizes(1), ')'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed

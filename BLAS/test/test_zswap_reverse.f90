@@ -11,17 +11,17 @@ program test_zswap_reverse
 
   integer :: n_test
   integer :: seed_array(33)
-  integer :: test_sizes(1)
+  integer :: test_sizes(3)
   integer :: i
   logical :: passed, all_passed
 
   seed_array = 42
   call random_seed(put=seed_array)
 
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing ZSWAP (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -117,8 +117,8 @@ contains
     complex(8), dimension(n) :: zx_dir
     complex(8), dimension(n) :: zy_dir
 
-    complex(8), dimension(n) :: zy_plus, zy_minus, zy_central_diff
     complex(8), dimension(n) :: zx_plus, zx_minus, zx_central_diff
+    complex(8), dimension(n) :: zy_plus, zy_minus, zy_central_diff
 
     complex(8), dimension(n) :: zx
     complex(8), dimension(n) :: zy
@@ -144,22 +144,22 @@ contains
     zx = zx_orig + cmplx(h, 0.0) * zx_dir
     zy = zy_orig + cmplx(h, 0.0) * zy_dir
     call zswap(nsize, zx, incx_val, zy, incy_val)
-    zy_plus = zy
     zx_plus = zx
+    zy_plus = zy
 
     zx = zx_orig - cmplx(h, 0.0) * zx_dir
     zy = zy_orig - cmplx(h, 0.0) * zy_dir
     call zswap(nsize, zx, incx_val, zy, incy_val)
-    zy_minus = zy
     zx_minus = zx
+    zy_minus = zy
 
-    zy_central_diff = (zy_plus - zy_minus) / (2.0 * h)
     zx_central_diff = (zx_plus - zx_minus) / (2.0 * h)
+    zy_central_diff = (zy_plus - zy_minus) / (2.0 * h)
 
     vjp_fd = 0.0
     n_products = n
     do i = 1, n
-      temp_products(i) = real(conjg(zyb_orig(i)) * zy_central_diff(i))
+      temp_products(i) = real(conjg(zxb_orig(i)) * zx_central_diff(i))
     end do
     call sort_array(temp_products, n_products)
     do i = 1, n_products
@@ -167,7 +167,7 @@ contains
     end do
     n_products = n
     do i = 1, n
-      temp_products(i) = real(conjg(zxb_orig(i)) * zx_central_diff(i))
+      temp_products(i) = real(conjg(zyb_orig(i)) * zy_central_diff(i))
     end do
     call sort_array(temp_products, n_products)
     do i = 1, n_products

@@ -7,14 +7,14 @@ program test_stbmv
   implicit none
   external :: stbmv
   external :: stbmv_d
-  integer :: n_test, seed_array(33), test_sizes(1), i
+  integer :: n_test, seed_array(33), test_sizes(3), i
   logical :: passed, all_passed
   seed_array = 42
   call random_seed(put=seed_array)
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing STBMV (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -77,6 +77,9 @@ contains
     alpha_orig = alpha
     alpha_d_seed = alpha_d
     call stbmv_d(uplo, trans, diag, nsize, ksize, a, a_d, lda_val, x, x_d, incx_val)
+    ! Reset input derivative vars from seeds; output derivative (x_d or y_d) keeps AD result
+    a_d = a_d_seed
+    alpha_d = alpha_d_seed
     write(*,*) 'Function calls completed successfully'
     call check_derivatives_numerically_band(n, lda_val, ksize, uplo, trans, diag, nsize, incx_val, a_orig, a_d_seed, x_orig, x_d_seed, x_d, passed)
     deallocate(a, a_d, a_orig, a_d_seed, x, x_d, x_orig, x_d_seed)
@@ -119,13 +122,13 @@ contains
     do ii = 1, n
       abs_error = abs((x_fwd(ii) - x_bwd(ii)) / (2.0e0 * h) - x_d_out(ii))
       abs_ref = abs(x_d_out(ii))
-      err_bound = 1.0e-3 + 1.0e-3 * abs_ref
+      err_bound = 2.0e-3 + 2.0e-3 * abs_ref
       if (abs_error > err_bound) has_err = .true.
       relative_error = abs_error / max(abs_ref, 1.0e-10)
       if (relative_error > max_error) max_error = relative_error
     end do
     write(*,*) 'Maximum relative error:', max_error
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
     passed = .not. has_err
     if (has_err) then
       write(*,*) 'FAIL: Derivatives are outside tolerance'

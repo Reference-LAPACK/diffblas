@@ -3,15 +3,15 @@ program test_csyr2k_reverse
   implicit none
   external :: csyr2k
   external :: csyr2k_b
-  integer :: n_test, test_sizes(1), i
+  integer :: n_test, test_sizes(3), i
   integer :: seed_array(33)
   logical :: passed, all_passed
   seed_array = 42
   call random_seed(put=seed_array)
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing CSYR2K (multi-size: n =', test_sizes(1), ')'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     call run_test_for_size(test_sizes(i), passed)
     all_passed = all_passed .and. passed
   end do

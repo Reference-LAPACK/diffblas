@@ -6,14 +6,14 @@ program test_dspmv_vector_reverse
   implicit none
   external :: dspmv
   external :: dspmv_bv
-  integer :: nbdirs, n_test, seed_array(33), test_sizes(1), i
+  integer :: nbdirs, n_test, seed_array(33), test_sizes(3), i
   logical :: passed, all_passed
   seed_array = 42
   call random_seed(put=seed_array)
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing DSPMV (Vector Reverse, multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     nbdirs = n_test
     call run_test_for_size(n_test, passed, nbdirs)

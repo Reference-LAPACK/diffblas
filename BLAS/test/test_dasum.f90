@@ -11,17 +11,17 @@ program test_dasum
 
   integer :: n_test
   integer :: seed_array(33)
-  integer :: test_sizes(1)
+  integer :: test_sizes(3)
   integer :: i
   logical :: passed, all_passed
 
   seed_array = 42
   call random_seed(put=seed_array)
 
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing DASUM (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -44,12 +44,12 @@ contains
     integer :: incx
 
     ! Derivative variables
-    real(8) :: dasum_d_result  ! Derivative of function result (avoid name clash with func_d)
     real(8), dimension(n) :: dx_d
+    real(8) :: dasum_d_result  ! Derivative of function result (avoid name clash with func_d)
 
     ! Array restoration and derivative storage
-    real(8) :: dasum_orig  ! Function result (no _d_orig - use _d_result)
     real(8), dimension(n) :: dx_orig, dx_d_orig
+    real(8) :: dasum_orig  ! Function result (no _d_orig - use _d_result)
     integer :: i, j
 
     nsize = n
@@ -64,13 +64,14 @@ contains
 
     ! Store _orig and _d_orig
     dx_d_orig = dx_d
-    dasum_orig = dasum(nsize, dx, 1)
     dx_orig = dx
+    dasum_orig = dasum(nsize, dx, 1)
 
     write(*,*) 'Testing DASUM (n =', n, ')'
 
     ! Call the differentiated function
     dasum_d_result = dasum_d(nsize, dx, dx_d, 1, dasum_orig)
+    dx_d = dx_d_orig
 
     write(*,*) 'Function calls completed successfully'
 

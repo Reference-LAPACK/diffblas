@@ -11,17 +11,17 @@ program test_ccopy
 
   integer :: n_test
   integer :: seed_array(33)
-  integer :: test_sizes(1)
+  integer :: test_sizes(3)
   integer :: i
   logical :: passed, all_passed
 
   seed_array = 42
   call random_seed(put=seed_array)
 
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing CCOPY (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -96,6 +96,7 @@ contains
 
     ! Call the differentiated function
     call ccopy_d(nsize, cx, cx_d, 1, cy, cy_d, 1)
+    cx_d = cx_d_orig
 
     ! Reset ISIZE globals to uninitialized (-1)
     call set_ISIZE1OFCy(-1)

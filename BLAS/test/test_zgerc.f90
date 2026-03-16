@@ -11,17 +11,17 @@ program test_zgerc
 
   integer :: n_test
   integer :: seed_array(33)
-  integer :: test_sizes(1)
+  integer :: test_sizes(3)
   integer :: i
   logical :: passed, all_passed
 
   seed_array = 42
   call random_seed(put=seed_array)
 
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing ZGERC (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -50,15 +50,15 @@ contains
     integer :: lda_val
 
     ! Derivative variables
-    complex(8), dimension(n) :: y_d
     complex(8), dimension(n,n) :: a_d
     complex(8) :: alpha_d
+    complex(8), dimension(n) :: y_d
     complex(8), dimension(n) :: x_d
 
     ! Array restoration and derivative storage
-    complex(8), dimension(n) :: y_orig, y_d_orig
     complex(8), dimension(n,n) :: a_orig, a_d_orig
     complex(8) :: alpha_orig, alpha_d_orig
+    complex(8), dimension(n) :: y_orig, y_d_orig
     complex(8), dimension(n) :: x_orig, x_d_orig
     real(8) :: temp_re, temp_im  ! For complex random init
     integer :: i, j
@@ -87,11 +87,6 @@ contains
     a = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
 
     ! Initialize input derivatives
-    do i = 1, n
-      call random_number(temp_re)
-      call random_number(temp_im)
-      y_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
-    end do
     call random_number(temp_re)
     call random_number(temp_im)
     a_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
@@ -101,17 +96,22 @@ contains
     do i = 1, n
       call random_number(temp_re)
       call random_number(temp_im)
+      y_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
+    end do
+    do i = 1, n
+      call random_number(temp_re)
+      call random_number(temp_im)
       x_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
     end do
 
     ! Store _orig and _d_orig
-    y_d_orig = y_d
     a_d_orig = a_d
     alpha_d_orig = alpha_d
+    y_d_orig = y_d
     x_d_orig = x_d
-    y_orig = y
     a_orig = a
     alpha_orig = alpha
+    y_orig = y
     x_orig = x
 
     write(*,*) 'Testing ZGERC (n =', n, ')'
@@ -119,15 +119,18 @@ contains
 
     ! Call the differentiated function
     call zgerc_d(msize, nsize, alpha, alpha_d, x, x_d, 1, y, y_d, 1, a, a_d, lda_val)
+    alpha_d = alpha_d_orig
+    y_d = y_d_orig
+    x_d = x_d_orig
 
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, msize, nsize, lda_val, y_orig, a_orig, x_orig, alpha_orig, y_d_orig, a_d_orig, x_d_orig, alpha_d_orig, a_d, passed)
+    call check_derivatives_numerically(n, msize, nsize, lda_val, y_orig, a_orig, alpha_orig, x_orig, y_d_orig, a_d_orig, alpha_d_orig, x_d_orig, a_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, msize, nsize, lda_val, y_orig, a_orig, x_orig, alpha_orig, y_d_orig, a_d_orig, x_d_orig, alpha_d_orig, a_d, passed)
+  subroutine check_derivatives_numerically(n, msize, nsize, lda_val, y_orig, a_orig, alpha_orig, x_orig, y_d_orig, a_d_orig, alpha_d_orig, x_d_orig, a_d, passed)
     implicit none
     integer, intent(in) :: n
     integer, intent(in) :: msize
@@ -135,8 +138,8 @@ contains
     integer, intent(in) :: lda_val
     complex(8), intent(in) :: y_orig(n), y_d_orig(n)
     complex(8), intent(in) :: a_orig(n,n), a_d_orig(n,n)
-    complex(8), intent(in) :: x_orig(n), x_d_orig(n)
     complex(8), intent(in) :: alpha_orig, alpha_d_orig
+    complex(8), intent(in) :: x_orig(n), x_d_orig(n)
     complex(8), intent(in) :: a_d(n,n)
     logical, intent(out) :: passed
 
@@ -149,8 +152,8 @@ contains
     integer :: i, j
     complex(8), dimension(n) :: y
     complex(8), dimension(n,n) :: a
-    complex(8), dimension(n) :: x
     complex(8) :: alpha
+    complex(8), dimension(n) :: x
 
     max_error = 0.0e0
     has_large_errors = .false.
@@ -161,16 +164,16 @@ contains
     ! Forward perturbation: f(x + h)
     y = y_orig + h * y_d_orig
     a = a_orig + h * a_d_orig
-    x = x_orig + h * x_d_orig
     alpha = alpha_orig + h * alpha_d_orig
+    x = x_orig + h * x_d_orig
     call zgerc(msize, nsize, alpha, x, 1, y, 1, a, lda_val)
     a_forward = a
 
     ! Backward perturbation: f(x - h)
     y = y_orig - h * y_d_orig
     a = a_orig - h * a_d_orig
-    x = x_orig - h * x_d_orig
     alpha = alpha_orig - h * alpha_d_orig
+    x = x_orig - h * x_d_orig
     call zgerc(msize, nsize, alpha, x, 1, y, 1, a, lda_val)
     a_backward = a
 

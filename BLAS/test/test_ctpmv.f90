@@ -7,14 +7,13 @@ program test_ctpmv
   implicit none
   external :: ctpmv
   external :: ctpmv_d
-  integer :: n_test, seed_array(33), test_sizes(1), i
+  integer :: n_test, seed_array(33), test_sizes(3), i
   logical :: passed, all_passed
   seed_array = 42
   call random_seed(put=seed_array)
-  test_sizes = (/ 4 /)
-  write(*,*) 'Testing CTPMV (multi-size: n = 4)'
+  test_sizes = (/ 4, 10, 25 /)
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -72,6 +71,7 @@ contains
     ap_d_seed = ap_d
     x_d_seed = x_d
     call ctpmv_d(uplo, trans, diag, nsize, ap, ap_d, x, x_d, incx_val)
+    ap_d = ap_d_seed  ! reset input derivative; x_d holds AD result
     write(*,*) 'Testing CTPMV (n =', n, ')'
     write(*,*) 'Function calls completed successfully'
     call check_derivatives_numerically(n, npack, uplo, trans, diag, nsize, incx_val, ap_orig, ap_d_seed, x_orig, x_d_seed, x_d, passed)
@@ -88,9 +88,10 @@ contains
     complex(4) :: ap_t(npack), x_t(n), x_plus(n), x_minus(n)
     complex(4) :: central_diff, ad_result
     logical :: has_err
-    integer :: ii
+    integer :: ii, nerr_detail
     real(4) :: abs_error, abs_ref, err_bound, relative_error, max_error
     has_err = .false.
+    nerr_detail = 0
     max_error = 0.0e0
     write(*,*) 'Checking derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
@@ -102,7 +103,7 @@ contains
     x_t = x - h * x_d_seed
     call ctpmv(uplo, trans, diag, nsize, ap_t, x_t, incx_val)
     x_minus = x_t
-    do ii = 1, min(2, n)
+    do ii = 1, n
       central_diff = (x_plus(ii) - x_minus(ii)) / (2.0e0 * h)
       ad_result = x_d(ii)
       abs_error = abs(central_diff - ad_result)
@@ -110,17 +111,21 @@ contains
       err_bound = 1.0e-3 + 1.0e-3 * abs_ref
       if (abs_error > err_bound) then
         has_err = .true.
-        relative_error = abs_error / max(abs_ref, 1.0e-10)
-        write(*,*) 'Large error in output X(', ii, '):'
-        write(*,*) '  Central diff: ', central_diff
-        write(*,*) '  AD result:   ', ad_result
-        write(*,*) '  Absolute error:', abs_error
-        write(*,*) '  Error bound:', err_bound
-        write(*,*) '  Relative error:', relative_error
+        nerr_detail = nerr_detail + 1
+        if (nerr_detail <= 5) then
+          relative_error = abs_error / max(abs_ref, 1.0e-10)
+          write(*,*) 'Large error in output X(', ii, '):'
+          write(*,*) '  Central diff: ', central_diff
+          write(*,*) '  AD result:   ', ad_result
+          write(*,*) '  Absolute error:', abs_error
+          write(*,*) '  Error bound:', err_bound
+          write(*,*) '  Relative error:', relative_error
+        end if
       end if
       relative_error = abs_error / max(abs_ref, 1.0e-10)
       max_error = max(max_error, relative_error)
     end do
+    if (has_err .and. nerr_detail > 5) write(*,*) '  ... and', nerr_detail - 5, 'more components exceeded tolerance'
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
     passed = .not. has_err

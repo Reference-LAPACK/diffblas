@@ -13,7 +13,7 @@ program test_dasum_vector_reverse
   integer :: n  ! Current size (set in loop)
   integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
   integer :: i, j, k  ! Loop counters
-  integer :: test_sizes(1), itest
+  integer :: test_sizes(3), itest
   logical :: passed, all_passed
   integer :: seed_array(33)  ! Random seed
   real(4) :: temp_real, temp_imag  ! Temporary variables for initialization
@@ -45,7 +45,7 @@ program test_dasum_vector_reverse
   seed_array = 42
   call random_seed(put=seed_array)
 
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing DASUM (Vector Reverse, multi-size: n = 4)'
   all_passed = .true.
   do itest = 1, 1

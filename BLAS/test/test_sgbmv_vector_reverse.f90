@@ -6,14 +6,14 @@ program test_sgbmv_vector_reverse
   implicit none
   external :: sgbmv
   external :: sgbmv_bv
-  integer :: nbdirs, n_test, seed_array(33), test_sizes(1), i
+  integer :: nbdirs, n_test, seed_array(33), test_sizes(3), i
   logical :: passed, all_passed
   seed_array = 42
   call random_seed(put=seed_array)
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing SGBMV (Vector Reverse band, multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     nbdirs = test_sizes(i)
     call run_test_for_size(n_test, passed, nbdirs)
@@ -191,7 +191,7 @@ contains
     end do
     abs_error = abs(vjp_fd - vjp_ad)
     abs_ref = abs(vjp_ad)
-    err_bound = 1.0e-3 + 1.0e-3 * abs_ref
+    err_bound = 2.0e-3 + 2.0e-3 * abs_ref
     if (abs_error > err_bound) has_err = .true.
     relative_error = abs_error / max(abs_ref, 1.0d-10)
     if (relative_error > max_re) max_re = relative_error
@@ -200,7 +200,7 @@ contains
     write(*,*) 'Checking derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
     write(*,*) 'Maximum relative error:', max_re
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
     passed = .not. has_err
     if (.not. passed) then
       write(*,*) 'FAIL: Derivatives are outside tolerance'

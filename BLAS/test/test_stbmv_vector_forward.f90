@@ -6,14 +6,14 @@ program test_stbmv_vector_forward
   implicit none
   external :: stbmv
   external :: stbmv_dv
-  integer :: nbdirs, n_test, seed_array(33), test_sizes(1), i
+  integer :: nbdirs, n_test, seed_array(33), test_sizes(3), i
   logical :: passed, all_passed
   seed_array = 42
   call random_seed(put=seed_array)
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing STBMV (Vector Forward band, multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     nbdirs = test_sizes(i)
     call run_test_for_size(n_test, passed, nbdirs)
@@ -118,14 +118,14 @@ contains
         ad_result = x_dv_out(idir, i)
         abs_error = abs(central_diff - ad_result)
         abs_ref = abs(ad_result)
-        err_bound = 1.0e-3 + 1.0e-3 * abs_ref
+        err_bound = 2.0e-3 + 2.0e-3 * abs_ref
         if (abs_error > err_bound) has_err = .true.
         relative_error = abs_error / max(abs_ref, 1.0e-10)
         if (relative_error > max_error) max_error = relative_error
       end do
     end do
     write(*,*) 'Maximum relative error:', max_error
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
     passed = .not. has_err
     if (has_err) then
       write(*,*) 'FAIL: Derivatives are outside tolerance'

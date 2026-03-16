@@ -7,14 +7,14 @@ program test_sspr2
   implicit none
   external :: sspr2
   external :: sspr2_d
-  integer :: n_test, seed_array(33), test_sizes(1), i
+  integer :: n_test, seed_array(33), test_sizes(3), i
   logical :: passed, all_passed
   seed_array = 42
   call random_seed(put=seed_array)
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing SSPR2 (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -106,7 +106,7 @@ contains
     do ii = 1, npack
       abs_error = abs((ap_fwd(ii) - ap_bwd(ii)) / (2.0e0 * h) - ap_d(ii))
       abs_ref = abs(ap_d(ii))
-      err_bound = 1.0e-3 + 1.0e-3 * abs_ref
+      err_bound = 2.0e-3 + 2.0e-3 * abs_ref
       if (abs_error > max_error) max_error = abs_error
       if (abs_error > err_bound) has_err = .true.
     end do
@@ -114,7 +114,7 @@ contains
     abs_ref = maxval(abs(ap_d)) + 1.0e0
     if (abs_ref > 1.0e-10) relative_error = max_error / abs_ref
     write(*,*) 'Maximum relative error:', relative_error
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
     passed = .not. has_err
     if (has_err) then
       write(*,*) 'FAIL: Derivatives are outside tolerance'

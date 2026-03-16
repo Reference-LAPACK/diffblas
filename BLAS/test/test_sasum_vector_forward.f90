@@ -14,7 +14,7 @@ program test_sasum_vector_forward
   integer, parameter :: max_size = 100  ! Maximum array dimension (multi-size: 1,4,40,100)
   integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
   integer :: i, j, idir  ! Loop counters
-  integer :: test_sizes(1), itest
+  integer :: test_sizes(3), itest
   logical :: passed, all_passed
   integer :: seed_array(33)  ! Random seed
   real(4) :: temp_real, temp_imag  ! Temporary variables for initialization
@@ -34,7 +34,7 @@ program test_sasum_vector_forward
   real(4) :: sasum_result
   real(4), dimension(nbdirs) :: sasum_dv_result
 
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing SASUM (Vector Forward, multi-size: n = 4)'
   all_passed = .true.
   do itest = 1, 1

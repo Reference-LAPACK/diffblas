@@ -11,17 +11,17 @@ program test_sasum
 
   integer :: n_test
   integer :: seed_array(33)
-  integer :: test_sizes(1)
+  integer :: test_sizes(3)
   integer :: i
   logical :: passed, all_passed
 
   seed_array = 42
   call random_seed(put=seed_array)
 
-  test_sizes = (/ 4 /)
+  test_sizes = (/ 4, 10, 25 /)
   write(*,*) 'Testing SASUM (multi-size: n = 4)'
   all_passed = .true.
-  do i = 1, 1
+  do i = 1, 3
     n_test = test_sizes(i)
     call run_test_for_size(n_test, passed)
     all_passed = all_passed .and. passed
@@ -44,12 +44,12 @@ contains
     integer :: incx
 
     ! Derivative variables
-    real(4), dimension(n) :: sx_d
     real(4) :: sasum_d_result  ! Derivative of function result (avoid name clash with func_d)
+    real(4), dimension(n) :: sx_d
 
     ! Array restoration and derivative storage
-    real(4), dimension(n) :: sx_orig, sx_d_orig
     real(4) :: sasum_orig  ! Function result (no _d_orig - use _d_result)
+    real(4), dimension(n) :: sx_orig, sx_d_orig
     integer :: i, j
 
     nsize = n
@@ -64,13 +64,14 @@ contains
 
     ! Store _orig and _d_orig
     sx_d_orig = sx_d
-    sx_orig = sx
     sasum_orig = sasum(nsize, sx, 1)
+    sx_orig = sx
 
     write(*,*) 'Testing SASUM (n =', n, ')'
 
     ! Call the differentiated function
     sasum_d_result = sasum_d(nsize, sx, sx_d, 1, sasum_orig)
+    sx_d = sx_d_orig
 
     write(*,*) 'Function calls completed successfully'
 
