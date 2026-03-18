@@ -41,5 +41,6 @@ Only for **single-precision complex** (`C*`) **vector reverse** tests:
 |---------------------------|-----------|
 | DOT (e.g. `CDOTC`)        | 2.5e-2 |
 | BLAS3 (e.g. `CGEMM`, `CSYMM`, `CHEMM`) | 1.0e-2 |
+| BLAS2 banded MV (e.g. `CGBMV`, `CTBMV`, `CHBMV`) | 1.0e-2 |
 
 All other `C*` modes use the base tolerance (1.0e-3). `Z*` does not use relaxed tolerances.
