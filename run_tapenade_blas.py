@@ -23453,7 +23453,7 @@ def main():
     print("\n" + "=" * 60)
     print("Generating top-level management files...")
     print("=" * 60)
-    generate_top_level_makefile(out_root, args.flat)
+    generate_top_level_makefile(out_root, args.flat, compiler=args.compiler, c_compiler=args.c_compiler)
     generate_top_level_test_script(out_root, run_d, run_dv, run_b, run_bv, args.flat)
     generate_meson_build(out_root, args.flat)
     generate_python_interface_test_script(out_root)
@@ -23475,7 +23475,7 @@ def main():
             print("  make vector-reverse       # Build vector reverse mode only")
         print("  ./test_<function>_vector_forward  # Run vector forward mode test")
 
-def generate_top_level_makefile(out_dir, flat_mode=False):
+def generate_top_level_makefile(out_dir, flat_mode=False, compiler="gfortran", c_compiler="gcc"):
     """Generate the top-level Makefile for building all subdirectories or flat makefiles"""
     
     if flat_mode:
@@ -23486,6 +23486,7 @@ def generate_top_level_makefile(out_dir, flat_mode=False):
 # Compilers and flags
 FC = gfortran
 CC = gcc
+
 # Ensure .mod files are written to (and read from) build/
 # Defaults: gfortran -> -J, ifort/ifx -> -module. You can still override MODFLAG on the make command line.
 MODDIR = $(BUILD_DIR)
@@ -23496,8 +23497,19 @@ MODFLAG ?= -module $(MODDIR)
 else
 MODFLAG ?= -J$(MODDIR)
 endif
+
+# Compiler-specific flag sets (avoid passing gfortran-only flags to ifort/ifx)
+ifeq ($(findstring ifort,$(FC)),ifort)
+FFLAGS = -O2 -fPIC -warn all -traceback -Iinclude -I$(MODDIR) $(MODFLAG)
+FFLAGS_F77 = -O2 -fPIC -warn all -traceback -Iinclude -I$(MODDIR)
+else ifeq ($(findstring ifx,$(FC)),ifx)
+FFLAGS = -O2 -fPIC -warn all -traceback -Iinclude -I$(MODDIR) $(MODFLAG)
+FFLAGS_F77 = -O2 -fPIC -warn all -traceback -Iinclude -I$(MODDIR)
+else
 FFLAGS = -O2 -fPIC -ffree-line-length-none -Wuninitialized -Wmaybe-uninitialized -Iinclude -I$(MODDIR) $(MODFLAG)
 FFLAGS_F77 = -O2 -fPIC -ffixed-line-length-none -Wuninitialized -Wmaybe-uninitialized -Iinclude -I$(MODDIR)
+endif
+
 CFLAGS = -O2 -fPIC
 
 # Directory structure
@@ -24072,6 +24084,10 @@ help:
 .PHONY: all forward reverse vector-forward vector-reverse clean rebuild test status help $(SUBDIRS)
 '''
     
+    # Apply requested compilers for the generated Makefile(s)
+    makefile_content = makefile_content.replace("FC = gfortran", f"FC = {compiler}")
+    makefile_content = makefile_content.replace("CC = gcc", f"CC = {c_compiler}")
+
     makefile_path = out_dir / "Makefile"
     with open(makefile_path, 'w') as f:
         f.write(makefile_content)
