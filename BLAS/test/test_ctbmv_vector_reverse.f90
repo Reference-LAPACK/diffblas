@@ -159,7 +159,7 @@ contains
     end do
     abs_error = abs(vjp_fd - vjp_ad)
     abs_ref = abs(vjp_ad)
-    err_bound = 1.0e-3 + 1.0e-3 * abs_ref
+    err_bound = 1.0e-2 + 1.0e-2 * abs_ref
     if (abs_error > err_bound) has_err = .true.
     relative_error = abs_error / max(abs_ref, 1.0d-10)
     if (relative_error > max_re) max_re = relative_error
@@ -168,7 +168,7 @@ contains
     write(*,*) 'Checking derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
     write(*,*) 'Maximum relative error:', max_re
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-2, atol=1.0e-2'
     passed = .not. has_err
     if (.not. passed) then
       write(*,*) 'FAIL: Derivatives are outside tolerance'

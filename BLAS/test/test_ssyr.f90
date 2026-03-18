@@ -48,14 +48,14 @@ contains
     integer :: lda_val
 
     ! Derivative variables
+    real(4), dimension(n) :: x_d
     real(4), dimension(n,n) :: a_d
     real(4) :: alpha_d
-    real(4), dimension(n) :: x_d
 
     ! Array restoration and derivative storage
+    real(4), dimension(n) :: x_orig, x_d_orig
     real(4), dimension(n,n) :: a_orig, a_d_orig
     real(4) :: alpha_orig, alpha_d_orig
-    real(4), dimension(n) :: x_orig, x_d_orig
     integer :: i, j
 
     uplo = 'U'
@@ -71,45 +71,45 @@ contains
     a = a * 2.0d0 - 1.0d0  ! Scale to [-1,1]
 
     ! Initialize input derivatives
+    call random_number(x_d)
+    x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(a_d)
     a_d = a_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(alpha_d)
     alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-    call random_number(x_d)
-    x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
     ! Store _orig and _d_orig
+    x_d_orig = x_d
     a_d_orig = a_d
     alpha_d_orig = alpha_d
-    x_d_orig = x_d
+    x_orig = x
     a_orig = a
     alpha_orig = alpha
-    x_orig = x
 
     write(*,*) 'Testing SSYR (n =', n, ')'
     a_orig = a
 
     ! Call the differentiated function
     call ssyr_d(uplo, nsize, alpha, alpha_d, x, x_d, 1, a, a_d, lda_val)
-    alpha_d = alpha_d_orig
     x_d = x_d_orig
+    alpha_d = alpha_d_orig
 
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, uplo, nsize, lda_val, a_orig, alpha_orig, x_orig, a_d_orig, alpha_d_orig, x_d_orig, a_d, passed)
+    call check_derivatives_numerically(n, uplo, nsize, lda_val, x_orig, a_orig, alpha_orig, x_d_orig, a_d_orig, alpha_d_orig, a_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, uplo, nsize, lda_val, a_orig, alpha_orig, x_orig, a_d_orig, alpha_d_orig, x_d_orig, a_d, passed)
+  subroutine check_derivatives_numerically(n, uplo, nsize, lda_val, x_orig, a_orig, alpha_orig, x_d_orig, a_d_orig, alpha_d_orig, a_d, passed)
     implicit none
     integer, intent(in) :: n
     character, intent(in) :: uplo
     integer, intent(in) :: nsize
     integer, intent(in) :: lda_val
+    real(4), intent(in) :: x_orig(n), x_d_orig(n)
     real(4), intent(in) :: a_orig(n,n), a_d_orig(n,n)
     real(4), intent(in) :: alpha_orig, alpha_d_orig
-    real(4), intent(in) :: x_orig(n), x_d_orig(n)
     real(4), intent(in) :: a_d(n,n)
     logical, intent(out) :: passed
 
@@ -120,9 +120,9 @@ contains
     logical :: has_large_errors
     real(4), dimension(n,n) :: a_forward, a_backward
     integer :: i, j
+    real(4), dimension(n) :: x
     real(4), dimension(n,n) :: a
     real(4) :: alpha
-    real(4), dimension(n) :: x
 
     max_error = 0.0e0
     has_large_errors = .false.
@@ -131,16 +131,16 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
+    x = x_orig + h * x_d_orig
     a = a_orig + h * a_d_orig
     alpha = alpha_orig + h * alpha_d_orig
-    x = x_orig + h * x_d_orig
     call ssyr(uplo, nsize, alpha, x, 1, a, lda_val)
     a_forward = a
 
     ! Backward perturbation: f(x - h)
+    x = x_orig - h * x_d_orig
     a = a_orig - h * a_d_orig
     alpha = alpha_orig - h * alpha_d_orig
-    x = x_orig - h * x_d_orig
     call ssyr(uplo, nsize, alpha, x, 1, a, lda_val)
     a_backward = a
 

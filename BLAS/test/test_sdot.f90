@@ -46,14 +46,14 @@ contains
     integer :: incy
 
     ! Derivative variables
+    real(4), dimension(n) :: sx_d
     real(4) :: sdot_d_result  ! Derivative of function result (avoid name clash with func_d)
     real(4), dimension(n) :: sy_d
-    real(4), dimension(n) :: sx_d
 
     ! Array restoration and derivative storage
+    real(4), dimension(n) :: sx_orig, sx_d_orig
     real(4) :: sdot_orig  ! Function result (no _d_orig - use _d_result)
     real(4), dimension(n) :: sy_orig, sy_d_orig
-    real(4), dimension(n) :: sx_orig, sx_d_orig
     integer :: i, j
 
     nsize = n
@@ -66,38 +66,38 @@ contains
     sy = sy * 2.0d0 - 1.0d0  ! Scale to [-1,1]
 
     ! Initialize input derivatives
-    call random_number(sy_d)
-    sy_d = sy_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(sx_d)
     sx_d = sx_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(sy_d)
+    sy_d = sy_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
     ! Store _orig and _d_orig
-    sy_d_orig = sy_d
     sx_d_orig = sx_d
+    sy_d_orig = sy_d
+    sx_orig = sx
     sdot_orig = sdot(nsize, sx, 1, sy, 1)
     sy_orig = sy
-    sx_orig = sx
 
     write(*,*) 'Testing SDOT (n =', n, ')'
 
     ! Call the differentiated function
     sdot_d_result = sdot_d(nsize, sx, sx_d, 1, sy, sy_d, 1, sdot_orig)
-    sy_d = sy_d_orig
     sx_d = sx_d_orig
+    sy_d = sy_d_orig
 
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, nsize, sy_orig, sx_orig, sdot_orig, sy_d_orig, sx_d_orig, sdot_d_result, passed)
+    call check_derivatives_numerically(n, nsize, sx_orig, sy_orig, sdot_orig, sx_d_orig, sy_d_orig, sdot_d_result, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, nsize, sy_orig, sx_orig, sdot_orig, sy_d_orig, sx_d_orig, sdot_d_result, passed)
+  subroutine check_derivatives_numerically(n, nsize, sx_orig, sy_orig, sdot_orig, sx_d_orig, sy_d_orig, sdot_d_result, passed)
     implicit none
     integer, intent(in) :: n
     integer, intent(in) :: nsize
-    real(4), intent(in) :: sy_orig(n), sy_d_orig(n)
     real(4), intent(in) :: sx_orig(n), sx_d_orig(n)
+    real(4), intent(in) :: sy_orig(n), sy_d_orig(n)
     real(4), intent(in) :: sdot_orig
     real(4), intent(in) :: sdot_d_result
     logical, intent(out) :: passed
@@ -109,8 +109,8 @@ contains
     logical :: has_large_errors
     real(4) :: sdot_forward, sdot_backward  ! Function result for FD check
     integer :: i, j
-    real(4), dimension(n) :: sy
     real(4), dimension(n) :: sx
+    real(4), dimension(n) :: sy
 
     max_error = 0.0e0
     has_large_errors = .false.
@@ -119,13 +119,13 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    sy = sy_orig + h * sy_d_orig
     sx = sx_orig + h * sx_d_orig
+    sy = sy_orig + h * sy_d_orig
     sdot_forward = sdot(nsize, sx, 1, sy, 1)
 
     ! Backward perturbation: f(x - h)
-    sy = sy_orig - h * sy_d_orig
     sx = sx_orig - h * sx_d_orig
+    sy = sy_orig - h * sy_d_orig
     sdot_backward = sdot(nsize, sx, 1, sy, 1)
 
     ! Compute central differences and compare with AD results

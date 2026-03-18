@@ -90,16 +90,16 @@ contains
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, nsize, zx_orig, da_orig, zx_d_orig, da_d_orig, zx_d, passed)
+    call check_derivatives_numerically(n, nsize, da_orig, zx_orig, da_d_orig, zx_d_orig, zx_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, nsize, zx_orig, da_orig, zx_d_orig, da_d_orig, zx_d, passed)
+  subroutine check_derivatives_numerically(n, nsize, da_orig, zx_orig, da_d_orig, zx_d_orig, zx_d, passed)
     implicit none
     integer, intent(in) :: n
     integer, intent(in) :: nsize
-    complex(8), intent(in) :: zx_orig(n), zx_d_orig(n)
     real(8), intent(in) :: da_orig, da_d_orig
+    complex(8), intent(in) :: zx_orig(n), zx_d_orig(n)
     complex(8), intent(in) :: zx_d(n)
     logical, intent(out) :: passed
 
@@ -110,8 +110,8 @@ contains
     logical :: has_large_errors
     complex(8), dimension(n) :: zx_forward, zx_backward
     integer :: i, j
-    complex(8), dimension(n) :: zx
     real(8) :: da
+    complex(8), dimension(n) :: zx
 
     max_error = 0.0e0
     has_large_errors = .false.
@@ -120,14 +120,14 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    zx = zx_orig + h * zx_d_orig
     da = da_orig + h * da_d_orig
+    zx = zx_orig + h * zx_d_orig
     call zdscal(nsize, da, zx, 1)
     zx_forward = zx
 
     ! Backward perturbation: f(x - h)
-    zx = zx_orig - h * zx_d_orig
     da = da_orig - h * da_d_orig
+    zx = zx_orig - h * zx_d_orig
     call zdscal(nsize, da, zx, 1)
     zx_backward = zx
 

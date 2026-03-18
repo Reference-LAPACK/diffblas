@@ -84,9 +84,9 @@ contains
     call ssyr2_bv(uplo, nsize, alpha, alphab, x, xb, incx_val, y, yb, incy_val, a, ab, lda_val, nbdirs)
     call set_ISIZE1OFX(-1)
     call set_ISIZE1OFY(-1)
-    call check_vjp_syr_syr2(n, nbdirs, uplo, nsize, lda_val, incx_val, incy_val, alpha_orig, x_orig, a_orig, ab_orig, alphab, xb, ab, passed, y_orig, yb)
+    call check_vjp_syr_syr2(n, nbdirs, uplo, nsize, lda_val, incx_val, incy_val, alpha_orig, x_orig, y_orig, a_orig, ab_orig, alphab, xb, yb, ab, passed)
   end subroutine run_test_for_size
-  subroutine check_vjp_syr_syr2(n, nbdirs, uplo, nsize, lda_val, incx_val, incy_val, alpha, x, a, ab_orig, alphab, xb, ab, passed, y, yb)
+  subroutine check_vjp_syr_syr2(n, nbdirs, uplo, nsize, lda_val, incx_val, incy_val, alpha, x, y, a, ab_orig, alphab, xb, yb, ab, passed)
     integer, intent(in) :: n, nbdirs
     character, intent(in) :: uplo
     integer, intent(in) :: nsize, lda_val, incx_val, incy_val
@@ -96,7 +96,8 @@ contains
     real(4), intent(in) :: alphab(nbdirs), xb(nbdirs,n)
     real(4), intent(in) :: ab(nbdirs,n,n)
     logical, intent(out) :: passed
-    real(4), intent(in), optional :: y(n), yb(nbdirs,n)
+    real(4), intent(in) :: y(n)
+    real(4), intent(in) :: yb(nbdirs,n)
     real(4), parameter :: h = 1.0e-3
     real(4) :: vjp_fd, vjp_ad, re, err_bnd, tr, ti, relative_error, abs_reference, max_error
     real(4) :: alpha_dir
@@ -116,8 +117,8 @@ contains
       alpha_dir = tr * 2.0d0 - 1.0d0
       call random_number(x_dir)
       x_dir = x_dir * 2.0d0 - 1.0d0
-      if (present(y)) call random_number(y_dir)
-      if (present(y)) y_dir = y_dir * 2.0d0 - 1.0d0
+      call random_number(y_dir)
+      y_dir = y_dir * 2.0d0 - 1.0d0
       call random_number(a_dir)
       a_dir = a_dir * 2.0d0 - 1.0d0
       do j = 1, n
@@ -127,21 +128,13 @@ contains
       end do
       a_t = a + h * a_dir
       x_t = x + h * x_dir
-      if (present(y)) y_t = y + h * y_dir
-      if (present(y)) then
-        call ssyr2(uplo, nsize, alpha + h*alpha_dir, x_t, incx_val, y_t, incy_val, a_t, lda_val)
-      else
-        call ssyr2(uplo, nsize, alpha + h*alpha_dir, x_t, incx_val, a_t, lda_val)
-      end if
+      y_t = y + h * y_dir
+      call ssyr2(uplo, nsize, alpha + h*alpha_dir, x_t, incx_val, y_t, incy_val, a_t, lda_val)
       a_plus = a_t
       a_t = a - h * a_dir
       x_t = x - h * x_dir
-      if (present(y)) y_t = y - h * y_dir
-      if (present(y)) then
-        call ssyr2(uplo, nsize, alpha - h*alpha_dir, x_t, incx_val, y_t, incy_val, a_t, lda_val)
-      else
-        call ssyr2(uplo, nsize, alpha - h*alpha_dir, x_t, incx_val, a_t, lda_val)
-      end if
+      y_t = y - h * y_dir
+      call ssyr2(uplo, nsize, alpha - h*alpha_dir, x_t, incx_val, y_t, incy_val, a_t, lda_val)
       a_minus = a_t
       a_cdiff = (a_plus - a_minus) / (2.0e0 * h)
       vjp_fd = 0.0e0
@@ -165,9 +158,7 @@ contains
           end if
         end do
       end do
-      if (present(y)) then
-        vjp_ad = vjp_ad + sum(y_dir*yb(k,:))
-      end if
+      vjp_ad = vjp_ad + sum(y_dir*yb(k,:))
       re = abs(vjp_fd - vjp_ad)
       abs_reference = abs(vjp_ad)
       if (abs_reference > 1.0e-10) then

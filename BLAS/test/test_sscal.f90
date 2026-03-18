@@ -45,12 +45,12 @@ contains
     integer :: incx
 
     ! Derivative variables
-    real(4) :: sa_d
     real(4), dimension(n) :: sx_d
+    real(4) :: sa_d
 
     ! Array restoration and derivative storage
-    real(4) :: sa_orig, sa_d_orig
     real(4), dimension(n) :: sx_orig, sx_d_orig
+    real(4) :: sa_orig, sa_d_orig
     integer :: i, j
 
     nsize = n
@@ -62,16 +62,16 @@ contains
     sx = sx * 2.0d0 - 1.0d0  ! Scale to [-1,1]
 
     ! Initialize input derivatives
-    call random_number(sa_d)
-    sa_d = sa_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(sx_d)
     sx_d = sx_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(sa_d)
+    sa_d = sa_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
     ! Store _orig and _d_orig
-    sa_d_orig = sa_d
     sx_d_orig = sx_d
-    sa_orig = sa
+    sa_d_orig = sa_d
     sx_orig = sx
+    sa_orig = sa
 
     write(*,*) 'Testing SSCAL (n =', n, ')'
     sx_orig = sx
@@ -83,16 +83,16 @@ contains
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, nsize, sa_orig, sx_orig, sa_d_orig, sx_d_orig, sx_d, passed)
+    call check_derivatives_numerically(n, nsize, sx_orig, sa_orig, sx_d_orig, sa_d_orig, sx_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, nsize, sa_orig, sx_orig, sa_d_orig, sx_d_orig, sx_d, passed)
+  subroutine check_derivatives_numerically(n, nsize, sx_orig, sa_orig, sx_d_orig, sa_d_orig, sx_d, passed)
     implicit none
     integer, intent(in) :: n
     integer, intent(in) :: nsize
-    real(4), intent(in) :: sa_orig, sa_d_orig
     real(4), intent(in) :: sx_orig(n), sx_d_orig(n)
+    real(4), intent(in) :: sa_orig, sa_d_orig
     real(4), intent(in) :: sx_d(n)
     logical, intent(out) :: passed
 
@@ -103,8 +103,8 @@ contains
     logical :: has_large_errors
     real(4), dimension(n) :: sx_forward, sx_backward
     integer :: i, j
-    real(4) :: sa
     real(4), dimension(n) :: sx
+    real(4) :: sa
 
     max_error = 0.0e0
     has_large_errors = .false.
@@ -113,14 +113,14 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    sa = sa_orig + h * sa_d_orig
     sx = sx_orig + h * sx_d_orig
+    sa = sa_orig + h * sa_d_orig
     call sscal(nsize, sa, sx, 1)
     sx_forward = sx
 
     ! Backward perturbation: f(x - h)
-    sa = sa_orig - h * sa_d_orig
     sx = sx_orig - h * sx_d_orig
+    sa = sa_orig - h * sa_d_orig
     call sscal(nsize, sa, sx, 1)
     sx_backward = sx
 

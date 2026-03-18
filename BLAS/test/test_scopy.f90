@@ -46,12 +46,12 @@ contains
     integer :: incy
 
     ! Derivative variables
-    real(4), dimension(n) :: sy_d
     real(4), dimension(n) :: sx_d
+    real(4), dimension(n) :: sy_d
 
     ! Array restoration and derivative storage
-    real(4), dimension(n) :: sy_orig, sy_d_orig
     real(4), dimension(n) :: sx_orig, sx_d_orig
+    real(4), dimension(n) :: sy_orig, sy_d_orig
     integer :: i, j
 
     nsize = n
@@ -64,16 +64,16 @@ contains
     sy = sy * 2.0d0 - 1.0d0  ! Scale to [-1,1]
 
     ! Initialize input derivatives
-    call random_number(sy_d)
-    sy_d = sy_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(sx_d)
     sx_d = sx_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(sy_d)
+    sy_d = sy_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
     ! Store _orig and _d_orig
-    sy_d_orig = sy_d
     sx_d_orig = sx_d
-    sy_orig = sy
+    sy_d_orig = sy_d
     sx_orig = sx
+    sy_orig = sy
 
     write(*,*) 'Testing SCOPY (n =', n, ')'
 

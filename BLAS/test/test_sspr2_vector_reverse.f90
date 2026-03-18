@@ -99,38 +99,26 @@ contains
       alpha_dir = tr * 2.0d0 - 1.0d0
       call random_number(x_dir)
       x_dir = x_dir * 2.0d0 - 1.0d0
-      if (present(y)) then
-        call random_number(y_dir)
-        y_dir = y_dir * 2.0d0 - 1.0d0
-      end if
+      call random_number(y_dir)
+      y_dir = y_dir * 2.0d0 - 1.0d0
       call random_number(ap_dir)
       ap_dir = ap_dir * 2.0d0 - 1.0d0
       ap_t = ap + h * ap_dir
       x_t = x + h * x_dir
-      if (present(y)) y_t = y + h * y_dir
-      if (present(y)) then
-        call sspr2(uplo, nsize, alpha + h*alpha_dir, x_t, incx_val, y_t, incy_val, ap_t)
-      else
-        call sspr2(uplo, nsize, alpha + h*alpha_dir, x_t, incx_val, ap_t)
-      end if
+      y_t = y + h * y_dir
+      call sspr2(uplo, nsize, alpha + h*alpha_dir, x_t, incx_val, y_t, incy_val, ap_t)
       ap_plus = ap_t
       ap_t = ap - h * ap_dir
       x_t = x - h * x_dir
-      if (present(y)) y_t = y - h * y_dir
-      if (present(y)) then
-        call sspr2(uplo, nsize, alpha - h*alpha_dir, x_t, incx_val, y_t, incy_val, ap_t)
-      else
-        call sspr2(uplo, nsize, alpha - h*alpha_dir, x_t, incx_val, ap_t)
-      end if
+      y_t = y - h * y_dir
+      call sspr2(uplo, nsize, alpha - h*alpha_dir, x_t, incx_val, y_t, incy_val, ap_t)
       ap_minus = ap_t
       ap_cdiff = (ap_plus - ap_minus) / (2.0e0 * h)
       vjp_fd = sum(apb_orig(k,:) * ap_cdiff)
       vjp_ad = alpha_dir * alphab(k)
       vjp_ad = vjp_ad + sum(x_dir*xb(k,:))
       vjp_ad = vjp_ad + sum(ap_dir*apb(k,:))
-      if (present(y)) then
-        vjp_ad = vjp_ad + sum(y_dir*yb(k,:))
-      end if
+      vjp_ad = vjp_ad + sum(y_dir*yb(k,:))
       re = abs(vjp_fd - vjp_ad)
       if (re > max_re) max_re = re
       err_bnd = 2.0e-3 + 2.0e-3 * abs(vjp_ad)

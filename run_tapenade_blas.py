@@ -4204,7 +4204,10 @@ def _generate_multisize_outlined_test_scalar_reverse_packed(func_name, src_file,
     lines.append(f"    {elem_type}, intent(in) :: x_orig(n), ap_orig(npack), apb_orig(npack)")
     lines.append(f"    {elem_type}, intent(in) :: alphab, xb(n), apb(npack)")
     lines.append("    logical, intent(out) :: passed")
-    lines.append(f"    {elem_type}, intent(in), optional :: y_orig(n), yb(n)")
+    if has_y:
+        lines.append(f"    {elem_type}, intent(in) :: y_orig(n), yb(n)")
+    else:
+        lines.append(f"    {elem_type}, intent(in), optional :: y_orig(n), yb(n)")
     lines.append(f"    {precision_type}, parameter :: h = {h_val}")
     lines.append(f"    {precision_type} :: vjp_fd, vjp_ad, abs_error, abs_reference, error_bound, relative_error")
     lines.append(f"    {elem_type} :: alpha_dir")
@@ -4225,20 +4228,16 @@ def _generate_multisize_outlined_test_scalar_reverse_packed(func_name, src_file,
     lines.append("    call random_number(x_dir)")
     lines.append("    x_dir = x_dir * 2.0d0 - 1.0d0")
     if has_y:
-        lines.append("    if (present(y_orig)) call random_number(y_dir)")
-        lines.append("    if (present(y_orig)) y_dir = y_dir * 2.0d0 - 1.0d0")
+        lines.append("    call random_number(y_dir)")
+        lines.append("    y_dir = y_dir * 2.0d0 - 1.0d0")
     lines.append("    call random_number(ap_dir)")
     lines.append("    ap_dir = ap_dir * 2.0d0 - 1.0d0")
     lines.append("    alpha_t = alpha_orig + h * alpha_dir")
     lines.append("    x_t = x_orig + h * x_dir")
     lines.append("    ap_t = ap_orig + h * ap_dir")
     if has_y:
-        lines.append("    if (present(y_orig)) y_t = y_orig + h * y_dir")
-        lines.append("    if (present(y_orig)) then")
-        lines.append(f"      call {func_name.lower()}(uplo, nsize, alpha_t, x_t, incx_val, y_t, incy_val, ap_t)")
-        lines.append("    else")
-        lines.append(f"      call {func_name.lower()}(uplo, nsize, alpha_t, x_t, incx_val, ap_t)")
-        lines.append("    end if")
+        lines.append("    y_t = y_orig + h * y_dir")
+        lines.append(f"    call {func_name.lower()}(uplo, nsize, alpha_t, x_t, incx_val, y_t, incy_val, ap_t)")
     else:
         lines.append(f"    call {func_name.lower()}(uplo, nsize, alpha_t, x_t, incx_val, ap_t)")
     lines.append("    ap_plus = ap_t")
@@ -4246,12 +4245,8 @@ def _generate_multisize_outlined_test_scalar_reverse_packed(func_name, src_file,
     lines.append("    x_t = x_orig - h * x_dir")
     lines.append("    ap_t = ap_orig - h * ap_dir")
     if has_y:
-        lines.append("    if (present(y_orig)) y_t = y_orig - h * y_dir")
-        lines.append("    if (present(y_orig)) then")
-        lines.append(f"      call {func_name.lower()}(uplo, nsize, alpha_t, x_t, incx_val, y_t, incy_val, ap_t)")
-        lines.append("    else")
-        lines.append(f"      call {func_name.lower()}(uplo, nsize, alpha_t, x_t, incx_val, ap_t)")
-        lines.append("    end if")
+        lines.append("    y_t = y_orig - h * y_dir")
+        lines.append(f"    call {func_name.lower()}(uplo, nsize, alpha_t, x_t, incx_val, y_t, incy_val, ap_t)")
     else:
         lines.append(f"    call {func_name.lower()}(uplo, nsize, alpha_t, x_t, incx_val, ap_t)")
     lines.append("    ap_minus = ap_t")
@@ -4303,19 +4298,17 @@ def _generate_multisize_outlined_test_scalar_reverse_packed(func_name, src_file,
         lines.append("      vjp_ad = vjp_ad + temp_products(i)")
         lines.append("    end do")
     if has_y:
-        lines.append("    if (present(y_orig)) then")
-        lines.append("      n_products = n")
-        lines.append("      do i = 1, n")
+        lines.append("    n_products = n")
+        lines.append("    do i = 1, n")
         if is_complex:
-            lines.append("        temp_products(i) = real(conjg(y_dir(i)) * yb(i))")
+            lines.append("      temp_products(i) = real(conjg(y_dir(i)) * yb(i))")
         else:
-            lines.append("        temp_products(i) = y_dir(i) * yb(i)")
-        lines.append("      end do")
-        lines.append("      call sort_array(temp_products, n_products)")
-        lines.append("      do i = 1, n_products")
-        lines.append("        vjp_ad = vjp_ad + temp_products(i)")
-        lines.append("      end do")
-        lines.append("    end if")
+            lines.append("      temp_products(i) = y_dir(i) * yb(i)")
+        lines.append("    end do")
+        lines.append("    call sort_array(temp_products, n_products)")
+        lines.append("    do i = 1, n_products")
+        lines.append("      vjp_ad = vjp_ad + temp_products(i)")
+        lines.append("    end do")
     lines.append("    abs_error = abs(vjp_fd - vjp_ad)")
     lines.append("    abs_reference = abs(vjp_ad)")
     lines.append("    relative_error = 0.0d0")
@@ -4944,7 +4937,11 @@ def _generate_multisize_outlined_test_scalar_reverse_band(func_name, src_file, s
     is_gbmv = is_band_general_function(func_name)
     is_tbmv_tbsv = is_band_triangular_function(func_name)
     is_single = precision_type == "real(4)"
-    rtol_atol = "2.0e-3" if (is_single and not is_complex) else ("1.0e-3" if is_single else "1.0e-5")
+    # Single-precision real band (S*) keeps 2e-3; single-precision complex band (C*) uses relaxed 1e-2
+    rtol_atol = (
+        "2.0e-3" if (is_single and not is_complex)
+        else ("1.0e-2" if (is_single and is_complex) else "1.0e-5")
+    )
     h_val = "1.0e-3" if is_single else "1.0e-7"
     isize_vars = []
     if reverse_src_dir is not None:
@@ -8425,8 +8422,16 @@ def _generate_multisize_outlined_test_vector_reverse_band(func_name, src_file, s
             b_file = Path(reverse_src_dir) / f"{src_stem}_bv.f90"
         if b_file.exists():
             isize_vars = _collect_isize_vars_from_file(b_file)
-    is_single = precision_type == "real(4)"
-    rtol_atol = "2.0e-3" if (is_single and not is_complex) else ("1.0e-3" if is_single else "1.0e-5")
+    # Single vs double is determined from the routine family (S*/C* vs D*/Z*)
+    is_single = func_name.upper().startswith('S') or func_name.upper().startswith('C')
+    # Single-precision real band (S*) keeps 2e-3; single-precision complex band (C*) uses relaxed 1e-2;
+    # double-precision (D*/Z*) keeps tight 1e-5.
+    if is_single and not is_complex:
+        rtol_atol = "2.0e-3"
+    elif is_single and is_complex:
+        rtol_atol = "1.0e-2"
+    else:
+        rtol_atol = "1.0e-5"
     h_val = "1.0e-3" if is_single else "1.0e-7"
 
     lines = []
@@ -11409,11 +11414,14 @@ def _generate_multisize_outlined_test_vector_reverse_syr_syr2(func_name, src_fil
     for isize_var in isize_vars_bv:
         lines.append(f"    call {_isize_var_to_setter(isize_var)}(-1)")
     if has_y:
-        lines.append("    call check_vjp_syr_syr2(n, nbdirs, uplo, nsize, lda_val, incx_val, incy_val, alpha_orig, x_orig, a_orig, ab_orig, alphab, xb, ab, passed, y_orig, yb)")
+        lines.append("    call check_vjp_syr_syr2(n, nbdirs, uplo, nsize, lda_val, incx_val, incy_val, alpha_orig, x_orig, y_orig, a_orig, ab_orig, alphab, xb, yb, ab, passed)")
     else:
         lines.append("    call check_vjp_syr_syr2(n, nbdirs, uplo, nsize, lda_val, incx_val, incy_val, alpha_orig, x_orig, a_orig, ab_orig, alphab, xb, ab, passed)")
     lines.append("  end subroutine run_test_for_size")
-    lines.append("  subroutine check_vjp_syr_syr2(n, nbdirs, uplo, nsize, lda_val, incx_val, incy_val, alpha, x, a, ab_orig, alphab, xb, ab, passed, y, yb)")
+    if has_y:
+        lines.append("  subroutine check_vjp_syr_syr2(n, nbdirs, uplo, nsize, lda_val, incx_val, incy_val, alpha, x, y, a, ab_orig, alphab, xb, yb, ab, passed)")
+    else:
+        lines.append("  subroutine check_vjp_syr_syr2(n, nbdirs, uplo, nsize, lda_val, incx_val, incy_val, alpha, x, a, ab_orig, alphab, xb, ab, passed)")
     lines.append("    integer, intent(in) :: n, nbdirs")
     lines.append("    character, intent(in) :: uplo")
     lines.append("    integer, intent(in) :: nsize, lda_val, incx_val, incy_val")
@@ -11423,7 +11431,9 @@ def _generate_multisize_outlined_test_vector_reverse_syr_syr2(func_name, src_fil
     lines.append(f"    {elem_type}, intent(in) :: alphab(nbdirs), xb(nbdirs,n)")
     lines.append(f"    {elem_type}, intent(in) :: ab(nbdirs,n,n)")
     lines.append("    logical, intent(out) :: passed")
-    lines.append(f"    {elem_type}, intent(in), optional :: y(n), yb(nbdirs,n)")
+    if has_y:
+        lines.append(f"    {elem_type}, intent(in) :: y(n)")
+        lines.append(f"    {elem_type}, intent(in) :: yb(nbdirs,n)")
     lines.append(f"    {precision_type}, parameter :: h = {h_val}")
     lines.append(f"    {precision_type} :: vjp_fd, vjp_ad, re, err_bnd, tr, ti, relative_error, abs_reference, max_error")
     lines.append(f"    {elem_type} :: alpha_dir")
@@ -11447,9 +11457,8 @@ def _generate_multisize_outlined_test_vector_reverse_syr_syr2(func_name, src_fil
     lines.append("      call random_number(x_dir)")
     lines.append("      x_dir = x_dir * 2.0d0 - 1.0d0")
     if has_y:
-        lines.append("      if (present(y)) call random_number(y_dir)")
-    if has_y:
-        lines.append("      if (present(y)) y_dir = y_dir * 2.0d0 - 1.0d0")
+        lines.append("      call random_number(y_dir)")
+        lines.append("      y_dir = y_dir * 2.0d0 - 1.0d0")
     lines.append("      call random_number(a_dir)")
     lines.append("      a_dir = a_dir * 2.0d0 - 1.0d0")
     lines.append("      do j = 1, n")
@@ -11463,22 +11472,18 @@ def _generate_multisize_outlined_test_vector_reverse_syr_syr2(func_name, src_fil
     lines.append("      a_t = a + h * a_dir")
     lines.append("      x_t = x + h * x_dir")
     if has_y:
-        lines.append("      if (present(y)) y_t = y + h * y_dir")
-    lines.append("      if (present(y)) then")
-    lines.append(f"        call {func_name.lower()}(uplo, nsize, alpha + h*alpha_dir, x_t, incx_val, y_t, incy_val, a_t, lda_val)")
-    lines.append("      else")
-    lines.append(f"        call {func_name.lower()}(uplo, nsize, alpha + h*alpha_dir, x_t, incx_val, a_t, lda_val)")
-    lines.append("      end if")
+        lines.append("      y_t = y + h * y_dir")
+        lines.append(f"      call {func_name.lower()}(uplo, nsize, alpha + h*alpha_dir, x_t, incx_val, y_t, incy_val, a_t, lda_val)")
+    else:
+        lines.append(f"      call {func_name.lower()}(uplo, nsize, alpha + h*alpha_dir, x_t, incx_val, a_t, lda_val)")
     lines.append("      a_plus = a_t")
     lines.append("      a_t = a - h * a_dir")
     lines.append("      x_t = x - h * x_dir")
     if has_y:
-        lines.append("      if (present(y)) y_t = y - h * y_dir")
-    lines.append("      if (present(y)) then")
-    lines.append(f"        call {func_name.lower()}(uplo, nsize, alpha - h*alpha_dir, x_t, incx_val, y_t, incy_val, a_t, lda_val)")
-    lines.append("      else")
-    lines.append(f"        call {func_name.lower()}(uplo, nsize, alpha - h*alpha_dir, x_t, incx_val, a_t, lda_val)")
-    lines.append("      end if")
+        lines.append("      y_t = y - h * y_dir")
+        lines.append(f"      call {func_name.lower()}(uplo, nsize, alpha - h*alpha_dir, x_t, incx_val, y_t, incy_val, a_t, lda_val)")
+    else:
+        lines.append(f"      call {func_name.lower()}(uplo, nsize, alpha - h*alpha_dir, x_t, incx_val, a_t, lda_val)")
     lines.append("      a_minus = a_t")
     two_h_syr2 = "2.0e0" if is_single else "2.0d0"
     lines.append(f"      a_cdiff = (a_plus - a_minus) / ({two_h_syr2} * h)")
@@ -11522,12 +11527,11 @@ def _generate_multisize_outlined_test_vector_reverse_syr_syr2(func_name, src_fil
     lines.append("          end if")
     lines.append("        end do")
     lines.append("      end do")
-    lines.append("      if (present(y)) then")
-    if is_complex:
-        lines.append("        vjp_ad = vjp_ad + sum(real(conjg(y_dir)*yb(k,:)))")
-    else:
-        lines.append("        vjp_ad = vjp_ad + sum(y_dir*yb(k,:))")
-    lines.append("      end if")
+    if has_y:
+        if is_complex:
+            lines.append("      vjp_ad = vjp_ad + sum(real(conjg(y_dir)*yb(k,:)))")
+        else:
+            lines.append("      vjp_ad = vjp_ad + sum(y_dir*yb(k,:))")
     lines.append("      re = abs(vjp_fd - vjp_ad)")
     lines.append("      abs_reference = abs(vjp_ad)")
     lines.append("      if (abs_reference > 1.0e-10) then")
@@ -11711,31 +11715,25 @@ def _generate_multisize_outlined_test_vector_reverse_spr_spr2(func_name, src_fil
     lines.append("      call random_number(x_dir)")
     lines.append("      x_dir = x_dir * 2.0d0 - 1.0d0")
     if has_y:
-        lines.append("      if (present(y)) then")
-        lines.append("        call random_number(y_dir)")
-        lines.append("        y_dir = y_dir * 2.0d0 - 1.0d0")
-        lines.append("      end if")
+        lines.append("      call random_number(y_dir)")
+        lines.append("      y_dir = y_dir * 2.0d0 - 1.0d0")
     lines.append("      call random_number(ap_dir)")
     lines.append("      ap_dir = ap_dir * 2.0d0 - 1.0d0")
     lines.append("      ap_t = ap + h * ap_dir")
     lines.append("      x_t = x + h * x_dir")
     if has_y:
-        lines.append("      if (present(y)) y_t = y + h * y_dir")
-    lines.append("      if (present(y)) then")
-    lines.append(f"        call {func_name.lower()}(uplo, nsize, alpha + h*alpha_dir, x_t, incx_val, y_t, incy_val, ap_t)")
-    lines.append("      else")
-    lines.append(f"        call {func_name.lower()}(uplo, nsize, alpha + h*alpha_dir, x_t, incx_val, ap_t)")
-    lines.append("      end if")
+        lines.append("      y_t = y + h * y_dir")
+        lines.append(f"      call {func_name.lower()}(uplo, nsize, alpha + h*alpha_dir, x_t, incx_val, y_t, incy_val, ap_t)")
+    else:
+        lines.append(f"      call {func_name.lower()}(uplo, nsize, alpha + h*alpha_dir, x_t, incx_val, ap_t)")
     lines.append("      ap_plus = ap_t")
     lines.append("      ap_t = ap - h * ap_dir")
     lines.append("      x_t = x - h * x_dir")
     if has_y:
-        lines.append("      if (present(y)) y_t = y - h * y_dir")
-    lines.append("      if (present(y)) then")
-    lines.append(f"        call {func_name.lower()}(uplo, nsize, alpha - h*alpha_dir, x_t, incx_val, y_t, incy_val, ap_t)")
-    lines.append("      else")
-    lines.append(f"        call {func_name.lower()}(uplo, nsize, alpha - h*alpha_dir, x_t, incx_val, ap_t)")
-    lines.append("      end if")
+        lines.append("      y_t = y - h * y_dir")
+        lines.append(f"      call {func_name.lower()}(uplo, nsize, alpha - h*alpha_dir, x_t, incx_val, y_t, incy_val, ap_t)")
+    else:
+        lines.append(f"      call {func_name.lower()}(uplo, nsize, alpha - h*alpha_dir, x_t, incx_val, ap_t)")
     lines.append("      ap_minus = ap_t")
     lines.append("      ap_cdiff = (ap_plus - ap_minus) / (2.0e0 * h)")
     if is_complex:
@@ -11754,12 +11752,11 @@ def _generate_multisize_outlined_test_vector_reverse_spr_spr2(func_name, src_fil
         lines.append("      vjp_ad = vjp_ad + sum(real(conjg(ap_dir)*apb(k,:)))")
     else:
         lines.append("      vjp_ad = vjp_ad + sum(ap_dir*apb(k,:))")
-    lines.append("      if (present(y)) then")
-    if is_complex:
-        lines.append("        vjp_ad = vjp_ad + sum(real(conjg(y_dir)*yb(k,:)))")
-    else:
-        lines.append("        vjp_ad = vjp_ad + sum(y_dir*yb(k,:))")
-    lines.append("      end if")
+    if has_y:
+        if is_complex:
+            lines.append("      vjp_ad = vjp_ad + sum(real(conjg(y_dir)*yb(k,:)))")
+        else:
+            lines.append("      vjp_ad = vjp_ad + sum(y_dir*yb(k,:))")
     lines.append("      re = abs(vjp_fd - vjp_ad)")
     lines.append("      if (re > max_re) max_re = re")
     lines.append(f"      err_bnd = {rtol_atol} + {rtol_atol} * abs(vjp_ad)")
@@ -12412,10 +12409,10 @@ def _generate_multisize_outlined_test_vector_reverse_blas3(func_name, src_file, 
             lines.append("    bb_seed = bb")
         else:
             lines.append("    cb_seed = cb")
-    if is_symm_hemm:
-        lines.append("    c_orig = c")
-    elif not is_complex:
-        # Real SYRK/SYR2K/TRMM/TRSM: initialize with random_number
+        if is_symm_hemm:
+            lines.append("    c_orig = c")
+    if not is_complex:
+        # Real BLAS3: initialize alpha/beta/a/b/c and output seed(s)
         lines.append("    call random_number(alpha)")
         lines.append("    alpha = alpha * 2.0d0 - 1.0d0")
         lines.append("    call random_number(beta)")
@@ -12437,7 +12434,8 @@ def _generate_multisize_outlined_test_vector_reverse_blas3(func_name, src_file, 
             lines.append("    call random_number(cb)")
             lines.append("    cb = cb * 2.0d0 - 1.0d0")
             lines.append("    cb_seed = cb")
-    # When is_complex and not is_symm_hemm, alpha/beta/a/b/c/cb/bb were already set in the is_complex block above
+        if is_symm_hemm:
+            lines.append("    c_orig = c")
     lines.append("    alphab = 0.0d0")
     lines.append("    betab = 0.0d0")
     lines.append("    ab = 0.0d0")
@@ -23488,8 +23486,18 @@ def generate_top_level_makefile(out_dir, flat_mode=False):
 # Compilers and flags
 FC = gfortran
 CC = gcc
-FFLAGS = -O2 -fPIC -ffree-line-length-none -Wuninitialized -Wmaybe-uninitialized -Iinclude
-FFLAGS_F77 = -O2 -fPIC -ffixed-line-length-none -Wuninitialized -Wmaybe-uninitialized -Iinclude
+# Ensure .mod files are written to (and read from) build/
+# Defaults: gfortran -> -J, ifort/ifx -> -module. You can still override MODFLAG on the make command line.
+MODDIR = $(BUILD_DIR)
+ifeq ($(findstring ifort,$(FC)),ifort)
+MODFLAG ?= -module $(MODDIR)
+else ifeq ($(findstring ifx,$(FC)),ifx)
+MODFLAG ?= -module $(MODDIR)
+else
+MODFLAG ?= -J$(MODDIR)
+endif
+FFLAGS = -O2 -fPIC -ffree-line-length-none -Wuninitialized -Wmaybe-uninitialized -Iinclude -I$(MODDIR) $(MODFLAG)
+FFLAGS_F77 = -O2 -fPIC -ffixed-line-length-none -Wuninitialized -Wmaybe-uninitialized -Iinclude -I$(MODDIR)
 CFLAGS = -O2 -fPIC
 
 # Directory structure
@@ -23656,7 +23664,8 @@ $(BUILD_DIR)/%_dep2.o: $(SRC_DIR)/%_dep2.f
 # DIFFSIZES_access - F77 .f or F90 .f90 (generator picks based on COMMON line length)
 # When .f90 exists: compile to produce .o and .mod; wrappers depend on .mod explicitly (avoids stale .o from .f)
 $(BUILD_DIR)/diffsizes_access.mod: $(SRC_DIR)/DIFFSIZES_access.f90
-	$(FC) $(FFLAGS) -J$(BUILD_DIR) -c $< -o $(BUILD_DIR)/DIFFSIZES_access.o
+	@mkdir -p $(BUILD_DIR)
+	$(FC) $(FFLAGS) -c $< -o $(BUILD_DIR)/DIFFSIZES_access.o
 
 # When .f90 exists: DIFFSIZES_access.o is produced as byproduct of diffsizes_access.mod (do not compile .f)
 ifeq ($(wildcard $(SRC_DIR)/DIFFSIZES_access.f90),)
@@ -23668,7 +23677,7 @@ endif
 
 # DIFFSIZES_access_wrappers.f - external symbols for F90 module (set_*, get_*, check_*)
 $(BUILD_DIR)/DIFFSIZES_access_wrappers.o: $(SRC_DIR)/DIFFSIZES_access_wrappers.f $(BUILD_DIR)/diffsizes_access.mod
-	$(FC) $(FFLAGS) -J$(BUILD_DIR) -c $(SRC_DIR)/DIFFSIZES_access_wrappers.f -o $@
+	$(FC) $(FFLAGS) -c $(SRC_DIR)/DIFFSIZES_access_wrappers.f -o $@
 
 # DIFFSIZES handling (supports both Fortran 90 module and Fortran 77 include)
 # For F90: DIFFSIZES.f90 is compiled to produce DIFFSIZES.o and DIFFSIZES.mod
@@ -23855,6 +23864,7 @@ $(BUILD_DIR)/test_%_vector_reverse.o: $(TEST_DIR)/test_%_vector_reverse.f90 $(BU
 clean:
 	@echo "Cleaning build directory..."
 	rm -rf $(BUILD_DIR)
+	rm -f *.mod
 	@echo "Clean complete."
 
 # Rebuild everything

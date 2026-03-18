@@ -49,12 +49,12 @@ contains
     integer :: incx
 
     ! Derivative variables
-    complex(8), dimension(n,n) :: a_d
     complex(8), dimension(n) :: x_d
+    complex(8), dimension(n,n) :: a_d
 
     ! Array restoration and derivative storage
-    complex(8), dimension(n,n) :: a_orig, a_d_orig
     complex(8), dimension(n) :: x_orig, x_d_orig
+    complex(8), dimension(n,n) :: a_orig, a_d_orig
     real(8) :: temp_re, temp_im  ! For complex random init
     integer :: i, j
 
@@ -75,20 +75,20 @@ contains
     end do
 
     ! Initialize input derivatives
-    call random_number(temp_re)
-    call random_number(temp_im)
-    a_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
     do i = 1, n
       call random_number(temp_re)
       call random_number(temp_im)
       x_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
     end do
+    call random_number(temp_re)
+    call random_number(temp_im)
+    a_d = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
 
     ! Store _orig and _d_orig
-    a_d_orig = a_d
     x_d_orig = x_d
-    a_orig = a
+    a_d_orig = a_d
     x_orig = x
+    a_orig = a
 
     write(*,*) 'Testing ZTRMV (n =', n, ')'
     x_orig = x

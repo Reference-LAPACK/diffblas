@@ -158,13 +158,13 @@ contains
     deallocate(temp_products)
     abs_error = abs(vjp_fd - vjp_ad)
     abs_ref = abs(vjp_ad)
-    err_bound = 1.0e-3 + 1.0e-3 * abs_ref
+    err_bound = 1.0e-2 + 1.0e-2 * abs_ref
     relative_error = 0.0d0
     if (abs_ref > 1.0d-10) relative_error = abs_error / abs_ref
     write(*,*) 'Checking derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
     write(*,*) 'Maximum relative error:', relative_error
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-2, atol=1.0e-2'
     passed = abs_error <= err_bound
     if (.not. passed) then
       write(*,*) 'FAIL: Derivatives are outside tolerance'

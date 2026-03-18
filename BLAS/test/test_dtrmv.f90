@@ -49,12 +49,12 @@ contains
     integer :: incx
 
     ! Derivative variables
-    real(8), dimension(n,n) :: a_d
     real(8), dimension(n) :: x_d
+    real(8), dimension(n,n) :: a_d
 
     ! Array restoration and derivative storage
-    real(8), dimension(n,n) :: a_orig, a_d_orig
     real(8), dimension(n) :: x_orig, x_d_orig
+    real(8), dimension(n,n) :: a_orig, a_d_orig
     integer :: i, j
 
     uplo = 'U'
@@ -70,16 +70,16 @@ contains
     x = x * 2.0d0 - 1.0d0  ! Scale to [-1,1]
 
     ! Initialize input derivatives
-    call random_number(a_d)
-    a_d = a_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(x_d)
     x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(a_d)
+    a_d = a_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
     ! Store _orig and _d_orig
-    a_d_orig = a_d
     x_d_orig = x_d
-    a_orig = a
+    a_d_orig = a_d
     x_orig = x
+    a_orig = a
 
     write(*,*) 'Testing DTRMV (n =', n, ')'
     x_orig = x

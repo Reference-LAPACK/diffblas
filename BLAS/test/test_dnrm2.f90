@@ -44,12 +44,12 @@ contains
     integer :: incx
 
     ! Derivative variables
-    real(8) :: dnrm2_d_result  ! Derivative of function result (avoid name clash with func_d)
     real(8), dimension(n) :: x_d
+    real(8) :: dnrm2_d_result  ! Derivative of function result (avoid name clash with func_d)
 
     ! Array restoration and derivative storage
-    real(8) :: dnrm2_orig  ! Function result (no _d_orig - use _d_result)
     real(8), dimension(n) :: x_orig, x_d_orig
+    real(8) :: dnrm2_orig  ! Function result (no _d_orig - use _d_result)
     integer :: i, j
 
     nsize = n
@@ -64,8 +64,8 @@ contains
 
     ! Store _orig and _d_orig
     x_d_orig = x_d
-    dnrm2_orig = dnrm2(nsize, x, 1)
     x_orig = x
+    dnrm2_orig = dnrm2(nsize, x, 1)
 
     write(*,*) 'Testing DNRM2 (n =', n, ')'
 

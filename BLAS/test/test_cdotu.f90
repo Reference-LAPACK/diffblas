@@ -46,14 +46,14 @@ contains
     integer :: incy
 
     ! Derivative variables
-    complex(4), dimension(n) :: cx_d
-    complex(4) :: cdotu_d_result  ! Derivative of function result (avoid name clash with func_d)
     complex(4), dimension(n) :: cy_d
+    complex(4) :: cdotu_d_result  ! Derivative of function result (avoid name clash with func_d)
+    complex(4), dimension(n) :: cx_d
 
     ! Array restoration and derivative storage
-    complex(4), dimension(n) :: cx_orig, cx_d_orig
-    complex(4) :: cdotu_orig  ! Function result (no _d_orig - use _d_result)
     complex(4), dimension(n) :: cy_orig, cy_d_orig
+    complex(4) :: cdotu_orig  ! Function result (no _d_orig - use _d_result)
+    complex(4), dimension(n) :: cx_orig, cx_d_orig
     real(4) :: temp_re, temp_im  ! For complex random init
     integer :: i, j
 
@@ -76,41 +76,41 @@ contains
     do i = 1, n
       call random_number(temp_re)
       call random_number(temp_im)
-      cx_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
+      cy_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
     end do
     do i = 1, n
       call random_number(temp_re)
       call random_number(temp_im)
-      cy_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
+      cx_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=4)
     end do
 
     ! Store _orig and _d_orig
-    cx_d_orig = cx_d
     cy_d_orig = cy_d
-    cx_orig = cx
-    cdotu_orig = cdotu(nsize, cx, 1, cy, 1)
+    cx_d_orig = cx_d
     cy_orig = cy
+    cdotu_orig = cdotu(nsize, cx, 1, cy, 1)
+    cx_orig = cx
 
     write(*,*) 'Testing CDOTU (n =', n, ')'
 
     ! Call the differentiated function
     cdotu_d_result = cdotu_d(nsize, cx, cx_d, 1, cy, cy_d, 1, cdotu_orig)
-    cx_d = cx_d_orig
     cy_d = cy_d_orig
+    cx_d = cx_d_orig
 
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, nsize, cx_orig, cy_orig, cdotu_orig, cx_d_orig, cy_d_orig, cdotu_d_result, passed)
+    call check_derivatives_numerically(n, nsize, cy_orig, cx_orig, cdotu_orig, cy_d_orig, cx_d_orig, cdotu_d_result, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, nsize, cx_orig, cy_orig, cdotu_orig, cx_d_orig, cy_d_orig, cdotu_d_result, passed)
+  subroutine check_derivatives_numerically(n, nsize, cy_orig, cx_orig, cdotu_orig, cy_d_orig, cx_d_orig, cdotu_d_result, passed)
     implicit none
     integer, intent(in) :: n
     integer, intent(in) :: nsize
-    complex(4), intent(in) :: cx_orig(n), cx_d_orig(n)
     complex(4), intent(in) :: cy_orig(n), cy_d_orig(n)
+    complex(4), intent(in) :: cx_orig(n), cx_d_orig(n)
     complex(4), intent(in) :: cdotu_orig
     complex(4), intent(in) :: cdotu_d_result
     logical, intent(out) :: passed
@@ -122,8 +122,8 @@ contains
     logical :: has_large_errors
     complex(4) :: cdotu_forward, cdotu_backward  ! Function result for FD check
     integer :: i, j
-    complex(4), dimension(n) :: cx
     complex(4), dimension(n) :: cy
+    complex(4), dimension(n) :: cx
 
     max_error = 0.0e0
     has_large_errors = .false.
@@ -132,13 +132,13 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    cx = cx_orig + h * cx_d_orig
     cy = cy_orig + h * cy_d_orig
+    cx = cx_orig + h * cx_d_orig
     cdotu_forward = cdotu(nsize, cx, 1, cy, 1)
 
     ! Backward perturbation: f(x - h)
-    cx = cx_orig - h * cx_d_orig
     cy = cy_orig - h * cy_d_orig
+    cx = cx_orig - h * cx_d_orig
     cdotu_backward = cdotu(nsize, cx, 1, cy, 1)
 
     ! Compute central differences and compare with AD results

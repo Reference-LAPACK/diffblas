@@ -82,7 +82,7 @@ contains
     real(8), intent(in) :: x_orig(n), ap_orig(npack), apb_orig(npack)
     real(8), intent(in) :: alphab, xb(n), apb(npack)
     logical, intent(out) :: passed
-    real(8), intent(in), optional :: y_orig(n), yb(n)
+    real(8), intent(in) :: y_orig(n), yb(n)
     real(8), parameter :: h = 1.0e-7
     real(8) :: vjp_fd, vjp_ad, abs_error, abs_reference, error_bound, relative_error
     real(8) :: alpha_dir
@@ -96,29 +96,21 @@ contains
     alpha_dir = alpha_dir * 2.0d0 - 1.0d0
     call random_number(x_dir)
     x_dir = x_dir * 2.0d0 - 1.0d0
-    if (present(y_orig)) call random_number(y_dir)
-    if (present(y_orig)) y_dir = y_dir * 2.0d0 - 1.0d0
+    call random_number(y_dir)
+    y_dir = y_dir * 2.0d0 - 1.0d0
     call random_number(ap_dir)
     ap_dir = ap_dir * 2.0d0 - 1.0d0
     alpha_t = alpha_orig + h * alpha_dir
     x_t = x_orig + h * x_dir
     ap_t = ap_orig + h * ap_dir
-    if (present(y_orig)) y_t = y_orig + h * y_dir
-    if (present(y_orig)) then
-      call dspr2(uplo, nsize, alpha_t, x_t, incx_val, y_t, incy_val, ap_t)
-    else
-      call dspr2(uplo, nsize, alpha_t, x_t, incx_val, ap_t)
-    end if
+    y_t = y_orig + h * y_dir
+    call dspr2(uplo, nsize, alpha_t, x_t, incx_val, y_t, incy_val, ap_t)
     ap_plus = ap_t
     alpha_t = alpha_orig - h * alpha_dir
     x_t = x_orig - h * x_dir
     ap_t = ap_orig - h * ap_dir
-    if (present(y_orig)) y_t = y_orig - h * y_dir
-    if (present(y_orig)) then
-      call dspr2(uplo, nsize, alpha_t, x_t, incx_val, y_t, incy_val, ap_t)
-    else
-      call dspr2(uplo, nsize, alpha_t, x_t, incx_val, ap_t)
-    end if
+    y_t = y_orig - h * y_dir
+    call dspr2(uplo, nsize, alpha_t, x_t, incx_val, y_t, incy_val, ap_t)
     ap_minus = ap_t
     ap_central_diff = (ap_plus - ap_minus) / (2.0d0 * h)
     vjp_fd = 0.0d0
@@ -147,16 +139,14 @@ contains
     do i = 1, n_products
       vjp_ad = vjp_ad + temp_products(i)
     end do
-    if (present(y_orig)) then
-      n_products = n
-      do i = 1, n
-        temp_products(i) = y_dir(i) * yb(i)
-      end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_ad = vjp_ad + temp_products(i)
-      end do
-    end if
+    n_products = n
+    do i = 1, n
+      temp_products(i) = y_dir(i) * yb(i)
+    end do
+    call sort_array(temp_products, n_products)
+    do i = 1, n_products
+      vjp_ad = vjp_ad + temp_products(i)
+    end do
     abs_error = abs(vjp_fd - vjp_ad)
     abs_reference = abs(vjp_ad)
     relative_error = 0.0d0

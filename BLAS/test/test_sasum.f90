@@ -44,12 +44,12 @@ contains
     integer :: incx
 
     ! Derivative variables
-    real(4) :: sasum_d_result  ! Derivative of function result (avoid name clash with func_d)
     real(4), dimension(n) :: sx_d
+    real(4) :: sasum_d_result  ! Derivative of function result (avoid name clash with func_d)
 
     ! Array restoration and derivative storage
-    real(4) :: sasum_orig  ! Function result (no _d_orig - use _d_result)
     real(4), dimension(n) :: sx_orig, sx_d_orig
+    real(4) :: sasum_orig  ! Function result (no _d_orig - use _d_result)
     integer :: i, j
 
     nsize = n
@@ -64,8 +64,8 @@ contains
 
     ! Store _orig and _d_orig
     sx_d_orig = sx_d
-    sasum_orig = sasum(nsize, sx, 1)
     sx_orig = sx
+    sasum_orig = sasum(nsize, sx, 1)
 
     write(*,*) 'Testing SASUM (n =', n, ')'
 

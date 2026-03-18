@@ -47,13 +47,13 @@ contains
 
     ! Derivative variables
     real(8), dimension(n) :: dx_d
-    real(8) :: ddot_d_result  ! Derivative of function result (avoid name clash with func_d)
     real(8), dimension(n) :: dy_d
+    real(8) :: ddot_d_result  ! Derivative of function result (avoid name clash with func_d)
 
     ! Array restoration and derivative storage
     real(8), dimension(n) :: dx_orig, dx_d_orig
-    real(8) :: ddot_orig  ! Function result (no _d_orig - use _d_result)
     real(8), dimension(n) :: dy_orig, dy_d_orig
+    real(8) :: ddot_orig  ! Function result (no _d_orig - use _d_result)
     integer :: i, j
 
     nsize = n
@@ -75,8 +75,8 @@ contains
     dx_d_orig = dx_d
     dy_d_orig = dy_d
     dx_orig = dx
-    ddot_orig = ddot(nsize, dx, 1, dy, 1)
     dy_orig = dy
+    ddot_orig = ddot(nsize, dx, 1, dy, 1)
 
     write(*,*) 'Testing DDOT (n =', n, ')'
 

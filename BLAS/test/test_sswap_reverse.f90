@@ -103,8 +103,8 @@ contains
     real(4), dimension(n) :: sx_dir
     real(4), dimension(n) :: sy_dir
 
-    real(4), dimension(n) :: sy_plus, sy_minus, sy_central_diff
     real(4), dimension(n) :: sx_plus, sx_minus, sx_central_diff
+    real(4), dimension(n) :: sy_plus, sy_minus, sy_central_diff
 
     real(4), dimension(n) :: sx
     real(4), dimension(n) :: sy
@@ -124,22 +124,22 @@ contains
     sx = sx_orig + h * sx_dir
     sy = sy_orig + h * sy_dir
     call sswap(nsize, sx, incx_val, sy, incy_val)
-    sy_plus = sy
     sx_plus = sx
+    sy_plus = sy
 
     sx = sx_orig - h * sx_dir
     sy = sy_orig - h * sy_dir
     call sswap(nsize, sx, incx_val, sy, incy_val)
-    sy_minus = sy
     sx_minus = sx
+    sy_minus = sy
 
-    sy_central_diff = (sy_plus - sy_minus) / (2.0 * h)
     sx_central_diff = (sx_plus - sx_minus) / (2.0 * h)
+    sy_central_diff = (sy_plus - sy_minus) / (2.0 * h)
 
     vjp_fd = 0.0
     n_products = n
     do i = 1, n
-      temp_products(i) = syb_orig(i) * sy_central_diff(i)
+      temp_products(i) = sxb_orig(i) * sx_central_diff(i)
     end do
     call sort_array(temp_products, n_products)
     do i = 1, n_products
@@ -147,7 +147,7 @@ contains
     end do
     n_products = n
     do i = 1, n
-      temp_products(i) = sxb_orig(i) * sx_central_diff(i)
+      temp_products(i) = syb_orig(i) * sy_central_diff(i)
     end do
     call sort_array(temp_products, n_products)
     do i = 1, n_products

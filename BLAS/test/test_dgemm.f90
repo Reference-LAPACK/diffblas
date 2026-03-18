@@ -54,18 +54,18 @@ contains
     integer :: ldc_val
 
     ! Derivative variables
-    real(8) :: alpha_d
-    real(8), dimension(n,n) :: c_d
-    real(8), dimension(n,n) :: a_d
     real(8), dimension(n,n) :: b_d
+    real(8), dimension(n,n) :: c_d
     real(8) :: beta_d
+    real(8), dimension(n,n) :: a_d
+    real(8) :: alpha_d
 
     ! Array restoration and derivative storage
-    real(8) :: alpha_orig, alpha_d_orig
-    real(8), dimension(n,n) :: c_orig, c_d_orig
-    real(8), dimension(n,n) :: a_orig, a_d_orig
     real(8), dimension(n,n) :: b_orig, b_d_orig
+    real(8), dimension(n,n) :: c_orig, c_d_orig
     real(8) :: beta_orig, beta_d_orig
+    real(8), dimension(n,n) :: a_orig, a_d_orig
+    real(8) :: alpha_orig, alpha_d_orig
     integer :: i, j
 
     transa = 'N'
@@ -89,47 +89,47 @@ contains
     c = c * 2.0d0 - 1.0d0  ! Scale to [-1,1]
 
     ! Initialize input derivatives
-    call random_number(alpha_d)
-    alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-    call random_number(c_d)
-    c_d = c_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-    call random_number(a_d)
-    a_d = a_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(b_d)
     b_d = b_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(c_d)
+    c_d = c_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
     call random_number(beta_d)
     beta_d = beta_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(a_d)
+    a_d = a_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(alpha_d)
+    alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
 
     ! Store _orig and _d_orig
-    alpha_d_orig = alpha_d
-    c_d_orig = c_d
-    a_d_orig = a_d
     b_d_orig = b_d
+    c_d_orig = c_d
     beta_d_orig = beta_d
-    alpha_orig = alpha
-    c_orig = c
-    a_orig = a
+    a_d_orig = a_d
+    alpha_d_orig = alpha_d
     b_orig = b
+    c_orig = c
     beta_orig = beta
+    a_orig = a
+    alpha_orig = alpha
 
     write(*,*) 'Testing DGEMM (n =', n, ')'
     c_orig = c
 
     ! Call the differentiated function
     call dgemm_d(transa, transb, msize, nsize, ksize, alpha, alpha_d, a, a_d, lda_val, b, b_d, ldb_val, beta, beta_d, c, c_d, ldc_val)
-    alpha_d = alpha_d_orig
-    a_d = a_d_orig
     b_d = b_d_orig
     beta_d = beta_d_orig
+    a_d = a_d_orig
+    alpha_d = alpha_d_orig
 
     write(*,*) 'Function calls completed successfully'
 
     ! Numerical differentiation check
-    call check_derivatives_numerically(n, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, alpha_orig, c_orig, beta_orig, b_orig, a_orig, alpha_d_orig, c_d_orig, beta_d_orig, b_d_orig, a_d_orig, c_d, passed)
+    call check_derivatives_numerically(n, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, b_orig, c_orig, beta_orig, a_orig, alpha_orig, b_d_orig, c_d_orig, beta_d_orig, a_d_orig, alpha_d_orig, c_d, passed)
 
   end subroutine run_test_for_size
 
-  subroutine check_derivatives_numerically(n, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, alpha_orig, c_orig, beta_orig, b_orig, a_orig, alpha_d_orig, c_d_orig, beta_d_orig, b_d_orig, a_d_orig, c_d, passed)
+  subroutine check_derivatives_numerically(n, transa, transb, msize, nsize, ksize, lda_val, ldb_val, ldc_val, b_orig, c_orig, beta_orig, a_orig, alpha_orig, b_d_orig, c_d_orig, beta_d_orig, a_d_orig, alpha_d_orig, c_d, passed)
     implicit none
     integer, intent(in) :: n
     character, intent(in) :: transa
@@ -140,11 +140,11 @@ contains
     integer, intent(in) :: lda_val
     integer, intent(in) :: ldb_val
     integer, intent(in) :: ldc_val
-    real(8), intent(in) :: alpha_orig, alpha_d_orig
+    real(8), intent(in) :: b_orig(n,n), b_d_orig(n,n)
     real(8), intent(in) :: c_orig(n,n), c_d_orig(n,n)
     real(8), intent(in) :: beta_orig, beta_d_orig
-    real(8), intent(in) :: b_orig(n,n), b_d_orig(n,n)
     real(8), intent(in) :: a_orig(n,n), a_d_orig(n,n)
+    real(8), intent(in) :: alpha_orig, alpha_d_orig
     real(8), intent(in) :: c_d(n,n)
     logical, intent(out) :: passed
 
@@ -155,11 +155,11 @@ contains
     logical :: has_large_errors
     real(8), dimension(n,n) :: c_forward, c_backward
     integer :: i, j
-    real(8) :: alpha
+    real(8), dimension(n,n) :: b
     real(8), dimension(n,n) :: c
     real(8) :: beta
-    real(8), dimension(n,n) :: b
     real(8), dimension(n,n) :: a
+    real(8) :: alpha
 
     max_error = 0.0e0
     has_large_errors = .false.
@@ -168,20 +168,20 @@ contains
     write(*,*) 'Step size h =', h
 
     ! Forward perturbation: f(x + h)
-    alpha = alpha_orig + h * alpha_d_orig
+    b = b_orig + h * b_d_orig
     c = c_orig + h * c_d_orig
     beta = beta_orig + h * beta_d_orig
-    b = b_orig + h * b_d_orig
     a = a_orig + h * a_d_orig
+    alpha = alpha_orig + h * alpha_d_orig
     call dgemm(transa, transb, msize, nsize, ksize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)
     c_forward = c
 
     ! Backward perturbation: f(x - h)
-    alpha = alpha_orig - h * alpha_d_orig
+    b = b_orig - h * b_d_orig
     c = c_orig - h * c_d_orig
     beta = beta_orig - h * beta_d_orig
-    b = b_orig - h * b_d_orig
     a = a_orig - h * a_d_orig
+    alpha = alpha_orig - h * alpha_d_orig
     call dgemm(transa, transb, msize, nsize, ksize, alpha, a, lda_val, b, ldb_val, beta, c, ldc_val)
     c_backward = c
 

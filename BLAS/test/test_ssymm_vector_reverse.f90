@@ -47,6 +47,19 @@ contains
     side = 'L'
     uplo = 'U'
     transa = 'N'
+    call random_number(alpha)
+    alpha = alpha * 2.0d0 - 1.0d0
+    call random_number(beta)
+    beta = beta * 2.0d0 - 1.0d0
+    call random_number(a)
+    a = a * 2.0d0 - 1.0d0
+    call random_number(b)
+    b = b * 2.0d0 - 1.0d0
+    call random_number(c)
+    c = c * 2.0d0 - 1.0d0
+    call random_number(cb)
+    cb = cb * 2.0d0 - 1.0d0
+    cb_seed = cb
     c_orig = c
     alphab = 0.0d0
     betab = 0.0d0
