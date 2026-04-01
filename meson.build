@@ -1,8 +1,7 @@
 project(
   'diffblas',
   'fortran', 'c',
-  version: '2026.1.30',
-  license: 'BSD-3',
+  version: '2026.2.27',
   meson_version: '>= 0.63.0',
   default_options: [
     'buildtype=release',
@@ -20,10 +19,16 @@ if fc.get_id() == 'nagfor'
   add_global_arguments('-dcfuns', language : 'fortran')
 endif
 
+# Tapenade-generated CBLAS code uses NBDirsMax as the maximum number
+# of differentiation directions. Keep this in sync with DIFFSIZESC.inc.
+add_global_arguments('-DNBDirsMax=4', language : 'c')
+
 # Options
 install_modules = get_option('modules')
 libblas_name = get_option('libblas')
 libblas_path = get_option('libblas_path')
+libcblas_name = get_option('libcblas')
+libcblas_path = get_option('libcblas_path')
 
 # Dependencies
 if libblas_path == []
@@ -32,13 +37,30 @@ endif
 if libblas_path != [] or not libblas.found()
     libblas = fc.find_library(libblas_name, dirs : libblas_path, required : false)
 endif
+if libcblas_path == []
+    libcblas = dependency(libcblas_name, required : false)
+endif
+if libcblas_path != [] or not libcblas.found()
+    libcblas = fc.find_library(libcblas_name, dirs : libcblas_path, required : false)
+endif
 
 # Headers
 libdiffblas_include = include_directories('BLAS/include', 'TAPENADE/include')
+libdiffcblas_inc_dirs = ['CBLAS/include', 'TAPENADE/include']
+
+# Allow the user to provide external CBLAS headers (e.g. Lapack's CBLAS/include)
+foreach p : libcblas_path
+  libdiffcblas_inc_dirs += p
+endforeach
+
+libdiffcblas_include = include_directories(libdiffcblas_inc_dirs)
 
 # Sources
 libdiffblas_src = []
+libdiffcblas_src = []
+
 subdir('BLAS')
+subdir('CBLAS')
 subdir('TAPENADE')
 
 # Library
@@ -46,6 +68,12 @@ libdiffblas = library('diffblas',
                       sources : libdiffblas_src,
                       dependencies : libblas,
                       include_directories: libdiffblas_include,
+                      install : true)
+
+libdiffcblas = library('diffcblas',
+                      sources : libdiffcblas_src,
+                      dependencies : libblas,
+                      include_directories: libdiffcblas_include,
                       install : true)
 
 # Fortran modules
