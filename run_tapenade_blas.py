@@ -643,10 +643,11 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
     complex_vars = set()
     integer_vars = set()
     char_vars = set()
+    array_vars = set()
     
     # Find the argument declaration section
     lines = content.split('\n')
-    in_args_section = False
+    in_args_section = False # This variable is used nowhere
     
     for i, line in enumerate(lines):
         line_stripped = line.strip()
@@ -661,6 +662,8 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
         
         # Also look for the actual declaration lines (not in comments)
         if line_stripped and not line_stripped.startswith('*') and not line_stripped.startswith('C     '):
+            # Look for ARRAY variables 
+            is_array = ('(' in line_stripped) and (')' in line_stripped)
             
             # Parse variable declarations
             if line_stripped.startswith('REAL') or line_stripped.startswith('DOUBLE PRECISION') or line_stripped.startswith('FLOAT'):
@@ -677,6 +680,8 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
                         var = re.sub(r'\*.*$', '', var)
                         if var and re.match(r'^[A-Za-z][A-Za-z0-9_]*$', var):
                             real_vars.add(var)
+                            if is_array:
+                                array_vars.add(var)
             
             elif line_stripped.startswith('INTEGER'):
                 int_decl = re.search(r'INTEGER\s+(.+)', line_stripped, re.IGNORECASE)
@@ -689,6 +694,8 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
                         var = re.sub(r'\*.*$', '', var)
                         if var and re.match(r'^[A-Za-z][A-Za-z0-9_]*$', var):
                             integer_vars.add(var)
+                            if is_array:
+                                array_vars.add(var)
             
             elif line_stripped.startswith('CHARACTER'):
                 char_decl = re.search(r'CHARACTER\s+(.+)', line_stripped, re.IGNORECASE)
@@ -701,6 +708,8 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
                         var = re.sub(r'\*.*$', '', var)
                         if var and re.match(r'^[A-Za-z][A-Za-z0-9_]*$', var):
                             char_vars.add(var)
+                            if is_array:
+                                array_vars.add(var)
             
             elif line_stripped.startswith('COMPLEX'):
                 # Extract variable names from COMPLEX declaration
@@ -716,6 +725,8 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
                         var = re.sub(r'\*.*$', '', var)
                         if var and re.match(r'^[A-Za-z][A-Za-z0-9_]*$', var):
                             complex_vars.add(var)  # Add complex variables to complex_vars
+                            if is_array:
+                                array_vars.add(var)
     
     # For FUNCTIONs with explicit return types, add function name to appropriate variable set
     if func_type == 'FUNCTION':
@@ -847,7 +858,8 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
         'real_vars': real_vars,
         'complex_vars': complex_vars,
         'integer_vars': integer_vars,
-        'char_vars': char_vars
+        'char_vars': char_vars,
+        'array_vars': array_vars
     }
     
     return func_name, valid_inputs, valid_outputs, inout_vars, func_type, params, warnings, param_types, has_sufficient_docs
@@ -8018,6 +8030,7 @@ def main():
                     help="AD modes to generate: d (forward scalar), dv (forward vector), b (reverse scalar), bv (reverse vector), all (all modes). Default: all")
     ap.add_argument("--nbdirsmax", type=int, default=4, help="Maximum number of derivative directions for vector mode (default: 4)")
     ap.add_argument("--flat", action="store_true", help="Use flat directory structure (all files in function directory, single DIFFSIZES.inc)")
+    ap.add_argument("--debug-genlib", default=None, required=False)
     ap.add_argument("--extra", nargs=argparse.REMAINDER, help="Extra args passed to Tapenade after -d/-r", default=[])
     args = ap.parse_args()
 
@@ -8110,6 +8123,9 @@ def main():
         
         # Parse the Fortran function to get signature
         func_name, inputs, outputs, inout_vars, func_type, all_params, parse_warnings, param_types, has_sufficient_docs = parse_fortran_function(src)
+        print(f"INPUTS = {inputs}")
+        print(f"ALL_PARAMS = {all_params}")
+        print(f"PARAM_TYPES = {param_types}")
         
         if not func_name:
             print(f"Skipping {src}: Could not parse function signature", file=sys.stderr)
@@ -8144,8 +8160,87 @@ def main():
         # Create output directory structure
         flat_mode = args.flat
         mode_dirs = {}
-        
-        if flat_mode:
+
+        if (args.debug_genlib):
+        # if (False):
+            # When generating the general lib useful to Tapenade, we will save everything in a tmp file
+            # and only the lib in a local folder used to concatenate everything afterwards.
+            tmp_dir = Path("TMPGENLIB").resolve()
+            tmp_dir.mkdir(parents=True, exist_ok=True)
+            func_out_dir = tmp_dir
+            genlib_dir = out_dir
+            genlib_dir.mkdir(parents=True, exist_ok=True)
+            if run_d:
+                mode_dirs['d'] = tmp_dir
+            if run_b:
+                mode_dirs['b'] = tmp_dir
+            if run_dv:
+                mode_dirs['dv'] = tmp_dir
+            if run_bv:
+                mode_dirs['bv'] = tmp_dir
+
+            def convert_tap_result2genlib_format(l: str) :
+                out = []
+                infos = l.split("[")[1]
+                use_infos = True
+                for c in infos[3:]: # Don't bother with the first 3 elements
+                    if(c == "]"):
+                        break
+                    if use_infos:
+                        if(c == "("):
+                            use_infos = False
+                        else:
+                            out = out + [("0" if c == "." else "1" )]
+                    else:
+                        if(c == ")"):
+                            use_infos = True
+
+                return out
+
+            def parse_tap_trace4inout(fname):
+                with open(fname, "r") as f:
+                    sought_after = " ===================== IN-OUT ANALYSIS OF UNIT "
+                    l = f.readline()
+                    while(not l.startswith(sought_after)):
+                        l = f.readline()
+
+                    # Now we read the next one, and start looking at the arguments
+                    var2idx_mapping = dict()
+                    idx2var_mapping = dict()
+                    l = f.readline().strip()
+                    for v in l.split(" ")[3:]: # The first three variables are useless in the sense that they are only used internally for tapenade
+                        # v is a string resembling "[id]varName" where id is an identifier internal to tapenade for the zone of variable varName
+                        not_quite_id, var_name = v.split("]")
+                        idx = int(not_quite_id[1:])
+                        var2idx_mapping[var_name] = idx
+                        idx2var_mapping[idx] = var_name
+
+                    # Now that the mapping has been parsed, we move towards the end of the analysis phase, and extract the summary
+                    sought_after = "terminateFGForUnit Unit"
+                    while(not l.startswith(sought_after)):
+                        l = f.readline()
+                    # We have found our signal to read the results
+                    # It is always four lines looking like this 
+                    # N  [111111..11(1)111111] ---> corresponds to NotReadNotWritten, probably useless
+                    # R  [...1111111(1)11111.] ---> corresponds to ReadNotWritten
+                    # W  [..1.......(1).....1] ---> corresponds to NotReadThenWritten ==> Need to check what the 1 in third position means
+                    # RW [..........(1).....1] ---> corresponds to ReadThenWritten
+                    l = f.readline()
+                    # Discard the not read not written elements
+                    l = f.readline()
+                    # We deal with the ReadNotWritten information
+                    read_not_written = convert_tap_result2genlib_format(l)
+                    l = f.readline()
+                    # Deal with NotReadThenWritten
+                    not_read_then_written = convert_tap_result2genlib_format(l)
+                    l = f.readline()
+                    # Deal with ReadThenWritten
+                    read_then_written = convert_tap_result2genlib_format(l)
+
+                return read_not_written, not_read_then_written, read_then_written, var2idx_mapping
+            
+
+        elif flat_mode:
             # Flat mode with organized subdirectories: src/, test/, include/
             src_dir = out_dir / 'src'
             test_dir = out_dir / 'test'
@@ -8188,7 +8283,7 @@ def main():
                 mode_dirs['bv'].mkdir(parents=True, exist_ok=True)
         
         # Update log path to be in the function subdirectory
-        func_log_path = func_out_dir / (src.stem + ".tapenade.log")
+        # func_log_path = func_out_dir / (src.stem + ".tapenade.log") # ISNT THIS COMPLETELY USELESS??
         
         # Find dependency files
         called_functions = parse_function_calls(src)
@@ -8240,11 +8335,14 @@ def main():
             for dep_file in main_file_removed:
                 cmd.append(str(dep_file))
             cmd.extend(list(args.extra))
+            if (args.debug_genlib):
+                cmd = cmd + ["-traceinout", src.stem]
             
             try:
                 with open(mode_log_path, "w") as logf:
                     logf.write(f"Mode: FORWARD (scalar)\n")
                     # Format command for logging (properly quoted for shell copy-paste)
+                    print("CMD:", cmd)
                     cmd_str = ' '.join(shlex.quote(str(arg)) for arg in cmd)
                     logf.write(f"Command: {cmd_str}\n")
                     logf.write(f"Function: {func_name}\n")
@@ -8285,6 +8383,42 @@ def main():
                     pass
                 print(f"    ERROR: Exception during forward mode execution: {e}", file=sys.stderr)
                 return_codes["forward"] = 999
+
+            if (args.debug_genlib) : # Everything went well, and we are trying to generate the external lib
+                read_not_written, not_read_then_written, read_then_written, var2idx  = parse_tap_trace4inout(mode_log_path)
+                print(var2idx)
+                param_2_tap_reordering = [var2idx[p.lower()]-3 for p in all_params]
+                print("Reordering is {}".format(param_2_tap_reordering))
+                with open("externalLib", "a") as f:
+                    f.write(("function " if func_type == 'FUNCTION' else "subroutine ") + src.stem + ":\n")
+                    indent = "  "
+                    f.write(indent + "external:\n")
+                    shape = "(" + ", ".join(["param " + str(i) for i in range(1,len(all_params)+1)]) + ")" ## TODO: Need to add ', return' in case of a function,. dpeending on whether it is within the all params or not
+                    f.write(indent + "shape: " + shape + "\n")
+                    types = []
+                    for p in all_params:
+                        current_type = ""
+                        if p in param_types['real_vars']:
+                            current_type = "metavar float" # We should probably be more precise in order to handle mixed precision things
+                            # Namely, adapt to 
+                            # modifiedType(modifiers(ident double), float() for double / REAL*8
+                            # float() for single precision
+                        elif p in param_types['complex_vars']:
+                            current_type = "metavar complex"
+                            # Similar to the real variables, we should be able to be more precise in terms of precision of the complex variable
+                        elif p in param_types['integer_vars']:
+                            current_type = "metavar integer"
+                        elif p in param_types['char_vars']:
+                            current_type = "character()"
+                        if p in param_types['array_vars']: # Will be "is_matrix_var" or "is_array_var" or something along those lines
+                            current_type = "arrayType(" + current_type + ", dimColons())"
+
+                        types.append(current_type)
+                    types = "(" + ", ".join(types) + ")"
+                    f.write(indent + "type: " + types + "\n")
+                    f.write(indent + "ReadNotWritten:     (" + ", ".join([read_not_written[i] for i in param_2_tap_reordering]) + ")\n")
+                    f.write(indent + "NotReadThenWritten: (" + ", ".join([not_read_then_written[i] for i in param_2_tap_reordering]) + ")\n")
+                    f.write(indent + "ReadThenWritten:    (" + ", ".join([read_then_written[i] for i in param_2_tap_reordering]) + ")\n")
         
         # Run scalar reverse mode (b)
         if run_b:
@@ -8383,6 +8517,7 @@ def main():
             try:
                 with open(mode_log_path, "w") as logf:
                     logf.write(f"Mode: FORWARD VECTOR\n")
+                    print("CMD:", cmd)
                     # Format command for logging (properly quoted for shell copy-paste)
                     cmd_str = ' '.join(shlex.quote(str(arg)) for arg in cmd)
                     logf.write(f"Command: {cmd_str}\n")
@@ -8449,6 +8584,7 @@ def main():
             try:
                 with open(mode_log_path, "w") as logf:
                     logf.write(f"Mode: REVERSE VECTOR\n")
+                    print("CMD:", cmd)
                     # Format command for logging (properly quoted for shell copy-paste)
                     cmd_str = ' '.join(shlex.quote(str(arg)) for arg in cmd)
                     logf.write(f"Command: {cmd_str}\n")
@@ -8679,6 +8815,48 @@ def main():
         final_rc = max(return_codes.values()) if return_codes else 999
         return (src, final_rc)
 
+    
+
+
+    if (args.debug_genlib):
+        ''' 
+            WORKING HERE
+            XXXXXXXXXX
+            Need to figure out:
+            -> The various parameters of a subroutine, their types
+            -> Convert these types into Tapenade's GenLib format
+            -> Link the number of a parameter in the prototype of the subroutine with its rank in tapenade's inout analysis
+            -> Dump everything into a single genlib file
+        '''
+        # Add tests for existence of file / correct extension / ...
+        file_path = fortran_dir / args.debug_genlib
+
+        tasks = []
+        func_stem = file_path.stem.lower()
+        rel = file_path.relative_to(fortran_dir)
+        out_dir = out_root / rel.parent
+        out_dir.mkdir(parents=True, exist_ok=True)
+        log_path = out_dir / (file_path.stem + ".tapenade.log")
+        # Explicitely force the diff modes for now: 
+        run_d, run_dv, run_b, run_bv = True, False, True, False
+        tasks.append((file_path, out_dir, log_path, run_d, run_dv, run_b, run_bv))
+        constraints = parse_parameter_constraints(file_path)
+        parsed_function = parse_fortran_function(file_path, suppress_warnings=False)
+        args_are = ["function_name", "inputs", "outputs", "inout_vars", "func_type", "params", "warnings", "param_types", "has_sufficient_docs"]
+        for idx, v in enumerate(parsed_function): 
+            print(f"{args_are[idx]} == {v}")
+
+        run_task(tasks[0])
+
+        return
+
+
+
+
+
+
+    
+    
     # Serial or parallel execution
     results = []
     if args.jobs <= 1:
