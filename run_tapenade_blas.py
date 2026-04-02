@@ -10,6 +10,7 @@ from shutil import rmtree as shrm
 
 FORTRAN_EXTS = {".f", ".for", ".f90", ".F", ".F90"}
 TAPENADE_USELESS_ZONES = 3
+GENLIBTMP = "TMPGENLIB"
 
 def is_fortran(p: Path) -> bool:
     return p.suffix in FORTRAN_EXTS
@@ -8163,7 +8164,7 @@ def main():
         if (args.genlib):
             # When generating the general lib useful to Tapenade, we will save everything in a tmp file
             # and only the lib in a local folder used to concatenate everything afterwards.
-            tmp_dir = Path("TMPGENLIB").resolve()
+            tmp_dir = Path(GENLIBTMP).resolve()
             tmp_dir.mkdir(parents=True, exist_ok=True)
             func_out_dir = tmp_dir
             genlib_dir = out_dir
@@ -8332,7 +8333,6 @@ def main():
                     # Format command for logging (properly quoted for shell copy-paste)
                     print("CMD:", cmd)
                     cmd_str = ' '.join(shlex.quote(str(arg)) for arg in cmd)
-                    print(cmd_str)
                     logf.write(f"Command: {cmd_str}\n")
                     logf.write(f"Function: {func_name}\n")
                     logf.write(f"Parsed inputs: {inputs}\n")
@@ -8804,43 +8804,7 @@ def main():
         
         # Return the worst return code (non-zero if any mode failed)
         final_rc = max(return_codes.values()) if return_codes else 999
-        return (src, final_rc)
-
-    
-
-
-    # if (args.genlib):
-    #     ''' 
-    #         WORKING HERE
-    #         XXXXXXXXXX
-    #         Need to figure out:
-    #         -> The various parameters of a subroutine, their types
-    #         -> Convert these types into Tapenade's GenLib format
-    #         -> Link the number of a parameter in the prototype of the subroutine with its rank in tapenade's inout analysis
-    #         -> Dump everything into a single genlib file
-    #     '''
-    #     # Add tests for existence of file / correct extension / ...
-    #     file_path = fortran_dir / args.genlib
-
-    #     tasks = []
-    #     func_stem = file_path.stem.lower()
-    #     rel = file_path.relative_to(fortran_dir)
-    #     out_dir = out_root / rel.parent
-    #     out_dir.mkdir(parents=True, exist_ok=True)
-    #     log_path = out_dir / (file_path.stem + ".tapenade.log")
-    #     # Explicitely force the diff modes for now: 
-    #     run_d, run_dv, run_b, run_bv = True, False, False, False
-    #     tasks.append((file_path, out_dir, log_path, run_d, run_dv, run_b, run_bv))
-    #     run_task(tasks[0])
-
-    #     return
-
-
-
-
-
-
-    
+        return (src, final_rc)    
     
     # Serial or parallel execution
     results = []
@@ -8937,6 +8901,9 @@ def main():
         if "reverse" in args.mode or args.mode == "both":
             print("  make vector-reverse       # Build vector reverse mode only")
         print("  ./test_<function>_vector_forward  # Run vector forward mode test")
+    
+    if args.genlib:
+        shrm(Path(GENLIBTMP))
 
 def generate_top_level_makefile(out_dir, flat_mode=False):
     """Generate the top-level Makefile for building all subdirectories or flat makefiles"""
