@@ -6,8 +6,10 @@ import shlex
 import subprocess
 import sys
 from pathlib import Path
+from shutil import rmtree as shrm
 
 FORTRAN_EXTS = {".f", ".for", ".f90", ".F", ".F90"}
+TAPENADE_USELESS_ZONES = 3
 
 def is_fortran(p: Path) -> bool:
     return p.suffix in FORTRAN_EXTS
@@ -8030,7 +8032,7 @@ def main():
                     help="AD modes to generate: d (forward scalar), dv (forward vector), b (reverse scalar), bv (reverse vector), all (all modes). Default: all")
     ap.add_argument("--nbdirsmax", type=int, default=4, help="Maximum number of derivative directions for vector mode (default: 4)")
     ap.add_argument("--flat", action="store_true", help="Use flat directory structure (all files in function directory, single DIFFSIZES.inc)")
-    ap.add_argument("--debug-genlib", default=None, required=False)
+    ap.add_argument("--genlib", default=None, required=False, help="Generate Tapenade external library")
     ap.add_argument("--extra", nargs=argparse.REMAINDER, help="Extra args passed to Tapenade after -d/-r", default=[])
     args = ap.parse_args()
 
@@ -8085,10 +8087,10 @@ def main():
         modes = {"d", "dv", "b", "bv"}
     
     # Determine which specific modes to run
-    run_d = "d" in modes
-    run_dv = "dv" in modes  
-    run_b = "b" in modes
-    run_bv = "bv" in modes
+    run_d = "d" in modes or args.genlib
+    run_dv = not args.genlib and "dv" in modes  
+    run_b = not args.genlib and "b" in modes
+    run_bv = not args.genlib and "bv" in modes
     
     # List of non-differentiable functions to skip entirely
     # See SKIPPED_FUNCTIONS.md for detailed documentation on why each is skipped
@@ -8123,9 +8125,6 @@ def main():
         
         # Parse the Fortran function to get signature
         func_name, inputs, outputs, inout_vars, func_type, all_params, parse_warnings, param_types, has_sufficient_docs = parse_fortran_function(src)
-        print(f"INPUTS = {inputs}")
-        print(f"ALL_PARAMS = {all_params}")
-        print(f"PARAM_TYPES = {param_types}")
         
         if not func_name:
             print(f"Skipping {src}: Could not parse function signature", file=sys.stderr)
@@ -8161,8 +8160,7 @@ def main():
         flat_mode = args.flat
         mode_dirs = {}
 
-        if (args.debug_genlib):
-        # if (False):
+        if (args.genlib):
             # When generating the general lib useful to Tapenade, we will save everything in a tmp file
             # and only the lib in a local folder used to concatenate everything afterwards.
             tmp_dir = Path("TMPGENLIB").resolve()
@@ -8170,20 +8168,13 @@ def main():
             func_out_dir = tmp_dir
             genlib_dir = out_dir
             genlib_dir.mkdir(parents=True, exist_ok=True)
-            if run_d:
-                mode_dirs['d'] = tmp_dir
-            if run_b:
-                mode_dirs['b'] = tmp_dir
-            if run_dv:
-                mode_dirs['dv'] = tmp_dir
-            if run_bv:
-                mode_dirs['bv'] = tmp_dir
+            mode_dirs['d'] = tmp_dir
 
             def convert_tap_result2genlib_format(l: str) :
                 out = []
                 infos = l.split("[")[1]
                 use_infos = True
-                for c in infos[3:]: # Don't bother with the first 3 elements
+                for c in infos[TAPENADE_USELESS_ZONES:]: # Don't bother with the first
                     if(c == "]"):
                         break
                     if use_infos:
@@ -8206,14 +8197,11 @@ def main():
 
                     # Now we read the next one, and start looking at the arguments
                     var2idx_mapping = dict()
-                    idx2var_mapping = dict()
                     l = f.readline().strip()
-                    for v in l.split(" ")[3:]: # The first three variables are useless in the sense that they are only used internally for tapenade
-                        # v is a string resembling "[id]varName" where id is an identifier internal to tapenade for the zone of variable varName
+                    for v in l.split(" ")[TAPENADE_USELESS_ZONES:]: # The first variables are useless
                         not_quite_id, var_name = v.split("]")
-                        idx = int(not_quite_id[1:])
+                        idx = int(not_quite_id[1:])-TAPENADE_USELESS_ZONES
                         var2idx_mapping[var_name] = idx
-                        idx2var_mapping[idx] = var_name
 
                     # Now that the mapping has been parsed, we move towards the end of the analysis phase, and extract the summary
                     sought_after = "terminateFGForUnit Unit"
@@ -8335,7 +8323,7 @@ def main():
             for dep_file in main_file_removed:
                 cmd.append(str(dep_file))
             cmd.extend(list(args.extra))
-            if (args.debug_genlib):
+            if (args.genlib):
                 cmd = cmd + ["-traceinout", src.stem]
             
             try:
@@ -8344,6 +8332,7 @@ def main():
                     # Format command for logging (properly quoted for shell copy-paste)
                     print("CMD:", cmd)
                     cmd_str = ' '.join(shlex.quote(str(arg)) for arg in cmd)
+                    print(cmd_str)
                     logf.write(f"Command: {cmd_str}\n")
                     logf.write(f"Function: {func_name}\n")
                     logf.write(f"Parsed inputs: {inputs}\n")
@@ -8384,41 +8373,43 @@ def main():
                 print(f"    ERROR: Exception during forward mode execution: {e}", file=sys.stderr)
                 return_codes["forward"] = 999
 
-            if (args.debug_genlib) : # Everything went well, and we are trying to generate the external lib
+            if (args.genlib) : # Everything went well, and we are trying to generate the external lib
                 read_not_written, not_read_then_written, read_then_written, var2idx  = parse_tap_trace4inout(mode_log_path)
-                print(var2idx)
-                param_2_tap_reordering = [var2idx[p.lower()]-3 for p in all_params]
-                print("Reordering is {}".format(param_2_tap_reordering))
-                with open("externalLib", "a") as f:
+                if func_type == 'FUNCTION':
+                    param_for_genlib = all_params + [src.stem]
+                else:
+                    param_for_genlib = all_params
+                param_2_tap_reordering = [var2idx[p.lower()] for p in param_for_genlib]
+                with open("DiffBlasGenLib", "a") as f:
                     f.write(("function " if func_type == 'FUNCTION' else "subroutine ") + src.stem + ":\n")
                     indent = "  "
                     f.write(indent + "external:\n")
-                    shape = "(" + ", ".join(["param " + str(i) for i in range(1,len(all_params)+1)]) + ")" ## TODO: Need to add ', return' in case of a function,. dpeending on whether it is within the all params or not
+                    shape = "(" + ", ".join(["param " + str(i) for i in range(1,len(all_params)+1)] + ["result" if func_type == 'FUNCTION' else ""]) + ")" ## TODO: Need to add ', return' in case of a function,. dpeending on whether it is within the all params or not
                     f.write(indent + "shape: " + shape + "\n")
                     types = []
-                    for p in all_params:
+                    for p in param_for_genlib:
                         current_type = ""
-                        if p in param_types['real_vars']:
+                        if p.upper() in param_types['real_vars'] or p.lower() in param_types['real_vars']:
                             current_type = "metavar float" # We should probably be more precise in order to handle mixed precision things
                             # Namely, adapt to 
                             # modifiedType(modifiers(ident double), float() for double / REAL*8
                             # float() for single precision
-                        elif p in param_types['complex_vars']:
+                        elif p.upper() in param_types['complex_vars'] or p.lower() in param_types['complex_vars']:
                             current_type = "metavar complex"
                             # Similar to the real variables, we should be able to be more precise in terms of precision of the complex variable
-                        elif p in param_types['integer_vars']:
+                        elif p.upper() in param_types['integer_vars'] or p.lower() in param_types['integer_vars']:
                             current_type = "metavar integer"
-                        elif p in param_types['char_vars']:
+                        elif p.upper() in param_types['char_vars'] or p.lower() in param_types['char_vars']:
                             current_type = "character()"
-                        if p in param_types['array_vars']: # Will be "is_matrix_var" or "is_array_var" or something along those lines
+                        if p.upper() in param_types['array_vars'] or p.lower() in param_types['array_vars']:
                             current_type = "arrayType(" + current_type + ", dimColons())"
-
                         types.append(current_type)
                     types = "(" + ", ".join(types) + ")"
                     f.write(indent + "type: " + types + "\n")
                     f.write(indent + "ReadNotWritten:     (" + ", ".join([read_not_written[i] for i in param_2_tap_reordering]) + ")\n")
                     f.write(indent + "NotReadThenWritten: (" + ", ".join([not_read_then_written[i] for i in param_2_tap_reordering]) + ")\n")
                     f.write(indent + "ReadThenWritten:    (" + ", ".join([read_then_written[i] for i in param_2_tap_reordering]) + ")\n")
+                    f.write("\n")
         
         # Run scalar reverse mode (b)
         if run_b:
@@ -8818,37 +8809,31 @@ def main():
     
 
 
-    if (args.debug_genlib):
-        ''' 
-            WORKING HERE
-            XXXXXXXXXX
-            Need to figure out:
-            -> The various parameters of a subroutine, their types
-            -> Convert these types into Tapenade's GenLib format
-            -> Link the number of a parameter in the prototype of the subroutine with its rank in tapenade's inout analysis
-            -> Dump everything into a single genlib file
-        '''
-        # Add tests for existence of file / correct extension / ...
-        file_path = fortran_dir / args.debug_genlib
+    # if (args.genlib):
+    #     ''' 
+    #         WORKING HERE
+    #         XXXXXXXXXX
+    #         Need to figure out:
+    #         -> The various parameters of a subroutine, their types
+    #         -> Convert these types into Tapenade's GenLib format
+    #         -> Link the number of a parameter in the prototype of the subroutine with its rank in tapenade's inout analysis
+    #         -> Dump everything into a single genlib file
+    #     '''
+    #     # Add tests for existence of file / correct extension / ...
+    #     file_path = fortran_dir / args.genlib
 
-        tasks = []
-        func_stem = file_path.stem.lower()
-        rel = file_path.relative_to(fortran_dir)
-        out_dir = out_root / rel.parent
-        out_dir.mkdir(parents=True, exist_ok=True)
-        log_path = out_dir / (file_path.stem + ".tapenade.log")
-        # Explicitely force the diff modes for now: 
-        run_d, run_dv, run_b, run_bv = True, False, True, False
-        tasks.append((file_path, out_dir, log_path, run_d, run_dv, run_b, run_bv))
-        constraints = parse_parameter_constraints(file_path)
-        parsed_function = parse_fortran_function(file_path, suppress_warnings=False)
-        args_are = ["function_name", "inputs", "outputs", "inout_vars", "func_type", "params", "warnings", "param_types", "has_sufficient_docs"]
-        for idx, v in enumerate(parsed_function): 
-            print(f"{args_are[idx]} == {v}")
+    #     tasks = []
+    #     func_stem = file_path.stem.lower()
+    #     rel = file_path.relative_to(fortran_dir)
+    #     out_dir = out_root / rel.parent
+    #     out_dir.mkdir(parents=True, exist_ok=True)
+    #     log_path = out_dir / (file_path.stem + ".tapenade.log")
+    #     # Explicitely force the diff modes for now: 
+    #     run_d, run_dv, run_b, run_bv = True, False, False, False
+    #     tasks.append((file_path, out_dir, log_path, run_d, run_dv, run_b, run_bv))
+    #     run_task(tasks[0])
 
-        run_task(tasks[0])
-
-        return
+    #     return
 
 
 
