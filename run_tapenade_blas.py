@@ -24220,6 +24220,48 @@ def generate_meson_build(out_dir, flat_mode=False):
         f.write(meson_content)
     print(f"Created meson.build: {meson_path}")
 
+    # ---------------------------------------------------------------------
+    # Meson native files (compiler selection)
+    #
+    # Meson selects compilers at `meson setup` time. For Intel toolchains,
+    # users should configure with a native file rather than relying on env
+    # vars, to keep builds reproducible.
+    # ---------------------------------------------------------------------
+    native_gfortran = out_path / "meson-gfortran.ini"
+    native_intel = out_path / "meson-intel-classic.ini"
+    native_intel_ifx = out_path / "meson-intel-llvm.ini"
+
+    # Keep these files minimal: Meson already manages Fortran module output
+    # directories internally; only compiler selection and a few safe flags.
+    native_gfortran.write_text(
+        "[binaries]\n"
+        "c = 'gcc'\n"
+        "fortran = 'gfortran'\n"
+        "\n"
+        "[built-in options]\n"
+        "c_args = ['-O2', '-fPIC']\n"
+        "fortran_args = ['-O2', '-fPIC']\n"
+    )
+    native_intel.write_text(
+        "[binaries]\n"
+        "c = 'icc'\n"
+        "fortran = 'ifort'\n"
+        "\n"
+        "[built-in options]\n"
+        "c_args = ['-O2', '-fPIC']\n"
+        "fortran_args = ['-O2', '-fPIC']\n"
+    )
+    native_intel_ifx.write_text(
+        "[binaries]\n"
+        "c = 'icx'\n"
+        "fortran = 'ifx'\n"
+        "\n"
+        "[built-in options]\n"
+        "c_args = ['-O2', '-fPIC']\n"
+        "fortran_args = ['-O2', '-fPIC']\n"
+    )
+    print(f"Created Meson native files: {native_gfortran}, {native_intel}, {native_intel_ifx}")
+
 def generate_top_level_test_script(out_dir, run_d=True, run_dv=False, run_b=True, run_bv=False, flat_mode=False):
     """Generate the top-level run_tests.sh script for testing all subdirectories or flat structure
     

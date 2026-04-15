@@ -32,6 +32,19 @@ endif
 if libblas_path != [] or not libblas.found()
     libblas = fc.find_library(libblas_name, dirs : libblas_path, required : false)
 endif
+if not libblas.found() and libblas_name == 'blas'
+    # Many LAPACK builds ship a reference BLAS as librefblas.{a,so}.
+    libblas = fc.find_library('refblas', dirs : libblas_path, required : false)
+endif
+
+if not libblas.found()
+  message('Library blas found: NO')
+  message('Hint: if your BLAS is librefblas.a, configure with either:')
+  message('  -Dlibblas=refblas')
+  message('or keep -Dlibblas=blas and set -Dlibblas_path to a directory containing librefblas.{a,so}.')
+else
+  message('Library blas found: YES')
+endif
 
 # Headers
 libdiffblas_include = include_directories('BLAS/include', 'TAPENADE/include')

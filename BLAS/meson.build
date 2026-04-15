@@ -3,6 +3,11 @@
 # Total: 406 files (101 per mode x 4 modes)
 
 libdiffblas_src += files('include/DIFFSIZES.f90')
+# ISIZE storage + F77-callable wrappers (same objects as Makefile builds)
+libdiffblas_src += files(
+  'src/DIFFSIZES_access.f90',
+  'src/DIFFSIZES_access_wrappers.f',
+)
 
 # Forward mode (_d) sources - 101 files
 libdiffblas_src += files(
