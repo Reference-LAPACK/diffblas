@@ -669,11 +669,14 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
             is_array = ('(' in line_stripped) and (')' in line_stripped)
             
             # Parse variable declarations
-            if line_stripped.startswith('REAL') or line_stripped.startswith('DOUBLE PRECISION') or line_stripped.startswith('FLOAT'):
+            looking_for_var_decl = line_stripped[0:16].upper() # 16 is the length of DOUBLE PRECISION
+            if looking_for_var_decl.startswith('REAL') or looking_for_var_decl.startswith('DOUBLE PRECISION') or looking_for_var_decl.startswith('FLOAT'):
                 # Extract variable names from REAL, DOUBLE PRECISION, or FLOAT declaration
-                real_decl = re.search(r'(?:REAL|DOUBLE PRECISION|FLOAT)\s+(.+)', line_stripped, re.IGNORECASE)
+                real_decl = re.search(r'(?:REAL|DOUBLE PRECISION|FLOAT)(?:\(\w+\))?\s+(.+)', line_stripped, re.IGNORECASE)
                 if real_decl:
                     vars_str = real_decl.group(1)
+                    # Before anything, remove F90 style '::' declaration
+                    vars_str = vars_str.split("::")[-1]
                     # First remove array dimensions, then split by comma
                     vars_str_clean = re.sub(r'\([^)]*\)', '', vars_str)
                     # Split by comma and clean up
@@ -686,10 +689,12 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
                             if is_array:
                                 array_vars.add(var)
             
-            elif line_stripped.startswith('INTEGER'):
+            elif looking_for_var_decl.startswith('INTEGER'):
                 int_decl = re.search(r'INTEGER\s+(.+)', line_stripped, re.IGNORECASE)
                 if int_decl:
                     vars_str = int_decl.group(1)
+                    # Before anything, remove F90 style '::' declaration
+                    vars_str = vars_str.split("::")[-1]
                     # First remove array dimensions, then split by comma
                     vars_str_clean = re.sub(r'\([^)]*\)', '', vars_str)
                     for var in vars_str_clean.split(','):
@@ -700,10 +705,12 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
                             if is_array:
                                 array_vars.add(var)
             
-            elif line_stripped.startswith('CHARACTER'):
+            elif looking_for_var_decl.startswith('CHARACTER'):
                 char_decl = re.search(r'CHARACTER\s+(.+)', line_stripped, re.IGNORECASE)
                 if char_decl:
                     vars_str = char_decl.group(1)
+                    # Before anything, remove F90 style '::' declaration
+                    vars_str = vars_str.split("::")[-1]
                     # First remove array dimensions, then split by comma
                     vars_str_clean = re.sub(r'\([^)]*\)', '', vars_str)
                     for var in vars_str_clean.split(','):
@@ -714,11 +721,13 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
                             if is_array:
                                 array_vars.add(var)
             
-            elif line_stripped.startswith('COMPLEX'):
+            elif looking_for_var_decl.startswith('COMPLEX'):
                 # Extract variable names from COMPLEX declaration
                 complex_decl = re.search(r'COMPLEX\*?\d*\s+(.+)', line_stripped, re.IGNORECASE)
                 if complex_decl:
                     vars_str = complex_decl.group(1)
+                    # Before anything, remove F90 style '::' declaration
+                    vars_str = vars_str.split("::")[-1]
                     # First remove array dimensions, then split by comma
                     vars_str_clean = re.sub(r'\([^)]*\)', '', vars_str)
                     # Split by comma and clean up
@@ -8384,7 +8393,7 @@ def main():
                     f.write(("function " if func_type == 'FUNCTION' else "subroutine ") + src.stem + ":\n")
                     indent = "  "
                     f.write(indent + "external:\n")
-                    shape = "(" + ", ".join(["param " + str(i) for i in range(1,len(all_params)+1)] + ["result" if func_type == 'FUNCTION' else ""]) + ")" ## TODO: Need to add ', return' in case of a function,. dpeending on whether it is within the all params or not
+                    shape = "(" + ", ".join(["param " + str(i) for i in range(1,len(all_params)+1)]) + (", result" if func_type == 'FUNCTION' else "" )  + ")" ## TODO: Need to add ', return' in case of a function,. dpeending on whether it is within the all params or not
                     f.write(indent + "shape: " + shape + "\n")
                     types = []
                     for p in param_for_genlib:
