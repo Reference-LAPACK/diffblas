@@ -736,6 +736,8 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
                 complex_vars.add(func_name)
             elif 'INTEGER' in return_type_upper:
                 integer_vars.add(func_name)
+            elif 'LOGICAL' in return_type_upper:
+                logical_vars.add(func_name)
         else:
             # Fortran 90 style: type is declared separately (e.g., "real(wp) :: func_name")
             # Look for type declaration after the function declaration
@@ -798,7 +800,7 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
                 inputs.append(param_name)
             elif param_type.lower() == 'out':
                 outputs.append(param_name)
-            elif param_type.lower() in ['in,out', 'in,out']:
+            elif param_type.lower() in ['in,out', 'in,out']: # ????? Why duplicate these things? 
                 inout_vars.append(param_name)
     
     # For FUNCTIONs, always add the function name itself as output if it's real or complex-valued
