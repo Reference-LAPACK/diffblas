@@ -646,6 +646,7 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
     complex_vars = set()
     integer_vars = set()
     char_vars = set()
+    logical_vars = set()
     array_vars = set()
     
     # Find the argument declaration section
@@ -656,7 +657,8 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
         line_stripped = line.strip()
         
         # Look for argument section markers (both in comments and actual code)
-        if 'Scalar Arguments' in line_stripped or 'Array Arguments' in line_stripped:
+        looking_for_var_decl = line_stripped.upper()
+        if 'SCALAR ARGUMENTS' in looking_for_var_decl or 'ARRAY ARGUMENTS' in looking_for_var_decl:
             in_args_section = True
             continue
         elif line_stripped.startswith('*') and ('..' in line_stripped or '=' in line_stripped):
@@ -664,15 +666,14 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
             continue
         
         # Also look for the actual declaration lines (not in comments)
-        if line_stripped and not line_stripped.startswith('*') and not line_stripped.startswith('C     '):
+        if line_stripped and not line_stripped.startswith('*') and not line_stripped.startswith('C     ') and in_args_section:
             # Look for ARRAY variables 
-            is_array = ('(' in line_stripped) and (')' in line_stripped)
+            is_array = ('(' in line_stripped) and (')' in line_stripped) # Probably better: re.search(r'(\s*\*\s*)', line_stripped) != None
             
             # Parse variable declarations
-            looking_for_var_decl = line_stripped[0:16].upper() # 16 is the length of DOUBLE PRECISION
             if looking_for_var_decl.startswith('REAL') or looking_for_var_decl.startswith('DOUBLE PRECISION') or looking_for_var_decl.startswith('FLOAT'):
                 # Extract variable names from REAL, DOUBLE PRECISION, or FLOAT declaration
-                real_decl = re.search(r'(?:REAL|DOUBLE PRECISION|FLOAT)(?:\(\w+\))?\s+(.+)', line_stripped, re.IGNORECASE)
+                real_decl = re.search(r'(?:REAL|DOUBLE PRECISION|FLOAT)\*?\d*(?:\(\w+\))?\s+(.+)', line_stripped, re.IGNORECASE)
                 if real_decl:
                     vars_str = real_decl.group(1)
                     # Before anything, remove F90 style '::' declaration
@@ -723,7 +724,7 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
             
             elif looking_for_var_decl.startswith('COMPLEX'):
                 # Extract variable names from COMPLEX declaration
-                complex_decl = re.search(r'COMPLEX\*?\d*\s+(.+)', line_stripped, re.IGNORECASE)
+                complex_decl = re.search(r'COMPLEX\*?\d*(?:\(\w+\))?\s+(.+)', line_stripped, re.IGNORECASE)
                 if complex_decl:
                     vars_str = complex_decl.group(1)
                     # Before anything, remove F90 style '::' declaration
@@ -737,6 +738,25 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
                         var = re.sub(r'\*.*$', '', var)
                         if var and re.match(r'^[A-Za-z][A-Za-z0-9_]*$', var):
                             complex_vars.add(var)  # Add complex variables to complex_vars
+                            if is_array:
+                                array_vars.add(var)
+
+            elif looking_for_var_decl.startswith('LOGICAL'):
+                if not keep_going:
+                    # Extract variable names from COMPLEX declaration
+                    bool_decl = re.search(r'LOGICAL\*?\d*(?:\(\w+\))?\s+(.+)', line_stripped, re.IGNORECASE)
+                    if bool_decl:
+                        vars_str = bool_decl.group(1)
+                        # First remove array dimensions, then split by comma
+                        vars_str_clean = re.sub(r'\([^)]*\)', '', vars_str)
+                if vars_str_clean:
+                    # Split by comma and clean up
+                    for var in vars_str_clean.split(','):
+                        var = var.strip()
+                        # Remove any remaining modifiers
+                        var = re.sub(r'\*.*$', '', var)
+                        if var and re.match(r'^[A-Za-z][A-Za-z0-9_]*$', var):
+                            logical_vars.add(var)  # Add complex variables to complex_vars
                             if is_array:
                                 array_vars.add(var)
     
@@ -871,6 +891,7 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
         'complex_vars': complex_vars,
         'integer_vars': integer_vars,
         'char_vars': char_vars,
+        'bool_vars': logical_vars,
         'array_vars': array_vars
     }
     
@@ -8410,6 +8431,8 @@ def main():
                             current_type = "metavar integer"
                         elif p.upper() in param_types['char_vars'] or p.lower() in param_types['char_vars']:
                             current_type = "character()"
+                        elif p.upper() in param_types['bool_vars'] or p.lower() in param_types['bool_vars']:
+                            current_type = "boolean()"
                         if p.upper() in param_types['array_vars'] or p.lower() in param_types['array_vars']:
                             current_type = "arrayType(" + current_type + ", dimColons())"
                         types.append(current_type)
