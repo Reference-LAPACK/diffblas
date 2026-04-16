@@ -648,6 +648,12 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
     char_vars = set()
     logical_vars = set()
     array_vars = set()
+
+    do_real = False
+    do_int = False
+    do_char = False
+    do_cplx = False
+    do_logical = False
     
     # Find the argument declaration section
     lines = content.split('\n')
@@ -666,99 +672,58 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
             continue
         
         # Also look for the actual declaration lines (not in comments)
-        if line_stripped and not line_stripped.startswith('*') and not line_stripped.startswith('C     ') and in_args_section:
-            # Look for ARRAY variables 
-            is_array = ('(' in line_stripped) and (')' in line_stripped) # Probably better: re.search(r'(\s*\*\s*)', line_stripped) != None
+        if in_args_section and line_stripped and not line_stripped.startswith('*') and not line_stripped.startswith('C     '):
             
             # Parse variable declarations
             if looking_for_var_decl.startswith('REAL') or looking_for_var_decl.startswith('DOUBLE PRECISION') or looking_for_var_decl.startswith('FLOAT'):
-                # Extract variable names from REAL, DOUBLE PRECISION, or FLOAT declaration
-                real_decl = re.search(r'(?:REAL|DOUBLE PRECISION|FLOAT)\*?\d*(?:\(\w+\))?\s+(.+)', line_stripped, re.IGNORECASE)
-                if real_decl:
-                    vars_str = real_decl.group(1)
-                    # Before anything, remove F90 style '::' declaration
-                    vars_str = vars_str.split("::")[-1]
-                    # First remove array dimensions, then split by comma
-                    vars_str_clean = re.sub(r'\([^)]*\)', '', vars_str)
-                    # Split by comma and clean up
-                    for var in vars_str_clean.split(','):
-                        var = var.strip()
-                        # Remove any remaining modifiers
-                        var = re.sub(r'\*.*$', '', var)
-                        if var and re.match(r'^[A-Za-z][A-Za-z0-9_]*$', var):
-                            real_vars.add(var)
-                            if is_array:
-                                array_vars.add(var)
-            
-            elif looking_for_var_decl.startswith('INTEGER'):
-                int_decl = re.search(r'INTEGER\s+(.+)', line_stripped, re.IGNORECASE)
-                if int_decl:
-                    vars_str = int_decl.group(1)
-                    # Before anything, remove F90 style '::' declaration
-                    vars_str = vars_str.split("::")[-1]
-                    # First remove array dimensions, then split by comma
-                    vars_str_clean = re.sub(r'\([^)]*\)', '', vars_str)
-                    for var in vars_str_clean.split(','):
-                        var = var.strip()
-                        var = re.sub(r'\*.*$', '', var)
-                        if var and re.match(r'^[A-Za-z][A-Za-z0-9_]*$', var):
-                            integer_vars.add(var)
-                            if is_array:
-                                array_vars.add(var)
-            
+                do_real = True
+                do_int = False
+                do_char = False
+                do_cplx = False
+                do_logical = False
+            elif looking_for_var_decl.startswith('INTEGER'): 
+                do_real = False
+                do_int = True
+                do_char = False
+                do_cplx = False
+                do_logical = False
             elif looking_for_var_decl.startswith('CHARACTER'):
-                char_decl = re.search(r'CHARACTER\s+(.+)', line_stripped, re.IGNORECASE)
-                if char_decl:
-                    vars_str = char_decl.group(1)
-                    # Before anything, remove F90 style '::' declaration
-                    vars_str = vars_str.split("::")[-1]
-                    # First remove array dimensions, then split by comma
-                    vars_str_clean = re.sub(r'\([^)]*\)', '', vars_str)
-                    for var in vars_str_clean.split(','):
-                        var = var.strip()
-                        var = re.sub(r'\*.*$', '', var)
-                        if var and re.match(r'^[A-Za-z][A-Za-z0-9_]*$', var):
-                            char_vars.add(var)
-                            if is_array:
-                                array_vars.add(var)
-            
-            elif looking_for_var_decl.startswith('COMPLEX'):
-                # Extract variable names from COMPLEX declaration
-                complex_decl = re.search(r'COMPLEX\*?\d*(?:\(\w+\))?\s+(.+)', line_stripped, re.IGNORECASE)
-                if complex_decl:
-                    vars_str = complex_decl.group(1)
-                    # Before anything, remove F90 style '::' declaration
-                    vars_str = vars_str.split("::")[-1]
-                    # First remove array dimensions, then split by comma
-                    vars_str_clean = re.sub(r'\([^)]*\)', '', vars_str)
-                    # Split by comma and clean up
-                    for var in vars_str_clean.split(','):
-                        var = var.strip()
-                        # Remove any remaining modifiers
-                        var = re.sub(r'\*.*$', '', var)
-                        if var and re.match(r'^[A-Za-z][A-Za-z0-9_]*$', var):
-                            complex_vars.add(var)  # Add complex variables to complex_vars
-                            if is_array:
-                                array_vars.add(var)
-
+                do_real = False
+                do_int = False
+                do_char = True
+                do_cplx = False
+                do_logical = False
+            elif looking_for_var_decl.startswith('COMPLEX'): 
+                do_real = False
+                do_int = False
+                do_char = False
+                do_cplx = True
+                do_logical = False
             elif looking_for_var_decl.startswith('LOGICAL'):
-                if not keep_going:
-                    # Extract variable names from COMPLEX declaration
-                    bool_decl = re.search(r'LOGICAL\*?\d*(?:\(\w+\))?\s+(.+)', line_stripped, re.IGNORECASE)
-                    if bool_decl:
-                        vars_str = bool_decl.group(1)
-                        # First remove array dimensions, then split by comma
-                        vars_str_clean = re.sub(r'\([^)]*\)', '', vars_str)
-                if vars_str_clean:
-                    # Split by comma and clean up
-                    for var in vars_str_clean.split(','):
-                        var = var.strip()
-                        # Remove any remaining modifiers
-                        var = re.sub(r'\*.*$', '', var)
-                        if var and re.match(r'^[A-Za-z][A-Za-z0-9_]*$', var):
-                            logical_vars.add(var)  # Add complex variables to complex_vars
-                            if is_array:
-                                array_vars.add(var)
+                do_real = False
+                do_int = False
+                do_char = False
+                do_cplx = False
+                do_logical = True
+            # vars_decl = re.search(r'(?:REAL|DOUBLE PRECISION|FLOAT|INTEGER|LOGICAL|COMPLEX|CHARACTER){0,1}(?:\((?:kind=){0,1}\w+\)){0,1}(?:,\s*INTENT\(\s*(?:IN|OUT|INOUT)\s*\)){0,1}\s*(?:\:\:){0,1}\s*(.*)', s, re.IGNORECASE).group(1)
+            vars_decl = re.search(r'(?:REAL|DOUBLE PRECISION|FLOAT|INTEGER|LOGICAL|COMPLEX|CHARACTER)?(?:\((?:kind=){0,1}\w+\))?(?:,\s*INTENT\(\s*(?:IN|OUT|INOUT)\s*\)){0,1}\s*(?:\:\:)?\s*(.*)', line_stripped, re.IGNORECASE).group(1)
+            for var in re.findall(r'\w+(?:\([^)]*\))?', vars_decl): 
+                var = var.strip()
+                # Look for ARRAY variables 
+                is_array = ('(' in var) and (')' in var)
+                if is_array:
+                    var = re.sub(r'\([^)]*\)', '', var)
+                    array_vars.add(var)
+                if do_real:
+                    real_vars.add(var)
+                elif do_int:
+                    integer_vars.add(var)
+                elif do_char:
+                    char_vars.add(var)
+                elif do_cplx:
+                    complex_vars.add(var)
+                elif do_logical:
+                    logical_vars.add(var)
     
     # For FUNCTIONs with explicit return types, add function name to appropriate variable set
     if func_type == 'FUNCTION':
