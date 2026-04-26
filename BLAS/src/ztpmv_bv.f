@@ -150,7 +150,7 @@ C  =====================================================================
       IMPLICIT NONE
       INCLUDE 'DIFFSIZES.inc'
 C  Hint: ISIZE1OFap should be the size of dimension 1 of array ap
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level2 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -162,7 +162,7 @@ C     .. Scalar Arguments ..
 C     ..
 C     .. Array Arguments ..
       COMPLEX*16 ap(*), x(*)
-      COMPLEX*16 apb(nbdirsmax, *), xb(nbdirsmax, *)
+      COMPLEX*16 apb(nbdirs, *), xb(nbdirs, *)
 C     ..
 C
 C  =====================================================================
@@ -173,7 +173,7 @@ C     .. Parameters ..
 C     ..
 C     .. Local Scalars ..
       COMPLEX*16 temp
-      COMPLEX*16 tempb(nbdirsmax)
+      COMPLEX*16 tempb(nbdirs)
       INTEGER i, info, ix, j, jx, k, kk, kx
       LOGICAL noconj, nounit
       EXTERNAL LSAME
@@ -215,15 +215,8 @@ C     ..
 C
 C     Test the input parameters.
 C
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
       CALL check_ISIZE1OFAp_initialized()
       ISIZE1OFAp = get_ISIZE1OFAp()
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       info = 0
       IF (.NOT.LSAME(uplo, 'U') .AND. (.NOT.LSAME(uplo, 'L'))) THEN
         CALL PUSHCONTROL3B(0)
@@ -250,7 +243,7 @@ C     Quick return if possible.
 C
         IF (n .EQ. 0) THEN
           DO ii1=1,ISIZE1OFap
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               apb(nd, ii1) = (0.0,0.0)
             ENDDO
           ENDDO
@@ -308,7 +301,7 @@ C
                   kk = kk + j
                 ENDDO
                 DO ii1=1,ISIZE1OFap
-                  DO nd=1,nbdirsmax
+                  DO nd=1,nbdirs
                     apb(nd, ii1) = (0.0,0.0)
                   ENDDO
                 ENDDO
@@ -325,7 +318,7 @@ C
                   ELSE IF (branch .NE. 1) THEN
                     GOTO 100
                   END IF
-                  DO nd=1,nbdirsmax
+                  DO nd=1,nbdirs
                     tempb(nd) = (0.0,0.0)
                   ENDDO
                   CALL POPINTEGER4(ad_to)
@@ -374,7 +367,7 @@ C
                   kk = kk + j
                 ENDDO
                 DO ii1=1,ISIZE1OFap
-                  DO nd=1,nbdirsmax
+                  DO nd=1,nbdirs
                     apb(nd, ii1) = (0.0,0.0)
                   ENDDO
                 ENDDO
@@ -392,7 +385,7 @@ C
                   ELSE IF (branch .NE. 1) THEN
                     GOTO 110
                   END IF
-                  DO nd=1,nbdirsmax
+                  DO nd=1,nbdirs
                     tempb(nd) = (0.0,0.0)
                   ENDDO
                   CALL POPINTEGER4(ad_from)
@@ -440,7 +433,7 @@ C
                   kk = kk - (n-j+1)
                 ENDDO
                 DO ii1=1,ISIZE1OFap
-                  DO nd=1,nbdirsmax
+                  DO nd=1,nbdirs
                     apb(nd, ii1) = (0.0,0.0)
                   ENDDO
                 ENDDO
@@ -457,7 +450,7 @@ C
                   ELSE IF (branch .NE. 1) THEN
                     GOTO 120
                   END IF
-                  DO nd=1,nbdirsmax
+                  DO nd=1,nbdirs
                     tempb(nd) = (0.0,0.0)
                   ENDDO
                   CALL POPINTEGER4(ad_to1)
@@ -507,7 +500,7 @@ C
                   kk = kk - (n-j+1)
                 ENDDO
                 DO ii1=1,ISIZE1OFap
-                  DO nd=1,nbdirsmax
+                  DO nd=1,nbdirs
                     apb(nd, ii1) = (0.0,0.0)
                   ENDDO
                 ENDDO
@@ -525,7 +518,7 @@ C
                   ELSE IF (branch .NE. 1) THEN
                     GOTO 130
                   END IF
-                  DO nd=1,nbdirsmax
+                  DO nd=1,nbdirs
                     tempb(nd) = (0.0,0.0)
                   ENDDO
                   CALL POPINTEGER4(ad_from0)
@@ -593,7 +586,7 @@ C
                 kk = kk - j
               ENDDO
               DO ii1=1,ISIZE1OFap
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   apb(nd, ii1) = (0.0,0.0)
                 ENDDO
               ENDDO
@@ -696,7 +689,7 @@ C
                 kk = kk - j
               ENDDO
               DO ii1=1,ISIZE1OFap
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   apb(nd, ii1) = (0.0,0.0)
                 ENDDO
               ENDDO
@@ -800,7 +793,7 @@ C
                 kk = kk + (n-j+1)
               ENDDO
               DO ii1=1,ISIZE1OFap
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   apb(nd, ii1) = (0.0,0.0)
                 ENDDO
               ENDDO
@@ -903,7 +896,7 @@ C
                 kk = kk + (n-j+1)
               ENDDO
               DO ii1=1,ISIZE1OFap
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   apb(nd, ii1) = (0.0,0.0)
                 ENDDO
               ENDDO

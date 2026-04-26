@@ -1,281 +1,223 @@
-! Test program for DGBMV vector reverse mode differentiation
+! Test program for DGBMV vector reverse - BLAS2 band
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*8 precision with nbdirsmax=4
+! Multi-size outlined run_test_for_size(n, passed, nbdirs)
 
 program test_dgbmv_vector_reverse
   implicit none
-  include 'DIFFSIZES.inc'
-
   external :: dgbmv
   external :: dgbmv_bv
-
-  ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-  integer :: i, j, k  ! Loop counters
-  integer :: seed_array(33)  ! Random seed
-  real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
-
-  character :: trans
-  integer :: msize
-  integer :: nsize
-  integer :: kl
-  integer :: ku
-  real(8) :: alpha
-  real(8), dimension(max_size,max_size) :: a
-  integer :: lda_val
-  real(8), dimension(max_size) :: x
-  integer :: incx_val
-  real(8) :: beta
-  real(8), dimension(max_size) :: y
-  integer :: incy_val
-
-  ! Adjoint variables (reverse vector mode)
-  ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
-  !                  input adjoints are OUTPUT (computed gradients)
-  real(8), dimension(nbdirsmax) :: alphab
-  real(8), dimension(nbdirsmax,max_size,max_size) :: ab
-  real(8), dimension(nbdirsmax,max_size) :: xb
-  real(8), dimension(nbdirsmax) :: betab
-  real(8), dimension(nbdirsmax,max_size) :: yb
-
-  ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  real(8), dimension(nbdirsmax,max_size) :: yb_orig
-
-  ! Storage for original values (for VJP verification)
-  real(8) :: alpha_orig
-  real(8), dimension(max_size,max_size) :: a_orig
-  real(8), dimension(max_size) :: x_orig
-  real(8) :: beta_orig
-  real(8), dimension(max_size) :: y_orig
-
-  ! Variables for VJP verification via finite differences
-  real(8), parameter :: h = 1.0e-7
-  real(8) :: vjp_ad, vjp_fd, relative_error, max_error, abs_error, abs_reference, error_bound
-  logical :: has_large_errors
-  real(8), dimension(max_size*max_size) :: temp_products  ! For sorted summation
-  integer :: n_products
-
-  ! Initialize random seed for reproducibility
+  integer :: nbdirs, n_test, seed_array(33), test_sizes(3), i
+  logical :: passed, all_passed
   seed_array = 42
   call random_seed(put=seed_array)
-
-  ! Initialize primal values
-  trans = 'N'
-  msize = n
-  nsize = n
-  kl = 1
-  ku = 1
-  call random_number(alpha)
-  alpha = alpha * 2.0 - 1.0
-  call random_number(a)
-  a = a * 2.0 - 1.0
-  lda_val = lda
-  call random_number(x)
-  x = x * 2.0 - 1.0
-  incx_val = 1
-  call random_number(beta)
-  beta = beta * 2.0 - 1.0
-  call random_number(y)
-  y = y * 2.0 - 1.0
-  incy_val = 1
-
-  ! Store original primal values
-  alpha_orig = alpha
-  a_orig = a
-  x_orig = x
-  beta_orig = beta
-  y_orig = y
-
-  ! Initialize output adjoints (cotangents) with random values for each direction
-  ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirsmax
-    call random_number(yb(k,:))
-    yb(k,:) = yb(k,:) * 2.0 - 1.0
+  test_sizes = (/ 4, 10, 25 /)
+  write(*,*) 'Testing DGBMV (Vector Reverse band, multi-size: n = 4)'
+  all_passed = .true.
+  do i = 1, 3
+    n_test = test_sizes(i)
+    nbdirs = test_sizes(i)
+    call run_test_for_size(n_test, passed, nbdirs)
+    all_passed = all_passed .and. passed
   end do
-
-  ! Initialize input adjoints to zero (they will be computed)
-  ! Note: Inout parameters are skipped - they already have output adjoints initialized
-  alphab = 0.0
-  ab = 0.0
-  xb = 0.0
-  betab = 0.0
-
-  ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
-  yb_orig = yb
-
-  ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! Differentiated code checks they are set via check_ISIZE*_initialized.
-  call set_ISIZE1OFX(max_size)
-  call set_ISIZE2OFA(max_size)
-
-  ! Call reverse vector mode differentiated function
-  call dgbmv_bv(trans, msize, nsize, kl, ku, alpha, alphab, a, ab, lda_val, x, xb, incx_val, beta, betab, y, yb, incy_val, nbdirsmax)
-
-  ! Reset ISIZE globals to uninitialized (-1) for completeness
-  call set_ISIZE1OFX(-1)
-  call set_ISIZE2OFA(-1)
-
-  ! VJP Verification using finite differences
-  call check_vjp_numerically()
-
-  write(*,*) ''
-  write(*,*) 'Test completed successfully'
-
+  if (all_passed) write(*,*) 'PASS: All sizes completed successfully'
+  if (.not. all_passed) write(*,*) 'FAIL: One or more sizes had derivative errors'
 contains
-
-  subroutine check_vjp_numerically()
+  subroutine run_test_for_size(n, passed, nbdirs)
     implicit none
-    
-    ! Direction vectors for VJP testing
-    real(8) :: alpha_dir
-    real(8), dimension(max_size,max_size) :: a_dir
-    real(8), dimension(max_size) :: x_dir
-    real(8) :: beta_dir
-    real(8), dimension(max_size) :: y_dir
-    real(8), dimension(max_size) :: y_plus, y_minus, y_central_diff
-    
-    max_error = 0.0d0
-    has_large_errors = .false.
-    
+    integer, intent(in) :: n, nbdirs
+    logical, intent(out) :: passed
+    character :: uplo, trans, diag
+    integer :: nsize, ksize, lda_val, incx_val, incy_val
+    integer :: msize, kl, ku
+    real(8) :: alpha, beta
+    real(8), dimension(:), allocatable :: alphab, betab
+    real(8), dimension(:,:), allocatable :: a
+    real(8), dimension(:,:,:), allocatable :: ab
+    real(8), dimension(:), allocatable :: x, y
+    real(8), dimension(:,:), allocatable :: xb, yb, xb_seed, yb_seed
+    integer :: band_row, j
+    real(4) :: temp_real
+    ksize = max(0, n - 1)
+    msize = n
+    nsize = n
+    kl = 1
+    ku = 1
+    lda_val = kl + ku + 1
+    incx_val = 1
+    incy_val = 1
+    uplo = 'U'
+    trans = 'N'
+    diag = 'N'
+    allocate(a(lda_val, n), ab(nbdirs, lda_val, n), x(n), xb(nbdirs, n), y(n), yb(nbdirs, n), yb_seed(nbdirs, n), alphab(nbdirs), betab(nbdirs))
+    ! Initialize a as general band matrix (kl, ku band storage)
+    do j = 1, n
+    do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)
+    call random_number(temp_real)
+    a(band_row, j) = temp_real * 2.0 - 1.0
+    end do
+    end do
+    call random_number(alpha)
+    alpha = alpha * 2.0d0 - 1.0d0
+    call random_number(beta)
+    beta = beta * 2.0d0 - 1.0d0
+    call random_number(x)
+    x = x * 2.0d0 - 1.0d0
+    call random_number(y)
+    y = y * 2.0d0 - 1.0d0
+    ab = 0.0d0
+    alphab = 0.0d0
+    betab = 0.0d0
+    xb = 0.0d0
+    ! Seed for vector reverse: output adjoint yb is the seed per direction
+    call random_number(yb)
+    yb = yb * 2.0d0 - 1.0d0
+    yb_seed = yb
+    write(*,*) 'Testing DGBMV (Vector Reverse band, n =', n, ')'
+    call set_ISIZE1OFX(n)
+    call set_ISIZE2OFA(n)
+    call dgbmv_bv(trans, msize, nsize, kl, ku, alpha, alphab, a, ab, lda_val, x, xb, incx_val, beta, betab, y, yb, incy_val, nbdirs)
+    call set_ISIZE1OFX(-1)
+    call set_ISIZE2OFA(-1)
     write(*,*) 'Function calls completed successfully'
-    
+    call check_vjp_numerically_band_gbmv_vec(n, nbdirs, lda_val, msize, nsize, kl, ku, trans, incx_val, incy_val, alpha, alphab, beta, betab, a, ab, x, xb, y, yb_seed, yb, passed)
+    if (allocated(a)) deallocate(a)
+    if (allocated(ab)) deallocate(ab)
+    if (allocated(x)) deallocate(x)
+    if (allocated(xb)) deallocate(xb)
+    if (allocated(y)) deallocate(y)
+    if (allocated(yb)) deallocate(yb)
+    if (allocated(yb_seed)) deallocate(yb_seed)
+    if (allocated(alphab)) deallocate(alphab)
+    if (allocated(betab)) deallocate(betab)
+  end subroutine run_test_for_size
+
+  subroutine check_vjp_numerically_band_gbmv_vec(n, nbdirs, lda_val, msize, nsize, kl, ku, trans, incx_val, incy_val, alpha, alphab, beta, betab, a, ab, x, xb, y, yb_seed, yb, passed)
+    implicit none
+    integer, intent(in) :: n, nbdirs, lda_val, msize, nsize, kl, ku, incx_val, incy_val
+    character, intent(in) :: trans
+    real(8), intent(in) :: alpha, beta
+    real(8), intent(in) :: alphab(nbdirs), betab(nbdirs)
+    real(8), intent(in) :: a(lda_val, n), ab(nbdirs, lda_val, n), x(n), xb(nbdirs, n), y(n), yb_seed(nbdirs, n), yb(nbdirs, n)
+    logical, intent(out) :: passed
+    real(8), parameter :: h = 1.0e-7
+    real(8) :: vjp_fd, vjp_ad, abs_error, abs_ref, err_bound, relative_error, max_re
+    real(8), dimension(n) :: y_plus, y_minus, y_t, y_central_diff
+    real(8) :: alpha_t, beta_t, alpha_dir, beta_dir
+    real(8), dimension(n) :: x_t, x_dir, y_dir
+    real(8), dimension(lda_val, n) :: a_t, a_dir
+    real(8), dimension(:), allocatable :: temp_products
+    integer :: i, j, band_row, n_products, k
+    logical :: has_err
+    has_err = .false.
+    max_re = 0.0d0
+    allocate(temp_products(n + (kl+ku+1)*n + 2))
+    do k = 1, nbdirs
+    ! Random direction for this k (match BLAS1 scalar: direction^T @ adjoint)
+    call random_number(alpha_dir)
+    alpha_dir = alpha_dir * 2.0d0 - 1.0d0
+    call random_number(beta_dir)
+    beta_dir = beta_dir * 2.0d0 - 1.0d0
+    do j = 1, n
+      do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)
+        call random_number(a_dir(band_row, j))
+        a_dir(band_row, j) = a_dir(band_row, j) * 2.0d0 - 1.0d0
+      end do
+    end do
+    call random_number(x_dir)
+    x_dir = x_dir * 2.0d0 - 1.0d0
+    call random_number(y_dir)
+    y_dir = y_dir * 2.0d0 - 1.0d0
+    alpha_t = alpha + h * alpha_dir
+    beta_t = beta + h * beta_dir
+    a_t = a
+    do j = 1, n
+      do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)
+        a_t(band_row, j) = a(band_row, j) + h * a_dir(band_row, j)
+      end do
+    end do
+    x_t = x + h * x_dir
+    y_t = y + h * y_dir
+    call dgbmv(trans, msize, nsize, kl, ku, alpha_t, a_t, lda_val, x_t, incx_val, beta_t, y_t, incy_val)
+    y_plus = y_t
+    alpha_t = alpha - h * alpha_dir
+    beta_t = beta - h * beta_dir
+    a_t = a
+    do j = 1, n
+      do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)
+        a_t(band_row, j) = a(band_row, j) - h * a_dir(band_row, j)
+      end do
+    end do
+    x_t = x - h * x_dir
+    y_t = y - h * y_dir
+    call dgbmv(trans, msize, nsize, kl, ku, alpha_t, a_t, lda_val, x_t, incx_val, beta_t, y_t, incy_val)
+    y_minus = y_t
+    y_central_diff = (y_plus - y_minus) / (2.0d0 * h)
+    vjp_fd = 0.0d0
+    n_products = n
+    do i = 1, n
+      temp_products(i) = yb_seed(k,i) * y_central_diff(i)
+    end do
+    call sort_array(temp_products, n_products)
+    do i = 1, n_products
+      vjp_fd = vjp_fd + temp_products(i)
+    end do
+    vjp_ad = 0.0d0
+    vjp_ad = vjp_ad + alpha_dir * alphab(k)
+    vjp_ad = vjp_ad + beta_dir * betab(k)
+    n_products = 0
+    do j = 1, n
+      do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)
+        n_products = n_products + 1
+        temp_products(n_products) = a_dir(band_row,j) * ab(k,band_row,j)
+      end do
+    end do
+    call sort_array(temp_products, n_products)
+    do i = 1, n_products
+      vjp_ad = vjp_ad + temp_products(i)
+    end do
+    do i = 1, n
+      temp_products(i) = x_dir(i) * xb(k,i)
+    end do
+    call sort_array(temp_products, n)
+    do i = 1, n
+      vjp_ad = vjp_ad + temp_products(i)
+    end do
+    do i = 1, n
+      temp_products(i) = y_dir(i) * yb(k,i)
+    end do
+    call sort_array(temp_products, n)
+    do i = 1, n
+      vjp_ad = vjp_ad + temp_products(i)
+    end do
+    abs_error = abs(vjp_fd - vjp_ad)
+    abs_ref = abs(vjp_ad)
+    err_bound = 1.0e-5 + 1.0e-5 * abs_ref
+    if (abs_error > err_bound) has_err = .true.
+    relative_error = abs_error / max(abs_ref, 1.0d-10)
+    if (relative_error > max_re) max_re = relative_error
+    end do
+    deallocate(temp_products)
     write(*,*) 'Checking derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    
-    ! Test each differentiation direction separately
-    do k = 1, nbdirsmax
-      
-      ! Initialize random direction vectors for all inputs
-      call random_number(alpha_dir)
-      alpha_dir = alpha_dir * 2.0 - 1.0
-      call random_number(a_dir)
-      a_dir = a_dir * 2.0 - 1.0
-      call random_number(x_dir)
-      x_dir = x_dir * 2.0 - 1.0
-      call random_number(beta_dir)
-      beta_dir = beta_dir * 2.0 - 1.0
-      call random_number(y_dir)
-      y_dir = y_dir * 2.0 - 1.0
-      
-      ! Forward perturbation: f(x + h*dir)
-      alpha = alpha_orig + h * alpha_dir
-      a = a_orig + h * a_dir
-      x = x_orig + h * x_dir
-      beta = beta_orig + h * beta_dir
-      y = y_orig + h * y_dir
-      call dgbmv(trans, msize, nsize, kl, ku, alpha, a, lda_val, x, incx_val, beta, y, incy_val)
-      y_plus = y
-      
-      ! Backward perturbation: f(x - h*dir)
-      alpha = alpha_orig - h * alpha_dir
-      a = a_orig - h * a_dir
-      x = x_orig - h * x_dir
-      beta = beta_orig - h * beta_dir
-      y = y_orig - h * y_dir
-      call dgbmv(trans, msize, nsize, kl, ku, alpha, a, lda_val, x, incx_val, beta, y, incy_val)
-      y_minus = y
-      
-      ! Compute central differences and VJP verification
-      ! VJP check: direction^T @ adjoint should equal finite difference
-      
-      ! Compute central differences: (f(x+h*dir) - f(x-h*dir)) / (2h)
-      y_central_diff = (y_plus - y_minus) / (2.0d0 * h)
-      
-      ! VJP verification:
-      ! cotangent^T @ central_diff should equal direction^T @ computed_adjoint
-      ! Left side: cotangent^T @ Jacobian @ direction (via finite differences, with sorted summation)
-      vjp_fd = 0.0d0
-      ! Compute and sort products for y (FD)
-      n_products = n
-      do i = 1, n
-        temp_products(i) = yb_orig(k,i) * y_central_diff(i)
-      end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_fd = vjp_fd + temp_products(i)
-      end do
-      
-      ! Right side: direction^T @ computed_adjoint (with sorted summation)
-      ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
-      ! For pure inputs: use adjoint directly
-      vjp_ad = 0.0d0
-      ! Compute and sort products for x
-      n_products = n
-      do i = 1, n
-        temp_products(i) = x_dir(i) * xb(k,i)
-      end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_ad = vjp_ad + temp_products(i)
-      end do
-      vjp_ad = vjp_ad + beta_dir * betab(k)
-      vjp_ad = vjp_ad + alpha_dir * alphab(k)
-      ! Compute and sort products for y
-      n_products = n
-      do i = 1, n
-        temp_products(i) = y_dir(i) * yb(k,i)
-      end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_ad = vjp_ad + temp_products(i)
-      end do
-      ! Compute and sort products for a
-      n_products = 0
-      do j = 1, n
-        do i = 1, n
-          n_products = n_products + 1
-          temp_products(n_products) = a_dir(i,j) * ab(k,i,j)
-        end do
-      end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_ad = vjp_ad + temp_products(i)
-      end do
-      
-      ! Error check: |vjp_fd - vjp_ad| > atol + rtol * |vjp_ad|
-      abs_error = abs(vjp_fd - vjp_ad)
-      abs_reference = abs(vjp_ad)
-      error_bound = 1.0e-5 + 1.0e-5 * abs_reference
-      if (abs_error > error_bound) then
-        has_large_errors = .true.
-      end if
-      
-      ! Compute relative error for reporting
-      if (abs_reference > 1.0e-10) then
-        relative_error = abs_error / abs_reference
-      else
-        relative_error = abs_error
-      end if
-      if (relative_error > max_error) max_error = relative_error
-    end do
-    
-    write(*,*) ''
-    write(*,*) 'Maximum relative error:', max_error
+    write(*,*) 'Maximum relative error:', max_re
     write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
-    if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
+    passed = .not. has_err
+    if (.not. passed) then
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
       write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if
-    
-  end subroutine check_vjp_numerically
-
+  end subroutine check_vjp_numerically_band_gbmv_vec
   subroutine sort_array(arr, n)
     implicit none
     integer, intent(in) :: n
     real(8), dimension(n), intent(inout) :: arr
     integer :: i, j, min_idx
     real(8) :: temp
-    
-    ! Simple selection sort
     do i = 1, n-1
       min_idx = i
       do j = i+1, n
-        if (abs(arr(j)) < abs(arr(min_idx))) then
-          min_idx = j
-        end if
+        if (abs(arr(j)) < abs(arr(min_idx))) min_idx = j
       end do
       if (min_idx /= i) then
         temp = arr(i)
@@ -284,5 +226,4 @@ contains
       end if
     end do
   end subroutine sort_array
-
 end program test_dgbmv_vector_reverse

@@ -1,6 +1,7 @@
 ! Test program for SSYMV differentiation
 ! Generated automatically by run_tapenade_blas.py
 ! Using REAL*4 precision
+! Multi-size test with outlined run_test_for_size(n) - arrays declared to size n
 
 program test_ssymv
   implicit none
@@ -8,235 +9,201 @@ program test_ssymv
   external :: ssymv
   external :: ssymv_d
 
-  ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension (rows/cols of matrices)
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-
-  character :: uplo
-  integer :: nsize
-  real(4) :: alpha
-  real(4), dimension(max_size,max_size) :: a
-  integer :: lda_val
-  real(4), dimension(max_size) :: x
-  integer :: incx_val
-  real(4) :: beta
-  real(4), dimension(max_size) :: y
-  integer :: incy_val
-
-  ! Derivative variables
-  real(4) :: alpha_d
-  real(4), dimension(max_size,max_size) :: a_d
-  real(4), dimension(max_size) :: x_d
-  real(4) :: beta_d
-  real(4), dimension(max_size) :: y_d
-
-  ! Storage variables for inout parameters
-  real(4), dimension(max_size) :: y_output
-
-  ! Array restoration variables for numerical differentiation
-  real(4), dimension(max_size) :: x_orig
-  real(4) :: beta_orig
-  real(4) :: alpha_orig
-  real(4), dimension(max_size) :: y_orig
-  real(4), dimension(max_size,max_size) :: a_orig
-
-  ! Variables for central difference computation
-  real(4), dimension(max_size) :: y_forward, y_backward
-  ! Scalar variables for central difference computation
-  real(4) :: central_diff, ad_result
-  logical :: has_large_errors
-
-  ! Variables for storing original derivative values
-  real(4), dimension(max_size) :: x_d_orig
-  real(4) :: beta_d_orig
-  real(4) :: alpha_d_orig
-  real(4), dimension(max_size) :: y_d_orig
-  real(4), dimension(max_size,max_size) :: a_d_orig
-
-  ! Temporary variables for matrix initialization
-  real(4) :: temp_real, temp_imag
-  integer :: i, j
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
+  integer :: n_test
   integer :: seed_array(33)
+  integer :: test_sizes(3)
+  integer :: i
+  logical :: passed, all_passed
+
   seed_array = 42
   call random_seed(put=seed_array)
 
-  uplo = 'U'
-  nsize = n
-  call random_number(alpha)
-  alpha = alpha * 2.0 - 1.0  ! Scale to [-1,1]
-  ! Initialize a as symmetric matrix
-  ! Fill upper triangle with random numbers
-  do i = 1, lda
-    do j = i, lda
-      call random_number(temp_real)
-      a(i,j) = temp_real * 2.0 - 1.0  ! Scale to [-1,1]
-    end do
+  test_sizes = (/ 4, 10, 25 /)
+  write(*,*) 'Testing SSYMV (multi-size: n = 4)'
+  all_passed = .true.
+  do i = 1, 3
+    n_test = test_sizes(i)
+    call run_test_for_size(n_test, passed)
+    all_passed = all_passed .and. passed
   end do
-  
-  ! Fill lower triangle with symmetric values
-  do i = 2, lda
-    do j = 1, i-1
-      a(i,j) = a(j,i)  ! A(i,j) = A(j,i)
-    end do
-  end do
-  lda_val = lda  ! LDA must be at least max( 1
-  call random_number(x)
-  x = x * 2.0 - 1.0  ! Scale to [-1,1]
-  incx_val = 1  ! INCX 1
-  call random_number(beta)
-  beta = beta * 2.0 - 1.0  ! Scale to [-1,1]
-  call random_number(y)
-  y = y * 2.0 - 1.0  ! Scale to [-1,1]
-  incy_val = 1  ! INCY 1
-
-  ! Initialize input derivatives to random values
-  call random_number(x_d)
-  x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-  call random_number(beta_d)
-  beta_d = beta_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-  call random_number(alpha_d)
-  alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-  call random_number(y_d)
-  y_d = y_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-  ! Initialize a_d as symmetric matrix
-  ! Fill upper triangle with random numbers
-  do i = 1, lda
-    do j = i, lda
-      call random_number(temp_real)
-      a_d(i,j) = temp_real * 2.0 - 1.0  ! Scale to [-1,1]
-    end do
-  end do
-  
-  ! Fill lower triangle with symmetric values
-  do i = 2, lda
-    do j = 1, i-1
-      a_d(i,j) = a_d(j,i)  ! A(i,j) = A(j,i)
-    end do
-  end do
-
-  ! Store initial derivative values after random initialization
-  x_d_orig = x_d
-  beta_d_orig = beta_d
-  alpha_d_orig = alpha_d
-  y_d_orig = y_d
-  a_d_orig = a_d
-
-  ! Store original values for central difference computation
-  x_orig = x
-  beta_orig = beta
-  alpha_orig = alpha
-  y_orig = y
-  a_orig = a
-
-  write(*,*) 'Testing SSYMV'
-  ! Store input values of inout parameters before first function call
-  y_orig = y
-
-  ! Re-initialize data for differentiated function
-  ! Only reinitialize inout parameters - keep input-only parameters unchanged
-
-  ! uplo already has correct value from original call
-  nsize = n
-  ! alpha already has correct value from original call
-  ! a already has correct value from original call
-  lda_val = lda  ! LDA must be at least max( 1
-  ! x already has correct value from original call
-  incx_val = 1  ! INCX 1
-  ! beta already has correct value from original call
-  y = y_orig
-  incy_val = 1  ! INCY 1
-
-  ! Call the differentiated function
-  call ssymv_d(uplo, nsize, alpha, alpha_d, a, a_d, lda_val, x, x_d, incx_val, beta, beta_d, y, y_d, incy_val)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically()
-
-  write(*,*) 'Test completed successfully'
+  if (all_passed) then
+    write(*,*) 'PASS: All sizes completed successfully'
+  else
+    write(*,*) 'FAIL: One or more sizes had derivative errors'
+  end if
 
 contains
 
-  subroutine check_derivatives_numerically()
+  subroutine run_test_for_size(n, passed)
     implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    character :: uplo
+    integer :: nsize
+    real(4) :: alpha
+    real(4), dimension(n,n) :: a
+    integer :: lda_val
+    real(4), dimension(n) :: x
+    integer :: incx
+    real(4) :: beta
+    real(4), dimension(n) :: y
+    integer :: incy
+
+    ! Derivative variables
+    real(4), dimension(n) :: x_d
+    real(4) :: beta_d
+    real(4), dimension(n,n) :: a_d
+    real(4) :: alpha_d
+    real(4), dimension(n) :: y_d
+
+    ! Array restoration and derivative storage
+    real(4), dimension(n) :: x_orig, x_d_orig
+    real(4) :: beta_orig, beta_d_orig
+    real(4), dimension(n,n) :: a_orig, a_d_orig
+    real(4) :: alpha_orig, alpha_d_orig
+    real(4), dimension(n) :: y_orig, y_d_orig
+    integer :: i, j
+
+    uplo = 'U'
+    nsize = n
+    lda_val = n
+    incx = 1
+    incy = 1
+
+    call random_number(alpha)
+    alpha = alpha * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+    call random_number(a)
+    a = a * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+    call random_number(x)
+    x = x * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+    call random_number(beta)
+    beta = beta * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+    call random_number(y)
+    y = y * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+
+    ! Initialize input derivatives
+    call random_number(x_d)
+    x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(beta_d)
+    beta_d = beta_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(a_d)
+    a_d = a_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(alpha_d)
+    alpha_d = alpha_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    call random_number(y_d)
+    y_d = y_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+
+    ! Store _orig and _d_orig
+    x_d_orig = x_d
+    beta_d_orig = beta_d
+    a_d_orig = a_d
+    alpha_d_orig = alpha_d
+    y_d_orig = y_d
+    x_orig = x
+    beta_orig = beta
+    a_orig = a
+    alpha_orig = alpha
+    y_orig = y
+
+    write(*,*) 'Testing SSYMV (n =', n, ')'
+    y_orig = y
+
+    ! Call the differentiated function
+    call ssymv_d(uplo, nsize, alpha, alpha_d, a, a_d, lda_val, x, x_d, 1, beta, beta_d, y, y_d, 1)
+    x_d = x_d_orig
+    beta_d = beta_d_orig
+    a_d = a_d_orig
+    alpha_d = alpha_d_orig
+
+    write(*,*) 'Function calls completed successfully'
+
+    ! Numerical differentiation check
+    call check_derivatives_numerically(n, uplo, nsize, lda_val, x_orig, beta_orig, a_orig, alpha_orig, y_orig, x_d_orig, beta_d_orig, a_d_orig, alpha_d_orig, y_d_orig, y_d, passed)
+
+  end subroutine run_test_for_size
+
+  subroutine check_derivatives_numerically(n, uplo, nsize, lda_val, x_orig, beta_orig, a_orig, alpha_orig, y_orig, x_d_orig, beta_d_orig, a_d_orig, alpha_d_orig, y_d_orig, y_d, passed)
+    implicit none
+    integer, intent(in) :: n
+    character, intent(in) :: uplo
+    integer, intent(in) :: nsize
+    integer, intent(in) :: lda_val
+    real(4), intent(in) :: x_orig(n), x_d_orig(n)
+    real(4), intent(in) :: beta_orig, beta_d_orig
+    real(4), intent(in) :: a_orig(n,n), a_d_orig(n,n)
+    real(4), intent(in) :: alpha_orig, alpha_d_orig
+    real(4), intent(in) :: y_orig(n), y_d_orig(n)
+    real(4), intent(in) :: y_d(n)
+    logical, intent(out) :: passed
+
     real(4), parameter :: h = 1.0e-3  ! Step size for finite differences
     real(4) :: relative_error, max_error
-    real(4) :: output_orig, output_pert
-    real(4) :: numerical_result, analytical_result
     real(4) :: abs_error, abs_reference, error_bound
+    real(4) :: central_diff, ad_result
+    logical :: has_large_errors
+    real(4), dimension(n) :: y_forward, y_backward
     integer :: i, j
-    
+    real(4), dimension(n) :: x
+    real(4) :: beta
+    real(4), dimension(n,n) :: a
+    real(4) :: alpha
+    real(4), dimension(n) :: y
+
     max_error = 0.0e0
     has_large_errors = .false.
-    
+
     write(*,*) 'Checking derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    
-    ! Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3
-    
-    ! Original values already stored in main program
-    
-    ! Central difference computation: f(x + h) - f(x - h) / (2h)
+
     ! Forward perturbation: f(x + h)
     x = x_orig + h * x_d_orig
     beta = beta_orig + h * beta_d_orig
+    a = a_orig + h * a_d_orig
     alpha = alpha_orig + h * alpha_d_orig
     y = y_orig + h * y_d_orig
-    a = a_orig + h * a_d_orig
-    call ssymv(uplo, nsize, alpha, a, lda_val, x, incx_val, beta, y, incy_val)
-    ! Store forward perturbation results
+    call ssymv(uplo, nsize, alpha, a, lda_val, x, 1, beta, y, 1)
     y_forward = y
-    
+
     ! Backward perturbation: f(x - h)
     x = x_orig - h * x_d_orig
     beta = beta_orig - h * beta_d_orig
+    a = a_orig - h * a_d_orig
     alpha = alpha_orig - h * alpha_d_orig
     y = y_orig - h * y_d_orig
-    a = a_orig - h * a_d_orig
-    call ssymv(uplo, nsize, alpha, a, lda_val, x, incx_val, beta, y, incy_val)
-    ! Store backward perturbation results
+    call ssymv(uplo, nsize, alpha, a, lda_val, x, 1, beta, y, 1)
     y_backward = y
-    
+
     ! Compute central differences and compare with AD results
-    ! Check derivatives for output Y
-    do i = 1, min(2, n)  ! Check only first few elements
-      ! Central difference: (f(x+h) - f(x-h)) / (2h)
-      central_diff = (y_forward(i) - y_backward(i)) / (2.0e0 * h)
-      ! AD result
-      ad_result = y_d(i)
-      ! Error check: |a - b| > atol + rtol * |b|
-      abs_error = abs(central_diff - ad_result)
-      abs_reference = abs(ad_result)
-      error_bound = 2.0e-3 + 2.0e-3 * abs_reference
-      if (abs_error > error_bound) then
-        has_large_errors = .true.
+    do i = 1, n
+        central_diff = (y_forward(i) - y_backward(i)) / (2.0e0 * h)
+        ad_result = y_d(i)
+        abs_error = abs(central_diff - ad_result)
+        abs_reference = abs(ad_result)
+        error_bound = 2.0e-3 + 2.0e-3 * abs_reference
+        if (abs_error > error_bound) then
+          has_large_errors = .true.
+          relative_error = abs_error / max(abs_reference, 1.0e-10)
+          write(*,*) 'Large error in output Y(', i, '):'
+          write(*,*) '  Central diff: ', central_diff
+          write(*,*) '  AD result:   ', ad_result
+          write(*,*) '  Absolute error:', abs_error
+          write(*,*) '  Error bound:', error_bound
+          write(*,*) '  Relative error:', relative_error
+        end if
         relative_error = abs_error / max(abs_reference, 1.0e-10)
-        write(*,*) 'Large error in output Y(', i, '):'
-        write(*,*) '  Central diff: ', central_diff
-        write(*,*) '  AD result:   ', ad_result
-        write(*,*) '  Absolute error:', abs_error
-        write(*,*) '  Error bound:', error_bound
-        write(*,*) '  Relative error:', relative_error
-      end if
-      ! Track max error for reporting (normalized)
-      relative_error = abs_error / max(abs_reference, 1.0e-10)
-      max_error = max(max_error, relative_error)
+        max_error = max(max_error, relative_error)
     end do
-    
+
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
+    passed = .not. has_large_errors
     if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
       write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if
-    
+
   end subroutine check_derivatives_numerically
 
 end program test_ssymv

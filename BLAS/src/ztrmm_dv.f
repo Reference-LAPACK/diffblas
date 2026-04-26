@@ -183,8 +183,8 @@ C  =====================================================================
       SUBROUTINE ZTRMM_DV(side, uplo, transa, diag, m, n, alpha, alphad
      +                    , a, ad, lda, b, bd, ldb, nbdirs)
       IMPLICIT NONE
-      INCLUDE 'DIFFSIZES.inc'
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C      INCLUDE 'DIFFSIZES.inc'
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level3 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -192,13 +192,13 @@ C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
       COMPLEX*16 alpha
-      COMPLEX*16 alphad(nbdirsmax)
+      COMPLEX*16 alphad(nbdirs)
       INTEGER lda, ldb, m, n
       CHARACTER diag, side, transa, uplo
 C     ..
 C     .. Array Arguments ..
       COMPLEX*16 a(lda, *), b(ldb, *)
-      COMPLEX*16 ad(nbdirsmax, lda, *), bd(nbdirsmax, ldb, *)
+      COMPLEX*16 ad(nbdirs, lda, *), bd(nbdirs, ldb, *)
       EXTERNAL LSAME
 C     ..
 C
@@ -215,7 +215,7 @@ C     .. Intrinsic Functions ..
 C     ..
 C     .. Local Scalars ..
       COMPLEX*16 temp
-      COMPLEX*16 tempd(nbdirsmax)
+      COMPLEX*16 tempd(nbdirs)
       INTEGER i, info, j, k, nrowa
       LOGICAL lside, noconj, nounit, upper
 C     ..
@@ -232,13 +232,6 @@ C     .. Parameters ..
 C     ..
 C
 C     Test the input parameters.
-C
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
 C
       lside = LSAME(side, 'L')
       IF (lside) THEN

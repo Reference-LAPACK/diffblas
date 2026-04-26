@@ -309,9 +309,13 @@ run_single_test() {
     local has_acceptable=false
     local has_outside_tolerance=false
     
-    if grep -q "FAIL: Large errors detected" "$output_file" 2>/dev/null; then
+    # Any FAIL: line from the test indicates derivative or test failure -> outside tolerance
+    if grep -q "FAIL:" "$output_file" 2>/dev/null; then
         has_outside_tolerance=true
-    elif grep -q "PASS: Derivatives are accurate to machine precision" "$output_file" 2>/dev/null; then
+    fi
+    # Only check PASS/WARNING if no FAIL was found
+    if [ "$has_outside_tolerance" = false ]; then
+    if grep -q "PASS: Derivatives are accurate to machine precision" "$output_file" 2>/dev/null; then
         has_machine_precision=true
     elif grep -q "PASS: Vector derivatives are accurate to machine precision" "$output_file" 2>/dev/null; then
         has_machine_precision=true
@@ -327,6 +331,7 @@ run_single_test() {
         has_outside_tolerance=true
     elif grep -q "WARNING: Vector derivatives may have significant errors" "$output_file" 2>/dev/null; then
         has_outside_tolerance=true
+    fi
     fi
     
     # Determine test result category and update counters

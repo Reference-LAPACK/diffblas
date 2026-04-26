@@ -78,7 +78,7 @@ C  =====================================================================
       IMPLICIT NONE
       INCLUDE 'DIFFSIZES.inc'
 C  Hint: ISIZE1OFdx should be the size of dimension 1 of array dx
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level1 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -89,14 +89,14 @@ C     .. Scalar Arguments ..
 C     ..
 C     .. Array Arguments ..
       DOUBLE PRECISION dx(*)
-      DOUBLE PRECISION dxb(nbdirsmax, *)
+      DOUBLE PRECISION dxb(nbdirs, *)
 C     ..
 C
 C  =====================================================================
 C
 C     .. Local Scalars ..
       DOUBLE PRECISION dtemp
-      DOUBLE PRECISION dtempb(nbdirsmax)
+      DOUBLE PRECISION dtempb(nbdirs)
       INTEGER i, m, mp1, nincx
       INTEGER ISIZE1OFDx
       INTEGER get_ISIZE1OFDx
@@ -105,40 +105,33 @@ C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC DABS, MOD
       DOUBLE PRECISION dabs0
-      DOUBLE PRECISION dabs0b(nbdirsmax)
+      DOUBLE PRECISION dabs0b(nbdirs)
       DOUBLE PRECISION dabs1
-      DOUBLE PRECISION dabs1b(nbdirsmax)
+      DOUBLE PRECISION dabs1b(nbdirs)
       DOUBLE PRECISION dabs2
-      DOUBLE PRECISION dabs2b(nbdirsmax)
+      DOUBLE PRECISION dabs2b(nbdirs)
       DOUBLE PRECISION dabs3
-      DOUBLE PRECISION dabs3b(nbdirsmax)
+      DOUBLE PRECISION dabs3b(nbdirs)
       DOUBLE PRECISION dabs4
-      DOUBLE PRECISION dabs4b(nbdirsmax)
+      DOUBLE PRECISION dabs4b(nbdirs)
       DOUBLE PRECISION dabs5
-      DOUBLE PRECISION dabs5b(nbdirsmax)
+      DOUBLE PRECISION dabs5b(nbdirs)
       DOUBLE PRECISION dabs6
-      DOUBLE PRECISION dabs6b(nbdirsmax)
+      DOUBLE PRECISION dabs6b(nbdirs)
       DOUBLE PRECISION dabs7
-      DOUBLE PRECISION dabs7b(nbdirsmax)
+      DOUBLE PRECISION dabs7b(nbdirs)
       INTEGER nd
       INTEGER*4 branch
       INTEGER ii1
-      DOUBLE PRECISION dasumb(nbdirsmax)
+      DOUBLE PRECISION dasumb(nbdirs)
       DOUBLE PRECISION dasum
       INTEGER nbdirs
 C     ..
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
       CALL check_ISIZE1OFDx_initialized()
       ISIZE1OFDx = get_ISIZE1OFDx()
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       IF (n .LE. 0 .OR. incx .LE. 0) THEN
         DO ii1=1,ISIZE1OFdx
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             dxb(nd, ii1) = 0.D0
           ENDDO
         ENDDO
@@ -163,7 +156,7 @@ C
                 dtempb(nd) = dasumb(nd)
               ENDDO
               DO ii1=1,ISIZE1OFdx
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   dxb(nd, ii1) = 0.D0
                 ENDDO
               ENDDO
@@ -228,7 +221,7 @@ C
         CALL POPCONTROL1B(branch)
         IF (branch .EQ. 0) THEN
           DO ii1=1,ISIZE1OFdx
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               dxb(nd, ii1) = 0.D0
             ENDDO
           ENDDO
@@ -306,7 +299,7 @@ C
           IF (branch .NE. 0) GOTO 110
         ELSE
           DO ii1=1,ISIZE1OFdx
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               dxb(nd, ii1) = 0.D0
             ENDDO
           ENDDO

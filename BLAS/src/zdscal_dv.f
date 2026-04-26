@@ -83,8 +83,8 @@ C>
 C  =====================================================================
       SUBROUTINE ZDSCAL_DV(n, da, dad, zx, zxd, incx, nbdirs)
       IMPLICIT NONE
-      INCLUDE 'DIFFSIZES.inc'
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C      INCLUDE 'DIFFSIZES.inc'
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level1 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -92,12 +92,12 @@ C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
       DOUBLE PRECISION da
-      DOUBLE PRECISION dad(nbdirsmax)
+      DOUBLE PRECISION dad(nbdirs)
       INTEGER incx, n
 C     ..
 C     .. Array Arguments ..
       COMPLEX*16 zx(*)
-      COMPLEX*16 zxd(nbdirsmax, *)
+      COMPLEX*16 zxd(nbdirs, *)
 C     ..
 C
 C  =====================================================================
@@ -111,20 +111,13 @@ C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC DBLE, DCMPLX, DIMAG
       DOUBLE PRECISION arg1
-      DOUBLE PRECISION arg1d(nbdirsmax)
+      DOUBLE PRECISION arg1d(nbdirs)
       DOUBLE PRECISION arg2
-      DOUBLE PRECISION arg2d(nbdirsmax)
+      DOUBLE PRECISION arg2d(nbdirs)
       INTEGER nd
       DOUBLE PRECISION temp
       INTEGER nbdirs
 C     ..
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       IF ((n .LE. 0 .OR. incx .LE. 0) .OR. da .EQ. one) THEN
         RETURN
       ELSE

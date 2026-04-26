@@ -76,8 +76,8 @@ C>
 C  =====================================================================
       SUBROUTINE DASUM_DV(n, dx, dxd, incx, dasum, dasumd, nbdirs)
       IMPLICIT NONE
-      INCLUDE 'DIFFSIZES.inc'
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C      INCLUDE 'DIFFSIZES.inc'
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level1 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -88,50 +88,43 @@ C     .. Scalar Arguments ..
 C     ..
 C     .. Array Arguments ..
       DOUBLE PRECISION dx(*)
-      DOUBLE PRECISION dxd(nbdirsmax, *)
+      DOUBLE PRECISION dxd(nbdirs, *)
 C     ..
 C
 C  =====================================================================
 C
 C     .. Local Scalars ..
       DOUBLE PRECISION dtemp
-      DOUBLE PRECISION dtempd(nbdirsmax)
+      DOUBLE PRECISION dtempd(nbdirs)
       INTEGER i, m, mp1, nincx
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC DABS, MOD
       DOUBLE PRECISION dabs0
-      DOUBLE PRECISION dabs0d(nbdirsmax)
+      DOUBLE PRECISION dabs0d(nbdirs)
       DOUBLE PRECISION dabs1
-      DOUBLE PRECISION dabs1d(nbdirsmax)
+      DOUBLE PRECISION dabs1d(nbdirs)
       DOUBLE PRECISION dabs2
-      DOUBLE PRECISION dabs2d(nbdirsmax)
+      DOUBLE PRECISION dabs2d(nbdirs)
       DOUBLE PRECISION dabs3
-      DOUBLE PRECISION dabs3d(nbdirsmax)
+      DOUBLE PRECISION dabs3d(nbdirs)
       DOUBLE PRECISION dabs4
-      DOUBLE PRECISION dabs4d(nbdirsmax)
+      DOUBLE PRECISION dabs4d(nbdirs)
       DOUBLE PRECISION dabs5
-      DOUBLE PRECISION dabs5d(nbdirsmax)
+      DOUBLE PRECISION dabs5d(nbdirs)
       DOUBLE PRECISION dabs6
-      DOUBLE PRECISION dabs6d(nbdirsmax)
+      DOUBLE PRECISION dabs6d(nbdirs)
       DOUBLE PRECISION dabs7
-      DOUBLE PRECISION dabs7d(nbdirsmax)
+      DOUBLE PRECISION dabs7d(nbdirs)
       INTEGER nd
-      DOUBLE PRECISION dasumd(nbdirsmax)
+      DOUBLE PRECISION dasumd(nbdirs)
       DOUBLE PRECISION dasum
       INTEGER nbdirs
 C     ..
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       dasum = 0.0d0
       dtemp = 0.0d0
       IF (n .LE. 0 .OR. incx .LE. 0) THEN
-        DO nd=1,nbdirsmax
+        DO nd=1,nbdirs
           dasumd(nd) = 0.D0
         ENDDO
         RETURN
@@ -144,7 +137,7 @@ C        clean-up loop
 C
           m = MOD(n, 6)
           IF (m .NE. 0) THEN
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               dtempd(nd) = 0.D0
             ENDDO
             DO i=1,m
@@ -172,7 +165,7 @@ C
               RETURN
             END IF
           ELSE
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               dtempd(nd) = 0.D0
             ENDDO
           END IF
@@ -256,7 +249,7 @@ C
 C        code for increment not equal to 1
 C
           nincx = n*incx
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             dtempd(nd) = 0.D0
           ENDDO
           DO i=1,nincx,incx

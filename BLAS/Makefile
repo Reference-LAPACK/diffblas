@@ -4,8 +4,18 @@
 # Compilers and flags
 FC = gfortran
 CC = gcc
-FFLAGS = -O2 -fPIC -ffree-line-length-none -Wuninitialized -Wmaybe-uninitialized -Iinclude
-FFLAGS_F77 = -O2 -fPIC -ffixed-line-length-none -Wuninitialized -Wmaybe-uninitialized -Iinclude
+# Ensure .mod files are written to (and read from) build/
+# Defaults: gfortran -> -J, ifort/ifx -> -module. You can still override MODFLAG on the make command line.
+MODDIR = $(BUILD_DIR)
+ifeq ($(findstring ifort,$(FC)),ifort)
+MODFLAG ?= -module $(MODDIR)
+else ifeq ($(findstring ifx,$(FC)),ifx)
+MODFLAG ?= -module $(MODDIR)
+else
+MODFLAG ?= -J$(MODDIR)
+endif
+FFLAGS = -O2 -fPIC -ffree-line-length-none -Wuninitialized -Wmaybe-uninitialized -Iinclude -I$(MODDIR) $(MODFLAG)
+FFLAGS_F77 = -O2 -fPIC -ffixed-line-length-none -Wuninitialized -Wmaybe-uninitialized -Iinclude -I$(MODDIR)
 CFLAGS = -O2 -fPIC
 
 # Directory structure
@@ -63,7 +73,8 @@ else
 BLAS_LIB ?= -lrefblas
 endif
 
-# Optional: DIFFSIZES_access when using ISIZE globals (.f or .f90+wrappers when many vars)
+# Optional: DIFFSIZES_access when using ISIZE globals (run_tapenade_blas.py writes .f or .f90+wrappers)
+# When many ISIZE vars exceed F77 COMMON line limit, generator writes DIFFSIZES_access.f90 + wrappers instead of .f
 # Prefer .f90 when present (may have more vars than stale .f)
 # Must be defined before any rule that uses it as a prerequisite, so "make forward" (etc.) builds it first.
 ifneq ($(wildcard $(SRC_DIR)/DIFFSIZES_access.f90),)
@@ -169,17 +180,22 @@ $(BUILD_DIR)/%_dep2.o: $(SRC_DIR)/%_dep2.f
 	$(FC) $(FFLAGS_F77) -c $< -o $@
 
 # DIFFSIZES_access - F77 .f or F90 .f90 (generator picks based on COMMON line length)
-# When .f90 exists: compile to produce .o and .mod; wrappers need .mod (depend on it explicitly)
+# When .f90 exists: compile to produce .o and .mod; wrappers depend on .mod explicitly (avoids stale .o from .f)
 $(BUILD_DIR)/diffsizes_access.mod: $(SRC_DIR)/DIFFSIZES_access.f90
-	$(FC) $(FFLAGS) -J$(BUILD_DIR) -c $< -o $(BUILD_DIR)/DIFFSIZES_access.o
+	@mkdir -p $(BUILD_DIR)
+	$(FC) $(FFLAGS) -c $< -o $(BUILD_DIR)/DIFFSIZES_access.o
 
+# When .f90 exists: DIFFSIZES_access.o is produced as byproduct of diffsizes_access.mod (do not compile .f)
+ifeq ($(wildcard $(SRC_DIR)/DIFFSIZES_access.f90),)
 $(BUILD_DIR)/DIFFSIZES_access.o: $(SRC_DIR)/DIFFSIZES_access.f
 	$(FC) $(FFLAGS_F77) -c $< -o $@
+else
+$(BUILD_DIR)/DIFFSIZES_access.o: $(BUILD_DIR)/diffsizes_access.mod
+endif
 
 # DIFFSIZES_access_wrappers.f - external symbols for F90 module (set_*, get_*, check_*)
-# Depend on .mod so we always build from .f90 when using F90 path (avoids stale .o from .f)
 $(BUILD_DIR)/DIFFSIZES_access_wrappers.o: $(SRC_DIR)/DIFFSIZES_access_wrappers.f $(BUILD_DIR)/diffsizes_access.mod
-	$(FC) $(FFLAGS) -J$(BUILD_DIR) -c $(SRC_DIR)/DIFFSIZES_access_wrappers.f -o $@
+	$(FC) $(FFLAGS) -c $(SRC_DIR)/DIFFSIZES_access_wrappers.f -o $@
 
 # DIFFSIZES handling (supports both Fortran 90 module and Fortran 77 include)
 # For F90: DIFFSIZES.f90 is compiled to produce DIFFSIZES.o and DIFFSIZES.mod
@@ -292,7 +308,7 @@ $(BUILD_DIR)/libdiffblas_d.a: compile-d $(DIFFSIZES_ACCESS_OBJ)
 	@echo "Created libdiffblas_d.a with $$(ls $(BUILD_DIR)/*_d.o 2>/dev/null | wc -w) objects"
 
 $(BUILD_DIR)/libdiffblas_d.so: compile-d
-	@$(FC) -shared -o $@ $$(ls $(BUILD_DIR)/*_d.o 2>/dev/null)
+	@objs="$$(ls $(BUILD_DIR)/*_d.o 2>/dev/null)"; if [ -n "$$objs" ]; then $(FC) -shared -o $@ $$objs; else touch $@; fi
 
 # Single library for all reverse mode differentiated code
 $(BUILD_DIR)/libdiffblas_b.a: compile-b $(DIFFSIZES_ACCESS_OBJ)
@@ -300,7 +316,7 @@ $(BUILD_DIR)/libdiffblas_b.a: compile-b $(DIFFSIZES_ACCESS_OBJ)
 	@echo "Created libdiffblas_b.a with $$(ls $(BUILD_DIR)/*_b.o 2>/dev/null | wc -w) objects"
 
 $(BUILD_DIR)/libdiffblas_b.so: compile-b $(DIFFSIZES_ACCESS_OBJ)
-	@$(FC) -shared -o $@ $$(ls $(BUILD_DIR)/*_b.o 2>/dev/null) $(BUILD_DIR)/adStack.o $(DIFFSIZES_ACCESS_OBJ)
+	@objs="$$(ls $(BUILD_DIR)/*_b.o 2>/dev/null)"; if [ -n "$$objs" ]; then $(FC) -shared -o $@ $$objs $(BUILD_DIR)/adStack.o $(DIFFSIZES_ACCESS_OBJ); else touch $@; fi
 
 # Single library for all vector forward mode differentiated code
 $(BUILD_DIR)/libdiffblas_dv.a: compile-dv $(DIFFSIZES_ACCESS_OBJ)
@@ -308,7 +324,7 @@ $(BUILD_DIR)/libdiffblas_dv.a: compile-dv $(DIFFSIZES_ACCESS_OBJ)
 	@echo "Created libdiffblas_dv.a with $$(ls $(BUILD_DIR)/*_dv.o 2>/dev/null | wc -w) objects"
 
 $(BUILD_DIR)/libdiffblas_dv.so: compile-dv
-	@$(FC) -shared -o $@ $$(ls $(BUILD_DIR)/*_dv.o 2>/dev/null) $(BUILD_DIR)/DIFFSIZES.o
+	@objs="$$(ls $(BUILD_DIR)/*_dv.o 2>/dev/null)"; if [ -n "$$objs" ]; then $(FC) -shared -o $@ $$objs $(BUILD_DIR)/DIFFSIZES.o; else touch $@; fi
 
 # Single library for all vector reverse mode differentiated code
 $(BUILD_DIR)/libdiffblas_bv.a: compile-bv $(DIFFSIZES_ACCESS_OBJ)
@@ -316,7 +332,7 @@ $(BUILD_DIR)/libdiffblas_bv.a: compile-bv $(DIFFSIZES_ACCESS_OBJ)
 	@echo "Created libdiffblas_bv.a with $$(ls $(BUILD_DIR)/*_bv.o 2>/dev/null | wc -w) objects"
 
 $(BUILD_DIR)/libdiffblas_bv.so: compile-bv $(DIFFSIZES_ACCESS_OBJ)
-	@$(FC) -shared -o $@ $$(ls $(BUILD_DIR)/*_bv.o 2>/dev/null) $(BUILD_DIR)/adStack.o $(BUILD_DIR)/DIFFSIZES.o $(DIFFSIZES_ACCESS_OBJ)
+	@objs="$$(ls $(BUILD_DIR)/*_bv.o 2>/dev/null)"; if [ -n "$$objs" ]; then $(FC) -shared -o $@ $$objs $(BUILD_DIR)/adStack.o $(BUILD_DIR)/DIFFSIZES.o $(DIFFSIZES_ACCESS_OBJ); else touch $@; fi
 
 # Note: Original BLAS functions come from $(BLAS_LIB) (librefblas in LAPACKDIR)
 # No need to build a separate liborigblas
@@ -366,6 +382,7 @@ $(BUILD_DIR)/test_%_vector_reverse.o: $(TEST_DIR)/test_%_vector_reverse.f90 $(BU
 clean:
 	@echo "Cleaning build directory..."
 	rm -rf $(BUILD_DIR)
+	rm -f *.mod
 	@echo "Clean complete."
 
 # Rebuild everything

@@ -88,7 +88,7 @@ C  =====================================================================
       IMPLICIT NONE
       INCLUDE 'DIFFSIZES.inc'
 C  Hint: ISIZE1OFcx should be the size of dimension 1 of array cx
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level1 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -99,7 +99,7 @@ C     .. Scalar Arguments ..
 C     ..
 C     .. Array Arguments ..
       COMPLEX cx(*), cy(*)
-      COMPLEX cxb(nbdirsmax, *), cyb(nbdirsmax, *)
+      COMPLEX cxb(nbdirs, *), cyb(nbdirs, *)
 C     ..
 C
 C  =====================================================================
@@ -113,24 +113,17 @@ C     .. Local Scalars ..
       INTEGER get_ISIZE1OFCx
       EXTERNAL get_ISIZE1OFCx
 C     ..
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
       CALL check_ISIZE1OFCx_initialized()
       ISIZE1OFCx = get_ISIZE1OFCx()
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       IF (n .LE. 0) THEN
         DO ii1=1,ISIZE1OFcx
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             cxb(nd, ii1) = (0.0,0.0)
           ENDDO
         ENDDO
       ELSE IF (incx .EQ. 1 .AND. incy .EQ. 1) THEN
         DO ii1=1,ISIZE1OFcx
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             cxb(nd, ii1) = (0.0,0.0)
           ENDDO
         ENDDO
@@ -156,7 +149,7 @@ C
           iy = iy + incy
         ENDDO
         DO ii1=1,ISIZE1OFcx
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             cxb(nd, ii1) = (0.0,0.0)
           ENDDO
         ENDDO

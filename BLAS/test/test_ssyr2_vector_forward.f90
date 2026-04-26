@@ -1,184 +1,169 @@
 ! Test program for SSYR2 vector forward mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirsmax=4
+! Using REAL*4 precision with nbdirs=n
+! Multi-size outlined run_test_for_size(n) - SYR/SYR2
 
 program test_ssyr2_vector_forward
   implicit none
-  include 'DIFFSIZES.inc'
 
   external :: ssyr2
   external :: ssyr2_dv
 
-  ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-  integer :: i, j, idir  ! Loop counters
-  integer :: seed_array(33)  ! Random seed
-  real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
+  integer :: nbdirs, n_test, seed_array(33), test_sizes(3), i
+  logical :: passed, all_passed
 
-  character :: uplo
-  integer :: nsize
-  real(4) :: alpha
-  real(4), dimension(max_size) :: x
-  integer :: incx_val
-  real(4), dimension(max_size) :: y
-  integer :: incy_val
-  real(4), dimension(max_size,max_size) :: a
-  integer :: lda_val
-
-  ! Vector mode derivative variables (type-promoted)
-  ! Scalars become arrays(nbdirsmax), arrays gain extra dimension
-  real(4), dimension(nbdirsmax) :: alpha_dv
-  real(4), dimension(nbdirsmax,max_size) :: x_dv
-  real(4), dimension(nbdirsmax,max_size) :: y_dv
-  real(4), dimension(nbdirsmax,max_size,max_size) :: a_dv
-  ! Declare variables for storing original values
-  real(4) :: alpha_orig
-  real(4), dimension(nbdirsmax) :: alpha_dv_orig
-  real(4), dimension(max_size) :: x_orig
-  real(4), dimension(nbdirsmax,max_size) :: x_dv_orig
-  real(4), dimension(max_size) :: y_orig
-  real(4), dimension(nbdirsmax,max_size) :: y_dv_orig
-  real(4), dimension(max_size,max_size) :: a_orig
-  real(4), dimension(nbdirsmax,max_size,max_size) :: a_dv_orig
-
-  ! Initialize test parameters
-  nsize = n
-  incx_val = 1
-  incy_val = 1
-  lda_val = lda
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
   seed_array = 42
   call random_seed(put=seed_array)
-
-  uplo = 'U'
-  call random_number(alpha)
-  alpha = alpha * 2.0 - 1.0  ! Scale to [-1,1]
-  call random_number(x)
-  x = x * 2.0 - 1.0  ! Scale to [-1,1]
-  call random_number(y)
-  y = y * 2.0 - 1.0  ! Scale to [-1,1]
-  call random_number(a)
-  a = a * 2.0 - 1.0  ! Scale to [-1,1]
-
-  ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirsmax
-    call random_number(temp_real)
-    alpha_dv(idir) = temp_real * 2.0 - 1.0
+  test_sizes = (/ 4, 10, 25 /)
+  write(*,*) 'Testing SSYR2 (Vector Forward, multi-size: n = 4)'
+  all_passed = .true.
+  do i = 1, 3
+    n_test = test_sizes(i)
+    nbdirs = test_sizes(i)
+    call run_test_for_size(n_test, passed, nbdirs)
+    all_passed = all_passed .and. passed
   end do
-  do idir = 1, nbdirsmax
-    call random_number(x_dv(idir,:))
-    x_dv(idir,:) = x_dv(idir,:) * 2.0 - 1.0
-  end do
-  do idir = 1, nbdirsmax
-    call random_number(y_dv(idir,:))
-    y_dv(idir,:) = y_dv(idir,:) * 2.0 - 1.0
-  end do
-  do idir = 1, nbdirsmax
-    call random_number(a_dv(idir,:,:))
-    a_dv(idir,:,:) = a_dv(idir,:,:) * 2.0 - 1.0
-  end do
-
-  write(*,*) 'Testing SSYR2 (Vector Forward Mode)'
-  ! Store original values before any function calls (critical for INOUT parameters)
-  alpha_orig = alpha
-  alpha_dv_orig = alpha_dv
-  x_orig = x
-  x_dv_orig = x_dv
-  y_orig = y
-  y_dv_orig = y_dv
-  a_orig = a
-  a_dv_orig = a_dv
-
-  ! Call the vector mode differentiated function
-
-  call ssyr2_dv(uplo, nsize, alpha, alpha_dv, x, x_dv, incx_val, y, y_dv, incy_val, a, a_dv, lda_val, nbdirsmax)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically()
-
-  write(*,*) 'Vector forward mode test completed successfully'
+  if (all_passed) write(*,*) 'PASS: All sizes completed successfully'
+  if (.not. all_passed) write(*,*) 'FAIL: One or more sizes had derivative errors'
 
 contains
 
-  subroutine check_derivatives_numerically()
+  subroutine run_test_for_size(n, passed, nbdirs)
     implicit none
-    real(4), parameter :: h = 1.0e-3  ! Step size for finite differences
-    real(4) :: relative_error, max_error
-    real(4) :: abs_error, abs_reference, error_bound
-    real(4) :: central_diff, ad_result
-    integer :: i, j, idir
-    logical :: has_large_errors
-    real(4), dimension(max_size,max_size) :: a_forward, a_backward
-    
-    max_error = 0.0e0
-    has_large_errors = .false.
-    
-    write(*,*) 'Checking vector derivatives against numerical differentiation:'
-    write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirsmax
-    
-    ! Test each derivative direction separately
-    do idir = 1, nbdirsmax
-      
-      ! Forward perturbation: f(x + h * direction)
-      alpha = alpha_orig + h * alpha_dv_orig(idir)
-      x = x_orig + h * x_dv_orig(idir,:)
-      y = y_orig + h * y_dv_orig(idir,:)
-      a = a_orig + h * a_dv_orig(idir,:,:)
-      call ssyr2(uplo, nsize, alpha, x, incx_val, y, incy_val, a, lda_val)
-      a_forward = a
-      
-      ! Backward perturbation: f(x - h * direction)
-      alpha = alpha_orig - h * alpha_dv_orig(idir)
-      x = x_orig - h * x_dv_orig(idir,:)
-      y = y_orig - h * y_dv_orig(idir,:)
-      a = a_orig - h * a_dv_orig(idir,:,:)
-      call ssyr2(uplo, nsize, alpha, x, incx_val, y, incy_val, a, lda_val)
-      a_backward = a
-      
-      ! Compute central differences and compare with AD results
-      do j = 1, min(2, nsize)  ! Check only first few elements
-        do i = 1, min(2, nsize)
-          ! Central difference: (f(x+h) - f(x-h)) / (2h)
-          central_diff = (a_forward(i,j) - a_backward(i,j)) / (2.0e0 * h)
-          ! AD result
-          ad_result = a_dv(idir,i,j)
-          ! Error check: |a - b| > atol + rtol * |b|
-          abs_error = abs(central_diff - ad_result)
-          abs_reference = abs(ad_result)
-          error_bound = 2.0e-3 + 2.0e-3 * abs_reference
-          if (abs_error > error_bound) then
-            has_large_errors = .true.
-            relative_error = abs_error / max(abs_reference, 1.0e-10)
-            write(*,*) '  Large error in direction', idir, ' output A(', i, ',', j, '):'
-            write(*,*) '    Central diff: ', central_diff
-            write(*,*) '    AD result:   ', ad_result
-            write(*,*) '    Absolute error:', abs_error
-            write(*,*) '    Error bound:', error_bound
-            write(*,*) '    Relative error:', relative_error
-          end if
-          ! Track max error for reporting (normalized)
-          relative_error = abs_error / max(abs_reference, 1.0e-10)
-          max_error = max(max_error, relative_error)
+    integer, intent(in) :: n, nbdirs
+    logical, intent(out) :: passed
+    character :: uplo
+    integer :: nsize, lda_val, incx_val, incy_val
+    real(4) :: alpha
+    real(4), dimension(n) :: x
+    real(4), dimension(n,n) :: a
+    real(4), dimension(nbdirs) :: alpha_dv
+    real(4), dimension(nbdirs,n) :: x_dv
+    real(4), dimension(nbdirs,n,n) :: a_dv
+    real(4) :: alpha_orig
+    real(4), dimension(nbdirs) :: alpha_dv_seed
+    real(4), dimension(n) :: x_orig
+    real(4), dimension(nbdirs,n) :: x_dv_seed
+    real(4), dimension(n) :: y
+    real(4), dimension(nbdirs,n) :: y_dv
+    real(4), dimension(n) :: y_orig
+    real(4), dimension(nbdirs,n) :: y_dv_seed
+    real(4), dimension(n,n) :: a_orig
+    real(4), dimension(nbdirs,n,n) :: a_dv_seed
+    integer :: ii, jj, idir
+    real(4) :: temp_real, temp_imag
+
+    uplo = 'U'
+    nsize = n
+    lda_val = n
+    incx_val = 1
+    incy_val = 1
+
+    call random_number(temp_real)
+    alpha = temp_real * 2.0d0 - 1.0d0
+    call random_number(x)
+    x = x * 2.0d0 - 1.0d0
+    call random_number(y)
+    y = y * 2.0d0 - 1.0d0
+    call random_number(a)
+    a = a * 2.0d0 - 1.0d0
+    do jj = 1, n
+      do ii = jj + 1, n
+        a(ii,jj) = a(jj,ii)
+      end do
+    end do
+    do idir = 1, nbdirs
+      call random_number(temp_real)
+      alpha_dv(idir) = temp_real * 2.0d0 - 1.0d0
+    end do
+    do idir = 1, nbdirs
+      call random_number(x_dv(idir,:))
+      x_dv(idir,:) = x_dv(idir,:) * 2.0d0 - 1.0d0
+    end do
+    do idir = 1, nbdirs
+      call random_number(y_dv(idir,:))
+      y_dv(idir,:) = y_dv(idir,:) * 2.0d0 - 1.0d0
+    end do
+    do idir = 1, nbdirs
+      call random_number(a_dv(idir,:,:))
+      a_dv(idir,:,:) = a_dv(idir,:,:) * 2.0d0 - 1.0d0
+      do jj = 1, n
+        do ii = jj + 1, n
+          a_dv(idir,ii,jj) = a_dv(idir,jj,ii)
         end do
       end do
     end do
-    
-    write(*,*) 'Maximum relative error across all directions:', max_error
+
+    write(*,*) 'Testing SSYR2 (Vector Forward, n =', n, ')'
+    alpha_orig = alpha
+    alpha_dv_seed = alpha_dv
+    x_orig = x
+    x_dv_seed = x_dv
+    y_orig = y
+    y_dv_seed = y_dv
+    a_orig = a
+    a_dv_seed = a_dv
+
+    call ssyr2_dv(uplo, nsize, alpha, alpha_dv, x, x_dv, incx_val, y, y_dv, incy_val, a, a_dv, lda_val, nbdirs)
+
+    call check_derivatives_numerically(n, nbdirs, uplo, nsize, lda_val, incx_val, incy_val, alpha_orig, alpha_dv_seed, x_orig, x_dv_seed, y_orig, y_dv_seed, a_orig, a_dv_seed, a_dv, passed)
+  end subroutine run_test_for_size
+
+  subroutine check_derivatives_numerically(n, nbdirs, uplo, nsize, lda_val, incx_val, incy_val, alpha_orig, alpha_dv_seed, x_orig, x_dv_seed, y_orig, y_dv_seed, a_orig, a_dv_seed, a_dv, passed)
+    implicit none
+    integer, intent(in) :: n, nbdirs
+    character, intent(in) :: uplo
+    integer, intent(in) :: nsize, lda_val, incx_val
+    integer, intent(in) :: incy_val
+    real(4), intent(in) :: alpha_orig
+    real(4), intent(in) :: alpha_dv_seed(nbdirs), x_orig(n), x_dv_seed(nbdirs,n)
+    real(4), intent(in) :: y_orig(n), y_dv_seed(nbdirs,n)
+    real(4), intent(in) :: a_orig(n,n), a_dv_seed(nbdirs,n,n), a_dv(nbdirs,n,n)
+    logical, intent(out) :: passed
+    real(4), parameter :: h = 1.0e-3
+    real(4), dimension(n,n) :: a_fwd, a_bwd
+    real(4) :: alpha_t
+    real(4), dimension(n) :: x_t
+    real(4), dimension(n) :: y_t
+    real(4), dimension(n,n) :: a_t
+    integer :: idir, i, j
+    logical :: has_err
+    real(4) :: abs_error, abs_ref, err_bound, max_error, relative_error
+    has_err = .false.
+    max_error = 0.0d0
+    write(*,*) 'Function calls completed successfully'
+    write(*,*) 'Checking derivatives against numerical differentiation:'
+    write(*,*) 'Step size h =', h
+    do idir = 1, nbdirs
+      alpha_t = alpha_orig + h * alpha_dv_seed(idir)
+      x_t = x_orig + h * x_dv_seed(idir,:)
+      y_t = y_orig + h * y_dv_seed(idir,:)
+      a_t = a_orig + h * a_dv_seed(idir,:,:)
+      call ssyr2(uplo, nsize, alpha_t, x_t, incx_val, y_t, incy_val, a_t, lda_val)
+      a_fwd = a_t
+      alpha_t = alpha_orig - h * alpha_dv_seed(idir)
+      x_t = x_orig - h * x_dv_seed(idir,:)
+      y_t = y_orig - h * y_dv_seed(idir,:)
+      a_t = a_orig - h * a_dv_seed(idir,:,:)
+      call ssyr2(uplo, nsize, alpha_t, x_t, incx_val, y_t, incy_val, a_t, lda_val)
+      a_bwd = a_t
+      do j = 1, min(2, n)
+        do i = 1, min(2, n)
+          abs_error = abs((a_fwd(i,j) - a_bwd(i,j)) / (2.0e0 * h) - a_dv(idir,i,j))
+          abs_ref = abs(a_dv(idir,i,j))
+          err_bound = 2.0e-3 + 2.0e-3 * abs_ref
+          if (abs_error > err_bound) has_err = .true.
+          relative_error = 0.0d0
+          if (abs_ref > 1.0d-10) relative_error = abs_error / abs_ref
+          if (relative_error > max_error) max_error = relative_error
+        end do
+      end do
+    end do
+    passed = .not. has_err
+    write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
-    if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in vector derivatives (outside tolerance)'
-    else
-      write(*,*) 'PASS: Vector derivatives are within tolerance (rtol + atol)'
-    end if
-    
+    if (has_err) write(*,*) 'FAIL: Derivatives are outside tolerance'
+    if (.not. has_err) write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
   end subroutine check_derivatives_numerically
 
 end program test_ssyr2_vector_forward

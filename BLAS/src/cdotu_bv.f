@@ -92,7 +92,7 @@ C  =====================================================================
       INCLUDE 'DIFFSIZES.inc'
 C  Hint: ISIZE1OFcy should be the size of dimension 1 of array cy
 C  Hint: ISIZE1OFcx should be the size of dimension 1 of array cx
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level1 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -103,44 +103,37 @@ C     .. Scalar Arguments ..
 C     ..
 C     .. Array Arguments ..
       COMPLEX cx(*), cy(*)
-      COMPLEX cxb(nbdirsmax, *), cyb(nbdirsmax, *)
+      COMPLEX cxb(nbdirs, *), cyb(nbdirs, *)
 C     ..
 C
 C  =====================================================================
 C
 C     .. Local Scalars ..
       COMPLEX ctemp
-      COMPLEX ctempb(nbdirsmax)
+      COMPLEX ctempb(nbdirs)
       INTEGER i, ix, iy
       INTEGER nd
       INTEGER ii1
       INTEGER*4 branch
-      COMPLEX cdotub(nbdirsmax)
+      COMPLEX cdotub(nbdirs)
       COMPLEX cdotu
       INTEGER nbdirs
       INTEGER ISIZE1OFCx, ISIZE1OFCy
       INTEGER get_ISIZE1OFCx, get_ISIZE1OFCy
       EXTERNAL get_ISIZE1OFCx, get_ISIZE1OFCy
 C     ..
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
       CALL check_ISIZE1OFCx_initialized()
       CALL check_ISIZE1OFCy_initialized()
       ISIZE1OFCx = get_ISIZE1OFCx()
       ISIZE1OFCy = get_ISIZE1OFCy()
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       IF (n .LE. 0) THEN
         DO ii1=1,ISIZE1OFcx
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             cxb(nd, ii1) = (0.0,0.0)
           ENDDO
         ENDDO
         DO ii1=1,ISIZE1OFcy
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             cyb(nd, ii1) = (0.0,0.0)
           ENDDO
         ENDDO
@@ -170,12 +163,12 @@ C
         CALL POPCONTROL1B(branch)
         IF (branch .EQ. 0) THEN
           DO ii1=1,ISIZE1OFcx
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               cxb(nd, ii1) = (0.0,0.0)
             ENDDO
           ENDDO
           DO ii1=1,ISIZE1OFcy
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               cyb(nd, ii1) = (0.0,0.0)
             ENDDO
           ENDDO
@@ -187,12 +180,12 @@ C
           ENDDO
         ELSE
           DO ii1=1,ISIZE1OFcx
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               cxb(nd, ii1) = (0.0,0.0)
             ENDDO
           ENDDO
           DO ii1=1,ISIZE1OFcy
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               cyb(nd, ii1) = (0.0,0.0)
             ENDDO
           ENDDO

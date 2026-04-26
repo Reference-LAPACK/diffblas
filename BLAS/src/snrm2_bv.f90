@@ -94,12 +94,12 @@
 !  =====================================================================
 SUBROUTINE SNRM2_BV(n, x, xb, incx, snrm2b, nbdirs)
   USE DIFFSIZES
-!  Hint: nbdirsmax should be the maximum number of differentiation directions
+!  Hint: nbdirs should be the maximum number of differentiation directions
   IMPLICIT NONE
   INTRINSIC KIND
   INTEGER, PARAMETER :: wp=KIND(1.e0)
   REAL(wp) :: snrm2
-  REAL(wp), DIMENSION(nbdirsmax) :: snrm2b
+  REAL(wp), DIMENSION(nbdirs) :: snrm2b
 !
 !  -- Reference BLAS level1 routine (version 3.9.1) --
 !  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -134,26 +134,26 @@ SUBROUTINE SNRM2_BV(n, x, xb, incx, snrm2b, nbdirs)
 !  ..
 !  .. Array Arguments ..
   REAL(wp) :: x(*)
-  REAL(wp) :: xb(nbdirsmax, *)
+  REAL(wp) :: xb(nbdirs, *)
 !  ..
 !  .. Local Scalars ..
   INTEGER :: i, ix
   LOGICAL :: notbig
   REAL(wp) :: abig, amed, asml, ax, scl, sumsq, ymax, ymin
-  REAL(wp), DIMENSION(nbdirsmax) :: abigb, amedb, asmlb, axb, sumsqb, &
+  REAL(wp), DIMENSION(nbdirs) :: abigb, amedb, asmlb, axb, sumsqb, &
 & ymaxb, yminb
   INTRINSIC ABS
   INTRINSIC SQRT
   INTEGER :: nd
   REAL(wp) :: temp
-  REAL(wp), DIMENSION(nbdirsmax) :: tempb
+  REAL(wp), DIMENSION(nbdirs) :: tempb
   INTEGER*4 :: branch
   INTEGER :: nbdirs
 !
 !  Quick return if possible
 !
   IF (n .LE. 0) THEN
-    xb(1:nbdirsmax, 1:1+(n-1)*abs(incx)) = 0.0_4
+    xb(1:nbdirs, 1:1+(n-1)*abs(incx)) = 0.0_4
   ELSE
 !
 !
@@ -164,13 +164,6 @@ SUBROUTINE SNRM2_BV(n, x, xb, incx, snrm2b, nbdirs)
 !  The thresholds and multipliers are
 !     tbig -- values bigger than this are scaled down by sbig
 !     tsml -- values smaller than this are scaled up by ssml
-!
-! Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-  IF (nbdirs <= 0 .OR. nbdirs > nbdirsmax) THEN
-    WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs, &
-      ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-    STOP 1
-  END IF
 !
     notbig = .true.
     asml = zero
@@ -326,7 +319,7 @@ SUBROUTINE SNRM2_BV(n, x, xb, incx, snrm2b, nbdirs)
       asmlb = 0.0_4
     END IF
     abigb = 0.0_4
- 100 xb(1:nbdirsmax, 1:1+(n-1)*abs(incx)) = 0.0_4
+ 100 xb(1:nbdirs, 1:1+(n-1)*abs(incx)) = 0.0_4
     DO i=n,1,-1
       CALL POPINTEGER4(ix)
       CALL POPCONTROL2B(branch)

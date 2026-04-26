@@ -194,8 +194,8 @@ C  =====================================================================
      +                    , lda, b, bd, ldb, beta, betad, c, cd, ldc, 
      +                    nbdirs)
       IMPLICIT NONE
-      INCLUDE 'DIFFSIZES.inc'
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C      INCLUDE 'DIFFSIZES.inc'
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level3 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -203,14 +203,14 @@ C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
       COMPLEX*16 alpha, beta
-      COMPLEX*16 alphad(nbdirsmax), betad(nbdirsmax)
+      COMPLEX*16 alphad(nbdirs), betad(nbdirs)
       INTEGER k, lda, ldb, ldc, m, n
       CHARACTER transa, transb
 C     ..
 C     .. Array Arguments ..
       COMPLEX*16 a(lda, *), b(ldb, *), c(ldc, *)
-      COMPLEX*16 ad(nbdirsmax, lda, *), bd(nbdirsmax, ldb, *), cd(
-     +           nbdirsmax, ldc, *)
+      COMPLEX*16 ad(nbdirs, lda, *), bd(nbdirs, ldb, *), cd(
+     +           nbdirs, ldc, *)
       EXTERNAL LSAME
 C     ..
 C
@@ -227,7 +227,7 @@ C     .. Intrinsic Functions ..
 C     ..
 C     .. Local Scalars ..
       COMPLEX*16 temp
-      COMPLEX*16 tempd(nbdirsmax)
+      COMPLEX*16 tempd(nbdirs)
       INTEGER i, info, j, l, nrowa, nrowb
       LOGICAL conja, conjb, nota, notb
 C     ..
@@ -249,13 +249,6 @@ C     Set  NOTA  and  NOTB  as  true if  A  and  B  respectively are not
 C     conjugated or transposed, set  CONJA and CONJB  as true if  A  and
 C     B  respectively are to be  transposed but  not conjugated  and set
 C     NROWA and NROWB  as the number of rows  of  A  and  B  respectively.
-C
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
 C
       nota = LSAME(transa, 'N')
       notb = LSAME(transb, 'N')
@@ -392,7 +385,7 @@ C
             DO j=1,n
               DO i=1,m
                 temp = zero
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   tempd(nd) = (0.0,0.0)
                 ENDDO
                 DO l=1,k
@@ -424,7 +417,7 @@ C
             DO j=1,n
               DO i=1,m
                 temp = zero
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   tempd(nd) = (0.0,0.0)
                 ENDDO
                 DO l=1,k
@@ -529,7 +522,7 @@ C
             DO j=1,n
               DO i=1,m
                 temp = zero
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   tempd(nd) = (0.0,0.0)
                 ENDDO
                 DO l=1,k
@@ -562,7 +555,7 @@ C
             DO j=1,n
               DO i=1,m
                 temp = zero
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   tempd(nd) = (0.0,0.0)
                 ENDDO
                 DO l=1,k
@@ -595,7 +588,7 @@ C
           DO j=1,n
             DO i=1,m
               temp = zero
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 tempd(nd) = (0.0,0.0)
               ENDDO
               DO l=1,k
@@ -627,7 +620,7 @@ C
           DO j=1,n
             DO i=1,m
               temp = zero
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 tempd(nd) = (0.0,0.0)
               ENDDO
               DO l=1,k
