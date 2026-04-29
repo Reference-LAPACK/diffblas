@@ -158,4 +158,8 @@ We are beginning to write a differentiated version of the LAPACK library.
 
 ## Acknowledgement
 This work was supported in part by the Applied Mathematics activity within the U.S. Department of Energy, Office of Science, Office
-of Advanced Scientific Computing Research Applied Mathematics, and Office of Nuclear Physics SciDAC program under Contract No. DE-AC02-06CH11357. This work was supported in part by NSF CSSI grant 2104068. 
+of Advanced Scientific Computing Research Applied Mathematics, and Office of Nuclear Physics SciDAC program under Contract No. DE-AC02-06CH11357. 
+This work was supported in part by NSF CSSI grant 2104068. 
+The authors thank the support of the [FACCTS](https://fcc.uchicago.edu/faccts-awards/) project Detecting Sparsity Patterns in Tapenade for Optimal Quantum Control Applications. 
+
+The authors also thank the INRIA centres at Sophia-Antipolis and Saclay for their support.

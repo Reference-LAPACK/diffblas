@@ -657,7 +657,7 @@ def parse_fortran_function(file_path: Path, suppress_warnings=False):
     
     # Find the argument declaration section
     lines = content.split('\n')
-    in_args_section = False # This variable is used nowhere
+    in_args_section = False
     
     for i, line in enumerate(lines):
         line_stripped = line.strip()
