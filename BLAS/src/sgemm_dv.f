@@ -194,8 +194,8 @@ C  =====================================================================
      +                    , lda, b, bd, ldb, beta, betad, c, cd, ldc, 
      +                    nbdirs)
       IMPLICIT NONE
-      INCLUDE 'DIFFSIZES.inc'
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C      INCLUDE 'DIFFSIZES.inc'
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level3 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -203,13 +203,13 @@ C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
       REAL alpha, beta
-      REAL alphad(nbdirsmax), betad(nbdirsmax)
+      REAL alphad(nbdirs), betad(nbdirs)
       INTEGER k, lda, ldb, ldc, m, n
       CHARACTER transa, transb
 C     ..
 C     .. Array Arguments ..
       REAL a(lda, *), b(ldb, *), c(ldc, *)
-      REAL ad(nbdirsmax, lda, *), bd(nbdirsmax, ldb, *), cd(nbdirsmax, 
+      REAL ad(nbdirs, lda, *), bd(nbdirs, ldb, *), cd(nbdirs, 
      +     ldc, *)
       EXTERNAL LSAME
 C     ..
@@ -227,7 +227,7 @@ C     .. Intrinsic Functions ..
 C     ..
 C     .. Local Scalars ..
       REAL temp
-      REAL tempd(nbdirsmax)
+      REAL tempd(nbdirs)
       INTEGER i, info, j, l, nrowa, nrowb
       LOGICAL nota, notb
 C     ..
@@ -244,13 +244,6 @@ C
 C     Set  NOTA  and  NOTB  as  true if  A  and  B  respectively are not
 C     transposed and set  NROWA and NROWB  as the number of rows of  A
 C     and  B  respectively.
-C
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
 C
       nota = LSAME(transa, 'N')
       notb = LSAME(transb, 'N')
@@ -385,7 +378,7 @@ C
             DO j=1,n
               DO i=1,m
                 temp = zero
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   tempd(nd) = 0.0
                 ENDDO
                 DO l=1,k
@@ -451,7 +444,7 @@ C
           DO j=1,n
             DO i=1,m
               temp = zero
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 tempd(nd) = 0.0
               ENDDO
               DO l=1,k

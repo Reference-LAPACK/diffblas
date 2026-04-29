@@ -2,7 +2,12 @@
 # Auto-generated - only includes files that exist in src/
 # Total: 406 files (101 per mode x 4 modes)
 
-libdiffblas_src += files('include/DIFFSIZES.f90', 'src/DIFFSIZES_access.f')
+libdiffblas_src += files('include/DIFFSIZES.f90')
+# ISIZE storage + F77-callable wrappers (same objects as Makefile builds)
+libdiffblas_src += files(
+  'src/DIFFSIZES_access.f90',
+  'src/DIFFSIZES_access_wrappers.f',
+)
 
 # Forward mode (_d) sources - 101 files
 libdiffblas_src += files(
@@ -27,8 +32,6 @@ libdiffblas_src += files(
   'src/ctpmv_d.f',
   'src/ctrmm_d.f',
   'src/ctrmv_d.f',
-  'src/ctrsm_d.f',
-  'src/ctrsv_d.f',
   'src/dasum_d.f',
   'src/daxpy_d.f',
   'src/dcopy_d.f',
@@ -54,8 +57,6 @@ libdiffblas_src += files(
   'src/dtpmv_d.f',
   'src/dtrmm_d.f',
   'src/dtrmv_d.f',
-  'src/dtrsm_d.f',
-  'src/dtrsv_d.f',
   'src/sasum_d.f',
   'src/saxpy_d.f',
   'src/scopy_d.f',
@@ -81,8 +82,6 @@ libdiffblas_src += files(
   'src/stpmv_d.f',
   'src/strmm_d.f',
   'src/strmv_d.f',
-  'src/strsm_d.f',
-  'src/strsv_d.f',
   'src/zaxpy_d.f',
   'src/zcopy_d.f',
   'src/zdotc_d.f',
@@ -105,8 +104,6 @@ libdiffblas_src += files(
   'src/ztpmv_d.f',
   'src/ztrmm_d.f',
   'src/ztrmv_d.f',
-  'src/ztrsm_d.f',
-  'src/ztrsv_d.f',
 )
 
 # Reverse mode (_b) sources - 101 files
@@ -132,8 +129,6 @@ libdiffblas_src += files(
   'src/ctpmv_b.f',
   'src/ctrmm_b.f',
   'src/ctrmv_b.f',
-  'src/ctrsm_b.f',
-  'src/ctrsv_b.f',
   'src/dasum_b.f',
   'src/daxpy_b.f',
   'src/dcopy_b.f',
@@ -159,8 +154,6 @@ libdiffblas_src += files(
   'src/dtpmv_b.f',
   'src/dtrmm_b.f',
   'src/dtrmv_b.f',
-  'src/dtrsm_b.f',
-  'src/dtrsv_b.f',
   'src/sasum_b.f',
   'src/saxpy_b.f',
   'src/scopy_b.f',
@@ -186,8 +179,6 @@ libdiffblas_src += files(
   'src/stpmv_b.f',
   'src/strmm_b.f',
   'src/strmv_b.f',
-  'src/strsm_b.f',
-  'src/strsv_b.f',
   'src/zaxpy_b.f',
   'src/zcopy_b.f',
   'src/zdotc_b.f',
@@ -210,8 +201,6 @@ libdiffblas_src += files(
   'src/ztpmv_b.f',
   'src/ztrmm_b.f',
   'src/ztrmv_b.f',
-  'src/ztrsm_b.f',
-  'src/ztrsv_b.f',
 )
 
 # Vector forward mode (_dv) sources - 101 files
@@ -237,8 +226,6 @@ libdiffblas_src += files(
   'src/ctpmv_dv.f',
   'src/ctrmm_dv.f',
   'src/ctrmv_dv.f',
-  'src/ctrsm_dv.f',
-  'src/ctrsv_dv.f',
   'src/dasum_dv.f',
   'src/daxpy_dv.f',
   'src/dcopy_dv.f',
@@ -264,8 +251,6 @@ libdiffblas_src += files(
   'src/dtpmv_dv.f',
   'src/dtrmm_dv.f',
   'src/dtrmv_dv.f',
-  'src/dtrsm_dv.f',
-  'src/dtrsv_dv.f',
   'src/sasum_dv.f',
   'src/saxpy_dv.f',
   'src/scopy_dv.f',
@@ -291,8 +276,6 @@ libdiffblas_src += files(
   'src/stpmv_dv.f',
   'src/strmm_dv.f',
   'src/strmv_dv.f',
-  'src/strsm_dv.f',
-  'src/strsv_dv.f',
   'src/zaxpy_dv.f',
   'src/zcopy_dv.f',
   'src/zdotc_dv.f',
@@ -315,8 +298,6 @@ libdiffblas_src += files(
   'src/ztpmv_dv.f',
   'src/ztrmm_dv.f',
   'src/ztrmv_dv.f',
-  'src/ztrsm_dv.f',
-  'src/ztrsv_dv.f',
 )
 
 # Vector reverse mode (_bv) sources - 101 files
@@ -342,8 +323,6 @@ libdiffblas_src += files(
   'src/ctpmv_bv.f',
   'src/ctrmm_bv.f',
   'src/ctrmv_bv.f',
-  'src/ctrsm_bv.f',
-  'src/ctrsv_bv.f',
   'src/dasum_bv.f',
   'src/daxpy_bv.f',
   'src/dcopy_bv.f',
@@ -369,8 +348,6 @@ libdiffblas_src += files(
   'src/dtpmv_bv.f',
   'src/dtrmm_bv.f',
   'src/dtrmv_bv.f',
-  'src/dtrsm_bv.f',
-  'src/dtrsv_bv.f',
   'src/sasum_bv.f',
   'src/saxpy_bv.f',
   'src/scopy_bv.f',
@@ -396,8 +373,6 @@ libdiffblas_src += files(
   'src/stpmv_bv.f',
   'src/strmm_bv.f',
   'src/strmv_bv.f',
-  'src/strsm_bv.f',
-  'src/strsv_bv.f',
   'src/zaxpy_bv.f',
   'src/zcopy_bv.f',
   'src/zdotc_bv.f',
@@ -420,6 +395,4 @@ libdiffblas_src += files(
   'src/ztpmv_bv.f',
   'src/ztrmm_bv.f',
   'src/ztrmv_bv.f',
-  'src/ztrsm_bv.f',
-  'src/ztrsv_bv.f',
 )

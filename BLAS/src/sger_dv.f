@@ -136,8 +136,8 @@ C  =====================================================================
       SUBROUTINE SGER_DV(m, n, alpha, alphad, x, xd, incx, y, yd, incy, 
      +                   a, ad, lda, nbdirs)
       IMPLICIT NONE
-      INCLUDE 'DIFFSIZES.inc'
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C      INCLUDE 'DIFFSIZES.inc'
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level2 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -145,12 +145,12 @@ C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
       REAL alpha
-      REAL alphad(nbdirsmax)
+      REAL alphad(nbdirs)
       INTEGER incx, incy, lda, m, n
 C     ..
 C     .. Array Arguments ..
       REAL a(lda, *), x(*), y(*)
-      REAL ad(nbdirsmax, lda, *), xd(nbdirsmax, *), yd(nbdirsmax, *)
+      REAL ad(nbdirs, lda, *), xd(nbdirs, *), yd(nbdirs, *)
 C     ..
 C
 C  =====================================================================
@@ -161,7 +161,7 @@ C     .. Parameters ..
 C     ..
 C     .. Local Scalars ..
       REAL temp
-      REAL tempd(nbdirsmax)
+      REAL tempd(nbdirs)
       INTEGER i, info, ix, j, jy, kx
 C     ..
 C     .. External Subroutines ..
@@ -175,13 +175,6 @@ C     .. Intrinsic Functions ..
 C     ..
 C
 C     Test the input parameters.
-C
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
 C
       info = 0
       IF (m .LT. 0) THEN

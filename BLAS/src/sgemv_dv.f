@@ -165,8 +165,8 @@ C  =====================================================================
       SUBROUTINE SGEMV_DV(trans, m, n, alpha, alphad, a, ad, lda, x, xd
      +                    , incx, beta, betad, y, yd, incy, nbdirs)
       IMPLICIT NONE
-      INCLUDE 'DIFFSIZES.inc'
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C      INCLUDE 'DIFFSIZES.inc'
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level2 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -174,13 +174,13 @@ C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
       REAL alpha, beta
-      REAL alphad(nbdirsmax), betad(nbdirsmax)
+      REAL alphad(nbdirs), betad(nbdirs)
       INTEGER incx, incy, lda, m, n
       CHARACTER trans
 C     ..
 C     .. Array Arguments ..
       REAL a(lda, *), x(*), y(*)
-      REAL ad(nbdirsmax, lda, *), xd(nbdirsmax, *), yd(nbdirsmax, *)
+      REAL ad(nbdirs, lda, *), xd(nbdirs, *), yd(nbdirs, *)
 C     ..
 C
 C  =====================================================================
@@ -191,7 +191,7 @@ C     .. Parameters ..
 C     ..
 C     .. Local Scalars ..
       REAL temp
-      REAL tempd(nbdirsmax)
+      REAL tempd(nbdirs)
       INTEGER i, info, ix, iy, j, jx, jy, kx, ky, lenx, leny
       EXTERNAL LSAME
 C     ..
@@ -209,13 +209,6 @@ C     .. Intrinsic Functions ..
 C     ..
 C
 C     Test the input parameters.
-C
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
 C
       info = 0
       IF (.NOT.LSAME(trans, 'N') .AND. (.NOT.LSAME(trans, 'T')) .AND. (
@@ -363,7 +356,7 @@ C
             IF (incx .EQ. 1) THEN
               DO j=1,n
                 temp = zero
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   tempd(nd) = 0.0
                 ENDDO
                 DO i=1,m
@@ -384,7 +377,7 @@ C
               DO j=1,n
                 temp = zero
                 ix = kx
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   tempd(nd) = 0.0
                 ENDDO
                 DO i=1,m

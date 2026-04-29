@@ -89,8 +89,8 @@ C  =====================================================================
       SUBROUTINE ZDOTC_DV(n, zx, zxd, incx, zy, zyd, incy, zdotc, zdotcd
      +                    , nbdirs)
       IMPLICIT NONE
-      INCLUDE 'DIFFSIZES.inc'
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C      INCLUDE 'DIFFSIZES.inc'
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level1 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -101,14 +101,14 @@ C     .. Scalar Arguments ..
 C     ..
 C     .. Array Arguments ..
       COMPLEX*16 zx(*), zy(*)
-      COMPLEX*16 zxd(nbdirsmax, *), zyd(nbdirsmax, *)
+      COMPLEX*16 zxd(nbdirs, *), zyd(nbdirs, *)
 C     ..
 C
 C  =====================================================================
 C
 C     .. Local Scalars ..
       COMPLEX*16 ztemp
-      COMPLEX*16 ztempd(nbdirsmax)
+      COMPLEX*16 ztempd(nbdirs)
       INTEGER i, ix, iy
 C     ..
 C     .. Intrinsic Functions ..
@@ -116,26 +116,19 @@ C     .. Intrinsic Functions ..
       INTEGER nd
       DOUBLE COMPLEX temp
       COMPLEX*16 zdotc
-      COMPLEX*16 zdotcd(nbdirsmax)
+      COMPLEX*16 zdotcd(nbdirs)
       INTEGER nbdirs
 C     ..
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       ztemp = (0.0d0,0.0d0)
       zdotc = (0.0d0,0.0d0)
       IF (n .LE. 0) THEN
-        DO nd=1,nbdirsmax
+        DO nd=1,nbdirs
           zdotcd(nd) = (0.0,0.0)
         ENDDO
         RETURN
       ELSE
         IF (incx .EQ. 1 .AND. incy .EQ. 1) THEN
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             ztempd(nd) = (0.0,0.0)
           ENDDO
 C
@@ -159,11 +152,11 @@ C
           IF (incx .LT. 0) ix = (-n+1)*incx + 1
           IF (incy .LT. 0) THEN
             iy = (-n+1)*incy + 1
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               ztempd(nd) = (0.0,0.0)
             ENDDO
           ELSE
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               ztempd(nd) = (0.0,0.0)
             ENDDO
           END IF

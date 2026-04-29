@@ -87,9 +87,9 @@ C>
 C  =====================================================================
       SUBROUTINE SCOPY_DV(n, sx, sxd, incx, sy, syd, incy, nbdirs)
       IMPLICIT NONE
-      INCLUDE 'DIFFSIZES.inc'
+C      INCLUDE 'DIFFSIZES.inc'
 C  Hint: ISIZE1OFsy should be the size of dimension 1 of array sy
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level1 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -100,7 +100,7 @@ C     .. Scalar Arguments ..
 C     ..
 C     .. Array Arguments ..
       REAL sx(*), sy(*)
-      REAL sxd(nbdirsmax, *), syd(nbdirsmax, *)
+      REAL sxd(nbdirs, *), syd(nbdirs, *)
 C     ..
 C
 C  =====================================================================
@@ -117,18 +117,11 @@ C     .. Intrinsic Functions ..
       INTEGER ii1
       INTEGER nbdirs
 C     ..
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
       CALL check_ISIZE1OFSy_initialized()
       ISIZE1OFSy = get_ISIZE1OFSy()
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       IF (n .LE. 0) THEN
         DO ii1=1,ISIZE1OFsy
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             syd(nd, ii1) = 0.0
           ENDDO
         ENDDO
@@ -144,7 +137,7 @@ C
           m = MOD(n, 7)
           IF (m .NE. 0) THEN
             DO ii1=1,ISIZE1OFsy
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 syd(nd, ii1) = 0.0
               ENDDO
             ENDDO
@@ -157,7 +150,7 @@ C
             IF (n .LT. 7) RETURN
           ELSE
             DO ii1=1,ISIZE1OFsy
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 syd(nd, ii1) = 0.0
               ENDDO
             ENDDO
@@ -192,13 +185,13 @@ C
           IF (incy .LT. 0) THEN
             iy = (-n+1)*incy + 1
             DO ii1=1,ISIZE1OFsy
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 syd(nd, ii1) = 0.0
               ENDDO
             ENDDO
           ELSE
             DO ii1=1,ISIZE1OFsy
-              DO nd=1,nbdirsmax
+              DO nd=1,nbdirs
                 syd(nd, ii1) = 0.0
               ENDDO
             ENDDO

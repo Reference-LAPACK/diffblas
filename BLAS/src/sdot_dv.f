@@ -88,8 +88,8 @@ C  =====================================================================
       SUBROUTINE SDOT_DV(n, sx, sxd, incx, sy, syd, incy, sdot, sdotd, 
      +                   nbdirs)
       IMPLICIT NONE
-      INCLUDE 'DIFFSIZES.inc'
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C      INCLUDE 'DIFFSIZES.inc'
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level1 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -100,34 +100,27 @@ C     .. Scalar Arguments ..
 C     ..
 C     .. Array Arguments ..
       REAL sx(*), sy(*)
-      REAL sxd(nbdirsmax, *), syd(nbdirsmax, *)
+      REAL sxd(nbdirs, *), syd(nbdirs, *)
 C     ..
 C
 C  =====================================================================
 C
 C     .. Local Scalars ..
       REAL stemp
-      REAL stempd(nbdirsmax)
+      REAL stempd(nbdirs)
       INTEGER i, ix, iy, m, mp1
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC MOD
       INTEGER nd
       REAL sdot
-      REAL sdotd(nbdirsmax)
+      REAL sdotd(nbdirs)
       INTEGER nbdirs
 C     ..
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       stemp = 0.0e0
       sdot = 0.0e0
       IF (n .LE. 0) THEN
-        DO nd=1,nbdirsmax
+        DO nd=1,nbdirs
           sdotd(nd) = 0.0
         ENDDO
         RETURN
@@ -141,7 +134,7 @@ C        clean-up loop
 C
           m = MOD(n, 5)
           IF (m .NE. 0) THEN
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               stempd(nd) = 0.0
             ENDDO
             DO i=1,m
@@ -159,7 +152,7 @@ C
               RETURN
             END IF
           ELSE
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               stempd(nd) = 0.0
             ENDDO
           END IF
@@ -185,11 +178,11 @@ C
           IF (incx .LT. 0) ix = (-n+1)*incx + 1
           IF (incy .LT. 0) THEN
             iy = (-n+1)*incy + 1
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               stempd(nd) = 0.0
             ENDDO
           ELSE
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               stempd(nd) = 0.0
             ENDDO
           END IF

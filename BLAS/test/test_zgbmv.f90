@@ -1,251 +1,179 @@
 ! Test program for ZGBMV differentiation
 ! Generated automatically by run_tapenade_blas.py
 ! Using REAL*8 precision
+! Multi-size outlined run_test_for_size(n) - BLAS2 band (declarations in subroutines)
 
 program test_zgbmv
   implicit none
-
   external :: zgbmv
   external :: zgbmv_d
-
-  ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension (rows/cols of matrices)
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-
-  character :: trans
-  integer :: msize
-  integer :: nsize
-  integer :: kl
-  integer :: ku
-  complex(8) :: alpha
-  complex(8), dimension(max_size,max_size) :: a
-  integer :: lda_val
-  complex(8), dimension(max_size) :: x
-  integer :: incx_val
-  complex(8) :: beta
-  complex(8), dimension(max_size) :: y
-  integer :: incy_val
-
-  ! Derivative variables
-  complex(8) :: alpha_d
-  complex(8), dimension(max_size,max_size) :: a_d
-  complex(8), dimension(max_size) :: x_d
-  complex(8) :: beta_d
-  complex(8), dimension(max_size) :: y_d
-
-  ! Storage variables for inout parameters
-  complex(8), dimension(max_size) :: y_output
-
-  ! Array restoration variables for numerical differentiation
-  complex(8), dimension(max_size) :: x_orig
-  complex(8) :: beta_orig
-  complex(8) :: alpha_orig
-  complex(8), dimension(max_size) :: y_orig
-  complex(8), dimension(max_size,max_size) :: a_orig
-
-  ! Variables for central difference computation
-  complex(8), dimension(max_size) :: y_forward, y_backward
-  ! Scalar variables for central difference computation
-  complex(8) :: central_diff, ad_result
-  logical :: has_large_errors
-
-  ! Variables for storing original derivative values
-  complex(8), dimension(max_size) :: x_d_orig
-  complex(8) :: beta_d_orig
-  complex(8) :: alpha_d_orig
-  complex(8), dimension(max_size) :: y_d_orig
-  complex(8), dimension(max_size,max_size) :: a_d_orig
-
-  ! Temporary variables for matrix initialization
-  real(4) :: temp_real, temp_imag
-  integer :: i, j
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
-  integer :: seed_array(33)
+  integer :: n_test, seed_array(33), test_sizes(3), i
+  logical :: passed, all_passed
   seed_array = 42
   call random_seed(put=seed_array)
-
-  trans = 'N'
-  msize = n
-  nsize = n
-  kl = 1  ! Number of sub-diagonals (non-negative integer)
-  ku = 1  ! Number of super-diagonals (non-negative integer)
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  alpha = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  do i = 1, lda
-    do j = 1, lda
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      a(i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
+  test_sizes = (/ 4, 10, 25 /)
+  write(*,*) 'Testing ZGBMV (multi-size: n = 4)'
+  all_passed = .true.
+  do i = 1, 3
+    n_test = test_sizes(i)
+    call run_test_for_size(n_test, passed)
+    all_passed = all_passed .and. passed
   end do
-  lda_val = lda  ! LDA must be at least ( kl + ku + 1 )
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    x(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-  incx_val = 1  ! INCX 1
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  beta = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    y(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-  incy_val = 1  ! INCY 1
-
-  ! Initialize input derivatives to random values
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    x_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  beta_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  alpha_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    y_d(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-  do i = 1, lda
-    do j = 1, lda
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      a_d(i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-  end do
-
-  ! Store initial derivative values after random initialization
-  x_d_orig = x_d
-  beta_d_orig = beta_d
-  alpha_d_orig = alpha_d
-  y_d_orig = y_d
-  a_d_orig = a_d
-
-  ! Store original values for central difference computation
-  x_orig = x
-  beta_orig = beta
-  alpha_orig = alpha
-  y_orig = y
-  a_orig = a
-
-  write(*,*) 'Testing ZGBMV'
-  ! Store input values of inout parameters before first function call
-  y_orig = y
-
-  ! Re-initialize data for differentiated function
-  ! Only reinitialize inout parameters - keep input-only parameters unchanged
-
-  ! trans already has correct value from original call
-  msize = n
-  nsize = n
-  ! kl already has correct value from original call
-  ! ku already has correct value from original call
-  ! alpha already has correct value from original call
-  ! a already has correct value from original call
-  lda_val = lda  ! LDA must be at least ( kl + ku + 1 )
-  ! x already has correct value from original call
-  incx_val = 1  ! INCX 1
-  ! beta already has correct value from original call
-  y = y_orig
-  incy_val = 1  ! INCY 1
-
-  ! Call the differentiated function
-  call zgbmv_d(trans, msize, nsize, kl, ku, alpha, alpha_d, a, a_d, lda_val, x, x_d, incx_val, beta, beta_d, y, y_d, incy_val)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically()
-
-  write(*,*) 'Test completed successfully'
-
+  if (all_passed) then
+    write(*,*) 'PASS: All sizes completed successfully'
+  else
+    write(*,*) 'FAIL: One or more sizes had derivative errors'
+  end if
 contains
-
-  subroutine check_derivatives_numerically()
+  subroutine run_test_for_size(n, passed)
     implicit none
-    real(8), parameter :: h = 1.0e-6  ! Step size for finite differences
-    real(8) :: relative_error, max_error
-    real(8) :: output_orig, output_pert
-    real(8) :: numerical_result, analytical_result
-    real(8) :: abs_error, abs_reference, error_bound
-    integer :: i, j
-    
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+    character :: uplo, trans, diag
+    integer :: nsize, ksize, lda_val, incx_val, incy_val
+    integer :: msize, kl, ku
+    complex(8) :: alpha, alpha_d, alpha_orig, alpha_d_seed
+    complex(8) :: beta, beta_d, beta_orig, beta_d_seed
+    complex(8), dimension(:,:), allocatable :: a, a_d, a_orig, a_d_seed
+    complex(8), dimension(:), allocatable :: x, x_d, x_orig, x_d_seed
+    complex(8), dimension(:), allocatable :: y, y_d, y_orig, y_d_seed
+    integer :: band_row, j
+    real(4) :: temp_real, temp_imag
+    ksize = max(0, n - 1)
+    msize = n
+    nsize = n
+    kl = 1
+    ku = 1
+    lda_val = kl + ku + 1
+    incx_val = 1
+    incy_val = 1
+    uplo = 'U'
+    trans = 'N'
+    diag = 'N'
+    allocate(a(lda_val, n), a_d(lda_val, n), a_orig(lda_val, n), a_d_seed(lda_val, n))
+    allocate(x(n), x_d(n), x_orig(n), x_d_seed(n))
+    allocate(y(n), y_d(n), y_orig(n), y_d_seed(n))
+    ! Initialize a as general band matrix (kl, ku band storage)
+    do j = 1, n
+    do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    a(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end do
+    end do
+    ! Keep direction consistent with general band (kl, ku): only band entries used
+    do j = 1, n
+    do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    a_d(band_row, j) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+    end do
+    end do
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    alpha = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(alpha))
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    alpha_d = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(alpha_d))
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    beta = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(beta))
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    beta_d = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(beta_d))
+    do j = 1, n
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      x(j) = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(x))
+      x_d(j) = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(x_d))
+    end do
+    do j = 1, n
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      y(j) = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(y))
+      y_d(j) = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(y_d))
+    end do
+    write(*,*) 'Testing ZGBMV (n =', n, ')'
+    a_orig = a
+    a_d_seed = a_d
+    x_orig = x
+    x_d_seed = x_d
+    alpha_orig = alpha
+    alpha_d_seed = alpha_d
+    y_orig = y
+    y_d_seed = y_d
+    beta_orig = beta
+    beta_d_seed = beta_d
+    call zgbmv_d(trans, msize, nsize, kl, ku, alpha, alpha_d, a, a_d, lda_val, x, x_d, incx_val, beta, beta_d, y, y_d, incy_val)
+    ! Reset input derivative vars from seeds; output derivative (x_d or y_d) keeps AD result
+    a_d = a_d_seed
+    x_d = x_d_seed
+    alpha_d = alpha_d_seed
+    beta_d = beta_d_seed
+    write(*,*) 'Function calls completed successfully'
+    call check_derivatives_numerically_band_gbmv(n, lda_val, msize, nsize, kl, ku, trans, incx_val, incy_val, alpha_orig, alpha_d_seed, beta_orig, beta_d_seed, a_orig, a_d_seed, x_orig, x_d_seed, y_orig, y_d_seed, y_d, passed)
+    deallocate(a, a_d, a_orig, a_d_seed, x, x_d, x_orig, x_d_seed)
+    deallocate(y, y_d, y_orig, y_d_seed)
+  end subroutine run_test_for_size
+
+  subroutine check_derivatives_numerically_band_gbmv(n, lda_val, msize, nsize, kl, ku, trans, incx_val, incy_val, alpha_orig, alpha_d_seed, beta_orig, beta_d_seed, a_orig, a_d_seed, x_orig, x_d_seed, y_orig, y_d_seed, y_d_out, passed)
+    implicit none
+    integer, intent(in) :: n, lda_val, msize, nsize, kl, ku, incx_val, incy_val
+    character, intent(in) :: trans
+    complex(8), intent(in) :: alpha_orig, alpha_d_seed, beta_orig, beta_d_seed
+    complex(8), intent(in) :: a_orig(lda_val, n), a_d_seed(lda_val, n), x_orig(n), x_d_seed(n), y_orig(n), y_d_seed(n), y_d_out(n)
+    logical, intent(out) :: passed
+    real(8), parameter :: h = 1.0e-7
+    real(8) :: abs_error, abs_ref, err_bound, max_error, relative_error
+    complex(8), dimension(n) :: y_fwd, y_bwd, y_t
+    complex(8) :: alpha_t, beta_t
+    complex(8), dimension(n) :: x_t
+    complex(8), dimension(lda_val, n) :: a_t
+    integer :: ii, j, band_row
+    logical :: has_err
+    has_err = .false.
     max_error = 0.0e0
-    has_large_errors = .false.
-    
+    alpha_t = alpha_orig + h * alpha_d_seed
+    beta_t = beta_orig + h * beta_d_seed
+    a_t = a_orig
+    do j = 1, n
+      do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)
+        a_t(band_row, j) = a_orig(band_row, j) + h * a_d_seed(band_row, j)
+      end do
+    end do
+    x_t = x_orig + h * x_d_seed
+    y_t = y_orig + h * y_d_seed
+    call zgbmv(trans, msize, nsize, kl, ku, alpha_t, a_t, lda_val, x_t, incx_val, beta_t, y_t, incy_val)
+    y_fwd = y_t
+    alpha_t = alpha_orig - h * alpha_d_seed
+    beta_t = beta_orig - h * beta_d_seed
+    a_t = a_orig
+    do j = 1, n
+      do band_row = max(1, ku+2-j), min(kl+ku+1, ku+msize-j+1)
+        a_t(band_row, j) = a_orig(band_row, j) - h * a_d_seed(band_row, j)
+      end do
+    end do
+    x_t = x_orig - h * x_d_seed
+    y_t = y_orig - h * y_d_seed
+    call zgbmv(trans, msize, nsize, kl, ku, alpha_t, a_t, lda_val, x_t, incx_val, beta_t, y_t, incy_val)
+    y_bwd = y_t
     write(*,*) 'Checking derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    
-    ! Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5
-    
-    ! Original values already stored in main program
-    
-    ! Central difference computation: f(x + h) - f(x - h) / (2h)
-    ! Forward perturbation: f(x + h)
-    x = x_orig + cmplx(h, 0.0) * x_d_orig
-    beta = beta_orig + cmplx(h, 0.0) * beta_d_orig
-    alpha = alpha_orig + cmplx(h, 0.0) * alpha_d_orig
-    y = y_orig + cmplx(h, 0.0) * y_d_orig
-    a = a_orig + cmplx(h, 0.0) * a_d_orig
-    call zgbmv(trans, msize, nsize, kl, ku, alpha, a, lda_val, x, incx_val, beta, y, incy_val)
-    ! Store forward perturbation results
-    y_forward = y
-    
-    ! Backward perturbation: f(x - h)
-    x = x_orig - cmplx(h, 0.0) * x_d_orig
-    beta = beta_orig - cmplx(h, 0.0) * beta_d_orig
-    alpha = alpha_orig - cmplx(h, 0.0) * alpha_d_orig
-    y = y_orig - cmplx(h, 0.0) * y_d_orig
-    a = a_orig - cmplx(h, 0.0) * a_d_orig
-    call zgbmv(trans, msize, nsize, kl, ku, alpha, a, lda_val, x, incx_val, beta, y, incy_val)
-    ! Store backward perturbation results
-    y_backward = y
-    
-    ! Compute central differences and compare with AD results
-    ! Check derivatives for output Y
-    do i = 1, min(2, n)  ! Check only first few elements
-      ! Central difference: (f(x+h) - f(x-h)) / (2h)
-      central_diff = (y_forward(i) - y_backward(i)) / (2.0e0 * h)
-      ! AD result
-      ad_result = y_d(i)
-      ! Error check: |a - b| > atol + rtol * |b|
-      abs_error = abs(central_diff - ad_result)
-      abs_reference = abs(ad_result)
-      error_bound = 1.0e-5 + 1.0e-5 * abs_reference
-      if (abs_error > error_bound) then
-        has_large_errors = .true.
-        relative_error = abs_error / max(abs_reference, 1.0e-10)
-        write(*,*) 'Large error in output Y(', i, '):'
-        write(*,*) '  Central diff: ', central_diff
-        write(*,*) '  AD result:   ', ad_result
-        write(*,*) '  Absolute error:', abs_error
-        write(*,*) '  Error bound:', error_bound
-        write(*,*) '  Relative error:', relative_error
-      end if
-      ! Track max error for reporting (normalized)
-      relative_error = abs_error / max(abs_reference, 1.0e-10)
-      max_error = max(max_error, relative_error)
+    do ii = 1, n
+      abs_error = abs((y_fwd(ii) - y_bwd(ii)) / (2.0e0 * h) - y_d_out(ii))
+      abs_ref = abs(y_d_out(ii))
+      err_bound = 1.0e-5 + 1.0e-5 * abs_ref
+      if (abs_error > err_bound) has_err = .true.
+      relative_error = abs_error / max(abs_ref, 1.0e-10)
+      if (relative_error > max_error) max_error = relative_error
     end do
-    
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
-    if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
+    passed = .not. has_err
+    if (has_err) then
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
       write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if
-    
-  end subroutine check_derivatives_numerically
-
+  end subroutine check_derivatives_numerically_band_gbmv
 end program test_zgbmv

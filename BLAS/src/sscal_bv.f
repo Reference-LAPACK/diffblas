@@ -85,7 +85,7 @@ C  =====================================================================
       SUBROUTINE SSCAL_BV(n, sa, sab, sx, sxb, incx, nbdirs)
       IMPLICIT NONE
       INCLUDE 'DIFFSIZES.inc'
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level1 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -93,12 +93,12 @@ C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
       REAL sa
-      REAL sab(nbdirsmax)
+      REAL sab(nbdirs)
       INTEGER incx, n
 C     ..
 C     .. Array Arguments ..
       REAL sx(*)
-      REAL sxb(nbdirsmax, *)
+      REAL sxb(nbdirs, *)
 C     ..
 C
 C  =====================================================================
@@ -116,15 +116,8 @@ C     .. Intrinsic Functions ..
       INTEGER*4 branch
       INTEGER nbdirs
 C     ..
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       IF ((n .LE. 0 .OR. incx .LE. 0) .OR. sa .EQ. one) THEN
-        DO nd=1,nbdirsmax
+        DO nd=1,nbdirs
           sab(nd) = 0.0
         ENDDO
       ELSE IF (incx .EQ. 1) THEN
@@ -141,7 +134,7 @@ C
             sx(i) = sa*sx(i)
           ENDDO
           IF (n .LT. 5) THEN
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               sab(nd) = 0.0
             ENDDO
             GOTO 100
@@ -164,7 +157,7 @@ C
           CALL PUSHREAL4(sx(i+4))
           sx(i+4) = sa*sx(i+4)
         ENDDO
-        DO nd=1,nbdirsmax
+        DO nd=1,nbdirs
           sab(nd) = 0.0
         ENDDO
         DO i=n-MOD(n-mp1, 5),mp1,-5
@@ -198,7 +191,7 @@ C
 C        code for increment not equal to 1
 C
         nincx = n*incx
-        DO nd=1,nbdirsmax
+        DO nd=1,nbdirs
           sab(nd) = 0.0
         ENDDO
         DO i=nincx-MOD(nincx-1, incx),1,-incx

@@ -1,6 +1,7 @@
 ! Test program for ZDSCAL differentiation
 ! Generated automatically by run_tapenade_blas.py
 ! Using REAL*8 precision
+! Multi-size test with outlined run_test_for_size(n) - arrays declared to size n
 
 program test_zdscal
   implicit none
@@ -8,139 +9,158 @@ program test_zdscal
   external :: zdscal
   external :: zdscal_d
 
-  ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension (rows/cols of matrices)
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-
-  integer :: nsize
-  real(8) :: da
-  complex(8), dimension(max_size) :: zx
-  integer :: incx_val
-
-  ! Derivative variables
-  real(8) :: da_d
-  complex(8), dimension(max_size) :: zx_d
-
-  ! Storage variables for inout parameters
-  complex(8), dimension(max_size) :: zx_output
-
-  ! Array restoration variables for numerical differentiation
-  complex(8), dimension(max_size) :: zx_orig
-  real(8) :: da_orig
-
-  ! Variables for central difference computation
-  complex(8), dimension(max_size) :: zx_forward, zx_backward
-  ! Scalar variables for central difference computation
-  complex(8) :: central_diff, ad_result
-  logical :: has_large_errors
-
-  ! Variables for storing original derivative values
-  complex(8), dimension(max_size) :: zx_d_orig
-  real(8) :: da_d_orig
-
-  ! Temporary variables for matrix initialization
-  real(4) :: temp_real, temp_imag
-  integer :: i, j
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
+  integer :: n_test
   integer :: seed_array(33)
+  integer :: test_sizes(3)
+  integer :: i
+  logical :: passed, all_passed
+
   seed_array = 42
   call random_seed(put=seed_array)
 
-  nsize = n
-  call random_number(da)
-  da = da * 2.0d0 - 1.0d0  ! Scale to [-1,1]
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    zx(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+  test_sizes = (/ 4, 10, 25 /)
+  write(*,*) 'Testing ZDSCAL (multi-size: n = 4)'
+  all_passed = .true.
+  do i = 1, 3
+    n_test = test_sizes(i)
+    call run_test_for_size(n_test, passed)
+    all_passed = all_passed .and. passed
   end do
-  incx_val = 1
-
-  ! Initialize input derivatives to random values
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  zx_d = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  call random_number(da_d)
-  da_d = da_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-
-  ! Store initial derivative values after random initialization
-  zx_d_orig = zx_d
-  da_d_orig = da_d
-
-  ! Store original values for central difference computation
-  zx_orig = zx
-  da_orig = da
-
-  write(*,*) 'Testing ZDSCAL'
-  ! Store input values of inout parameters before first function call
-  zx_orig = zx
-
-  ! Re-initialize data for differentiated function
-  ! Only reinitialize inout parameters - keep input-only parameters unchanged
-
-  nsize = n
-  ! da already has correct value from original call
-  zx = zx_orig
-  incx_val = 1
-
-  ! Call the differentiated function
-  call zdscal_d(nsize, da, da_d, zx, zx_d, incx_val)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically()
-
-  write(*,*) 'Test completed successfully'
+  if (all_passed) then
+    write(*,*) 'PASS: All sizes completed successfully'
+  else
+    write(*,*) 'FAIL: One or more sizes had derivative errors'
+  end if
 
 contains
 
-  subroutine check_derivatives_numerically()
+  subroutine run_test_for_size(n, passed)
     implicit none
+    integer, intent(in) :: n
+    logical, intent(out) :: passed
+
+    integer :: nsize
+    real(8) :: da
+    complex(8), dimension(n) :: zx
+    integer :: incx
+
+    ! Derivative variables
+    real(8) :: da_d
+    complex(8), dimension(n) :: zx_d
+
+    ! Array restoration and derivative storage
+    real(8) :: da_orig, da_d_orig
+    complex(8), dimension(n) :: zx_orig, zx_d_orig
+    real(8) :: temp_re, temp_im  ! For complex random init
+    integer :: i, j
+
+    nsize = n
+    incx = 1
+
+    call random_number(da)
+    da = da * 2.0d0 - 1.0d0  ! Scale to [-1,1]
+    do i = 1, n
+      call random_number(temp_re)
+      call random_number(temp_im)
+      zx(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
+    end do
+
+    ! Initialize input derivatives
+    call random_number(da_d)
+    da_d = da_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
+    do i = 1, n
+      call random_number(temp_re)
+      call random_number(temp_im)
+      zx_d(i) = cmplx(temp_re * 2.0 - 1.0, temp_im * 2.0 - 1.0, kind=8)
+    end do
+
+    ! Store _orig and _d_orig
+    da_d_orig = da_d
+    zx_d_orig = zx_d
+    da_orig = da
+    zx_orig = zx
+
+    write(*,*) 'Testing ZDSCAL (n =', n, ')'
+    zx_orig = zx
+
+    ! Call the differentiated function
+    call zdscal_d(nsize, da, da_d, zx, zx_d, 1)
+    da_d = da_d_orig
+
+    write(*,*) 'Function calls completed successfully'
+
+    ! Numerical differentiation check
+    call check_derivatives_numerically(n, nsize, da_orig, zx_orig, da_d_orig, zx_d_orig, zx_d, passed)
+
+  end subroutine run_test_for_size
+
+  subroutine check_derivatives_numerically(n, nsize, da_orig, zx_orig, da_d_orig, zx_d_orig, zx_d, passed)
+    implicit none
+    integer, intent(in) :: n
+    integer, intent(in) :: nsize
+    real(8), intent(in) :: da_orig, da_d_orig
+    complex(8), intent(in) :: zx_orig(n), zx_d_orig(n)
+    complex(8), intent(in) :: zx_d(n)
+    logical, intent(out) :: passed
+
     real(8), parameter :: h = 1.0e-6  ! Step size for finite differences
     real(8) :: relative_error, max_error
-    real(8) :: output_orig, output_pert
-    real(8) :: numerical_result, analytical_result
     real(8) :: abs_error, abs_reference, error_bound
+    real(8) :: central_diff, ad_result
+    logical :: has_large_errors
+    complex(8), dimension(n) :: zx_forward, zx_backward
     integer :: i, j
-    
+    real(8) :: da
+    complex(8), dimension(n) :: zx
+
     max_error = 0.0e0
     has_large_errors = .false.
-    
+
     write(*,*) 'Checking derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    
-    ! Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5
-    
-    ! Original values already stored in main program
-    
-    ! Central difference computation: f(x + h) - f(x - h) / (2h)
+
     ! Forward perturbation: f(x + h)
-    zx = zx_orig + cmplx(h, 0.0) * zx_d_orig
     da = da_orig + h * da_d_orig
-    call zdscal(nsize, da, zx, incx_val)
-    ! Store forward perturbation results
-    
+    zx = zx_orig + h * zx_d_orig
+    call zdscal(nsize, da, zx, 1)
+    zx_forward = zx
+
     ! Backward perturbation: f(x - h)
-    zx = zx_orig - cmplx(h, 0.0) * zx_d_orig
     da = da_orig - h * da_d_orig
-    call zdscal(nsize, da, zx, incx_val)
-    ! Store backward perturbation results
-    
+    zx = zx_orig - h * zx_d_orig
+    call zdscal(nsize, da, zx, 1)
+    zx_backward = zx
+
     ! Compute central differences and compare with AD results
-    
+    do i = 1, n
+        central_diff = (zx_forward(i) - zx_backward(i)) / (2.0e0 * h)
+        ad_result = zx_d(i)
+        abs_error = abs(central_diff - ad_result)
+        abs_reference = abs(ad_result)
+        error_bound = 1.0e-5 + 1.0e-5 * abs_reference
+        if (abs_error > error_bound) then
+          has_large_errors = .true.
+          relative_error = abs_error / max(abs_reference, 1.0e-10)
+          write(*,*) 'Large error in output ZX(', i, '):'
+          write(*,*) '  Central diff: ', central_diff
+          write(*,*) '  AD result:   ', ad_result
+          write(*,*) '  Absolute error:', abs_error
+          write(*,*) '  Error bound:', error_bound
+          write(*,*) '  Relative error:', relative_error
+        end if
+        relative_error = abs_error / max(abs_reference, 1.0e-10)
+        max_error = max(max_error, relative_error)
+    end do
+
     write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
+    passed = .not. has_large_errors
     if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
       write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if
-    
+
   end subroutine check_derivatives_numerically
 
 end program test_zdscal

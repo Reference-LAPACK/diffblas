@@ -97,7 +97,7 @@ C  =====================================================================
       IMPLICIT NONE
       INCLUDE 'DIFFSIZES.inc'
 C  Hint: ISIZE1OFdx should be the size of dimension 1 of array dx
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level1 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -105,12 +105,12 @@ C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
       DOUBLE PRECISION da
-      DOUBLE PRECISION dab(nbdirsmax)
+      DOUBLE PRECISION dab(nbdirs)
       INTEGER incx, incy, n
 C     ..
 C     .. Array Arguments ..
       DOUBLE PRECISION dx(*), dy(*)
-      DOUBLE PRECISION dxb(nbdirsmax, *), dyb(nbdirsmax, *)
+      DOUBLE PRECISION dxb(nbdirs, *), dyb(nbdirs, *)
 C     ..
 C
 C  =====================================================================
@@ -128,31 +128,24 @@ C     .. Intrinsic Functions ..
       INTEGER*4 branch
       INTEGER nbdirs
 C     ..
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
       CALL check_ISIZE1OFDx_initialized()
       ISIZE1OFDx = get_ISIZE1OFDx()
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       IF (n .LE. 0) THEN
         DO ii1=1,ISIZE1OFdx
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             dxb(nd, ii1) = 0.D0
           ENDDO
         ENDDO
-        DO nd=1,nbdirsmax
+        DO nd=1,nbdirs
           dab(nd) = 0.D0
         ENDDO
       ELSE IF (da .EQ. 0.0d0) THEN
         DO ii1=1,ISIZE1OFdx
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             dxb(nd, ii1) = 0.D0
           ENDDO
         ENDDO
-        DO nd=1,nbdirsmax
+        DO nd=1,nbdirs
           dab(nd) = 0.D0
         ENDDO
       ELSE IF (incx .EQ. 1 .AND. incy .EQ. 1) THEN
@@ -170,21 +163,21 @@ C
         END IF
         IF (n .LT. 4) THEN
           DO ii1=1,ISIZE1OFdx
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               dxb(nd, ii1) = 0.D0
             ENDDO
           ENDDO
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             dab(nd) = 0.D0
           ENDDO
         ELSE
           mp1 = m + 1
           DO ii1=1,ISIZE1OFdx
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               dxb(nd, ii1) = 0.D0
             ENDDO
           ENDDO
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             dab(nd) = 0.D0
           ENDDO
           DO i=n-MOD(n-mp1, 4),mp1,-4
@@ -223,11 +216,11 @@ C
           iy = iy + incy
         ENDDO
         DO ii1=1,ISIZE1OFdx
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             dxb(nd, ii1) = 0.D0
           ENDDO
         ENDDO
-        DO nd=1,nbdirsmax
+        DO nd=1,nbdirs
           dab(nd) = 0.D0
         ENDDO
         DO i=n,1,-1

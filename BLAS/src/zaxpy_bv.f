@@ -96,7 +96,7 @@ C  =====================================================================
       IMPLICIT NONE
       INCLUDE 'DIFFSIZES.inc'
 C  Hint: ISIZE1OFzx should be the size of dimension 1 of array zx
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level1 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -104,12 +104,12 @@ C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
 C
 C     .. Scalar Arguments ..
       COMPLEX*16 za
-      COMPLEX*16 zab(nbdirsmax)
+      COMPLEX*16 zab(nbdirs)
       INTEGER incx, incy, n
 C     ..
 C     .. Array Arguments ..
       COMPLEX*16 zx(*), zy(*)
-      COMPLEX*16 zxb(nbdirsmax, *), zyb(nbdirsmax, *)
+      COMPLEX*16 zxb(nbdirs, *), zyb(nbdirs, *)
 C     ..
 C
 C  =====================================================================
@@ -128,42 +128,35 @@ C     .. External Functions ..
       INTEGER ii1
       INTEGER nbdirs
 C     ..
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
       CALL check_ISIZE1OFZx_initialized()
       ISIZE1OFZx = get_ISIZE1OFZx()
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       IF (n .LE. 0) THEN
         DO ii1=1,ISIZE1OFzx
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             zxb(nd, ii1) = (0.0,0.0)
           ENDDO
         ENDDO
-        DO nd=1,nbdirsmax
+        DO nd=1,nbdirs
           zab(nd) = (0.0,0.0)
         ENDDO
       ELSE
         result1 = DCABS1(za)
         IF (result1 .EQ. 0.0d0) THEN
           DO ii1=1,ISIZE1OFzx
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               zxb(nd, ii1) = (0.0,0.0)
             ENDDO
           ENDDO
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             zab(nd) = (0.0,0.0)
           ENDDO
         ELSE IF (incx .EQ. 1 .AND. incy .EQ. 1) THEN
           DO ii1=1,ISIZE1OFzx
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               zxb(nd, ii1) = (0.0,0.0)
             ENDDO
           ENDDO
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             zab(nd) = (0.0,0.0)
           ENDDO
           DO i=n,1,-1
@@ -188,11 +181,11 @@ C
             iy = iy + incy
           ENDDO
           DO ii1=1,ISIZE1OFzx
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               zxb(nd, ii1) = (0.0,0.0)
             ENDDO
           ENDDO
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             zab(nd) = (0.0,0.0)
           ENDDO
           DO i=n,1,-1

@@ -86,8 +86,8 @@ C>
 C  =====================================================================
       SUBROUTINE ZSWAP_DV(n, zx, zxd, incx, zy, zyd, incy, nbdirs)
       IMPLICIT NONE
-      INCLUDE 'DIFFSIZES.inc'
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C      INCLUDE 'DIFFSIZES.inc'
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level1 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -98,25 +98,18 @@ C     .. Scalar Arguments ..
 C     ..
 C     .. Array Arguments ..
       COMPLEX*16 zx(*), zy(*)
-      COMPLEX*16 zxd(nbdirsmax, *), zyd(nbdirsmax, *)
+      COMPLEX*16 zxd(nbdirs, *), zyd(nbdirs, *)
 C     ..
 C
 C  =====================================================================
 C
 C     .. Local Scalars ..
       COMPLEX*16 ztemp
-      COMPLEX*16 ztempd(nbdirsmax)
+      COMPLEX*16 ztempd(nbdirs)
       INTEGER i, ix, iy
       INTEGER nd
       INTEGER nbdirs
 C     ..
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       IF (n .LE. 0) THEN
         RETURN
       ELSE

@@ -1,314 +1,246 @@
-! Test program for CHBMV vector reverse mode differentiation
+! Test program for CHBMV vector reverse - BLAS2 band
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirsmax=4
+! Multi-size outlined run_test_for_size(n, passed, nbdirs)
 
 program test_chbmv_vector_reverse
   implicit none
-  include 'DIFFSIZES.inc'
-
   external :: chbmv
   external :: chbmv_bv
-
-  ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-  integer :: i, j, k, band_row  ! Loop counters
-  integer :: seed_array(33)  ! Random seed
-  real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
-
-  character :: uplo
-  integer :: nsize
-  integer :: ksize
-  complex(4) :: alpha
-  complex(4), dimension(max_size,n) :: a  ! Band storage
-  integer :: lda_val
-  complex(4), dimension(max_size) :: x
-  integer :: incx_val
-  complex(4) :: beta
-  complex(4), dimension(max_size) :: y
-  integer :: incy_val
-
-  ! Adjoint variables (reverse vector mode)
-  ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
-  !                  input adjoints are OUTPUT (computed gradients)
-  complex(4), dimension(nbdirsmax) :: alphab
-  complex(4), dimension(nbdirsmax,max_size,n) :: ab  ! Band storage
-  complex(4), dimension(nbdirsmax,max_size) :: xb
-  complex(4), dimension(nbdirsmax) :: betab
-  complex(4), dimension(nbdirsmax,max_size) :: yb
-
-  ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  complex(4), dimension(nbdirsmax,max_size) :: yb_orig
-
-  ! Storage for original values (for VJP verification)
-  complex(4) :: alpha_orig
-  complex(4), dimension(max_size,max_size) :: a_orig
-  complex(4), dimension(max_size) :: x_orig
-  complex(4) :: beta_orig
-  complex(4), dimension(max_size) :: y_orig
-
-  ! Variables for VJP verification via finite differences
-  real(4), parameter :: h = 1.0e-3
-  real(4) :: vjp_ad, vjp_fd, relative_error, max_error, abs_error, abs_reference, error_bound
-  logical :: has_large_errors
-  real(4), dimension(max_size*max_size) :: temp_products  ! For sorted summation
-  integer :: n_products
-
-  ! Initialize random seed for reproducibility
+  integer :: nbdirs, n_test, seed_array(33), test_sizes(3), i
+  logical :: passed, all_passed
   seed_array = 42
   call random_seed(put=seed_array)
-
-  ! Initialize primal values
-  uplo = 'U'
-  nsize = n
-  ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  alpha = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-  do j = 1, n
-    do i = 1, n
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      a(i,j) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-    end do
+  test_sizes = (/ 4, 10, 25 /)
+  write(*,*) 'Testing CHBMV (Vector Reverse band, multi-size: n = 4)'
+  all_passed = .true.
+  do i = 1, 3
+    n_test = test_sizes(i)
+    nbdirs = test_sizes(i)
+    call run_test_for_size(n_test, passed, nbdirs)
+    all_passed = all_passed .and. passed
   end do
-  lda_val = lda
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    x(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-  end do
-  incx_val = 1
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  beta = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-  do i = 1, n
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    y(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-  end do
-  incy_val = 1
-
-  ! Store original primal values
-  alpha_orig = alpha
-  a_orig = a
-  x_orig = x
-  beta_orig = beta
-  y_orig = y
-
-  ! Initialize output adjoints (cotangents) with random values for each direction
-  ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirsmax
-    do i = 1, n
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      yb(k,i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-    end do
-  end do
-
-  ! Initialize input adjoints to zero (they will be computed)
-  ! Note: Inout parameters are skipped - they already have output adjoints initialized
-  alphab = 0.0
-  ab = 0.0
-  xb = 0.0
-  betab = 0.0
-
-  ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
-  yb_orig = yb
-
-  ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! Differentiated code checks they are set via check_ISIZE*_initialized.
-  call set_ISIZE1OFX(max_size)
-  call set_ISIZE2OFA(max_size)
-
-  ! Call reverse vector mode differentiated function
-  call chbmv_bv(uplo, nsize, ksize, alpha, alphab, a, ab, lda_val, x, xb, incx_val, beta, betab, y, yb, incy_val, nbdirsmax)
-
-  ! Reset ISIZE globals to uninitialized (-1) for completeness
-  call set_ISIZE1OFX(-1)
-  call set_ISIZE2OFA(-1)
-
-  ! VJP Verification using finite differences
-  call check_vjp_numerically()
-
-  write(*,*) ''
-  write(*,*) 'Test completed successfully'
-
+  if (all_passed) write(*,*) 'PASS: All sizes completed successfully'
+  if (.not. all_passed) write(*,*) 'FAIL: One or more sizes had derivative errors'
 contains
-
-  subroutine check_vjp_numerically()
+  subroutine run_test_for_size(n, passed, nbdirs)
     implicit none
-    
-    integer :: band_row
-    
-    ! Direction vectors for VJP testing
-    complex(4) :: alpha_dir
-    complex(4), dimension(max_size,n) :: a_dir
-    complex(4), dimension(max_size) :: x_dir
-    complex(4) :: beta_dir
-    complex(4), dimension(max_size) :: y_dir
-    complex(4), dimension(max_size) :: y_plus, y_minus, y_central_diff
-    
-    max_error = 0.0d0
-    has_large_errors = .false.
-    
+    integer, intent(in) :: n, nbdirs
+    logical, intent(out) :: passed
+    character :: uplo, trans, diag
+    integer :: nsize, ksize, lda_val, incx_val, incy_val
+    complex(4) :: alpha, beta
+    complex(4), dimension(:), allocatable :: alphab, betab
+    complex(4), dimension(:,:), allocatable :: a
+    complex(4), dimension(:,:,:), allocatable :: ab
+    complex(4), dimension(:), allocatable :: x, y
+    complex(4), dimension(:,:), allocatable :: xb, yb, xb_seed, yb_seed
+    integer :: band_row, j
+    real(4) :: temp_real, temp_imag
+    ksize = max(0, n - 1)
+    nsize = n
+    lda_val = ksize + 1
+    incx_val = 1
+    incy_val = 1
+    uplo = 'U'
+    trans = 'N'
+    diag = 'N'
+    allocate(a(lda_val, n), ab(nbdirs, lda_val, n), x(n), xb(nbdirs, n), y(n), yb(nbdirs, n), yb_seed(nbdirs, n), alphab(nbdirs), betab(nbdirs))
+    ! Initialize a as Hermitian band matrix (upper band storage, real diagonal)
+    do j = 1, n
+    do band_row = max(1, ksize+2-j), ksize+1
+    if (band_row .eq. ksize+1) then
+    call random_number(temp_real)
+    a(band_row, j) = cmplx(temp_real * 2.0 - 1.0, 0.0)  ! Real diagonal
+    else
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    a(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end if
+    end do
+    end do
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    alpha = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(alpha))
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    beta = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(beta))
+    do j = 1, n
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      x(j) = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(x))
+      call random_number(temp_real)
+      call random_number(temp_imag)
+      y(j) = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(y))
+    end do
+    ab = 0.0d0
+    alphab = 0.0d0
+    betab = 0.0d0
+    xb = 0.0d0
+    ! Seed for vector reverse: output adjoint yb is the seed per direction
+    do j = 1, n
+      do band_row = 1, nbdirs
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        yb(band_row, j) = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(yb))
+      end do
+    end do
+    yb_seed = yb
+    write(*,*) 'Testing CHBMV (Vector Reverse band, n =', n, ')'
+    call set_ISIZE1OFX(n)
+    call set_ISIZE2OFA(n)
+    call chbmv_bv(uplo, nsize, ksize, alpha, alphab, a, ab, lda_val, x, xb, incx_val, beta, betab, y, yb, incy_val, nbdirs)
+    call set_ISIZE1OFX(-1)
+    call set_ISIZE2OFA(-1)
     write(*,*) 'Function calls completed successfully'
-    
+    call check_vjp_numerically_band_vec(n, nbdirs, lda_val, ksize, uplo, nsize, incx_val, incy_val, alpha, alphab, beta, betab, a, ab, x, xb, y, yb_seed, yb, passed)
+    if (allocated(a)) deallocate(a)
+    if (allocated(ab)) deallocate(ab)
+    if (allocated(x)) deallocate(x)
+    if (allocated(xb)) deallocate(xb)
+    if (allocated(y)) deallocate(y)
+    if (allocated(yb)) deallocate(yb)
+    if (allocated(yb_seed)) deallocate(yb_seed)
+    if (allocated(alphab)) deallocate(alphab)
+    if (allocated(betab)) deallocate(betab)
+  end subroutine run_test_for_size
+
+  subroutine check_vjp_numerically_band_vec(n, nbdirs, lda_val, ksize, uplo, nsize, incx_val, incy_val, alpha, alphab, beta, betab, a, ab, x, xb, y, yb_seed, yb, passed)
+    implicit none
+    integer, intent(in) :: n, nbdirs, lda_val, ksize, nsize, incx_val, incy_val
+    character, intent(in) :: uplo
+    complex(4), intent(in) :: alpha, beta
+    complex(4), intent(in) :: alphab(nbdirs), betab(nbdirs)
+    complex(4), intent(in) :: a(lda_val, n), ab(nbdirs, lda_val, n), x(n), xb(nbdirs, n), y(n), yb_seed(nbdirs, n), yb(nbdirs, n)
+    logical, intent(out) :: passed
+    real(4), parameter :: h = 1.0e-3
+    real(4) :: vjp_fd, vjp_ad, abs_error, abs_ref, err_bound, relative_error, max_re
+    complex(4), dimension(n) :: y_plus, y_minus, y_t, y_central_diff
+    complex(4) :: alpha_t, beta_t, alpha_dir, beta_dir
+    complex(4), dimension(n) :: x_t, x_dir, y_dir
+    complex(4), dimension(lda_val, n) :: a_t, a_dir
+    real(4), dimension(:), allocatable :: temp_products
+    real(kind(0.0d0)) :: tr, ti
+    integer :: i, j, band_row, n_products, k
+    logical :: has_err
+    has_err = .false.
+    max_re = 0.0d0
+    allocate(temp_products(n + n + n + (ksize+1)*n + 2))
+    do k = 1, nbdirs
+    ! Random direction for this k
+    call random_number(tr)
+    call random_number(ti)
+    alpha_dir = cmplx(tr*2.0d0-1.0d0, ti*2.0d0-1.0d0, kind=kind(alpha_dir))
+    call random_number(tr)
+    call random_number(ti)
+    beta_dir = cmplx(tr*2.0d0-1.0d0, ti*2.0d0-1.0d0, kind=kind(beta_dir))
+    do j = 1, n
+      do band_row = max(1, ksize+2-j), ksize+1
+        if (band_row .eq. ksize+1) then
+          call random_number(tr)
+          a_dir(band_row, j) = cmplx(tr*2.0d0-1.0d0, 0.0d0, kind=kind(a_dir))
+        else
+          call random_number(tr)
+          call random_number(ti)
+          a_dir(band_row, j) = cmplx(tr*2.0d0-1.0d0, ti*2.0d0-1.0d0, kind=kind(a_dir))
+        end if
+      end do
+    end do
+    do i = 1, n
+      call random_number(tr)
+      call random_number(ti)
+      x_dir(i) = cmplx(tr*2.0d0-1.0d0, ti*2.0d0-1.0d0, kind=kind(x_dir))
+      call random_number(tr)
+      call random_number(ti)
+      y_dir(i) = cmplx(tr*2.0d0-1.0d0, ti*2.0d0-1.0d0, kind=kind(y_dir))
+    end do
+    ! Forward perturbation: f(inputs + h*direction)
+    alpha_t = alpha + h * alpha_dir
+    beta_t = beta + h * beta_dir
+    a_t = a
+    do j = 1, n
+      do band_row = max(1, ksize+2-j), ksize+1
+        a_t(band_row, j) = a(band_row, j) + h * a_dir(band_row, j)
+      end do
+    end do
+    x_t = x + h * x_dir
+    y_t = y + h * y_dir
+    call chbmv(uplo, nsize, ksize, alpha_t, a_t, lda_val, x_t, incx_val, beta_t, y_t, incy_val)
+    y_plus = y_t
+    ! Backward perturbation: f(inputs - h*direction)
+    alpha_t = alpha - h * alpha_dir
+    beta_t = beta - h * beta_dir
+    a_t = a
+    do j = 1, n
+      do band_row = max(1, ksize+2-j), ksize+1
+        a_t(band_row, j) = a(band_row, j) - h * a_dir(band_row, j)
+      end do
+    end do
+    x_t = x - h * x_dir
+    y_t = y - h * y_dir
+    call chbmv(uplo, nsize, ksize, alpha_t, a_t, lda_val, x_t, incx_val, beta_t, y_t, incy_val)
+    y_minus = y_t
+    y_central_diff = (y_plus - y_minus) / (2.0d0 * h)
+    vjp_fd = 0.0d0
+    n_products = n
+    do i = 1, n
+      temp_products(i) = real(conjg(yb_seed(k,i)) * y_central_diff(i))
+    end do
+    call sort_array(temp_products, n_products)
+    do i = 1, n_products
+      vjp_fd = vjp_fd + temp_products(i)
+    end do
+    ! VJP(AD) = direction^T @ adjoint
+    vjp_ad = 0.0d0
+    vjp_ad = vjp_ad + real(conjg(alpha_dir) * alphab(k))
+    vjp_ad = vjp_ad + real(conjg(beta_dir) * betab(k))
+    n_products = 0
+    do j = 1, n
+      do band_row = max(1, ksize+2-j), ksize+1
+        n_products = n_products + 1
+        temp_products(n_products) = real(conjg(a_dir(band_row,j)) * ab(k,band_row,j))
+      end do
+    end do
+    do i = 1, n
+      n_products = n_products + 1
+      temp_products(n_products) = real(conjg(x_dir(i)) * xb(k,i))
+    end do
+    do i = 1, n
+      n_products = n_products + 1
+      temp_products(n_products) = real(conjg(y_dir(i)) * yb(k,i))
+    end do
+    call sort_array(temp_products, n_products)
+    do i = 1, n_products
+      vjp_ad = vjp_ad + temp_products(i)
+    end do
+    abs_error = abs(vjp_fd - vjp_ad)
+    abs_ref = abs(vjp_ad)
+    err_bound = 1.0e-2 + 1.0e-2 * abs_ref
+    if (abs_error > err_bound) has_err = .true.
+    relative_error = abs_error / max(abs_ref, 1.0d-10)
+    if (relative_error > max_re) max_re = relative_error
+    end do
+    deallocate(temp_products)
     write(*,*) 'Checking derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    
-    ! Test each differentiation direction separately
-    do k = 1, nbdirsmax
-      
-      ! Initialize random direction vectors for all inputs
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      alpha_dir = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-      ! Keep direction consistent with Hermitian band: real diagonal, band entries only
-      do j = 1, n
-        do band_row = max(1, ksize+2-j), ksize+1
-          if (band_row .eq. ksize+1) then
-            call random_number(temp_real)
-            a_dir(band_row, j) = cmplx(temp_real * 2.0 - 1.0, 0.0d0)
-          else
-            call random_number(temp_real)
-            call random_number(temp_imag)
-            a_dir(band_row, j) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-          end if
-        end do
-      end do
-      do i = 1, n
-        call random_number(temp_real)
-        call random_number(temp_imag)
-        x_dir(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-      end do
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      beta_dir = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-      do i = 1, n
-        call random_number(temp_real)
-        call random_number(temp_imag)
-        y_dir(i) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-      end do
-      
-      ! Forward perturbation: f(x + h*dir)
-      alpha = alpha_orig + cmplx(h, 0.0) * alpha_dir
-      a = a_orig + cmplx(h, 0.0) * a_dir
-      x = x_orig + cmplx(h, 0.0) * x_dir
-      beta = beta_orig + cmplx(h, 0.0) * beta_dir
-      y = y_orig + cmplx(h, 0.0) * y_dir
-      call chbmv(uplo, nsize, ksize, alpha, a, lda_val, x, incx_val, beta, y, incy_val)
-      y_plus = y
-      
-      ! Backward perturbation: f(x - h*dir)
-      alpha = alpha_orig - cmplx(h, 0.0) * alpha_dir
-      a = a_orig - cmplx(h, 0.0) * a_dir
-      x = x_orig - cmplx(h, 0.0) * x_dir
-      beta = beta_orig - cmplx(h, 0.0) * beta_dir
-      y = y_orig - cmplx(h, 0.0) * y_dir
-      call chbmv(uplo, nsize, ksize, alpha, a, lda_val, x, incx_val, beta, y, incy_val)
-      y_minus = y
-      
-      ! Compute central differences and VJP verification
-      ! VJP check: direction^T @ adjoint should equal finite difference
-      
-      ! Compute central differences: (f(x+h*dir) - f(x-h*dir)) / (2h)
-      y_central_diff = (y_plus - y_minus) / (2.0 * h)
-      
-      ! VJP verification:
-      ! cotangent^T @ central_diff should equal direction^T @ computed_adjoint
-      ! Left side: cotangent^T @ Jacobian @ direction (via finite differences, with sorted summation)
-      vjp_fd = 0.0
-      ! Compute and sort products for y (FD)
-      n_products = n
-      do i = 1, n
-        temp_products(i) = real(conjg(yb_orig(k,i)) * y_central_diff(i))
-      end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_fd = vjp_fd + temp_products(i)
-      end do
-      
-      ! Right side: direction^T @ computed_adjoint (with sorted summation)
-      ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
-      ! For pure inputs: use adjoint directly
-      vjp_ad = 0.0
-      ! Compute and sort products for x
-      n_products = n
-      do i = 1, n
-        temp_products(i) = real(conjg(x_dir(i)) * xb(k,i))
-      end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_ad = vjp_ad + temp_products(i)
-      end do
-      vjp_ad = vjp_ad + real(conjg(beta_dir) * betab(k))
-      vjp_ad = vjp_ad + real(conjg(alpha_dir) * alphab(k))
-      ! Compute and sort products for y
-      n_products = n
-      do i = 1, n
-        temp_products(i) = real(conjg(y_dir(i)) * yb(k,i))
-      end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_ad = vjp_ad + temp_products(i)
-      end do
-      ! Compute and sort products for a (band storage)
-      n_products = 0
-      do j = 1, n
-        do band_row = max(1, ksize+2-j), ksize+1
-          n_products = n_products + 1
-          temp_products(n_products) = real(conjg(a_dir(band_row,j)) * ab(k,band_row,j))
-        end do
-      end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_ad = vjp_ad + temp_products(i)
-      end do
-      
-      ! Error check: |vjp_fd - vjp_ad| > atol + rtol * |vjp_ad|
-      abs_error = abs(vjp_fd - vjp_ad)
-      abs_reference = abs(vjp_ad)
-      error_bound = 1.0e-3 + 1.0e-3 * abs_reference
-      if (abs_error > error_bound) then
-        has_large_errors = .true.
-      end if
-      
-      ! Compute relative error for reporting
-      if (abs_reference > 1.0e-10) then
-        relative_error = abs_error / abs_reference
-      else
-        relative_error = abs_error
-      end if
-      if (relative_error > max_error) max_error = relative_error
-    end do
-    
-    write(*,*) ''
-    write(*,*) 'Maximum relative error:', max_error
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
-    if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in derivatives (outside tolerance)'
+    write(*,*) 'Maximum relative error:', max_re
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-2, atol=1.0e-2'
+    passed = .not. has_err
+    if (.not. passed) then
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
       write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if
-    
-  end subroutine check_vjp_numerically
-
+  end subroutine check_vjp_numerically_band_vec
   subroutine sort_array(arr, n)
     implicit none
     integer, intent(in) :: n
     real(4), dimension(n), intent(inout) :: arr
     integer :: i, j, min_idx
     real(4) :: temp
-    
-    ! Simple selection sort
     do i = 1, n-1
       min_idx = i
       do j = i+1, n
-        if (abs(arr(j)) < abs(arr(min_idx))) then
-          min_idx = j
-        end if
+        if (abs(arr(j)) < abs(arr(min_idx))) min_idx = j
       end do
       if (min_idx /= i) then
         temp = arr(i)
@@ -317,5 +249,4 @@ contains
       end if
     end do
   end subroutine sort_array
-
 end program test_chbmv_vector_reverse

@@ -90,7 +90,7 @@ C  =====================================================================
       INCLUDE 'DIFFSIZES.inc'
 C  Hint: ISIZE1OFsy should be the size of dimension 1 of array sy
 C  Hint: ISIZE1OFsx should be the size of dimension 1 of array sx
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level1 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -101,14 +101,14 @@ C     .. Scalar Arguments ..
 C     ..
 C     .. Array Arguments ..
       REAL sx(*), sy(*)
-      REAL sxb(nbdirsmax, *), syb(nbdirsmax, *)
+      REAL sxb(nbdirs, *), syb(nbdirs, *)
 C     ..
 C
 C  =====================================================================
 C
 C     .. Local Scalars ..
       REAL stemp
-      REAL stempb(nbdirsmax)
+      REAL stempb(nbdirs)
       INTEGER i, ix, iy, m, mp1
       INTEGER ISIZE1OFSx, ISIZE1OFSy
       INTEGER get_ISIZE1OFSx, get_ISIZE1OFSy
@@ -120,28 +120,21 @@ C     .. Intrinsic Functions ..
       INTEGER ii1
       INTEGER*4 branch
       REAL sdot
-      REAL sdotb(nbdirsmax)
+      REAL sdotb(nbdirs)
       INTEGER nbdirs
 C     ..
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
       CALL check_ISIZE1OFSx_initialized()
       CALL check_ISIZE1OFSy_initialized()
       ISIZE1OFSx = get_ISIZE1OFSx()
       ISIZE1OFSy = get_ISIZE1OFSy()
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       IF (n .LE. 0) THEN
         DO ii1=1,ISIZE1OFsx
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             sxb(nd, ii1) = 0.0
           ENDDO
         ENDDO
         DO ii1=1,ISIZE1OFsy
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             syb(nd, ii1) = 0.0
           ENDDO
         ENDDO
@@ -160,12 +153,12 @@ C
                 stempb(nd) = sdotb(nd)
               ENDDO
               DO ii1=1,ISIZE1OFsx
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   sxb(nd, ii1) = 0.0
                 ENDDO
               ENDDO
               DO ii1=1,ISIZE1OFsy
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   syb(nd, ii1) = 0.0
                 ENDDO
               ENDDO
@@ -201,12 +194,12 @@ C
         CALL POPCONTROL1B(branch)
         IF (branch .EQ. 0) THEN
           DO ii1=1,ISIZE1OFsx
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               sxb(nd, ii1) = 0.0
             ENDDO
           ENDDO
           DO ii1=1,ISIZE1OFsy
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               syb(nd, ii1) = 0.0
             ENDDO
           ENDDO
@@ -228,12 +221,12 @@ C
           IF (branch .NE. 0) GOTO 110
         ELSE
           DO ii1=1,ISIZE1OFsx
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               sxb(nd, ii1) = 0.0
             ENDDO
           ENDDO
           DO ii1=1,ISIZE1OFsy
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               syb(nd, ii1) = 0.0
             ENDDO
           ENDDO

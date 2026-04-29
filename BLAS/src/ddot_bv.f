@@ -90,7 +90,7 @@ C  =====================================================================
       INCLUDE 'DIFFSIZES.inc'
 C  Hint: ISIZE1OFdy should be the size of dimension 1 of array dy
 C  Hint: ISIZE1OFdx should be the size of dimension 1 of array dx
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level1 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -101,14 +101,14 @@ C     .. Scalar Arguments ..
 C     ..
 C     .. Array Arguments ..
       DOUBLE PRECISION dx(*), dy(*)
-      DOUBLE PRECISION dxb(nbdirsmax, *), dyb(nbdirsmax, *)
+      DOUBLE PRECISION dxb(nbdirs, *), dyb(nbdirs, *)
 C     ..
 C
 C  =====================================================================
 C
 C     .. Local Scalars ..
       DOUBLE PRECISION dtemp
-      DOUBLE PRECISION dtempb(nbdirsmax)
+      DOUBLE PRECISION dtempb(nbdirs)
       INTEGER i, ix, iy, m, mp1
       INTEGER ISIZE1OFDx, ISIZE1OFDy
       INTEGER get_ISIZE1OFDx, get_ISIZE1OFDy
@@ -120,28 +120,21 @@ C     .. Intrinsic Functions ..
       INTEGER ii1
       INTEGER*4 branch
       DOUBLE PRECISION ddot
-      DOUBLE PRECISION ddotb(nbdirsmax)
+      DOUBLE PRECISION ddotb(nbdirs)
       INTEGER nbdirs
 C     ..
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
       CALL check_ISIZE1OFDx_initialized()
       CALL check_ISIZE1OFDy_initialized()
       ISIZE1OFDx = get_ISIZE1OFDx()
       ISIZE1OFDy = get_ISIZE1OFDy()
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       IF (n .LE. 0) THEN
         DO ii1=1,ISIZE1OFdx
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             dxb(nd, ii1) = 0.D0
           ENDDO
         ENDDO
         DO ii1=1,ISIZE1OFdy
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             dyb(nd, ii1) = 0.D0
           ENDDO
         ENDDO
@@ -160,12 +153,12 @@ C
                 dtempb(nd) = ddotb(nd)
               ENDDO
               DO ii1=1,ISIZE1OFdx
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   dxb(nd, ii1) = 0.D0
                 ENDDO
               ENDDO
               DO ii1=1,ISIZE1OFdy
-                DO nd=1,nbdirsmax
+                DO nd=1,nbdirs
                   dyb(nd, ii1) = 0.D0
                 ENDDO
               ENDDO
@@ -201,12 +194,12 @@ C
         CALL POPCONTROL1B(branch)
         IF (branch .EQ. 0) THEN
           DO ii1=1,ISIZE1OFdx
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               dxb(nd, ii1) = 0.D0
             ENDDO
           ENDDO
           DO ii1=1,ISIZE1OFdy
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               dyb(nd, ii1) = 0.D0
             ENDDO
           ENDDO
@@ -228,12 +221,12 @@ C
           IF (branch .NE. 0) GOTO 110
         ELSE
           DO ii1=1,ISIZE1OFdx
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               dxb(nd, ii1) = 0.D0
             ENDDO
           ENDDO
           DO ii1=1,ISIZE1OFdy
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               dyb(nd, ii1) = 0.D0
             ENDDO
           ENDDO

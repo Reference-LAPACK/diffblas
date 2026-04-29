@@ -1,166 +1,128 @@
 ! Test program for ZTPMV vector forward mode differentiation
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*8 precision with nbdirsmax=4
+! Multi-size outlined run_test_for_size(n) - TPMV/TPSV packed triangular
 
 program test_ztpmv_vector_forward
   implicit none
-  include 'DIFFSIZES.inc'
-
   external :: ztpmv
   external :: ztpmv_dv
-
-  ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-  integer :: i, j, idir  ! Loop counters
-  integer :: seed_array(33)  ! Random seed
-  real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
-
-  character :: uplo
-  character :: trans
-  character :: diag
-  integer :: nsize
-  complex(8), dimension((n*(n+1))/2) :: ap
-  complex(8), dimension(max_size) :: x
-  integer :: incx_val
-
-  ! Vector mode derivative variables (type-promoted)
-  ! Scalars become arrays(nbdirsmax), arrays gain extra dimension
-  complex(8), dimension(nbdirsmax,(n*(n+1))/2) :: ap_dv
-  complex(8), dimension(nbdirsmax,max_size) :: x_dv
-  ! Declare variables for storing original values
-  complex(8), dimension((n*(n+1))/2) :: ap_orig
-  complex(8), dimension(nbdirsmax,(n*(n+1))/2) :: ap_dv_orig
-  complex(8), dimension(max_size) :: x_orig
-  complex(8), dimension(nbdirsmax,max_size) :: x_dv_orig
-
-  ! Initialize test parameters
-  nsize = n
-  incx_val = 1
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
+  integer :: nbdirs, n_test, seed_array(33), test_sizes(3), i
+  logical :: passed, all_passed
   seed_array = 42
   call random_seed(put=seed_array)
-
-  uplo = 'U'
-  trans = 'N'
-  diag = 'N'
-  do i = 1, size(ap)
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    ap(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+  test_sizes = (/ 4, 10, 25 /)
+  write(*,*) 'Testing ZTPMV (Vector Forward, multi-size: n = 4)'
+  all_passed = .true.
+  do i = 1, 3
+    n_test = test_sizes(i)
+    nbdirs = test_sizes(i)
+    call run_test_for_size(n_test, passed, nbdirs)
+    all_passed = all_passed .and. passed
   end do
-  do i = 1, max_size
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    x(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-
-  ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirsmax
-    do i = 1, size(ap)
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      ap_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-  end do
-  do idir = 1, nbdirsmax
-    do i = 1, max_size
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      x_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-  end do
-
-  write(*,*) 'Testing ZTPMV (Vector Forward Mode)'
-  ! Store original values before any function calls (critical for INOUT parameters)
-  ap_orig = ap
-  ap_dv_orig = ap_dv
-  x_orig = x
-  x_dv_orig = x_dv
-
-  ! Call the vector mode differentiated function
-
-  call ztpmv_dv(uplo, trans, diag, nsize, ap, ap_dv, x, x_dv, incx_val, nbdirsmax)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically()
-
-  write(*,*) 'Vector forward mode test completed successfully'
-
+  if (all_passed) write(*,*) 'PASS: All sizes completed successfully'
+  if (.not. all_passed) write(*,*) 'FAIL: One or more sizes had derivative errors'
 contains
-
-  subroutine check_derivatives_numerically()
+  subroutine run_test_for_size(n, passed, nbdirs)
     implicit none
-    real(8), parameter :: h = 1.0e-7  ! Step size for finite differences
-    real(8) :: relative_error, max_error
-    real(8) :: abs_error, abs_reference, error_bound
-    complex(8) :: central_diff, ad_result
-    integer :: i, j, idir
-    logical :: has_large_errors
-    complex(8), dimension(max_size) :: x_forward, x_backward
-    
-    max_error = 0.0e0
-    has_large_errors = .false.
-    
-    write(*,*) 'Checking vector derivatives against numerical differentiation:'
+    integer, intent(in) :: n, nbdirs
+    logical, intent(out) :: passed
+    character :: uplo, trans, diag
+    integer :: nsize, incx_val, npack
+    complex(8), allocatable :: ap(:), x(:)
+    complex(8), allocatable :: ap_dv(:,:), x_dv(:,:)
+    complex(8), allocatable :: ap_orig(:), x_orig(:)
+    complex(8), allocatable :: ap_dv_seed(:,:), x_dv_seed(:,:)
+    integer :: idir, ii
+    real(4) :: tr, ti
+    uplo = 'U'
+    trans = 'N'
+    diag = 'N'
+    nsize = n
+    incx_val = 1
+    npack = (n * (n + 1)) / 2
+    allocate(ap(npack), x(n), ap_dv(nbdirs, npack), x_dv(nbdirs, n))
+    allocate(ap_orig(npack), x_orig(n), ap_dv_seed(nbdirs, npack), x_dv_seed(nbdirs, n))
+    do ii = 1, npack
+      call random_number(tr)
+      call random_number(ti)
+      ap(ii) = cmplx(tr*2.0-1.0, ti*2.0-1.0, kind=kind(ap))
+    end do
+    do ii = 1, n
+      call random_number(tr)
+      call random_number(ti)
+      x(ii) = cmplx(tr*2.0-1.0, ti*2.0-1.0, kind=kind(x))
+    end do
+    do idir = 1, nbdirs
+      do ii = 1, npack
+        call random_number(tr)
+        call random_number(ti)
+        ap_dv(idir,ii) = cmplx(tr*2.0-1.0, ti*2.0-1.0, kind=kind(ap_dv))
+      end do
+    end do
+    do idir = 1, nbdirs
+      do ii = 1, n
+        call random_number(tr)
+        call random_number(ti)
+        x_dv(idir,ii) = cmplx(tr*2.0-1.0, ti*2.0-1.0, kind=kind(x_dv))
+      end do
+    end do
+
+    write(*,*) 'Testing ZTPMV (Vector Forward, n =', n, ')'
+    ap_orig = ap
+    x_orig = x
+    ap_dv_seed = ap_dv
+    x_dv_seed = x_dv
+    call ztpmv_dv(uplo, trans, diag, nsize, ap, ap_dv, x, x_dv, incx_val, nbdirs)
+    write(*,*) 'Function calls completed successfully'
+    call check_derivatives_numerically(n, npack, nbdirs, uplo, trans, diag, nsize, incx_val, ap_orig, ap_dv_seed, x_orig, x_dv_seed, x_dv, passed)
+    deallocate(ap, x, ap_dv, x_dv, ap_orig, x_orig, ap_dv_seed, x_dv_seed)
+  end subroutine run_test_for_size
+
+  subroutine check_derivatives_numerically(n, npack, nbdirs, uplo, trans, diag, nsize, incx_val, ap_orig, ap_dv_seed, x_orig, x_dv_seed, x_dv, passed)
+    integer, intent(in) :: n, npack, nbdirs
+    character, intent(in) :: uplo, trans, diag
+    integer, intent(in) :: nsize, incx_val
+    complex(8), intent(in) :: ap_orig(npack), ap_dv_seed(nbdirs,npack), x_orig(n), x_dv_seed(nbdirs,n), x_dv(nbdirs,n)
+    logical, intent(out) :: passed
+    real(8), parameter :: h = 1.0e-7
+    real(8) :: abs_error, abs_ref, err_bound, relative_error, max_error
+    complex(8), dimension(npack) :: ap_t
+    complex(8), dimension(n) :: x_t, x_plus, x_minus
+    integer :: idir, ii
+    logical :: has_err
+    has_err = .false.
+    max_error = 0.0d0
+    write(*,*) 'Checking derivatives against numerical differentiation:'
     write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirsmax
-    
-    ! Test each derivative direction separately
-    do idir = 1, nbdirsmax
-      
-      ! Forward perturbation: f(x + h * direction)
-      ap = ap_orig + cmplx(h, 0.0) * ap_dv_orig(idir,:)
-      x = x_orig + cmplx(h, 0.0) * x_dv_orig(idir,:)
-      call ztpmv(uplo, trans, diag, nsize, ap, x, incx_val)
-      x_forward = x
-      
-      ! Backward perturbation: f(x - h * direction)
-      ap = ap_orig - cmplx(h, 0.0) * ap_dv_orig(idir,:)
-      x = x_orig - cmplx(h, 0.0) * x_dv_orig(idir,:)
-      call ztpmv(uplo, trans, diag, nsize, ap, x, incx_val)
-      x_backward = x
-      
-      ! Compute central differences and compare with AD results
-      do i = 1, min(2, nsize)  ! Check only first few elements
-        ! Central difference: (f(x+h) - f(x-h)) / (2h)
-        central_diff = (x_forward(i) - x_backward(i)) / (2.0e0 * h)
-        ! AD result
-        ad_result = x_dv(idir,i)
-        ! Error check: |a - b| > atol + rtol * |b|
-        abs_error = abs(central_diff - ad_result)
-        abs_reference = abs(ad_result)
-        error_bound = 1.0e-5 + 1.0e-5 * abs_reference
-        if (abs_error > error_bound) then
-          has_large_errors = .true.
-          relative_error = abs_error / max(abs_reference, 1.0e-10)
-          write(*,*) '  Large error in direction', idir, ' output X(', i, '):'
-          write(*,*) '    Central diff: ', central_diff
-          write(*,*) '    AD result:   ', ad_result
-          write(*,*) '    Absolute error:', abs_error
-          write(*,*) '    Error bound:', error_bound
-          write(*,*) '    Relative error:', relative_error
+    do idir = 1, nbdirs
+      ap_t = ap_orig + h * ap_dv_seed(idir,:)
+      x_t = x_orig + h * x_dv_seed(idir,:)
+      call ztpmv(uplo, trans, diag, nsize, ap_t, x_t, incx_val)
+      x_plus = x_t
+      ap_t = ap_orig - h * ap_dv_seed(idir,:)
+      x_t = x_orig - h * x_dv_seed(idir,:)
+      call ztpmv(uplo, trans, diag, nsize, ap_t, x_t, incx_val)
+      x_minus = x_t
+      do ii = 1, min(2, n)
+        abs_error = abs((x_plus(ii) - x_minus(ii)) / (2.0d0 * h) - x_dv(idir,ii))
+        abs_ref = abs(x_dv(idir,ii))
+        err_bound = 1.0e-5 + 1.0e-5 * abs_ref
+        if (abs_error > err_bound) then
+          has_err = .true.
+          relative_error = abs_error / max(abs_ref, 1.0e-10)
+          write(*,*) 'Large error direction', idir, ' X(', ii, '): abs_err=', abs_error, ' rel_err=', relative_error
         end if
-        ! Track max error for reporting (normalized)
-        relative_error = abs_error / max(abs_reference, 1.0e-10)
+        relative_error = abs_error / max(abs_ref, 1.0e-10)
         max_error = max(max_error, relative_error)
       end do
     end do
-    
-    write(*,*) 'Maximum relative error across all directions:', max_error
+    write(*,*) 'Maximum relative error:', max_error
     write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
-    if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in vector derivatives (outside tolerance)'
+    passed = .not. has_err
+    if (has_err) then
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
-      write(*,*) 'PASS: Vector derivatives are within tolerance (rtol + atol)'
+      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if
-    
   end subroutine check_derivatives_numerically
-
 end program test_ztpmv_vector_forward

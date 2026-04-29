@@ -1,7 +1,7 @@
 project(
   'diffblas',
   'fortran', 'c',
-  version: '2026.1.30',
+  version: '2026.4.26',
   license: 'BSD-3',
   meson_version: '>= 0.63.0',
   default_options: [

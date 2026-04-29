@@ -77,8 +77,8 @@ C>
 C  =====================================================================
       SUBROUTINE SASUM_DV(n, sx, sxd, incx, sasum, sasumd, nbdirs)
       IMPLICIT NONE
-      INCLUDE 'DIFFSIZES.inc'
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
+C      INCLUDE 'DIFFSIZES.inc'
+C  Hint: nbdirs should be the maximum number of differentiation directions
 C
 C  -- Reference BLAS level1 routine --
 C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -89,50 +89,43 @@ C     .. Scalar Arguments ..
 C     ..
 C     .. Array Arguments ..
       REAL sx(*)
-      REAL sxd(nbdirsmax, *)
+      REAL sxd(nbdirs, *)
 C     ..
 C
 C  =====================================================================
 C
 C     .. Local Scalars ..
       REAL stemp
-      REAL stempd(nbdirsmax)
+      REAL stempd(nbdirs)
       INTEGER i, m, mp1, nincx
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC ABS, MOD
       REAL abs0
-      REAL abs0d(nbdirsmax)
+      REAL abs0d(nbdirs)
       REAL abs1
-      REAL abs1d(nbdirsmax)
+      REAL abs1d(nbdirs)
       REAL abs2
-      REAL abs2d(nbdirsmax)
+      REAL abs2d(nbdirs)
       REAL abs3
-      REAL abs3d(nbdirsmax)
+      REAL abs3d(nbdirs)
       REAL abs4
-      REAL abs4d(nbdirsmax)
+      REAL abs4d(nbdirs)
       REAL abs5
-      REAL abs5d(nbdirsmax)
+      REAL abs5d(nbdirs)
       REAL abs6
-      REAL abs6d(nbdirsmax)
+      REAL abs6d(nbdirs)
       REAL abs7
-      REAL abs7d(nbdirsmax)
+      REAL abs7d(nbdirs)
       INTEGER nd
-      REAL sasumd(nbdirsmax)
+      REAL sasumd(nbdirs)
       REAL sasum
       INTEGER nbdirs
 C     ..
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
-      END IF
-C
       sasum = 0.0e0
       stemp = 0.0e0
       IF (n .LE. 0 .OR. incx .LE. 0) THEN
-        DO nd=1,nbdirsmax
+        DO nd=1,nbdirs
           sasumd(nd) = 0.0
         ENDDO
         RETURN
@@ -145,7 +138,7 @@ C        clean-up loop
 C
           m = MOD(n, 6)
           IF (m .NE. 0) THEN
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               stempd(nd) = 0.0
             ENDDO
             DO i=1,m
@@ -173,7 +166,7 @@ C
               RETURN
             END IF
           ELSE
-            DO nd=1,nbdirsmax
+            DO nd=1,nbdirs
               stempd(nd) = 0.0
             ENDDO
           END IF
@@ -256,7 +249,7 @@ C
 C        code for increment not equal to 1
 C
           nincx = n*incx
-          DO nd=1,nbdirsmax
+          DO nd=1,nbdirs
             stempd(nd) = 0.0
           ENDDO
           DO i=1,nincx,incx

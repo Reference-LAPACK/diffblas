@@ -1,175 +1,146 @@
-! Test program for CTBMV vector forward mode differentiation
+! Test program for CTBMV vector forward - BLAS2 band
 ! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirsmax=4
+! Multi-size outlined run_test_for_size(n, passed, nbdirs) - band
 
 program test_ctbmv_vector_forward
   implicit none
-  include 'DIFFSIZES.inc'
-
   external :: ctbmv
   external :: ctbmv_dv
-
-  ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-  integer :: i, j, idir, band_row  ! Loop counters
-  integer :: seed_array(33)  ! Random seed
-  real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
-
-  character :: uplo
-  character :: trans
-  character :: diag
-  integer :: nsize
-  integer :: ksize
-  complex(4), dimension(max_size,max_size) :: a
-  integer :: lda_val
-  complex(4), dimension(max_size) :: x
-  integer :: incx_val
-
-  ! Vector mode derivative variables (type-promoted)
-  ! Scalars become arrays(nbdirsmax), arrays gain extra dimension
-  complex(4), dimension(nbdirsmax,max_size,max_size) :: a_dv
-  complex(4), dimension(nbdirsmax,max_size) :: x_dv
-  ! Declare variables for storing original values
-  complex(4), dimension(max_size,max_size) :: a_orig
-  complex(4), dimension(nbdirsmax,max_size,max_size) :: a_dv_orig
-  complex(4), dimension(max_size) :: x_orig
-  complex(4), dimension(nbdirsmax,max_size) :: x_dv_orig
-
-  ! Initialize test parameters
-  nsize = n
-  ksize = max(0, n - 1)  ! Band width: 0 <= K <= N-1
-  lda_val = lda
-  incx_val = 1
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
+  integer :: nbdirs, n_test, seed_array(33), test_sizes(3), i
+  logical :: passed, all_passed
   seed_array = 42
   call random_seed(put=seed_array)
-
-  uplo = 'U'
-  trans = 'N'
-  diag = 'N'
-  ! Initialize a as triangular band matrix (upper band storage)
-  do j = 1, n
-    do band_row = max(1, ksize+2-j), ksize+1
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      a(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
+  test_sizes = (/ 4, 10, 25 /)
+  write(*,*) 'Testing CTBMV (Vector Forward band, multi-size: n = 4)'
+  all_passed = .true.
+  do i = 1, 3
+    n_test = test_sizes(i)
+    nbdirs = test_sizes(i)
+    call run_test_for_size(n_test, passed, nbdirs)
+    all_passed = all_passed .and. passed
   end do
-  do i = 1, max_size
+  if (all_passed) write(*,*) 'PASS: All sizes completed successfully'
+  if (.not. all_passed) write(*,*) 'FAIL: One or more sizes had derivative errors'
+contains
+  subroutine run_test_for_size(n, passed, nbdirs)
+    implicit none
+    integer, intent(in) :: n, nbdirs
+    logical, intent(out) :: passed
+    character :: uplo, trans, diag
+    integer :: nsize, ksize, lda_val, incx_val, incy_val
+    complex(4) :: alpha, beta
+    complex(4), dimension(:,:), allocatable :: a, a_orig
+    complex(4), dimension(:,:,:), allocatable :: a_dv, a_dv_seed
+    complex(4), dimension(:), allocatable :: x, y, x_orig, y_orig
+    complex(4), dimension(:,:), allocatable :: x_dv, y_dv, x_dv_seed, y_dv_seed
+    integer :: band_row, j, idir
+    real(4) :: temp_real, temp_imag
+    ksize = max(0, n - 1)
+    nsize = n
+    lda_val = ksize + 1
+    incx_val = 1
+    incy_val = 1
+    uplo = 'U'
+    trans = 'N'
+    diag = 'N'
+    allocate(a(lda_val, n), a_orig(lda_val, n), a_dv(nbdirs, lda_val, n), a_dv_seed(nbdirs, lda_val, n), x(n), x_orig(n), x_dv(nbdirs, n), x_dv_seed(nbdirs, n))
+    ! Initialize a as triangular band matrix (upper band storage)
+    do j = 1, n
+    do band_row = max(1, ksize+2-j), ksize+1
     call random_number(temp_real)
     call random_number(temp_imag)
-    x(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-
-  ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirsmax
-    do i = 1, max_size
-      do j = 1, max_size
-        call random_number(temp_real)
-        call random_number(temp_imag)
-        a_dv(idir,i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    a(band_row, j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+    end do
+    end do
+    do idir = 1, nbdirs
+      do j = 1, n
+        do band_row = max(1, ksize+2-j), ksize+1
+          call random_number(temp_real)
+          call random_number(temp_imag)
+          a_dv(idir, band_row, j) = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(a_dv))
+        end do
       end do
     end do
-  end do
-  do idir = 1, nbdirsmax
-    do i = 1, max_size
+    call random_number(temp_real)
+    call random_number(temp_imag)
+    alpha = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(alpha))
+    do j = 1, n
       call random_number(temp_real)
       call random_number(temp_imag)
-      x_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+      x(j) = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(x))
     end do
-  end do
-
-  write(*,*) 'Testing CTBMV (Vector Forward Mode)'
-  ! Store original values before any function calls (critical for INOUT parameters)
-  a_orig = a
-  a_dv_orig = a_dv
-  x_orig = x
-  x_dv_orig = x_dv
-
-  ! Call the vector mode differentiated function
-
-  call ctbmv_dv(uplo, trans, diag, nsize, ksize, a, a_dv, lda_val, x, x_dv, incx_val, nbdirsmax)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically()
-
-  write(*,*) 'Vector forward mode test completed successfully'
-
-contains
-
-  subroutine check_derivatives_numerically()
-    implicit none
-    real(4), parameter :: h = 1.0e-3  ! Step size for finite differences
-    real(4) :: relative_error, max_error
-    real(4) :: abs_error, abs_reference, error_bound
-    complex(4) :: central_diff, ad_result
-    integer :: i, j, idir, band_row
-    logical :: has_large_errors
-    complex(4), dimension(max_size) :: x_forward, x_backward
-    
-    max_error = 0.0e0
-    has_large_errors = .false.
-    
-    write(*,*) 'Checking vector derivatives against numerical differentiation:'
-    write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirsmax
-    
-    ! Test each derivative direction separately
-    do idir = 1, nbdirsmax
-      
-      ! Forward perturbation: f(x + h * direction)
-      a = a_orig + cmplx(h, 0.0) * a_dv_orig(idir,:,:)
-      x = x_orig + cmplx(h, 0.0) * x_dv_orig(idir,:)
-      call ctbmv(uplo, trans, diag, nsize, ksize, a, lda_val, x, incx_val)
-      x_forward = x
-      
-      ! Backward perturbation: f(x - h * direction)
-      a = a_orig - cmplx(h, 0.0) * a_dv_orig(idir,:,:)
-      x = x_orig - cmplx(h, 0.0) * x_dv_orig(idir,:)
-      call ctbmv(uplo, trans, diag, nsize, ksize, a, lda_val, x, incx_val)
-      x_backward = x
-      
-      ! Compute central differences and compare with AD results
-      do i = 1, min(2, nsize)  ! Check only first few elements
-        ! Central difference: (f(x+h) - f(x-h)) / (2h)
-        central_diff = (x_forward(i) - x_backward(i)) / (2.0e0 * h)
-        ! AD result
-        ad_result = x_dv(idir,i)
-        ! Error check: |a - b| > atol + rtol * |b|
-        abs_error = abs(central_diff - ad_result)
-        abs_reference = abs(ad_result)
-        error_bound = 1.0e-3 + 1.0e-3 * abs_reference
-        if (abs_error > error_bound) then
-          has_large_errors = .true.
-          relative_error = abs_error / max(abs_reference, 1.0e-10)
-          write(*,*) '  Large error in direction', idir, ' output X(', i, '):'
-          write(*,*) '    Central diff: ', central_diff
-          write(*,*) '    AD result:   ', ad_result
-          write(*,*) '    Absolute error:', abs_error
-          write(*,*) '    Error bound:', error_bound
-          write(*,*) '    Relative error:', relative_error
-        end if
-        ! Track max error for reporting (normalized)
-        relative_error = abs_error / max(abs_reference, 1.0e-10)
-        max_error = max(max_error, relative_error)
+    do idir = 1, nbdirs
+      do j = 1, n
+        call random_number(temp_real)
+        call random_number(temp_imag)
+        x_dv(idir,j) = cmplx(temp_real*2.0-1.0, temp_imag*2.0-1.0, kind=kind(x_dv))
       end do
     end do
-    
-    write(*,*) 'Maximum relative error across all directions:', max_error
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
-    if (has_large_errors) then
-      write(*,*) 'FAIL: Large errors detected in vector derivatives (outside tolerance)'
-    else
-      write(*,*) 'PASS: Vector derivatives are within tolerance (rtol + atol)'
-    end if
-    
-  end subroutine check_derivatives_numerically
+    write(*,*) 'Testing CTBMV (Vector Forward band, n =', n, ')'
+    a_orig = a
+    x_orig = x
+    a_dv_seed = a_dv
+    x_dv_seed = x_dv
+    call ctbmv_dv(uplo, trans, diag, nsize, ksize, a, a_dv, lda_val, x, x_dv, incx_val, nbdirs)
+    write(*,*) 'Function calls completed successfully'
+    call check_derivatives_numerically_band_tri(n, nbdirs, lda_val, ksize, uplo, trans, diag, nsize, incx_val, a_orig, a_dv_seed, x_orig, x_dv_seed, x_dv, passed)
+    deallocate(a, a_orig, a_dv, a_dv_seed, x, x_orig, x_dv, x_dv_seed)
+  end subroutine run_test_for_size
 
+  subroutine check_derivatives_numerically_band_tri(n, nbdirs, lda_val, ksize, uplo, trans, diag, nsize, incx_val, a_orig, a_dv_seed, x_orig, x_dv_seed, x_dv_out, passed)
+    implicit none
+    integer, intent(in) :: n, nbdirs, lda_val, ksize, nsize, incx_val
+    character, intent(in) :: uplo, trans, diag
+    complex(4), intent(in) :: a_orig(lda_val, n), a_dv_seed(nbdirs, lda_val, n), x_orig(n), x_dv_seed(nbdirs, n), x_dv_out(nbdirs, n)
+    logical, intent(out) :: passed
+    real(4), parameter :: h = 1.0e-3
+    real(4) :: abs_error, abs_ref, err_bound, max_error, relative_error
+    complex(4) :: central_diff, ad_result
+    logical :: has_err
+    complex(4), dimension(n) :: x_fwd, x_bwd, x_t
+    complex(4), dimension(lda_val, n) :: a_t
+    integer :: i, idir, j, band_row
+    has_err = .false.
+    max_error = 0.0e0
+    write(*,*) 'Checking derivatives against numerical differentiation:'
+    write(*,*) 'Step size h =', h
+    do idir = 1, nbdirs
+      a_t = a_orig
+      do j = 1, n
+        do band_row = max(1, ksize+2-j), ksize+1
+          a_t(band_row, j) = a_orig(band_row, j) + h * a_dv_seed(idir, band_row, j)
+        end do
+      end do
+      x_t = x_orig + h * x_dv_seed(idir,:)
+      call ctbmv(uplo, trans, diag, nsize, ksize, a_t, lda_val, x_t, incx_val)
+      x_fwd = x_t
+      a_t = a_orig
+      do j = 1, n
+        do band_row = max(1, ksize+2-j), ksize+1
+          a_t(band_row, j) = a_orig(band_row, j) - h * a_dv_seed(idir, band_row, j)
+        end do
+      end do
+      x_t = x_orig - h * x_dv_seed(idir,:)
+      call ctbmv(uplo, trans, diag, nsize, ksize, a_t, lda_val, x_t, incx_val)
+      x_bwd = x_t
+      do i = 1, min(3, n)
+        central_diff = (x_fwd(i) - x_bwd(i)) / (2.0e0 * h)
+        ad_result = x_dv_out(idir, i)
+        abs_error = abs(central_diff - ad_result)
+        abs_ref = abs(ad_result)
+        err_bound = 1.0e-3 + 1.0e-3 * abs_ref
+        if (abs_error > err_bound) has_err = .true.
+        relative_error = abs_error / max(abs_ref, 1.0e-10)
+        if (relative_error > max_error) max_error = relative_error
+      end do
+    end do
+    write(*,*) 'Maximum relative error:', max_error
+    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    passed = .not. has_err
+    if (has_err) then
+      write(*,*) 'FAIL: Derivatives are outside tolerance'
+    else
+      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
+    end if
+  end subroutine check_derivatives_numerically_band_tri
 end program test_ctbmv_vector_forward

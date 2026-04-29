@@ -94,12 +94,12 @@
 !  =====================================================================
 SUBROUTINE SNRM2_DV(n, x, xd, incx, snrm2, snrm2d, nbdirs)
   USE DIFFSIZES
-!  Hint: nbdirsmax should be the maximum number of differentiation directions
+!  Hint: nbdirs should be the maximum number of differentiation directions
   IMPLICIT NONE
   INTRINSIC KIND
   INTEGER, PARAMETER :: wp=KIND(1.e0)
   REAL(wp) :: snrm2
-  REAL(wp), DIMENSION(nbdirsmax) :: snrm2d
+  REAL(wp), DIMENSION(nbdirs) :: snrm2d
 !
 !  -- Reference BLAS level1 routine (version 3.9.1) --
 !  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -134,18 +134,18 @@ SUBROUTINE SNRM2_DV(n, x, xd, incx, snrm2, snrm2d, nbdirs)
 !  ..
 !  .. Array Arguments ..
   REAL(wp) :: x(*)
-  REAL(wp) :: xd(nbdirsmax, *)
+  REAL(wp) :: xd(nbdirs, *)
 !  ..
 !  .. Local Scalars ..
   INTEGER :: i, ix
   LOGICAL :: notbig
   REAL(wp) :: abig, amed, asml, ax, scl, sumsq, ymax, ymin
-  REAL(wp), DIMENSION(nbdirsmax) :: abigd, amedd, asmld, axd, sumsqd, &
+  REAL(wp), DIMENSION(nbdirs) :: abigd, amedd, asmld, axd, sumsqd, &
 & ymaxd, ymind
   INTRINSIC ABS
   INTRINSIC SQRT
   REAL(wp) :: result1
-  REAL(wp), DIMENSION(nbdirsmax) :: result1d
+  REAL(wp), DIMENSION(nbdirs) :: result1d
   INTEGER :: nd
   REAL(wp) :: temp
   INTEGER :: nbdirs
@@ -154,13 +154,6 @@ SUBROUTINE SNRM2_DV(n, x, xd, incx, snrm2, snrm2d, nbdirs)
 !
   snrm2 = zero
   IF (n .LE. 0) THEN
-! Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-  IF (nbdirs <= 0 .OR. nbdirs > nbdirsmax) THEN
-    WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs, &
-      ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-    STOP 1
-  END IF
-!
     snrm2d = 0.0_4
     RETURN
   ELSE
