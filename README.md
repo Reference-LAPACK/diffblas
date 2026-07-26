@@ -76,7 +76,7 @@ You need **pre-generated** sources (from step 1). The build compiles them and li
 **Dependencies:**
 
 - **Fortran compiler** (e.g. gfortran, ifort, ifx) and **C compiler** (e.g. gcc).
-- **LAPACK installation** — a built Reference LAPACK (or compatible) providing BLAS (e.g. `librefblas.a` or `libblas.a`). Set **`LAPACKDIR`** (or equivalent) so Meson can find it (see below).
+- **LAPACK installation** — a built Reference LAPACK (or compatible) providing BLAS (e.g. `librefblas.a` or `libblas.a`). Set **`LAPACKDIR`** (or equivalent) so Meson can find it (see below). If your build produced `libblas.a` rather than `librefblas.a`, pass `-Dlibblas=blas` instead of `-Dlibblas=refblas`.
 - **Tapenade adStack** — the repo already contains `TAPENADE/adStack.c` and `TAPENADE/include/`; Meson compiles and links these automatically. No separate Tapenade install is required for the build.
 
 **Configure and build from the project root:**
@@ -118,6 +118,19 @@ cd BLAS
 export LAPACKDIR=/path/to/your/lapack/build   # or wherever librefblas is
 make
 ```
+
+**Note on library naming:** if you built Reference LAPACK yourself via its standard CMake build, the resulting BLAS archive is usually named `libblas.a` (and `liblapack.a`), not `librefblas.a`. Since this Makefile links against `-lrefblas` by default (see `BLAS_LIB` in the Makefile), you'll need to either:
+
+1. Symlink it to the expected name:
+
+       cd $LAPACKDIR
+       ln -s libblas.a librefblas.a
+
+2. Or override `BLAS_LIB` with the full linker flags for your archive's actual name:
+
+       make BLAS_LIB="-L$LAPACKDIR -lblas"
+
+Run `find $LAPACKDIR -name "*.a"` first if you're not sure which archive names you actually have.
 
 This builds per-mode static libraries (`build/libdiffblas_d.a`, `libdiffblas_b.a`, `libdiffblas_dv.a`, `libdiffblas_bv.a`) and test executables in `build/`. Run tests:
 
