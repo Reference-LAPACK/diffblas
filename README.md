@@ -116,7 +116,7 @@ meson install -C builddir --prefix /your/install
 ```bash
 cd BLAS
 export LAPACKDIR=/path/to/your/lapack/build   # or wherever librefblas is
-make
+make # use make -j 8 or make -j 16 for a faster build using multi-threading
 ```
 
 **Note on library naming:** if you built Reference LAPACK yourself via its standard CMake build, the resulting BLAS archive is usually named `libblas.a` (and `liblapack.a`), not `librefblas.a`. Since this Makefile links against `-lrefblas` by default (see `BLAS_LIB` in the Makefile), you'll need to either:
