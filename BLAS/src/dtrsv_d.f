@@ -390,12 +390,15 @@ C      END IF
 C      END
 
       SUBROUTINE DTRSV_D(UPLO, TRANS, DIAG, N, A, AD, LDA, X, XD, INCX)
-!
-! Forward-mode derivative of DTRSV, black-box/Giles-style: differentiate
-! op(A)*s = b directly. Uses only the original DTRSV and DTRMV.
-! X, XD are overwritten in place with the solution and its derivative,
-! matching the primal DTRSV's own convention.
-!
+C
+C Forward-mode derivative of STRSV via the black-box / Giles-style
+C approach: differentiate op(A)*s = b directly (the exact vector case
+C from the Giles appendix). Uses only the original STRSV and STRMV.
+C
+C CONVENTION (matches the primal STRSV's own in-place behavior):
+C   X, XD : overwritten in place with the solution S and its
+C           derivative dS, exactly like the primal/forward routine.
+C
       IMPLICIT NONE
       CHARACTER UPLO, TRANS, DIAG
       INTEGER N, LDA, INCX

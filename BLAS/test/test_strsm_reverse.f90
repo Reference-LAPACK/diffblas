@@ -56,7 +56,6 @@ program test_strsm_reverse
   seed_array = 42
   call random_seed(put=seed_array)
 
-
   ! Initialize primal values
   side = 'L'
   uplo = 'U'

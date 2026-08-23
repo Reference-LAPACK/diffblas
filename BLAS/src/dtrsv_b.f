@@ -644,11 +644,11 @@ C      CALL POPCONTROL3B(branch)
 C      END
 
       SUBROUTINE DTRSV_B(UPLO, TRANS, DIAG, N, A, AB, LDA, X, XB, INCX)
-!
-! Reverse-mode (adjoint) derivative of DTRSV, black-box/Giles-style.
-! X is read-only (original entry RHS), never written -- matches the
-! net externally-visible behavior of Tapenade's own dtrsv_b.f.
-!
+C
+C Reverse-mode (adjoint) derivative of DTRSV, black-box/Giles-style.
+C X is read-only (original entry RHS), never written -- matches the
+C net externally-visible behavior of Tapenade's own dtrsv_b.f.
+C
       IMPLICIT NONE
       CHARACTER UPLO, TRANS, DIAG
       INTEGER N, LDA, INCX

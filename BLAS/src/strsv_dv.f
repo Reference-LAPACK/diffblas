@@ -152,322 +152,388 @@ C>     Richard Hanson, Sandia National Labs.
 C> \endverbatim
 C>
 C  =====================================================================
-      SUBROUTINE STRSV_DV(uplo, trans, diag, n, a, ad, lda, x, xd, incx
-     +                    , nbdirs)
+C      SUBROUTINE STRSV_DV(uplo, trans, diag, n, a, ad, lda, x, xd, incx
+C     +                    , nbdirs)
+C      IMPLICIT NONE
+C      INCLUDE 'DIFFSIZES.inc'
+CC  Hint: nbdirsmax should be the maximum number of differentiation directions
+CC
+CC  -- Reference BLAS level2 routine --
+CC  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
+CC  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
+CC
+CC     .. Scalar Arguments ..
+C      INTEGER incx, lda, n
+C      CHARACTER diag, trans, uplo
+CC     ..
+CC     .. Array Arguments ..
+C      REAL a(lda, *), x(*)
+C      REAL ad(nbdirsmax, lda, *), xd(nbdirsmax, *)
+CC     ..
+CC
+CC  =====================================================================
+CC     ..
+CC     .. Local Scalars ..
+C      REAL temp
+C      REAL tempd(nbdirsmax)
+C      INTEGER i, info, ix, j, jx, kx
+C      LOGICAL nounit
+C      EXTERNAL LSAME
+CC     ..
+CC     .. External Functions ..
+C      LOGICAL LSAME
+CC     ..
+CC     .. External Subroutines ..
+C      EXTERNAL XERBLA
+CC     ..
+CC     .. Intrinsic Functions ..
+C      INTRINSIC MAX
+C      INTEGER max1
+C      INTEGER nd
+C      REAL temp0
+C      INTEGER nbdirs
+CC     ..
+CC
+CC     Test the input parameters.
+CC
+CC     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
+C      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
+C        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
+C     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
+C        STOP 1
+C      END IF
+CC
+C      info = 0
+C      IF (.NOT.LSAME(uplo, 'U') .AND. (.NOT.LSAME(uplo, 'L'))) THEN
+C        info = 1
+C      ELSE IF (.NOT.LSAME(trans, 'N') .AND. (.NOT.LSAME(trans, 'T')) 
+C     +    .AND. (.NOT.LSAME(trans, 'C'))) THEN
+C        info = 2
+C      ELSE IF (.NOT.LSAME(diag, 'U') .AND. (.NOT.LSAME(diag, 'N'))) THEN
+C        info = 3
+C      ELSE IF (n .LT. 0) THEN
+C        info = 4
+C      ELSE
+C        IF (1 .LT. n) THEN
+C          max1 = n
+C        ELSE
+C          max1 = 1
+C        END IF
+C        IF (lda .LT. max1) THEN
+C          info = 6
+C        ELSE IF (incx .EQ. 0) THEN
+C          info = 8
+C        END IF
+C      END IF
+C      IF (info .NE. 0) THEN
+C        CALL XERBLA('STRSV ', info)
+C        RETURN
+C      ELSE IF (n .EQ. 0) THEN
+CC
+CC     Quick return if possible.
+CC
+C        RETURN
+C      ELSE
+CC
+C        nounit = LSAME(diag, 'N')
+CC
+CC     Set up the start point in X if the increment is not unity. This
+CC     will be  ( N - 1 )*INCX  too small for descending loops.
+CC
+C        IF (incx .LE. 0) THEN
+C          kx = 1 - (n-1)*incx
+C        ELSE IF (incx .NE. 1) THEN
+C          kx = 1
+C        END IF
+CC
+CC     Start the operations. In this version the elements of A are
+CC     accessed sequentially with one pass through A.
+CC
+C        IF (LSAME(trans, 'N')) THEN
+CC
+CC        Form  x := inv( A )*x.
+CC
+C          IF (LSAME(uplo, 'U')) THEN
+C            IF (incx .EQ. 1) THEN
+C              DO j=n,1,-1
+C                IF (nounit) THEN
+C                  temp0 = x(j)/a(j, j)
+C                  DO nd=1,nbdirs
+C                    xd(nd, j) = (xd(nd, j)-temp0*ad(nd, j, j))/a(j, j)
+C                  ENDDO
+C                  x(j) = temp0
+C                END IF
+C                DO nd=1,nbdirs
+C                  tempd(nd) = xd(nd, j)
+C                ENDDO
+C                temp = x(j)
+C                DO i=j-1,1,-1
+C                  DO nd=1,nbdirs
+C                    xd(nd, i) = xd(nd, i) - a(i, j)*tempd(nd) - temp*ad(
+C     +                nd, i, j)
+C                  ENDDO
+C                  x(i) = x(i) - temp*a(i, j)
+C                ENDDO
+C              ENDDO
+C            ELSE
+C              jx = kx + (n-1)*incx
+C              DO j=n,1,-1
+C                IF (nounit) THEN
+C                  temp0 = x(jx)/a(j, j)
+C                  DO nd=1,nbdirs
+C                    xd(nd, jx) = (xd(nd, jx)-temp0*ad(nd, j, j))/a(j, j)
+C                  ENDDO
+C                  x(jx) = temp0
+C                END IF
+C                DO nd=1,nbdirs
+C                  tempd(nd) = xd(nd, jx)
+C                ENDDO
+C                temp = x(jx)
+C                ix = jx
+C                DO i=j-1,1,-1
+C                  ix = ix - incx
+C                  DO nd=1,nbdirs
+C                    xd(nd, ix) = xd(nd, ix) - a(i, j)*tempd(nd) - temp*
+C     +                ad(nd, i, j)
+C                  ENDDO
+C                  x(ix) = x(ix) - temp*a(i, j)
+C                ENDDO
+C                jx = jx - incx
+C              ENDDO
+C            END IF
+C          ELSE IF (incx .EQ. 1) THEN
+C            DO j=1,n
+C              IF (nounit) THEN
+C                temp0 = x(j)/a(j, j)
+C                DO nd=1,nbdirs
+C                  xd(nd, j) = (xd(nd, j)-temp0*ad(nd, j, j))/a(j, j)
+C                ENDDO
+C                x(j) = temp0
+C              END IF
+C              DO nd=1,nbdirs
+C                tempd(nd) = xd(nd, j)
+C              ENDDO
+C              temp = x(j)
+C              DO i=j+1,n
+C                DO nd=1,nbdirs
+C                  xd(nd, i) = xd(nd, i) - a(i, j)*tempd(nd) - temp*ad(nd
+C     +              , i, j)
+C                ENDDO
+C                x(i) = x(i) - temp*a(i, j)
+C              ENDDO
+C            ENDDO
+C          ELSE
+C            jx = kx
+C            DO j=1,n
+C              IF (nounit) THEN
+C                temp0 = x(jx)/a(j, j)
+C                DO nd=1,nbdirs
+C                  xd(nd, jx) = (xd(nd, jx)-temp0*ad(nd, j, j))/a(j, j)
+C                ENDDO
+C                x(jx) = temp0
+C              END IF
+C              DO nd=1,nbdirs
+C                tempd(nd) = xd(nd, jx)
+C              ENDDO
+C              temp = x(jx)
+C              ix = jx
+C              DO i=j+1,n
+C                ix = ix + incx
+C                DO nd=1,nbdirs
+C                  xd(nd, ix) = xd(nd, ix) - a(i, j)*tempd(nd) - temp*ad(
+C     +              nd, i, j)
+C                ENDDO
+C                x(ix) = x(ix) - temp*a(i, j)
+C              ENDDO
+C              jx = jx + incx
+C            ENDDO
+C          END IF
+C        ELSE IF (LSAME(uplo, 'U')) THEN
+CC
+CC        Form  x := inv( A**T )*x.
+CC
+C          IF (incx .EQ. 1) THEN
+C            DO j=1,n
+C              DO nd=1,nbdirs
+C                tempd(nd) = xd(nd, j)
+C              ENDDO
+C              temp = x(j)
+C              DO i=1,j-1
+C                DO nd=1,nbdirs
+C                  tempd(nd) = tempd(nd) - x(i)*ad(nd, i, j) - a(i, j)*xd
+C     +              (nd, i)
+C                ENDDO
+C                temp = temp - a(i, j)*x(i)
+C              ENDDO
+C              IF (nounit) THEN
+C                temp0 = temp/a(j, j)
+C                DO nd=1,nbdirs
+C                  tempd(nd) = (tempd(nd)-temp0*ad(nd, j, j))/a(j, j)
+C                ENDDO
+C                temp = temp0
+C              END IF
+C              DO nd=1,nbdirs
+C                xd(nd, j) = tempd(nd)
+C              ENDDO
+C              x(j) = temp
+C            ENDDO
+C          ELSE
+C            jx = kx
+C            DO j=1,n
+C              DO nd=1,nbdirs
+C                tempd(nd) = xd(nd, jx)
+C              ENDDO
+C              temp = x(jx)
+C              ix = kx
+C              DO i=1,j-1
+C                DO nd=1,nbdirs
+C                  tempd(nd) = tempd(nd) - x(ix)*ad(nd, i, j) - a(i, j)*
+C     +              xd(nd, ix)
+C                ENDDO
+C                temp = temp - a(i, j)*x(ix)
+C                ix = ix + incx
+C              ENDDO
+C              IF (nounit) THEN
+C                temp0 = temp/a(j, j)
+C                DO nd=1,nbdirs
+C                  tempd(nd) = (tempd(nd)-temp0*ad(nd, j, j))/a(j, j)
+C                ENDDO
+C                temp = temp0
+C              END IF
+C              DO nd=1,nbdirs
+C                xd(nd, jx) = tempd(nd)
+C              ENDDO
+C              x(jx) = temp
+C              jx = jx + incx
+C            ENDDO
+C          END IF
+C        ELSE IF (incx .EQ. 1) THEN
+C          DO j=n,1,-1
+C            DO nd=1,nbdirs
+C              tempd(nd) = xd(nd, j)
+C            ENDDO
+C            temp = x(j)
+C            DO i=n,j+1,-1
+C              DO nd=1,nbdirs
+C                tempd(nd) = tempd(nd) - x(i)*ad(nd, i, j) - a(i, j)*xd(
+C     +            nd, i)
+C              ENDDO
+C              temp = temp - a(i, j)*x(i)
+C            ENDDO
+C            IF (nounit) THEN
+C              temp0 = temp/a(j, j)
+C              DO nd=1,nbdirs
+C                tempd(nd) = (tempd(nd)-temp0*ad(nd, j, j))/a(j, j)
+C              ENDDO
+C              temp = temp0
+C            END IF
+C            DO nd=1,nbdirs
+C              xd(nd, j) = tempd(nd)
+C            ENDDO
+C            x(j) = temp
+C          ENDDO
+C        ELSE
+C          kx = kx + (n-1)*incx
+C          jx = kx
+C          DO j=n,1,-1
+C            DO nd=1,nbdirs
+C              tempd(nd) = xd(nd, jx)
+C            ENDDO
+C            temp = x(jx)
+C            ix = kx
+C            DO i=n,j+1,-1
+C              DO nd=1,nbdirs
+C                tempd(nd) = tempd(nd) - x(ix)*ad(nd, i, j) - a(i, j)*xd(
+C     +            nd, ix)
+C              ENDDO
+C              temp = temp - a(i, j)*x(ix)
+C              ix = ix - incx
+C            ENDDO
+C            IF (nounit) THEN
+C              temp0 = temp/a(j, j)
+C              DO nd=1,nbdirs
+C                tempd(nd) = (tempd(nd)-temp0*ad(nd, j, j))/a(j, j)
+C              ENDDO
+C              temp = temp0
+C            END IF
+C            DO nd=1,nbdirs
+C              xd(nd, jx) = tempd(nd)
+C            ENDDO
+C            x(jx) = temp
+C            jx = jx - incx
+C          ENDDO
+C        END IF
+CC
+C        RETURN
+CC
+CC     End of STRSV
+CC
+C      END IF
+C      END
+
+      SUBROUTINE STRSV_DV(UPLO, TRANS, DIAG, N, A, AD, LDA, X, XD,
+     +                    INCX, NBDIRS)
+C
+C Vector forward-mode derivative of STRSV, black-box/Giles-style.
+C Self-contained -- does not call STRSV_D.
+C
       IMPLICIT NONE
       INCLUDE 'DIFFSIZES.inc'
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
-C
-C  -- Reference BLAS level2 routine --
-C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
-C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
-C
-C     .. Scalar Arguments ..
-      INTEGER incx, lda, n
-      CHARACTER diag, trans, uplo
-C     ..
-C     .. Array Arguments ..
-      REAL a(lda, *), x(*)
-      REAL ad(nbdirsmax, lda, *), xd(nbdirsmax, *)
-C     ..
-C
-C  =====================================================================
-C     ..
-C     .. Local Scalars ..
-      REAL temp
-      REAL tempd(nbdirsmax)
-      INTEGER i, info, ix, j, jx, kx
-      LOGICAL nounit
-      EXTERNAL LSAME
-C     ..
-C     .. External Functions ..
-      LOGICAL LSAME
-C     ..
-C     .. External Subroutines ..
-      EXTERNAL XERBLA
-C     ..
-C     .. Intrinsic Functions ..
-      INTRINSIC MAX
-      INTEGER max1
-      INTEGER nd
-      REAL temp0
-      INTEGER nbdirs
-C     ..
-C
-C     Test the input parameters.
-C
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
+      CHARACTER UPLO, TRANS, DIAG
+      INTEGER N, LDA, INCX, NBDIRS
+      REAL A(LDA,*), AD(NBDIRSMAX,LDA,*)
+      REAL X(*), XD(NBDIRSMAX,*)
+
+      REAL S(N), T(N), W(N), AD_SLICE(LDA,LDA)
+      INTEGER ND, I, J, KX
+
+      IF (NBDIRS.LE.0 .OR. NBDIRS.GT.NBDIRSMAX) THEN
+         WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', NBDIRS,
+     +      ' must be in 1..nbdirsmax=', NBDIRSMAX, '. Stopping.'
+         STOP 1
       END IF
-C
-      info = 0
-      IF (.NOT.LSAME(uplo, 'U') .AND. (.NOT.LSAME(uplo, 'L'))) THEN
-        info = 1
-      ELSE IF (.NOT.LSAME(trans, 'N') .AND. (.NOT.LSAME(trans, 'T')) 
-     +    .AND. (.NOT.LSAME(trans, 'C'))) THEN
-        info = 2
-      ELSE IF (.NOT.LSAME(diag, 'U') .AND. (.NOT.LSAME(diag, 'N'))) THEN
-        info = 3
-      ELSE IF (n .LT. 0) THEN
-        info = 4
+
+      IF (N.EQ.0) RETURN
+
+      IF (INCX.GE.1) THEN
+         KX = 1
       ELSE
-        IF (1 .LT. n) THEN
-          max1 = n
-        ELSE
-          max1 = 1
-        END IF
-        IF (lda .LT. max1) THEN
-          info = 6
-        ELSE IF (incx .EQ. 0) THEN
-          info = 8
-        END IF
+         KX = 1 - (N-1)*INCX
       END IF
-      IF (info .NE. 0) THEN
-        CALL XERBLA('STRSV ', info)
-        RETURN
-      ELSE IF (n .EQ. 0) THEN
-C
-C     Quick return if possible.
-C
-        RETURN
-      ELSE
-C
-        nounit = LSAME(diag, 'N')
-C
-C     Set up the start point in X if the increment is not unity. This
-C     will be  ( N - 1 )*INCX  too small for descending loops.
-C
-        IF (incx .LE. 0) THEN
-          kx = 1 - (n-1)*incx
-        ELSE IF (incx .NE. 1) THEN
-          kx = 1
-        END IF
-C
-C     Start the operations. In this version the elements of A are
-C     accessed sequentially with one pass through A.
-C
-        IF (LSAME(trans, 'N')) THEN
-C
-C        Form  x := inv( A )*x.
-C
-          IF (LSAME(uplo, 'U')) THEN
-            IF (incx .EQ. 1) THEN
-              DO j=n,1,-1
-                IF (nounit) THEN
-                  temp0 = x(j)/a(j, j)
-                  DO nd=1,nbdirs
-                    xd(nd, j) = (xd(nd, j)-temp0*ad(nd, j, j))/a(j, j)
-                  ENDDO
-                  x(j) = temp0
-                END IF
-                DO nd=1,nbdirs
-                  tempd(nd) = xd(nd, j)
-                ENDDO
-                temp = x(j)
-                DO i=j-1,1,-1
-                  DO nd=1,nbdirs
-                    xd(nd, i) = xd(nd, i) - a(i, j)*tempd(nd) - temp*ad(
-     +                nd, i, j)
-                  ENDDO
-                  x(i) = x(i) - temp*a(i, j)
-                ENDDO
-              ENDDO
-            ELSE
-              jx = kx + (n-1)*incx
-              DO j=n,1,-1
-                IF (nounit) THEN
-                  temp0 = x(jx)/a(j, j)
-                  DO nd=1,nbdirs
-                    xd(nd, jx) = (xd(nd, jx)-temp0*ad(nd, j, j))/a(j, j)
-                  ENDDO
-                  x(jx) = temp0
-                END IF
-                DO nd=1,nbdirs
-                  tempd(nd) = xd(nd, jx)
-                ENDDO
-                temp = x(jx)
-                ix = jx
-                DO i=j-1,1,-1
-                  ix = ix - incx
-                  DO nd=1,nbdirs
-                    xd(nd, ix) = xd(nd, ix) - a(i, j)*tempd(nd) - temp*
-     +                ad(nd, i, j)
-                  ENDDO
-                  x(ix) = x(ix) - temp*a(i, j)
-                ENDDO
-                jx = jx - incx
-              ENDDO
-            END IF
-          ELSE IF (incx .EQ. 1) THEN
-            DO j=1,n
-              IF (nounit) THEN
-                temp0 = x(j)/a(j, j)
-                DO nd=1,nbdirs
-                  xd(nd, j) = (xd(nd, j)-temp0*ad(nd, j, j))/a(j, j)
-                ENDDO
-                x(j) = temp0
-              END IF
-              DO nd=1,nbdirs
-                tempd(nd) = xd(nd, j)
-              ENDDO
-              temp = x(j)
-              DO i=j+1,n
-                DO nd=1,nbdirs
-                  xd(nd, i) = xd(nd, i) - a(i, j)*tempd(nd) - temp*ad(nd
-     +              , i, j)
-                ENDDO
-                x(i) = x(i) - temp*a(i, j)
-              ENDDO
-            ENDDO
-          ELSE
-            jx = kx
-            DO j=1,n
-              IF (nounit) THEN
-                temp0 = x(jx)/a(j, j)
-                DO nd=1,nbdirs
-                  xd(nd, jx) = (xd(nd, jx)-temp0*ad(nd, j, j))/a(j, j)
-                ENDDO
-                x(jx) = temp0
-              END IF
-              DO nd=1,nbdirs
-                tempd(nd) = xd(nd, jx)
-              ENDDO
-              temp = x(jx)
-              ix = jx
-              DO i=j+1,n
-                ix = ix + incx
-                DO nd=1,nbdirs
-                  xd(nd, ix) = xd(nd, ix) - a(i, j)*tempd(nd) - temp*ad(
-     +              nd, i, j)
-                ENDDO
-                x(ix) = x(ix) - temp*a(i, j)
-              ENDDO
-              jx = jx + incx
-            ENDDO
-          END IF
-        ELSE IF (LSAME(uplo, 'U')) THEN
-C
-C        Form  x := inv( A**T )*x.
-C
-          IF (incx .EQ. 1) THEN
-            DO j=1,n
-              DO nd=1,nbdirs
-                tempd(nd) = xd(nd, j)
-              ENDDO
-              temp = x(j)
-              DO i=1,j-1
-                DO nd=1,nbdirs
-                  tempd(nd) = tempd(nd) - x(i)*ad(nd, i, j) - a(i, j)*xd
-     +              (nd, i)
-                ENDDO
-                temp = temp - a(i, j)*x(i)
-              ENDDO
-              IF (nounit) THEN
-                temp0 = temp/a(j, j)
-                DO nd=1,nbdirs
-                  tempd(nd) = (tempd(nd)-temp0*ad(nd, j, j))/a(j, j)
-                ENDDO
-                temp = temp0
-              END IF
-              DO nd=1,nbdirs
-                xd(nd, j) = tempd(nd)
-              ENDDO
-              x(j) = temp
-            ENDDO
-          ELSE
-            jx = kx
-            DO j=1,n
-              DO nd=1,nbdirs
-                tempd(nd) = xd(nd, jx)
-              ENDDO
-              temp = x(jx)
-              ix = kx
-              DO i=1,j-1
-                DO nd=1,nbdirs
-                  tempd(nd) = tempd(nd) - x(ix)*ad(nd, i, j) - a(i, j)*
-     +              xd(nd, ix)
-                ENDDO
-                temp = temp - a(i, j)*x(ix)
-                ix = ix + incx
-              ENDDO
-              IF (nounit) THEN
-                temp0 = temp/a(j, j)
-                DO nd=1,nbdirs
-                  tempd(nd) = (tempd(nd)-temp0*ad(nd, j, j))/a(j, j)
-                ENDDO
-                temp = temp0
-              END IF
-              DO nd=1,nbdirs
-                xd(nd, jx) = tempd(nd)
-              ENDDO
-              x(jx) = temp
-              jx = jx + incx
-            ENDDO
-          END IF
-        ELSE IF (incx .EQ. 1) THEN
-          DO j=n,1,-1
-            DO nd=1,nbdirs
-              tempd(nd) = xd(nd, j)
-            ENDDO
-            temp = x(j)
-            DO i=n,j+1,-1
-              DO nd=1,nbdirs
-                tempd(nd) = tempd(nd) - x(i)*ad(nd, i, j) - a(i, j)*xd(
-     +            nd, i)
-              ENDDO
-              temp = temp - a(i, j)*x(i)
-            ENDDO
-            IF (nounit) THEN
-              temp0 = temp/a(j, j)
-              DO nd=1,nbdirs
-                tempd(nd) = (tempd(nd)-temp0*ad(nd, j, j))/a(j, j)
-              ENDDO
-              temp = temp0
-            END IF
-            DO nd=1,nbdirs
-              xd(nd, j) = tempd(nd)
-            ENDDO
-            x(j) = temp
-          ENDDO
-        ELSE
-          kx = kx + (n-1)*incx
-          jx = kx
-          DO j=n,1,-1
-            DO nd=1,nbdirs
-              tempd(nd) = xd(nd, jx)
-            ENDDO
-            temp = x(jx)
-            ix = kx
-            DO i=n,j+1,-1
-              DO nd=1,nbdirs
-                tempd(nd) = tempd(nd) - x(ix)*ad(nd, i, j) - a(i, j)*xd(
-     +            nd, ix)
-              ENDDO
-              temp = temp - a(i, j)*x(ix)
-              ix = ix - incx
-            ENDDO
-            IF (nounit) THEN
-              temp0 = temp/a(j, j)
-              DO nd=1,nbdirs
-                tempd(nd) = (tempd(nd)-temp0*ad(nd, j, j))/a(j, j)
-              ENDDO
-              temp = temp0
-            END IF
-            DO nd=1,nbdirs
-              xd(nd, jx) = tempd(nd)
-            ENDDO
-            x(jx) = temp
-            jx = jx - incx
-          ENDDO
-        END IF
-C
-        RETURN
-C
-C     End of STRSV
-C
-      END IF
-      END
+
+C     S = solution, overwriting X in place (same for every direction)
+      CALL STRSV(UPLO, TRANS, DIAG, N, A, LDA, X, INCX)
+      DO I = 1, N
+         S(I) = X(KX + (I-1)*INCX)
+      END DO
+
+      DO ND = 1, NBDIRS
+
+         DO J = 1, N
+            DO I = 1, N
+               AD_SLICE(I,J) = AD(ND,I,J)
+            END DO
+         END DO
+
+C        T = op(Ad)*S (local copy, S stays untouched)
+         DO I = 1, N
+            T(I) = S(I)
+         END DO
+         CALL STRMV(UPLO, TRANS, DIAG, N, AD_SLICE, LDA, T, 1)
+
+C        RHS = Xd_in - T, gathered respecting INCX
+         DO I = 1, N
+            W(I) = XD(ND, KX + (I-1)*INCX) - T(I)
+         END DO
+
+         CALL STRSV(UPLO, TRANS, DIAG, N, A, LDA, W, 1)
+
+         DO I = 1, N
+            XD(ND, KX + (I-1)*INCX) = W(I)
+         END DO
+
+      END DO
+
+      RETURN
+      END SUBROUTINE STRSV_DV
 

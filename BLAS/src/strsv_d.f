@@ -152,246 +152,303 @@ C>     Richard Hanson, Sandia National Labs.
 C> \endverbatim
 C>
 C  =====================================================================
-      SUBROUTINE STRSV_D(uplo, trans, diag, n, a, ad, lda, x, xd, incx)
+C      SUBROUTINE STRSV_D(uplo, trans, diag, n, a, ad, lda, x, xd, incx)
+C      IMPLICIT NONE
+CC
+CC  -- Reference BLAS level2 routine --
+CC  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
+CC  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
+CC
+CC     .. Scalar Arguments ..
+C      INTEGER incx, lda, n
+C      CHARACTER diag, trans, uplo
+CC     ..
+CC     .. Array Arguments ..
+C      REAL a(lda, *), x(*)
+C      REAL ad(lda, *), xd(*)
+CC     ..
+CC
+CC  =====================================================================
+CC     ..
+CC     .. Local Scalars ..
+C      REAL temp
+C      REAL tempd
+C      INTEGER i, info, ix, j, jx, kx
+C      LOGICAL nounit
+C      EXTERNAL LSAME
+CC     ..
+CC     .. External Functions ..
+C      LOGICAL LSAME
+CC     ..
+CC     .. External Subroutines ..
+C      EXTERNAL XERBLA
+CC     ..
+CC     .. Intrinsic Functions ..
+C      INTRINSIC MAX
+C      INTEGER max1
+C      REAL temp0
+CC     ..
+CC
+CC     Test the input parameters.
+CC
+C      info = 0
+C      IF (.NOT.LSAME(uplo, 'U') .AND. (.NOT.LSAME(uplo, 'L'))) THEN
+C        info = 1
+C      ELSE IF (.NOT.LSAME(trans, 'N') .AND. (.NOT.LSAME(trans, 'T')) 
+C     +    .AND. (.NOT.LSAME(trans, 'C'))) THEN
+C        info = 2
+C      ELSE IF (.NOT.LSAME(diag, 'U') .AND. (.NOT.LSAME(diag, 'N'))) THEN
+C        info = 3
+C      ELSE IF (n .LT. 0) THEN
+C        info = 4
+C      ELSE
+C        IF (1 .LT. n) THEN
+C          max1 = n
+C        ELSE
+C          max1 = 1
+C        END IF
+C        IF (lda .LT. max1) THEN
+C          info = 6
+C        ELSE IF (incx .EQ. 0) THEN
+C          info = 8
+C        END IF
+C      END IF
+C      IF (info .NE. 0) THEN
+C        CALL XERBLA('STRSV ', info)
+C        RETURN
+C      ELSE IF (n .EQ. 0) THEN
+CC
+CC     Quick return if possible.
+CC
+C        RETURN
+C      ELSE
+CC
+C        nounit = LSAME(diag, 'N')
+CC
+CC     Set up the start point in X if the increment is not unity. This
+CC     will be  ( N - 1 )*INCX  too small for descending loops.
+CC
+C        IF (incx .LE. 0) THEN
+C          kx = 1 - (n-1)*incx
+C        ELSE IF (incx .NE. 1) THEN
+C          kx = 1
+C        END IF
+CC
+CC     Start the operations. In this version the elements of A are
+CC     accessed sequentially with one pass through A.
+CC
+C        IF (LSAME(trans, 'N')) THEN
+CC
+CC        Form  x := inv( A )*x.
+CC
+C          IF (LSAME(uplo, 'U')) THEN
+C            IF (incx .EQ. 1) THEN
+C              DO j=n,1,-1
+C                IF (nounit) THEN
+C                  temp0 = x(j)/a(j, j)
+C                  xd(j) = (xd(j)-temp0*ad(j, j))/a(j, j)
+C                  x(j) = temp0
+C                END IF
+C                tempd = xd(j)
+C                temp = x(j)
+C                DO i=j-1,1,-1
+C                  xd(i) = xd(i) - a(i, j)*tempd - temp*ad(i, j)
+C                  x(i) = x(i) - temp*a(i, j)
+C                ENDDO
+C              ENDDO
+C            ELSE
+C              jx = kx + (n-1)*incx
+C              DO j=n,1,-1
+C                IF (nounit) THEN
+C                  temp0 = x(jx)/a(j, j)
+C                  xd(jx) = (xd(jx)-temp0*ad(j, j))/a(j, j)
+C                  x(jx) = temp0
+C                END IF
+C                tempd = xd(jx)
+C                temp = x(jx)
+C                ix = jx
+C                DO i=j-1,1,-1
+C                  ix = ix - incx
+C                  xd(ix) = xd(ix) - a(i, j)*tempd - temp*ad(i, j)
+C                  x(ix) = x(ix) - temp*a(i, j)
+C                ENDDO
+C                jx = jx - incx
+C              ENDDO
+C            END IF
+C          ELSE IF (incx .EQ. 1) THEN
+C            DO j=1,n
+C              IF (nounit) THEN
+C                temp0 = x(j)/a(j, j)
+C                xd(j) = (xd(j)-temp0*ad(j, j))/a(j, j)
+C                x(j) = temp0
+C              END IF
+C              tempd = xd(j)
+C              temp = x(j)
+C              DO i=j+1,n
+C                xd(i) = xd(i) - a(i, j)*tempd - temp*ad(i, j)
+C                x(i) = x(i) - temp*a(i, j)
+C              ENDDO
+C            ENDDO
+C          ELSE
+C            jx = kx
+C            DO j=1,n
+C              IF (nounit) THEN
+C                temp0 = x(jx)/a(j, j)
+C                xd(jx) = (xd(jx)-temp0*ad(j, j))/a(j, j)
+C                x(jx) = temp0
+C              END IF
+C              tempd = xd(jx)
+C              temp = x(jx)
+C              ix = jx
+C              DO i=j+1,n
+C                ix = ix + incx
+C                xd(ix) = xd(ix) - a(i, j)*tempd - temp*ad(i, j)
+C                x(ix) = x(ix) - temp*a(i, j)
+C              ENDDO
+C              jx = jx + incx
+C            ENDDO
+C          END IF
+C        ELSE IF (LSAME(uplo, 'U')) THEN
+CC
+CC        Form  x := inv( A**T )*x.
+CC
+C          IF (incx .EQ. 1) THEN
+C            DO j=1,n
+C              tempd = xd(j)
+C              temp = x(j)
+C              DO i=1,j-1
+C                tempd = tempd - x(i)*ad(i, j) - a(i, j)*xd(i)
+C                temp = temp - a(i, j)*x(i)
+C              ENDDO
+C              IF (nounit) THEN
+C                temp0 = temp/a(j, j)
+C                tempd = (tempd-temp0*ad(j, j))/a(j, j)
+C                temp = temp0
+C              END IF
+C              xd(j) = tempd
+C              x(j) = temp
+C            ENDDO
+C          ELSE
+C            jx = kx
+C            DO j=1,n
+C              tempd = xd(jx)
+C              temp = x(jx)
+C              ix = kx
+C              DO i=1,j-1
+C                tempd = tempd - x(ix)*ad(i, j) - a(i, j)*xd(ix)
+C                temp = temp - a(i, j)*x(ix)
+C                ix = ix + incx
+C              ENDDO
+C              IF (nounit) THEN
+C                temp0 = temp/a(j, j)
+C                tempd = (tempd-temp0*ad(j, j))/a(j, j)
+C                temp = temp0
+C              END IF
+C              xd(jx) = tempd
+C              x(jx) = temp
+C              jx = jx + incx
+C            ENDDO
+C          END IF
+C        ELSE IF (incx .EQ. 1) THEN
+C          DO j=n,1,-1
+C            tempd = xd(j)
+C            temp = x(j)
+C            DO i=n,j+1,-1
+C              tempd = tempd - x(i)*ad(i, j) - a(i, j)*xd(i)
+C              temp = temp - a(i, j)*x(i)
+C            ENDDO
+C            IF (nounit) THEN
+C              temp0 = temp/a(j, j)
+C              tempd = (tempd-temp0*ad(j, j))/a(j, j)
+C              temp = temp0
+C            END IF
+C            xd(j) = tempd
+C            x(j) = temp
+C          ENDDO
+C        ELSE
+C          kx = kx + (n-1)*incx
+C          jx = kx
+C          DO j=n,1,-1
+C            tempd = xd(jx)
+C            temp = x(jx)
+C            ix = kx
+C            DO i=n,j+1,-1
+C              tempd = tempd - x(ix)*ad(i, j) - a(i, j)*xd(ix)
+C              temp = temp - a(i, j)*x(ix)
+C              ix = ix - incx
+C            ENDDO
+C            IF (nounit) THEN
+C              temp0 = temp/a(j, j)
+C              tempd = (tempd-temp0*ad(j, j))/a(j, j)
+C              temp = temp0
+C            END IF
+C            xd(jx) = tempd
+C            x(jx) = temp
+C            jx = jx - incx
+C          ENDDO
+C        END IF
+CC
+C        RETURN
+CC
+CC     End of STRSV
+CC
+C      END IF
+C      END
+
+      SUBROUTINE STRSV_D(UPLO, TRANS, DIAG, N, A, AD, LDA, X, XD, INCX)
+C
+C Forward-mode derivative of STRSV via the black-box / Giles-style
+C approach: differentiate op(A)*s = b directly (the exact vector case
+C from the Giles appendix). Uses only the original STRSV and STRMV.
+C
+C CONVENTION (matches the primal STRSV's own in-place behavior):
+C   X, XD : overwritten in place with the solution S and its
+C           derivative dS, exactly like the primal/forward routine.
+C
       IMPLICIT NONE
-C
-C  -- Reference BLAS level2 routine --
-C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
-C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
-C
-C     .. Scalar Arguments ..
-      INTEGER incx, lda, n
-      CHARACTER diag, trans, uplo
-C     ..
-C     .. Array Arguments ..
-      REAL a(lda, *), x(*)
-      REAL ad(lda, *), xd(*)
-C     ..
-C
-C  =====================================================================
-C     ..
-C     .. Local Scalars ..
-      REAL temp
-      REAL tempd
-      INTEGER i, info, ix, j, jx, kx
-      LOGICAL nounit
-      EXTERNAL LSAME
-C     ..
-C     .. External Functions ..
-      LOGICAL LSAME
-C     ..
-C     .. External Subroutines ..
-      EXTERNAL XERBLA
-C     ..
-C     .. Intrinsic Functions ..
-      INTRINSIC MAX
-      INTEGER max1
-      REAL temp0
-C     ..
-C
-C     Test the input parameters.
-C
-      info = 0
-      IF (.NOT.LSAME(uplo, 'U') .AND. (.NOT.LSAME(uplo, 'L'))) THEN
-        info = 1
-      ELSE IF (.NOT.LSAME(trans, 'N') .AND. (.NOT.LSAME(trans, 'T')) 
-     +    .AND. (.NOT.LSAME(trans, 'C'))) THEN
-        info = 2
-      ELSE IF (.NOT.LSAME(diag, 'U') .AND. (.NOT.LSAME(diag, 'N'))) THEN
-        info = 3
-      ELSE IF (n .LT. 0) THEN
-        info = 4
+      CHARACTER UPLO, TRANS, DIAG
+      INTEGER N, LDA, INCX
+      REAL A(LDA,*), AD(LDA,*)
+      REAL X(*), XD(*)
+
+      REAL S(N), W(N)
+      INTEGER I, KX
+
+      IF (N.EQ.0) RETURN
+
+      IF (INCX.GE.1) THEN
+         KX = 1
       ELSE
-        IF (1 .LT. n) THEN
-          max1 = n
-        ELSE
-          max1 = 1
-        END IF
-        IF (lda .LT. max1) THEN
-          info = 6
-        ELSE IF (incx .EQ. 0) THEN
-          info = 8
-        END IF
+         KX = 1 - (N-1)*INCX
       END IF
-      IF (info .NE. 0) THEN
-        CALL XERBLA('STRSV ', info)
-        RETURN
-      ELSE IF (n .EQ. 0) THEN
-C
-C     Quick return if possible.
-C
-        RETURN
-      ELSE
-C
-        nounit = LSAME(diag, 'N')
-C
-C     Set up the start point in X if the increment is not unity. This
-C     will be  ( N - 1 )*INCX  too small for descending loops.
-C
-        IF (incx .LE. 0) THEN
-          kx = 1 - (n-1)*incx
-        ELSE IF (incx .NE. 1) THEN
-          kx = 1
-        END IF
-C
-C     Start the operations. In this version the elements of A are
-C     accessed sequentially with one pass through A.
-C
-        IF (LSAME(trans, 'N')) THEN
-C
-C        Form  x := inv( A )*x.
-C
-          IF (LSAME(uplo, 'U')) THEN
-            IF (incx .EQ. 1) THEN
-              DO j=n,1,-1
-                IF (nounit) THEN
-                  temp0 = x(j)/a(j, j)
-                  xd(j) = (xd(j)-temp0*ad(j, j))/a(j, j)
-                  x(j) = temp0
-                END IF
-                tempd = xd(j)
-                temp = x(j)
-                DO i=j-1,1,-1
-                  xd(i) = xd(i) - a(i, j)*tempd - temp*ad(i, j)
-                  x(i) = x(i) - temp*a(i, j)
-                ENDDO
-              ENDDO
-            ELSE
-              jx = kx + (n-1)*incx
-              DO j=n,1,-1
-                IF (nounit) THEN
-                  temp0 = x(jx)/a(j, j)
-                  xd(jx) = (xd(jx)-temp0*ad(j, j))/a(j, j)
-                  x(jx) = temp0
-                END IF
-                tempd = xd(jx)
-                temp = x(jx)
-                ix = jx
-                DO i=j-1,1,-1
-                  ix = ix - incx
-                  xd(ix) = xd(ix) - a(i, j)*tempd - temp*ad(i, j)
-                  x(ix) = x(ix) - temp*a(i, j)
-                ENDDO
-                jx = jx - incx
-              ENDDO
-            END IF
-          ELSE IF (incx .EQ. 1) THEN
-            DO j=1,n
-              IF (nounit) THEN
-                temp0 = x(j)/a(j, j)
-                xd(j) = (xd(j)-temp0*ad(j, j))/a(j, j)
-                x(j) = temp0
-              END IF
-              tempd = xd(j)
-              temp = x(j)
-              DO i=j+1,n
-                xd(i) = xd(i) - a(i, j)*tempd - temp*ad(i, j)
-                x(i) = x(i) - temp*a(i, j)
-              ENDDO
-            ENDDO
-          ELSE
-            jx = kx
-            DO j=1,n
-              IF (nounit) THEN
-                temp0 = x(jx)/a(j, j)
-                xd(jx) = (xd(jx)-temp0*ad(j, j))/a(j, j)
-                x(jx) = temp0
-              END IF
-              tempd = xd(jx)
-              temp = x(jx)
-              ix = jx
-              DO i=j+1,n
-                ix = ix + incx
-                xd(ix) = xd(ix) - a(i, j)*tempd - temp*ad(i, j)
-                x(ix) = x(ix) - temp*a(i, j)
-              ENDDO
-              jx = jx + incx
-            ENDDO
-          END IF
-        ELSE IF (LSAME(uplo, 'U')) THEN
-C
-C        Form  x := inv( A**T )*x.
-C
-          IF (incx .EQ. 1) THEN
-            DO j=1,n
-              tempd = xd(j)
-              temp = x(j)
-              DO i=1,j-1
-                tempd = tempd - x(i)*ad(i, j) - a(i, j)*xd(i)
-                temp = temp - a(i, j)*x(i)
-              ENDDO
-              IF (nounit) THEN
-                temp0 = temp/a(j, j)
-                tempd = (tempd-temp0*ad(j, j))/a(j, j)
-                temp = temp0
-              END IF
-              xd(j) = tempd
-              x(j) = temp
-            ENDDO
-          ELSE
-            jx = kx
-            DO j=1,n
-              tempd = xd(jx)
-              temp = x(jx)
-              ix = kx
-              DO i=1,j-1
-                tempd = tempd - x(ix)*ad(i, j) - a(i, j)*xd(ix)
-                temp = temp - a(i, j)*x(ix)
-                ix = ix + incx
-              ENDDO
-              IF (nounit) THEN
-                temp0 = temp/a(j, j)
-                tempd = (tempd-temp0*ad(j, j))/a(j, j)
-                temp = temp0
-              END IF
-              xd(jx) = tempd
-              x(jx) = temp
-              jx = jx + incx
-            ENDDO
-          END IF
-        ELSE IF (incx .EQ. 1) THEN
-          DO j=n,1,-1
-            tempd = xd(j)
-            temp = x(j)
-            DO i=n,j+1,-1
-              tempd = tempd - x(i)*ad(i, j) - a(i, j)*xd(i)
-              temp = temp - a(i, j)*x(i)
-            ENDDO
-            IF (nounit) THEN
-              temp0 = temp/a(j, j)
-              tempd = (tempd-temp0*ad(j, j))/a(j, j)
-              temp = temp0
-            END IF
-            xd(j) = tempd
-            x(j) = temp
-          ENDDO
-        ELSE
-          kx = kx + (n-1)*incx
-          jx = kx
-          DO j=n,1,-1
-            tempd = xd(jx)
-            temp = x(jx)
-            ix = kx
-            DO i=n,j+1,-1
-              tempd = tempd - x(ix)*ad(i, j) - a(i, j)*xd(ix)
-              temp = temp - a(i, j)*x(ix)
-              ix = ix - incx
-            ENDDO
-            IF (nounit) THEN
-              temp0 = temp/a(j, j)
-              tempd = (tempd-temp0*ad(j, j))/a(j, j)
-              temp = temp0
-            END IF
-            xd(jx) = tempd
-            x(jx) = temp
-            jx = jx - incx
-          ENDDO
-        END IF
-C
-        RETURN
-C
-C     End of STRSV
-C
-      END IF
-      END
+
+C     Step 1: solve for S, overwriting X in place (matches primal convention)
+      CALL STRSV(UPLO, TRANS, DIAG, N, A, LDA, X, INCX)
+
+C     Gather S (now held in X) into a contiguous local copy
+      DO I = 1, N
+         S(I) = X(KX + (I-1)*INCX)
+      END DO
+
+C     Step 2: T = op(AD)*S  (local work vector, unit stride)
+      DO I = 1, N
+         W(I) = S(I)
+      END DO
+      CALL STRMV(UPLO, TRANS, DIAG, N, AD, LDA, W, 1)
+
+C     Step 3: RHS = XD_in - T, gathered from XD into W (reused)
+      DO I = 1, N
+         W(I) = XD(KX + (I-1)*INCX) - W(I)
+      END DO
+
+C     Step 4: solve op(A)*dS = RHS -> W holds dS
+      CALL STRSV(UPLO, TRANS, DIAG, N, A, LDA, W, 1)
+
+C     Scatter dS back into XD
+      DO I = 1, N
+         XD(KX + (I-1)*INCX) = W(I)
+      END DO
+
+      RETURN
+      END SUBROUTINE STRSV_D
 

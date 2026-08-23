@@ -556,12 +556,14 @@ C      END
 
       SUBROUTINE STRSM_DV(SIDE, UPLO, TRANSA, DIAG, M, N,
      +                    ALPHA, ALPHAD, A, AD, LDA, B, BD, LDB, NBDIRS)
-!
-! Vector forward-mode derivative of STRSM (black-box/Giles-style).
-! Self-contained -- does not call STRSM_D. AD/BD store direction as
-! the FASTEST-varying index (nbdirsmax, LDA/LDB, *): gather each
-! direction into a plain work array before use, scatter back after.
-!
+C
+C Vector forward-mode derivative of STRSM (black-box / Giles-style):
+C differentiates op(A)*X = alpha*B directly, using only the original
+C STRSM and STRMM. Self-contained, does not call STRSM_D.
+C
+C AD/BD store direction as the FASTEST-varying index (nbdirsmax, LDA/LDB, *),
+C so each direction's slice is gathered into a plain work array before use.
+C
       IMPLICIT NONE
       INCLUDE 'DIFFSIZES.inc'
       CHARACTER SIDE, UPLO, TRANSA, DIAG

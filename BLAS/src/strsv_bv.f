@@ -152,595 +152,686 @@ C>     Richard Hanson, Sandia National Labs.
 C> \endverbatim
 C>
 C  =====================================================================
-      SUBROUTINE STRSV_BV(uplo, trans, diag, n, a, ab, lda, x, xb, incx
-     +                    , nbdirs)
+C      SUBROUTINE STRSV_BV(uplo, trans, diag, n, a, ab, lda, x, xb, incx
+C     +                    , nbdirs)
+C      IMPLICIT NONE
+C      INCLUDE 'DIFFSIZES.inc'
+CC  Hint: ISIZE2OFa should be the size of dimension 2 of array a
+CC  Hint: nbdirsmax should be the maximum number of differentiation directions
+CC
+CC  -- Reference BLAS level2 routine --
+CC  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
+CC  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
+CC
+CC     .. Scalar Arguments ..
+C      INTEGER incx, lda, n
+C      CHARACTER diag, trans, uplo
+CC     ..
+CC     .. Array Arguments ..
+C      REAL a(lda, *), x(*)
+C      REAL ab(nbdirsmax, lda, *), xb(nbdirsmax, *)
+CC     ..
+CC
+CC  =====================================================================
+CC     ..
+CC     .. Local Scalars ..
+C      REAL temp
+C      REAL tempb(nbdirsmax)
+C      INTEGER i, info, ix, j, jx, kx
+C      LOGICAL nounit
+C      EXTERNAL LSAME
+C      INTEGER ISIZE2OFA
+CC     ..
+CC     .. External Functions ..
+C      INTEGER get_ISIZE2OFA
+C      EXTERNAL get_ISIZE2OFA
+C      LOGICAL LSAME
+CC     ..
+CC     .. External Subroutines ..
+C      EXTERNAL XERBLA, check_ISIZE2OFA_initialized
+CC     ..
+CC     .. Intrinsic Functions ..
+C      INTRINSIC MAX
+C      INTEGER max1
+C      INTEGER nd
+C      REAL tempb0(nbdirsmax)
+C      INTEGER ad_from
+C      INTEGER*4 branch
+C      INTEGER ad_from0
+C      INTEGER ad_from1
+C      INTEGER ad_from2
+C      INTEGER ad_to
+C      INTEGER ad_to0
+C      INTEGER ad_to1
+C      INTEGER ad_to2
+C      INTEGER ii2
+C      INTEGER ii1
+C      INTEGER nbdirs
+CC     ..
+CC
+CC     Test the input parameters.
+CC
+CC     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
+C      CALL check_ISIZE2OFA_initialized()
+C      ISIZE2OFA = get_ISIZE2OFA()
+C      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
+C        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
+C     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
+C        STOP 1
+C      END IF
+CC
+C      info = 0
+C      IF (.NOT.LSAME(uplo, 'U') .AND. (.NOT.LSAME(uplo, 'L'))) THEN
+C        CALL PUSHCONTROL3B(0)
+C        info = 1
+C      ELSE IF (.NOT.LSAME(trans, 'N') .AND. (.NOT.LSAME(trans, 'T')) 
+C     +    .AND. (.NOT.LSAME(trans, 'C'))) THEN
+C        CALL PUSHCONTROL3B(1)
+C        info = 2
+C      ELSE IF (.NOT.LSAME(diag, 'U') .AND. (.NOT.LSAME(diag, 'N'))) THEN
+C        CALL PUSHCONTROL3B(2)
+C        info = 3
+C      ELSE IF (n .LT. 0) THEN
+C        CALL PUSHCONTROL3B(3)
+C        info = 4
+C      ELSE
+C        IF (1 .LT. n) THEN
+C          max1 = n
+C        ELSE
+C          max1 = 1
+C        END IF
+C        IF (lda .LT. max1) THEN
+C          CALL PUSHCONTROL3B(4)
+C          info = 6
+C        ELSE IF (incx .EQ. 0) THEN
+C          CALL PUSHCONTROL3B(5)
+C          info = 8
+C        ELSE
+C          CALL PUSHCONTROL3B(5)
+C        END IF
+C      END IF
+C      IF (info .EQ. 0) THEN
+CC
+CC     Quick return if possible.
+CC
+C        IF (n .EQ. 0) THEN
+C          DO ii1=1,ISIZE2OFa
+C            DO ii2=1,lda
+C              DO nd=1,nbdirsmax
+C                ab(nd, ii2, ii1) = 0.0
+C              ENDDO
+C            ENDDO
+C          ENDDO
+C        ELSE
+CC
+C          nounit = LSAME(diag, 'N')
+CC
+CC     Set up the start point in X if the increment is not unity. This
+CC     will be  ( N - 1 )*INCX  too small for descending loops.
+CC
+C          IF (incx .LE. 0) THEN
+C            CALL PUSHCONTROL1B(0)
+C            kx = 1 - (n-1)*incx
+C          ELSE IF (incx .NE. 1) THEN
+C            CALL PUSHCONTROL1B(1)
+C            kx = 1
+C          ELSE
+C            CALL PUSHCONTROL1B(1)
+C          END IF
+CC
+CC     Start the operations. In this version the elements of A are
+CC     accessed sequentially with one pass through A.
+CC
+C          IF (LSAME(trans, 'N')) THEN
+CC
+CC        Form  x := inv( A )*x.
+CC
+C            IF (LSAME(uplo, 'U')) THEN
+C              IF (incx .EQ. 1) THEN
+C                DO j=n,1,-1
+C                  IF (nounit) THEN
+C                    CALL PUSHREAL4(x(j))
+C                    x(j) = x(j)/a(j, j)
+C                    CALL PUSHCONTROL1B(0)
+C                  ELSE
+C                    CALL PUSHCONTROL1B(1)
+C                  END IF
+C                  CALL PUSHREAL4(temp)
+C                  temp = x(j)
+C                  ad_from = j - 1
+C                  DO i=ad_from,1,-1
+C                    CALL PUSHREAL4(x(i))
+C                    x(i) = x(i) - temp*a(i, j)
+C                  ENDDO
+C                  CALL PUSHINTEGER4(ad_from)
+C                ENDDO
+C                DO ii1=1,ISIZE2OFa
+C                  DO ii2=1,lda
+C                    DO nd=1,nbdirsmax
+C                      ab(nd, ii2, ii1) = 0.0
+C                    ENDDO
+C                  ENDDO
+C                ENDDO
+C                DO j=1,n,1
+C                  DO nd=1,nbdirsmax
+C                    tempb(nd) = 0.0
+C                  ENDDO
+C                  CALL POPINTEGER4(ad_from)
+C                  DO i=1,ad_from,1
+C                    CALL POPREAL4(x(i))
+C                    DO nd=1,nbdirs
+C                      tempb(nd) = tempb(nd) - a(i, j)*xb(nd, i)
+C                      ab(nd, i, j) = ab(nd, i, j) - temp*xb(nd, i)
+C                    ENDDO
+C                  ENDDO
+C                  CALL POPREAL4(temp)
+C                  DO nd=1,nbdirs
+C                    xb(nd, j) = xb(nd, j) + tempb(nd)
+C                  ENDDO
+C                  CALL POPCONTROL1B(branch)
+C                  IF (branch .EQ. 0) THEN
+C                    CALL POPREAL4(x(j))
+C                    DO nd=1,nbdirs
+C                      tempb0(nd) = xb(nd, j)/a(j, j)
+C                      xb(nd, j) = tempb0(nd)
+C                      ab(nd, j, j) = ab(nd, j, j) - x(j)*tempb0(nd)/a(j
+C     +                  , j)
+C                    ENDDO
+C                  END IF
+C                ENDDO
+C              ELSE
+C                jx = kx + (n-1)*incx
+C                DO j=n,1,-1
+C                  IF (nounit) THEN
+C                    CALL PUSHREAL4(x(jx))
+C                    x(jx) = x(jx)/a(j, j)
+C                    CALL PUSHCONTROL1B(0)
+C                  ELSE
+C                    CALL PUSHCONTROL1B(1)
+C                  END IF
+C                  CALL PUSHREAL4(temp)
+C                  temp = x(jx)
+C                  CALL PUSHINTEGER4(ix)
+C                  ix = jx
+C                  ad_from0 = j - 1
+C                  DO i=ad_from0,1,-1
+C                    CALL PUSHINTEGER4(ix)
+C                    ix = ix - incx
+C                    CALL PUSHREAL4(x(ix))
+C                    x(ix) = x(ix) - temp*a(i, j)
+C                  ENDDO
+C                  CALL PUSHINTEGER4(ad_from0)
+C                  CALL PUSHINTEGER4(jx)
+C                  jx = jx - incx
+C                ENDDO
+C                DO ii1=1,ISIZE2OFa
+C                  DO ii2=1,lda
+C                    DO nd=1,nbdirsmax
+C                      ab(nd, ii2, ii1) = 0.0
+C                    ENDDO
+C                  ENDDO
+C                ENDDO
+C                DO j=1,n,1
+C                  CALL POPINTEGER4(jx)
+C                  DO nd=1,nbdirsmax
+C                    tempb(nd) = 0.0
+C                  ENDDO
+C                  CALL POPINTEGER4(ad_from0)
+C                  DO i=1,ad_from0,1
+C                    DO nd=1,nbdirs
+C                      tempb(nd) = tempb(nd) - a(i, j)*xb(nd, ix)
+C                      ab(nd, i, j) = ab(nd, i, j) - temp*xb(nd, ix)
+C                    ENDDO
+C                    CALL POPREAL4(x(ix))
+C                    CALL POPINTEGER4(ix)
+C                  ENDDO
+C                  CALL POPINTEGER4(ix)
+C                  CALL POPREAL4(temp)
+C                  DO nd=1,nbdirs
+C                    xb(nd, jx) = xb(nd, jx) + tempb(nd)
+C                  ENDDO
+C                  CALL POPCONTROL1B(branch)
+C                  IF (branch .EQ. 0) THEN
+C                    CALL POPREAL4(x(jx))
+C                    DO nd=1,nbdirs
+C                      tempb0(nd) = xb(nd, jx)/a(j, j)
+C                      xb(nd, jx) = tempb0(nd)
+C                      ab(nd, j, j) = ab(nd, j, j) - x(jx)*tempb0(nd)/a(j
+C     +                  , j)
+C                    ENDDO
+C                  END IF
+C                ENDDO
+C              END IF
+C            ELSE IF (incx .EQ. 1) THEN
+C              DO j=1,n
+C                IF (nounit) THEN
+C                  CALL PUSHREAL4(x(j))
+C                  x(j) = x(j)/a(j, j)
+C                  CALL PUSHCONTROL1B(0)
+C                ELSE
+C                  CALL PUSHCONTROL1B(1)
+C                END IF
+C                CALL PUSHREAL4(temp)
+C                temp = x(j)
+C                ad_from1 = j + 1
+C                DO i=ad_from1,n
+C                  CALL PUSHREAL4(x(i))
+C                  x(i) = x(i) - temp*a(i, j)
+C                ENDDO
+C                CALL PUSHINTEGER4(ad_from1)
+C              ENDDO
+C              DO ii1=1,ISIZE2OFa
+C                DO ii2=1,lda
+C                  DO nd=1,nbdirsmax
+C                    ab(nd, ii2, ii1) = 0.0
+C                  ENDDO
+C                ENDDO
+C              ENDDO
+C              DO j=n,1,-1
+C                DO nd=1,nbdirsmax
+C                  tempb(nd) = 0.0
+C                ENDDO
+C                CALL POPINTEGER4(ad_from1)
+C                DO i=n,ad_from1,-1
+C                  CALL POPREAL4(x(i))
+C                  DO nd=1,nbdirs
+C                    tempb(nd) = tempb(nd) - a(i, j)*xb(nd, i)
+C                    ab(nd, i, j) = ab(nd, i, j) - temp*xb(nd, i)
+C                  ENDDO
+C                ENDDO
+C                CALL POPREAL4(temp)
+C                DO nd=1,nbdirs
+C                  xb(nd, j) = xb(nd, j) + tempb(nd)
+C                ENDDO
+C                CALL POPCONTROL1B(branch)
+C                IF (branch .EQ. 0) THEN
+C                  CALL POPREAL4(x(j))
+C                  DO nd=1,nbdirs
+C                    tempb0(nd) = xb(nd, j)/a(j, j)
+C                    xb(nd, j) = tempb0(nd)
+C                    ab(nd, j, j) = ab(nd, j, j) - x(j)*tempb0(nd)/a(j, j
+C     +                )
+C                  ENDDO
+C                END IF
+C              ENDDO
+C            ELSE
+C              jx = kx
+C              DO j=1,n
+C                IF (nounit) THEN
+C                  CALL PUSHREAL4(x(jx))
+C                  x(jx) = x(jx)/a(j, j)
+C                  CALL PUSHCONTROL1B(0)
+C                ELSE
+C                  CALL PUSHCONTROL1B(1)
+C                END IF
+C                CALL PUSHREAL4(temp)
+C                temp = x(jx)
+C                CALL PUSHINTEGER4(ix)
+C                ix = jx
+C                ad_from2 = j + 1
+C                DO i=ad_from2,n
+C                  CALL PUSHINTEGER4(ix)
+C                  ix = ix + incx
+C                  CALL PUSHREAL4(x(ix))
+C                  x(ix) = x(ix) - temp*a(i, j)
+C                ENDDO
+C                CALL PUSHINTEGER4(ad_from2)
+C                CALL PUSHINTEGER4(jx)
+C                jx = jx + incx
+C              ENDDO
+C              DO ii1=1,ISIZE2OFa
+C                DO ii2=1,lda
+C                  DO nd=1,nbdirsmax
+C                    ab(nd, ii2, ii1) = 0.0
+C                  ENDDO
+C                ENDDO
+C              ENDDO
+C              DO j=n,1,-1
+C                CALL POPINTEGER4(jx)
+C                DO nd=1,nbdirsmax
+C                  tempb(nd) = 0.0
+C                ENDDO
+C                CALL POPINTEGER4(ad_from2)
+C                DO i=n,ad_from2,-1
+C                  DO nd=1,nbdirs
+C                    tempb(nd) = tempb(nd) - a(i, j)*xb(nd, ix)
+C                    ab(nd, i, j) = ab(nd, i, j) - temp*xb(nd, ix)
+C                  ENDDO
+C                  CALL POPREAL4(x(ix))
+C                  CALL POPINTEGER4(ix)
+C                ENDDO
+C                CALL POPINTEGER4(ix)
+C                CALL POPREAL4(temp)
+C                DO nd=1,nbdirs
+C                  xb(nd, jx) = xb(nd, jx) + tempb(nd)
+C                ENDDO
+C                CALL POPCONTROL1B(branch)
+C                IF (branch .EQ. 0) THEN
+C                  CALL POPREAL4(x(jx))
+C                  DO nd=1,nbdirs
+C                    tempb0(nd) = xb(nd, jx)/a(j, j)
+C                    xb(nd, jx) = tempb0(nd)
+C                    ab(nd, j, j) = ab(nd, j, j) - x(jx)*tempb0(nd)/a(j, 
+C     +                j)
+C                  ENDDO
+C                END IF
+C              ENDDO
+C            END IF
+C          ELSE IF (LSAME(uplo, 'U')) THEN
+CC
+CC        Form  x := inv( A**T )*x.
+CC
+C            IF (incx .EQ. 1) THEN
+C              DO j=1,n
+C                temp = x(j)
+C                DO i=1,j-1
+C                  temp = temp - a(i, j)*x(i)
+C                ENDDO
+C                CALL PUSHINTEGER4(i - 1)
+C                IF (nounit) THEN
+C                  CALL PUSHREAL4(temp)
+C                  temp = temp/a(j, j)
+C                  CALL PUSHCONTROL1B(0)
+C                ELSE
+C                  CALL PUSHCONTROL1B(1)
+C                END IF
+C                CALL PUSHREAL4(x(j))
+C                x(j) = temp
+C              ENDDO
+C              DO ii1=1,ISIZE2OFa
+C                DO ii2=1,lda
+C                  DO nd=1,nbdirsmax
+C                    ab(nd, ii2, ii1) = 0.0
+C                  ENDDO
+C                ENDDO
+C              ENDDO
+C              DO j=n,1,-1
+C                CALL POPREAL4(x(j))
+C                DO nd=1,nbdirs
+C                  tempb(nd) = xb(nd, j)
+C                  xb(nd, j) = 0.0
+C                ENDDO
+C                CALL POPCONTROL1B(branch)
+C                IF (branch .EQ. 0) THEN
+C                  CALL POPREAL4(temp)
+C                  DO nd=1,nbdirs
+C                    tempb(nd) = tempb0(nd)
+C                    ab(nd, j, j) = ab(nd, j, j) - temp*tempb0(nd)/a(j, j
+C     +                )
+C                  ENDDO
+C                END IF
+C                CALL POPINTEGER4(ad_to)
+C                DO i=ad_to,1,-1
+C                  DO nd=1,nbdirs
+C                    ab(nd, i, j) = ab(nd, i, j) - x(i)*tempb(nd)
+C                    xb(nd, i) = xb(nd, i) - a(i, j)*tempb(nd)
+C                  ENDDO
+C                ENDDO
+C                DO nd=1,nbdirs
+C                  xb(nd, j) = xb(nd, j) + tempb(nd)
+C                ENDDO
+C              ENDDO
+C            ELSE
+C              jx = kx
+C              DO j=1,n
+C                temp = x(jx)
+C                ix = kx
+C                DO i=1,j-1
+C                  temp = temp - a(i, j)*x(ix)
+C                  CALL PUSHINTEGER4(ix)
+C                  ix = ix + incx
+C                ENDDO
+C                CALL PUSHINTEGER4(i - 1)
+C                IF (nounit) THEN
+C                  CALL PUSHREAL4(temp)
+C                  temp = temp/a(j, j)
+C                  CALL PUSHCONTROL1B(0)
+C                ELSE
+C                  CALL PUSHCONTROL1B(1)
+C                END IF
+C                CALL PUSHREAL4(x(jx))
+C                x(jx) = temp
+C                CALL PUSHINTEGER4(jx)
+C                jx = jx + incx
+C              ENDDO
+C              DO ii1=1,ISIZE2OFa
+C                DO ii2=1,lda
+C                  DO nd=1,nbdirsmax
+C                    ab(nd, ii2, ii1) = 0.0
+C                  ENDDO
+C                ENDDO
+C              ENDDO
+C              DO j=n,1,-1
+C                CALL POPINTEGER4(jx)
+C                CALL POPREAL4(x(jx))
+C                DO nd=1,nbdirs
+C                  tempb(nd) = xb(nd, jx)
+C                  xb(nd, jx) = 0.0
+C                ENDDO
+C                CALL POPCONTROL1B(branch)
+C                IF (branch .EQ. 0) THEN
+C                  CALL POPREAL4(temp)
+C                  DO nd=1,nbdirs
+C                    tempb(nd) = tempb0(nd)
+C                    ab(nd, j, j) = ab(nd, j, j) - temp*tempb0(nd)/a(j, j
+C     +                )
+C                  ENDDO
+C                END IF
+C                CALL POPINTEGER4(ad_to0)
+C                DO i=ad_to0,1,-1
+C                  CALL POPINTEGER4(ix)
+C                  DO nd=1,nbdirs
+C                    ab(nd, i, j) = ab(nd, i, j) - x(ix)*tempb(nd)
+C                    xb(nd, ix) = xb(nd, ix) - a(i, j)*tempb(nd)
+C                  ENDDO
+C                ENDDO
+C                DO nd=1,nbdirs
+C                  xb(nd, jx) = xb(nd, jx) + tempb(nd)
+C                ENDDO
+C              ENDDO
+C            END IF
+C          ELSE IF (incx .EQ. 1) THEN
+C            DO j=n,1,-1
+C              temp = x(j)
+C              DO i=n,j+1,-1
+C                temp = temp - a(i, j)*x(i)
+C              ENDDO
+C              CALL PUSHINTEGER4(i + 1)
+C              IF (nounit) THEN
+C                CALL PUSHREAL4(temp)
+C                temp = temp/a(j, j)
+C                CALL PUSHCONTROL1B(0)
+C              ELSE
+C                CALL PUSHCONTROL1B(1)
+C              END IF
+C              CALL PUSHREAL4(x(j))
+C              x(j) = temp
+C            ENDDO
+C            DO ii1=1,ISIZE2OFa
+C              DO ii2=1,lda
+C                DO nd=1,nbdirsmax
+C                  ab(nd, ii2, ii1) = 0.0
+C                ENDDO
+C              ENDDO
+C            ENDDO
+C            DO j=1,n,1
+C              CALL POPREAL4(x(j))
+C              DO nd=1,nbdirs
+C                tempb(nd) = xb(nd, j)
+C                xb(nd, j) = 0.0
+C              ENDDO
+C              CALL POPCONTROL1B(branch)
+C              IF (branch .EQ. 0) THEN
+C                CALL POPREAL4(temp)
+C                DO nd=1,nbdirs
+C                  tempb(nd) = tempb0(nd)
+C                  ab(nd, j, j) = ab(nd, j, j) - temp*tempb0(nd)/a(j, j)
+C                ENDDO
+C              END IF
+C              CALL POPINTEGER4(ad_to1)
+C              DO i=ad_to1,n,1
+C                DO nd=1,nbdirs
+C                  ab(nd, i, j) = ab(nd, i, j) - x(i)*tempb(nd)
+C                  xb(nd, i) = xb(nd, i) - a(i, j)*tempb(nd)
+C                ENDDO
+C              ENDDO
+C              DO nd=1,nbdirs
+C                xb(nd, j) = xb(nd, j) + tempb(nd)
+C              ENDDO
+C            ENDDO
+C          ELSE
+C            kx = kx + (n-1)*incx
+C            jx = kx
+C            DO j=n,1,-1
+C              temp = x(jx)
+C              ix = kx
+C              DO i=n,j+1,-1
+C                temp = temp - a(i, j)*x(ix)
+C                CALL PUSHINTEGER4(ix)
+C                ix = ix - incx
+C              ENDDO
+C              CALL PUSHINTEGER4(i + 1)
+C              IF (nounit) THEN
+C                CALL PUSHREAL4(temp)
+C                temp = temp/a(j, j)
+C                CALL PUSHCONTROL1B(0)
+C              ELSE
+C                CALL PUSHCONTROL1B(1)
+C              END IF
+C              CALL PUSHREAL4(x(jx))
+C              x(jx) = temp
+C              CALL PUSHINTEGER4(jx)
+C              jx = jx - incx
+C            ENDDO
+C            DO ii1=1,ISIZE2OFa
+C              DO ii2=1,lda
+C                DO nd=1,nbdirsmax
+C                  ab(nd, ii2, ii1) = 0.0
+C                ENDDO
+C              ENDDO
+C            ENDDO
+C            DO j=1,n,1
+C              CALL POPINTEGER4(jx)
+C              CALL POPREAL4(x(jx))
+C              DO nd=1,nbdirs
+C                tempb(nd) = xb(nd, jx)
+C                xb(nd, jx) = 0.0
+C              ENDDO
+C              CALL POPCONTROL1B(branch)
+C              IF (branch .EQ. 0) THEN
+C                CALL POPREAL4(temp)
+C                DO nd=1,nbdirs
+C                  tempb(nd) = tempb0(nd)
+C                  ab(nd, j, j) = ab(nd, j, j) - temp*tempb0(nd)/a(j, j)
+C                ENDDO
+C              END IF
+C              CALL POPINTEGER4(ad_to2)
+C              DO i=ad_to2,n,1
+C                CALL POPINTEGER4(ix)
+C                DO nd=1,nbdirs
+C                  ab(nd, i, j) = ab(nd, i, j) - x(ix)*tempb(nd)
+C                  xb(nd, ix) = xb(nd, ix) - a(i, j)*tempb(nd)
+C                ENDDO
+C              ENDDO
+C              DO nd=1,nbdirs
+C                xb(nd, jx) = xb(nd, jx) + tempb(nd)
+C              ENDDO
+C            ENDDO
+C          END IF
+C          CALL POPCONTROL1B(branch)
+C        END IF
+C      END IF
+C      CALL POPCONTROL3B(branch)
+C      END
+
+      SUBROUTINE STRSV_BV(UPLO, TRANS, DIAG, N, A, AB, LDA, X, XB,
+     +                    INCX, NBDIRS)
+C
+C Vector reverse-mode (adjoint) derivative of STRSV, black-box/Giles-style.
+C Self-contained -- does not call STRSV_B.
+C
       IMPLICIT NONE
       INCLUDE 'DIFFSIZES.inc'
-C  Hint: ISIZE2OFa should be the size of dimension 2 of array a
-C  Hint: nbdirsmax should be the maximum number of differentiation directions
-C
-C  -- Reference BLAS level2 routine --
-C  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
-C  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
-C
-C     .. Scalar Arguments ..
-      INTEGER incx, lda, n
-      CHARACTER diag, trans, uplo
-C     ..
-C     .. Array Arguments ..
-      REAL a(lda, *), x(*)
-      REAL ab(nbdirsmax, lda, *), xb(nbdirsmax, *)
-C     ..
-C
-C  =====================================================================
-C     ..
-C     .. Local Scalars ..
-      REAL temp
-      REAL tempb(nbdirsmax)
-      INTEGER i, info, ix, j, jx, kx
-      LOGICAL nounit
-      EXTERNAL LSAME
-      INTEGER ISIZE2OFA
-C     ..
-C     .. External Functions ..
-      INTEGER get_ISIZE2OFA
-      EXTERNAL get_ISIZE2OFA
-      LOGICAL LSAME
-C     ..
-C     .. External Subroutines ..
-      EXTERNAL XERBLA, check_ISIZE2OFA_initialized
-C     ..
-C     .. Intrinsic Functions ..
-      INTRINSIC MAX
-      INTEGER max1
-      INTEGER nd
-      REAL tempb0(nbdirsmax)
-      INTEGER ad_from
-      INTEGER*4 branch
-      INTEGER ad_from0
-      INTEGER ad_from1
-      INTEGER ad_from2
-      INTEGER ad_to
-      INTEGER ad_to0
-      INTEGER ad_to1
-      INTEGER ad_to2
-      INTEGER ii2
-      INTEGER ii1
-      INTEGER nbdirs
-C     ..
-C
-C     Test the input parameters.
-C
-C     Check 0 < nbdirs <= nbdirsmax (required by DIFFSIZES.inc)
-      CALL check_ISIZE2OFA_initialized()
-      ISIZE2OFA = get_ISIZE2OFA()
-      IF (nbdirs.LE.0 .OR. nbdirs.GT.nbdirsmax) THEN
-        WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', nbdirs,
-     +  ' must be in 1..nbdirsmax=', nbdirsmax, '. Stopping.'
-        STOP 1
+      CHARACTER UPLO, TRANS, DIAG
+      INTEGER N, LDA, INCX, NBDIRS
+      REAL A(LDA,*), AB(NBDIRSMAX,LDA,*)
+      REAL X(*), XB(NBDIRSMAX,*)
+
+      REAL BLOC(N), S(N), YB(N), AB_SLICE(LDA,LDA)
+      CHARACTER TRANS_T
+      LOGICAL UPPER, UNIT, NOTRANS
+      INTEGER ND, I, J, KX
+
+      IF (NBDIRS.LE.0 .OR. NBDIRS.GT.NBDIRSMAX) THEN
+         WRITE(*,'(A,I0,A,I0,A)') 'Error: nbdirs=', NBDIRS,
+     +      ' must be in 1..nbdirsmax=', NBDIRSMAX, '. Stopping.'
+         STOP 1
       END IF
-C
-      info = 0
-      IF (.NOT.LSAME(uplo, 'U') .AND. (.NOT.LSAME(uplo, 'L'))) THEN
-        CALL PUSHCONTROL3B(0)
-        info = 1
-      ELSE IF (.NOT.LSAME(trans, 'N') .AND. (.NOT.LSAME(trans, 'T')) 
-     +    .AND. (.NOT.LSAME(trans, 'C'))) THEN
-        CALL PUSHCONTROL3B(1)
-        info = 2
-      ELSE IF (.NOT.LSAME(diag, 'U') .AND. (.NOT.LSAME(diag, 'N'))) THEN
-        CALL PUSHCONTROL3B(2)
-        info = 3
-      ELSE IF (n .LT. 0) THEN
-        CALL PUSHCONTROL3B(3)
-        info = 4
+
+      IF (N.EQ.0) RETURN
+
+      IF (INCX.GE.1) THEN
+         KX = 1
       ELSE
-        IF (1 .LT. n) THEN
-          max1 = n
-        ELSE
-          max1 = 1
-        END IF
-        IF (lda .LT. max1) THEN
-          CALL PUSHCONTROL3B(4)
-          info = 6
-        ELSE IF (incx .EQ. 0) THEN
-          CALL PUSHCONTROL3B(5)
-          info = 8
-        ELSE
-          CALL PUSHCONTROL3B(5)
-        END IF
+         KX = 1 - (N-1)*INCX
       END IF
-      IF (info .EQ. 0) THEN
-C
-C     Quick return if possible.
-C
-        IF (n .EQ. 0) THEN
-          DO ii1=1,ISIZE2OFa
-            DO ii2=1,lda
-              DO nd=1,nbdirsmax
-                ab(nd, ii2, ii1) = 0.0
-              ENDDO
-            ENDDO
-          ENDDO
-        ELSE
-C
-          nounit = LSAME(diag, 'N')
-C
-C     Set up the start point in X if the increment is not unity. This
-C     will be  ( N - 1 )*INCX  too small for descending loops.
-C
-          IF (incx .LE. 0) THEN
-            CALL PUSHCONTROL1B(0)
-            kx = 1 - (n-1)*incx
-          ELSE IF (incx .NE. 1) THEN
-            CALL PUSHCONTROL1B(1)
-            kx = 1
-          ELSE
-            CALL PUSHCONTROL1B(1)
-          END IF
-C
-C     Start the operations. In this version the elements of A are
-C     accessed sequentially with one pass through A.
-C
-          IF (LSAME(trans, 'N')) THEN
-C
-C        Form  x := inv( A )*x.
-C
-            IF (LSAME(uplo, 'U')) THEN
-              IF (incx .EQ. 1) THEN
-                DO j=n,1,-1
-                  IF (nounit) THEN
-                    CALL PUSHREAL4(x(j))
-                    x(j) = x(j)/a(j, j)
-                    CALL PUSHCONTROL1B(0)
-                  ELSE
-                    CALL PUSHCONTROL1B(1)
-                  END IF
-                  CALL PUSHREAL4(temp)
-                  temp = x(j)
-                  ad_from = j - 1
-                  DO i=ad_from,1,-1
-                    CALL PUSHREAL4(x(i))
-                    x(i) = x(i) - temp*a(i, j)
-                  ENDDO
-                  CALL PUSHINTEGER4(ad_from)
-                ENDDO
-                DO ii1=1,ISIZE2OFa
-                  DO ii2=1,lda
-                    DO nd=1,nbdirsmax
-                      ab(nd, ii2, ii1) = 0.0
-                    ENDDO
-                  ENDDO
-                ENDDO
-                DO j=1,n,1
-                  DO nd=1,nbdirsmax
-                    tempb(nd) = 0.0
-                  ENDDO
-                  CALL POPINTEGER4(ad_from)
-                  DO i=1,ad_from,1
-                    CALL POPREAL4(x(i))
-                    DO nd=1,nbdirs
-                      tempb(nd) = tempb(nd) - a(i, j)*xb(nd, i)
-                      ab(nd, i, j) = ab(nd, i, j) - temp*xb(nd, i)
-                    ENDDO
-                  ENDDO
-                  CALL POPREAL4(temp)
-                  DO nd=1,nbdirs
-                    xb(nd, j) = xb(nd, j) + tempb(nd)
-                  ENDDO
-                  CALL POPCONTROL1B(branch)
-                  IF (branch .EQ. 0) THEN
-                    CALL POPREAL4(x(j))
-                    DO nd=1,nbdirs
-                      tempb0(nd) = xb(nd, j)/a(j, j)
-                      xb(nd, j) = tempb0(nd)
-                      ab(nd, j, j) = ab(nd, j, j) - x(j)*tempb0(nd)/a(j
-     +                  , j)
-                    ENDDO
-                  END IF
-                ENDDO
-              ELSE
-                jx = kx + (n-1)*incx
-                DO j=n,1,-1
-                  IF (nounit) THEN
-                    CALL PUSHREAL4(x(jx))
-                    x(jx) = x(jx)/a(j, j)
-                    CALL PUSHCONTROL1B(0)
-                  ELSE
-                    CALL PUSHCONTROL1B(1)
-                  END IF
-                  CALL PUSHREAL4(temp)
-                  temp = x(jx)
-                  CALL PUSHINTEGER4(ix)
-                  ix = jx
-                  ad_from0 = j - 1
-                  DO i=ad_from0,1,-1
-                    CALL PUSHINTEGER4(ix)
-                    ix = ix - incx
-                    CALL PUSHREAL4(x(ix))
-                    x(ix) = x(ix) - temp*a(i, j)
-                  ENDDO
-                  CALL PUSHINTEGER4(ad_from0)
-                  CALL PUSHINTEGER4(jx)
-                  jx = jx - incx
-                ENDDO
-                DO ii1=1,ISIZE2OFa
-                  DO ii2=1,lda
-                    DO nd=1,nbdirsmax
-                      ab(nd, ii2, ii1) = 0.0
-                    ENDDO
-                  ENDDO
-                ENDDO
-                DO j=1,n,1
-                  CALL POPINTEGER4(jx)
-                  DO nd=1,nbdirsmax
-                    tempb(nd) = 0.0
-                  ENDDO
-                  CALL POPINTEGER4(ad_from0)
-                  DO i=1,ad_from0,1
-                    DO nd=1,nbdirs
-                      tempb(nd) = tempb(nd) - a(i, j)*xb(nd, ix)
-                      ab(nd, i, j) = ab(nd, i, j) - temp*xb(nd, ix)
-                    ENDDO
-                    CALL POPREAL4(x(ix))
-                    CALL POPINTEGER4(ix)
-                  ENDDO
-                  CALL POPINTEGER4(ix)
-                  CALL POPREAL4(temp)
-                  DO nd=1,nbdirs
-                    xb(nd, jx) = xb(nd, jx) + tempb(nd)
-                  ENDDO
-                  CALL POPCONTROL1B(branch)
-                  IF (branch .EQ. 0) THEN
-                    CALL POPREAL4(x(jx))
-                    DO nd=1,nbdirs
-                      tempb0(nd) = xb(nd, jx)/a(j, j)
-                      xb(nd, jx) = tempb0(nd)
-                      ab(nd, j, j) = ab(nd, j, j) - x(jx)*tempb0(nd)/a(j
-     +                  , j)
-                    ENDDO
-                  END IF
-                ENDDO
-              END IF
-            ELSE IF (incx .EQ. 1) THEN
-              DO j=1,n
-                IF (nounit) THEN
-                  CALL PUSHREAL4(x(j))
-                  x(j) = x(j)/a(j, j)
-                  CALL PUSHCONTROL1B(0)
-                ELSE
-                  CALL PUSHCONTROL1B(1)
-                END IF
-                CALL PUSHREAL4(temp)
-                temp = x(j)
-                ad_from1 = j + 1
-                DO i=ad_from1,n
-                  CALL PUSHREAL4(x(i))
-                  x(i) = x(i) - temp*a(i, j)
-                ENDDO
-                CALL PUSHINTEGER4(ad_from1)
-              ENDDO
-              DO ii1=1,ISIZE2OFa
-                DO ii2=1,lda
-                  DO nd=1,nbdirsmax
-                    ab(nd, ii2, ii1) = 0.0
-                  ENDDO
-                ENDDO
-              ENDDO
-              DO j=n,1,-1
-                DO nd=1,nbdirsmax
-                  tempb(nd) = 0.0
-                ENDDO
-                CALL POPINTEGER4(ad_from1)
-                DO i=n,ad_from1,-1
-                  CALL POPREAL4(x(i))
-                  DO nd=1,nbdirs
-                    tempb(nd) = tempb(nd) - a(i, j)*xb(nd, i)
-                    ab(nd, i, j) = ab(nd, i, j) - temp*xb(nd, i)
-                  ENDDO
-                ENDDO
-                CALL POPREAL4(temp)
-                DO nd=1,nbdirs
-                  xb(nd, j) = xb(nd, j) + tempb(nd)
-                ENDDO
-                CALL POPCONTROL1B(branch)
-                IF (branch .EQ. 0) THEN
-                  CALL POPREAL4(x(j))
-                  DO nd=1,nbdirs
-                    tempb0(nd) = xb(nd, j)/a(j, j)
-                    xb(nd, j) = tempb0(nd)
-                    ab(nd, j, j) = ab(nd, j, j) - x(j)*tempb0(nd)/a(j, j
-     +                )
-                  ENDDO
-                END IF
-              ENDDO
-            ELSE
-              jx = kx
-              DO j=1,n
-                IF (nounit) THEN
-                  CALL PUSHREAL4(x(jx))
-                  x(jx) = x(jx)/a(j, j)
-                  CALL PUSHCONTROL1B(0)
-                ELSE
-                  CALL PUSHCONTROL1B(1)
-                END IF
-                CALL PUSHREAL4(temp)
-                temp = x(jx)
-                CALL PUSHINTEGER4(ix)
-                ix = jx
-                ad_from2 = j + 1
-                DO i=ad_from2,n
-                  CALL PUSHINTEGER4(ix)
-                  ix = ix + incx
-                  CALL PUSHREAL4(x(ix))
-                  x(ix) = x(ix) - temp*a(i, j)
-                ENDDO
-                CALL PUSHINTEGER4(ad_from2)
-                CALL PUSHINTEGER4(jx)
-                jx = jx + incx
-              ENDDO
-              DO ii1=1,ISIZE2OFa
-                DO ii2=1,lda
-                  DO nd=1,nbdirsmax
-                    ab(nd, ii2, ii1) = 0.0
-                  ENDDO
-                ENDDO
-              ENDDO
-              DO j=n,1,-1
-                CALL POPINTEGER4(jx)
-                DO nd=1,nbdirsmax
-                  tempb(nd) = 0.0
-                ENDDO
-                CALL POPINTEGER4(ad_from2)
-                DO i=n,ad_from2,-1
-                  DO nd=1,nbdirs
-                    tempb(nd) = tempb(nd) - a(i, j)*xb(nd, ix)
-                    ab(nd, i, j) = ab(nd, i, j) - temp*xb(nd, ix)
-                  ENDDO
-                  CALL POPREAL4(x(ix))
-                  CALL POPINTEGER4(ix)
-                ENDDO
-                CALL POPINTEGER4(ix)
-                CALL POPREAL4(temp)
-                DO nd=1,nbdirs
-                  xb(nd, jx) = xb(nd, jx) + tempb(nd)
-                ENDDO
-                CALL POPCONTROL1B(branch)
-                IF (branch .EQ. 0) THEN
-                  CALL POPREAL4(x(jx))
-                  DO nd=1,nbdirs
-                    tempb0(nd) = xb(nd, jx)/a(j, j)
-                    xb(nd, jx) = tempb0(nd)
-                    ab(nd, j, j) = ab(nd, j, j) - x(jx)*tempb0(nd)/a(j, 
-     +                j)
-                  ENDDO
-                END IF
-              ENDDO
-            END IF
-          ELSE IF (LSAME(uplo, 'U')) THEN
-C
-C        Form  x := inv( A**T )*x.
-C
-            IF (incx .EQ. 1) THEN
-              DO j=1,n
-                temp = x(j)
-                DO i=1,j-1
-                  temp = temp - a(i, j)*x(i)
-                ENDDO
-                CALL PUSHINTEGER4(i - 1)
-                IF (nounit) THEN
-                  CALL PUSHREAL4(temp)
-                  temp = temp/a(j, j)
-                  CALL PUSHCONTROL1B(0)
-                ELSE
-                  CALL PUSHCONTROL1B(1)
-                END IF
-                CALL PUSHREAL4(x(j))
-                x(j) = temp
-              ENDDO
-              DO ii1=1,ISIZE2OFa
-                DO ii2=1,lda
-                  DO nd=1,nbdirsmax
-                    ab(nd, ii2, ii1) = 0.0
-                  ENDDO
-                ENDDO
-              ENDDO
-              DO j=n,1,-1
-                CALL POPREAL4(x(j))
-                DO nd=1,nbdirs
-                  tempb(nd) = xb(nd, j)
-                  xb(nd, j) = 0.0
-                ENDDO
-                CALL POPCONTROL1B(branch)
-                IF (branch .EQ. 0) THEN
-                  CALL POPREAL4(temp)
-                  DO nd=1,nbdirs
-                    tempb(nd) = tempb0(nd)
-                    ab(nd, j, j) = ab(nd, j, j) - temp*tempb0(nd)/a(j, j
-     +                )
-                  ENDDO
-                END IF
-                CALL POPINTEGER4(ad_to)
-                DO i=ad_to,1,-1
-                  DO nd=1,nbdirs
-                    ab(nd, i, j) = ab(nd, i, j) - x(i)*tempb(nd)
-                    xb(nd, i) = xb(nd, i) - a(i, j)*tempb(nd)
-                  ENDDO
-                ENDDO
-                DO nd=1,nbdirs
-                  xb(nd, j) = xb(nd, j) + tempb(nd)
-                ENDDO
-              ENDDO
-            ELSE
-              jx = kx
-              DO j=1,n
-                temp = x(jx)
-                ix = kx
-                DO i=1,j-1
-                  temp = temp - a(i, j)*x(ix)
-                  CALL PUSHINTEGER4(ix)
-                  ix = ix + incx
-                ENDDO
-                CALL PUSHINTEGER4(i - 1)
-                IF (nounit) THEN
-                  CALL PUSHREAL4(temp)
-                  temp = temp/a(j, j)
-                  CALL PUSHCONTROL1B(0)
-                ELSE
-                  CALL PUSHCONTROL1B(1)
-                END IF
-                CALL PUSHREAL4(x(jx))
-                x(jx) = temp
-                CALL PUSHINTEGER4(jx)
-                jx = jx + incx
-              ENDDO
-              DO ii1=1,ISIZE2OFa
-                DO ii2=1,lda
-                  DO nd=1,nbdirsmax
-                    ab(nd, ii2, ii1) = 0.0
-                  ENDDO
-                ENDDO
-              ENDDO
-              DO j=n,1,-1
-                CALL POPINTEGER4(jx)
-                CALL POPREAL4(x(jx))
-                DO nd=1,nbdirs
-                  tempb(nd) = xb(nd, jx)
-                  xb(nd, jx) = 0.0
-                ENDDO
-                CALL POPCONTROL1B(branch)
-                IF (branch .EQ. 0) THEN
-                  CALL POPREAL4(temp)
-                  DO nd=1,nbdirs
-                    tempb(nd) = tempb0(nd)
-                    ab(nd, j, j) = ab(nd, j, j) - temp*tempb0(nd)/a(j, j
-     +                )
-                  ENDDO
-                END IF
-                CALL POPINTEGER4(ad_to0)
-                DO i=ad_to0,1,-1
-                  CALL POPINTEGER4(ix)
-                  DO nd=1,nbdirs
-                    ab(nd, i, j) = ab(nd, i, j) - x(ix)*tempb(nd)
-                    xb(nd, ix) = xb(nd, ix) - a(i, j)*tempb(nd)
-                  ENDDO
-                ENDDO
-                DO nd=1,nbdirs
-                  xb(nd, jx) = xb(nd, jx) + tempb(nd)
-                ENDDO
-              ENDDO
-            END IF
-          ELSE IF (incx .EQ. 1) THEN
-            DO j=n,1,-1
-              temp = x(j)
-              DO i=n,j+1,-1
-                temp = temp - a(i, j)*x(i)
-              ENDDO
-              CALL PUSHINTEGER4(i + 1)
-              IF (nounit) THEN
-                CALL PUSHREAL4(temp)
-                temp = temp/a(j, j)
-                CALL PUSHCONTROL1B(0)
-              ELSE
-                CALL PUSHCONTROL1B(1)
-              END IF
-              CALL PUSHREAL4(x(j))
-              x(j) = temp
-            ENDDO
-            DO ii1=1,ISIZE2OFa
-              DO ii2=1,lda
-                DO nd=1,nbdirsmax
-                  ab(nd, ii2, ii1) = 0.0
-                ENDDO
-              ENDDO
-            ENDDO
-            DO j=1,n,1
-              CALL POPREAL4(x(j))
-              DO nd=1,nbdirs
-                tempb(nd) = xb(nd, j)
-                xb(nd, j) = 0.0
-              ENDDO
-              CALL POPCONTROL1B(branch)
-              IF (branch .EQ. 0) THEN
-                CALL POPREAL4(temp)
-                DO nd=1,nbdirs
-                  tempb(nd) = tempb0(nd)
-                  ab(nd, j, j) = ab(nd, j, j) - temp*tempb0(nd)/a(j, j)
-                ENDDO
-              END IF
-              CALL POPINTEGER4(ad_to1)
-              DO i=ad_to1,n,1
-                DO nd=1,nbdirs
-                  ab(nd, i, j) = ab(nd, i, j) - x(i)*tempb(nd)
-                  xb(nd, i) = xb(nd, i) - a(i, j)*tempb(nd)
-                ENDDO
-              ENDDO
-              DO nd=1,nbdirs
-                xb(nd, j) = xb(nd, j) + tempb(nd)
-              ENDDO
-            ENDDO
-          ELSE
-            kx = kx + (n-1)*incx
-            jx = kx
-            DO j=n,1,-1
-              temp = x(jx)
-              ix = kx
-              DO i=n,j+1,-1
-                temp = temp - a(i, j)*x(ix)
-                CALL PUSHINTEGER4(ix)
-                ix = ix - incx
-              ENDDO
-              CALL PUSHINTEGER4(i + 1)
-              IF (nounit) THEN
-                CALL PUSHREAL4(temp)
-                temp = temp/a(j, j)
-                CALL PUSHCONTROL1B(0)
-              ELSE
-                CALL PUSHCONTROL1B(1)
-              END IF
-              CALL PUSHREAL4(x(jx))
-              x(jx) = temp
-              CALL PUSHINTEGER4(jx)
-              jx = jx - incx
-            ENDDO
-            DO ii1=1,ISIZE2OFa
-              DO ii2=1,lda
-                DO nd=1,nbdirsmax
-                  ab(nd, ii2, ii1) = 0.0
-                ENDDO
-              ENDDO
-            ENDDO
-            DO j=1,n,1
-              CALL POPINTEGER4(jx)
-              CALL POPREAL4(x(jx))
-              DO nd=1,nbdirs
-                tempb(nd) = xb(nd, jx)
-                xb(nd, jx) = 0.0
-              ENDDO
-              CALL POPCONTROL1B(branch)
-              IF (branch .EQ. 0) THEN
-                CALL POPREAL4(temp)
-                DO nd=1,nbdirs
-                  tempb(nd) = tempb0(nd)
-                  ab(nd, j, j) = ab(nd, j, j) - temp*tempb0(nd)/a(j, j)
-                ENDDO
-              END IF
-              CALL POPINTEGER4(ad_to2)
-              DO i=ad_to2,n,1
-                CALL POPINTEGER4(ix)
-                DO nd=1,nbdirs
-                  ab(nd, i, j) = ab(nd, i, j) - x(ix)*tempb(nd)
-                  xb(nd, ix) = xb(nd, ix) - a(i, j)*tempb(nd)
-                ENDDO
-              ENDDO
-              DO nd=1,nbdirs
-                xb(nd, jx) = xb(nd, jx) + tempb(nd)
-              ENDDO
-            ENDDO
-          END IF
-          CALL POPCONTROL1B(branch)
-        END IF
+
+      UPPER   = (UPLO.EQ.'U'  .OR. UPLO.EQ.'u')
+      UNIT    = (DIAG.EQ.'U'  .OR. DIAG.EQ.'u')
+      NOTRANS = (TRANS.EQ.'N' .OR. TRANS.EQ.'n')
+      IF (NOTRANS) THEN
+         TRANS_T = 'T'
+      ELSE
+         TRANS_T = 'N'
       END IF
-      CALL POPCONTROL3B(branch)
-      END
+
+C     Gather original B once, recompute S once (shared across directions)
+      DO I = 1, N
+         BLOC(I) = X(KX + (I-1)*INCX)
+      END DO
+      DO I = 1, N
+         S(I) = BLOC(I)
+      END DO
+      CALL STRSV(UPLO, TRANS, DIAG, N, A, LDA, S, 1)
+
+      DO ND = 1, NBDIRS
+
+         DO I = 1, N
+            YB(I) = XB(ND, KX + (I-1)*INCX)
+         END DO
+
+         CALL STRSV(UPLO, TRANS_T, DIAG, N, A, LDA, YB, 1)
+
+         DO J = 1, LDA
+            DO I = 1, LDA
+               AB_SLICE(I,J) = 0.0E0
+            END DO
+         END DO
+         DO J = 1, N
+            DO I = 1, N
+               IF ((UPPER.AND.I.LE.J).OR.(.NOT.UPPER.AND.I.GE.J)) THEN
+                  IF (.NOT.(UNIT.AND.I.EQ.J)) THEN
+                     IF (NOTRANS) THEN
+                        AB_SLICE(I,J) = -YB(I)*S(J)
+                     ELSE
+                        AB_SLICE(I,J) = -S(I)*YB(J)
+                     END IF
+                  END IF
+               END IF
+            END DO
+         END DO
+
+         DO I = 1, N
+            XB(ND, KX + (I-1)*INCX) = YB(I)
+         END DO
+         DO J = 1, LDA
+            DO I = 1, LDA
+               AB(ND,I,J) = AB_SLICE(I,J)
+            END DO
+         END DO
+
+      END DO
+
+      RETURN
+      END SUBROUTINE STRSV_BV
 

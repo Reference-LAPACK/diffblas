@@ -901,10 +901,17 @@ C      END
 
       SUBROUTINE STRSM_BV(SIDE, UPLO, TRANSA, DIAG, M, N,
      +                    ALPHA, ALPHAB, A, AB, LDA, B, BB, LDB, NBDIRS)
-!
-! Vector reverse-mode (adjoint) derivative of STRSM, black-box/Giles-style.
-! Self-contained -- does not call STRSM_B.
-!
+C
+C Vector reverse-mode (adjoint) derivative of STRSM, black-box/Giles-style.
+C Self-contained -- does not call STRSM_B. AB/BB store direction as the
+C FASTEST-varying index (nbdirsmax, LDA/LDB, *): gather each direction into
+C a plain work array before use, scatter the result back after.
+C
+C CONVENTION (matches Tapenade's strsm_bv.f):
+C   B          : untouched, original forward-call input.
+C   BB         : IN = seed adjoints (one per direction); OUT = dF/dB.
+C   ALPHAB, AB : OUTPUT ONLY, zeroed and filled here per direction.
+C
       IMPLICIT NONE
       INCLUDE 'DIFFSIZES.inc'
       CHARACTER SIDE, UPLO, TRANSA, DIAG

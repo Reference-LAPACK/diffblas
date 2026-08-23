@@ -483,8 +483,8 @@ C      END
      +                   ALPHA, ALPHAD, A, AD, LDA, B, BD, LDB)
 C
 C Forward-mode derivative of DTRSM via the black-box / Giles-style
-C approach: uses ONLY the original, undifferentiated
-C DTRSM and DTRMM -- no hand-differentiated loops.
+C approach: differentiate op(A)*X = alpha*B directly. Uses only the
+C original DTRSM and DTRMM.
 C
       IMPLICIT NONE
       CHARACTER SIDE, UPLO, TRANSA, DIAG

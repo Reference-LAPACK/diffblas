@@ -791,15 +791,17 @@ C      END
 
       SUBROUTINE STRSM_B(SIDE, UPLO, TRANSA, DIAG, M, N,
      +                   ALPHA, ALPHAB, A, AB, LDA, B, BB, LDB)
-!
-! Reverse-mode (adjoint) derivative of STRSM via the Giles/black-box
-! method. Uses only the original STRSM.
-!
-! CONVENTION:
-!   B          : untouched, original forward-call input.
-!   BB         : IN = seed adjoint dF/dX; OUT = adjoint dF/dB (in place).
-!   ALPHAB, AB : OUTPUT ONLY -- zeroed and filled here.
-!
+C
+C Reverse-mode (adjoint) derivative of STRSM via the Giles/black-box
+C method: differentiates op(A)*X = alpha*B directly, using only the
+C original, undifferentiated STRSM -- never the substitution algorithm.
+C
+C CONVENTION (matches Tapenade's own generated strsm_b.f):
+C   B          : untouched, original forward-call input.
+C   BB         : IN = seed adjoint dF/dX; OUT = adjoint dF/dB (in place).
+C   ALPHAB, AB : OUTPUT ONLY -- zeroed and filled here, not accumulated
+C                into whatever the caller passed in.
+C
       IMPLICIT NONE
       CHARACTER SIDE, UPLO, TRANSA, DIAG
       INTEGER M, N, LDA, LDB
@@ -828,6 +830,7 @@ C      END
       END IF
 
 C     Step 1: Yb solves op(A)^T*Yb = Xb (SIDE='L') or Yb*op(A)^T = Xb (SIDE='R')
+C             Overwrites BB in place: held the seed on entry, holds Yb after.
       CALL STRSM(SIDE, UPLO, TRANSA_T, DIAG, M, N, 1.0E0, A, LDA, BB, LDB)
 
 C     Step 2: recompute X from the ORIGINAL, untouched B

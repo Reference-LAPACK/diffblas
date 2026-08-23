@@ -481,11 +481,11 @@ C      END
 
       SUBROUTINE STRSM_D(SIDE, UPLO, TRANSA, DIAG, M, N,
      +                   ALPHA, ALPHAD, A, AD, LDA, B, BD, LDB)
-!
-! Forward-mode derivative of STRSM via the black-box / Giles-style
-! approach: differentiate op(A)*X = alpha*B directly. Uses only the
-! original STRSM and STRMM.
-!
+C
+C Forward-mode derivative of STRSM via the black-box / Giles-style
+C approach: differentiate op(A)*X = alpha*B directly. Uses only the
+C original STRSM and STRMM.
+C
       IMPLICIT NONE
       CHARACTER SIDE, UPLO, TRANSA, DIAG
       INTEGER M, N, LDA, LDB
@@ -499,6 +499,7 @@ C      END
       IF (M.EQ.0 .OR. N.EQ.0) RETURN
 
 C     Step 1: X = solution of the original forward call
+C             (private copy -- B itself must stay untouched)
       DO J = 1, N
          DO I = 1, M
             X(I,J) = B(I,J)

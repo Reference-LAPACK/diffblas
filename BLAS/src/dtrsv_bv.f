@@ -740,10 +740,10 @@ C      END
 
       SUBROUTINE DTRSV_BV(UPLO, TRANS, DIAG, N, A, AB, LDA, X, XB,
      +                    INCX, NBDIRS)
-!
-! Vector reverse-mode (adjoint) derivative of DTRSV, black-box/Giles-style.
-! Self-contained -- does not call DTRSV_B.
-!
+C
+C Vector reverse-mode (adjoint) derivative of DTRSV, black-box/Giles-style.
+C Self-contained -- does not call DTRSV_B.
+C
       IMPLICIT NONE
       INCLUDE 'DIFFSIZES.inc'
       CHARACTER UPLO, TRANS, DIAG
