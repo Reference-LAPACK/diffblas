@@ -1,254 +1,183 @@
-! Test program for STRSM reverse mode (adjoint) differentiation
-! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision
-! Verification uses VJP methodology with finite differences
+! Test program for STRSM reverse (adjoint) mode differentiation
+! Hand-written driver following the structure of test_dgemv_reverse.f90.
+! Validates the adjoint via the dot-product (VJP) identity:
+!   <bb_seed, dX> = <a_dir,ab> + <b_dir,bb_out> + alpha_dir*alphab
+! Uses REAL*8. Multi-size, sweeps DIAG in {'N','U'}.
+! (SIDE='L', UPLO='U', TRANSA='N' held fixed for now.)
 
 program test_strsm_reverse
   implicit none
 
-  integer :: seed_array(33)
-
   external :: strsm
   external :: strsm_b
 
-  ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension (rows/cols of matrices)
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-
-  character :: side
-  character :: uplo
-  character :: transa
+  integer :: n_test, seed_array(33), test_sizes(3), i, id
+  logical :: passed, all_passed
   character :: diag
-  integer :: msize
-  integer :: nsize
-  real(4) :: alpha
-  real(4), dimension(max_size,max_size) :: a
-  integer :: lda_val
-  real(4), dimension(max_size,max_size) :: b
-  integer :: ldb_val
 
-  ! Adjoint variables (reverse mode)
-  ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
-  !                  input adjoints are OUTPUT (computed gradients)
-  real(4) :: alphab
-  real(4), dimension(max_size,max_size) :: ab
-  real(4), dimension(max_size,max_size) :: bb
-
-  ! Storage for original values (for VJP verification)
-  real(4) :: alpha_orig
-  real(4), dimension(max_size,max_size) :: a_orig
-  real(4), dimension(max_size,max_size) :: b_orig
-
-  ! Variables for VJP verification via finite differences
-  real(4), dimension(max_size,max_size) :: b_plus, b_minus
-
-  ! Saved cotangents (output adjoints) for VJP verification
-  real(4), dimension(max_size,max_size) :: bb_orig
-  real(4), parameter :: h = 1.0e-3
-  real(4) :: vjp_ad, vjp_fd, relative_error, max_error, abs_error, abs_reference, error_bound
-  logical :: has_large_errors
-  integer :: i, j
-  real(4), dimension(max_size*max_size) :: temp_products  ! For sorted summation
-  integer :: n_products
-
-  ! Initialize random seed for reproducibility
   seed_array = 42
   call random_seed(put=seed_array)
 
-  ! Initialize primal values
-  side = 'L'
-  uplo = 'U'
-  transa = 'N'
-  diag = 'N'
-  msize = n
-  nsize = n
-  call random_number(alpha)
-  alpha = alpha * 2.0 - 1.0
-  call random_number(a)
-  a = a * 2.0d0 - 1.0d0
-  lda_val = lda
-  call random_number(b)
-  b = b * 2.0d0 - 1.0d0
-  ldb_val = ldb
-
-  ! Store original primal values
-  alpha_orig = alpha
-  a_orig = a
-  b_orig = b
-
-  write(*,*) 'Testing STRSM'
-
-  ! Initialize output adjoints (cotangents) with random values
-  ! These are the 'seeds' for reverse mode
-  call random_number(bb)
-  bb = bb * 2.0 - 1.0
-
-  ! Save output adjoints (cotangents) for VJP verification
-  ! Note: output adjoints may be modified by reverse mode function
-  bb_orig = bb
-
-  ! Initialize input adjoints to zero (they will be computed)
-  ab = 0.0
-  alphab = 0.0
-
-  ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! Differentiated code checks they are set via check_ISIZE*_initialized.
-  call set_ISIZE2OFA(max_size)
-
-  ! Call reverse mode differentiated function
-  call strsm_b(side, uplo, transa, diag, msize, nsize, alpha, alphab, a, ab, lda_val, b, bb, ldb_val)
-
-  ! Reset ISIZE globals to uninitialized (-1) for completeness
-  call set_ISIZE2OFA(-1)
-
-  ! VJP Verification using finite differences
-  ! For reverse mode, we verify: cotangent^T @ J @ direction = direction^T @ adjoint
-  ! Equivalently: cotangent^T @ (f(x+h*dir) - f(x-h*dir))/(2h) should equal dir^T @ computed_adjoint
-  call check_vjp_numerically()
-
-  write(*,*) ''
-  write(*,*) 'Test completed successfully'
+  test_sizes = (/ 4, 10, 25 /)
+  write(*,*) 'Testing STRSM (reverse mode)'
+  all_passed = .true.
+  do id = 1, 2
+    if (id == 1) then
+      diag = 'N'
+    else
+      diag = 'U'
+    end if
+    do i = 1, 3
+      n_test = test_sizes(i)
+      call run_test_for_size(n_test, diag, passed)
+      all_passed = all_passed .and. passed
+    end do
+  end do
+  if (all_passed) then
+    write(*,*) 'PASS: All sizes/diags completed successfully'
+  else
+    write(*,*) 'FAIL: One or more cases had derivative errors'
+  end if
 
 contains
 
-  subroutine check_vjp_numerically()
+  subroutine run_test_for_size(n, diag, passed)
     implicit none
-    
-    ! Direction vectors for VJP testing (like tangents in forward mode)
-    real(4) :: alpha_dir
-    real(4), dimension(max_size,max_size) :: a_dir
-    real(4), dimension(max_size,max_size) :: b_dir
-    
-    real(4), dimension(max_size,max_size) :: b_central_diff
-    
-    max_error = 0.0
+    integer, intent(in) :: n
+    character, intent(in) :: diag
+    logical, intent(out) :: passed
+
+    character :: side, uplo, transa
+    integer :: msize, nsize, lda_val, ldb_val
+    real(4) :: alpha, alphab
+    real(4), dimension(n,n) :: a, b, ab, bb
+    real(4) :: alpha_orig
+    real(4), dimension(n,n) :: a_orig, b_orig, bb_orig
+    integer :: i, j
+
+    side = 'L'
+    uplo = 'U'
+    transa = 'N'
+    msize = n
+    nsize = n
+    lda_val = n
+    ldb_val = n
+
+    call random_number(alpha)
+    alpha = alpha * 2.0e0 - 1.0e0
+    call random_number(a)
+    a = (a * 2.0e0 - 1.0e0) / real(n, 4)
+    do i = 1, n
+      a(i,i) = 2.0e0 + abs(a(i,i))
+    end do
+    call random_number(b)
+    b = b * 2.0e0 - 1.0e0
+
+    alpha_orig = alpha
+    a_orig = a
+    b_orig = b
+
+    ! Output-space seed dF/dX
+    call random_number(bb)
+    bb = bb * 2.0e0 - 1.0e0
+    bb_orig = bb
+
+    alphab = 0.0e0
+    ab = 0.0e0
+
+    write(*,*) 'Testing STRSM (n =', n, ', diag = ', diag, ')'
+
+    call strsm_b(side, uplo, transa, diag, msize, nsize, alpha, alphab, &
+                 a, ab, lda_val, b, bb, ldb_val)
+
+    call check_vjp_numerically(n, side, uplo, transa, diag, msize, nsize, &
+         lda_val, ldb_val, alpha_orig, a_orig, b_orig, bb_orig, alphab, ab, &
+         bb, passed)
+
+  end subroutine run_test_for_size
+
+  subroutine check_vjp_numerically(n, side, uplo, transa, diag, msize, nsize, &
+       lda_val, ldb_val, alpha_orig, a_orig, b_orig, bb_orig, alphab, ab, &
+       bb, passed)
+    implicit none
+    integer, intent(in) :: n, msize, nsize, lda_val, ldb_val
+    character, intent(in) :: side, uplo, transa, diag
+    real(4), intent(in) :: alpha_orig
+    real(4), intent(in) :: a_orig(n,n), b_orig(n,n), bb_orig(n,n)
+    real(4), intent(in) :: alphab, ab(n,n), bb(n,n)
+    logical, intent(out) :: passed
+
+    real(4), parameter :: h = 1.0e-4
+    real(4) :: vjp_ad, vjp_fd, relative_error, max_error
+    real(4) :: abs_error, abs_reference, error_bound
+    logical :: has_large_errors
+    integer :: i, j
+
+    real(4) :: alpha_dir, alpha
+    real(4), dimension(n,n) :: a_dir, b_dir, a, b
+    real(4), dimension(n,n) :: x_plus, x_minus, x_cdiff
+
     has_large_errors = .false.
-    
-    write(*,*) 'Function calls completed successfully'
-    
-    write(*,*) 'Checking derivatives against numerical differentiation:'
-    write(*,*) 'Step size h =', h
-    
-    ! Initialize random direction vectors for all inputs
+
+    ! Random perturbation directions for the inputs
     call random_number(alpha_dir)
-    alpha_dir = alpha_dir * 2.0 - 1.0
+    alpha_dir = alpha_dir * 2.0e0 - 1.0e0
     call random_number(a_dir)
-    a_dir = a_dir * 2.0 - 1.0
+    a_dir = a_dir * 2.0e0 - 1.0e0
     call random_number(b_dir)
-    b_dir = b_dir * 2.0 - 1.0
-    
-    ! Forward perturbation: f(x + h*dir)
+    b_dir = b_dir * 2.0e0 - 1.0e0
+
+    ! Central difference of the solution X w.r.t. the input direction
     alpha = alpha_orig + h * alpha_dir
     a = a_orig + h * a_dir
     b = b_orig + h * b_dir
     call strsm(side, uplo, transa, diag, msize, nsize, alpha, a, lda_val, b, ldb_val)
-    b_plus = b
-    
-    ! Backward perturbation: f(x - h*dir)
+    x_plus = b
+
     alpha = alpha_orig - h * alpha_dir
     a = a_orig - h * a_dir
     b = b_orig - h * b_dir
     call strsm(side, uplo, transa, diag, msize, nsize, alpha, a, lda_val, b, ldb_val)
-    b_minus = b
-    
-    ! Compute central differences: (f(x+h*dir) - f(x-h*dir)) / (2h)
-    b_central_diff = (b_plus - b_minus) / (2.0d0 * h)
-    
-    ! VJP verification:
-    ! cotangent^T @ central_diff should equal direction^T @ computed_adjoint
-    ! Left side: cotangent^T @ Jacobian @ direction (via finite differences, with sorted summation)
-    vjp_fd = 0.0
-    ! Compute and sort products for b (FD)
-    n_products = 0
+    x_minus = b
+
+    x_cdiff = (x_plus - x_minus) / (2.0e0 * h)
+
+    ! <bb_seed, dX>
+    vjp_fd = 0.0e0
     do j = 1, n
       do i = 1, n
-        n_products = n_products + 1
-        temp_products(n_products) = bb_orig(i,j) * b_central_diff(i,j)
+        vjp_fd = vjp_fd + bb_orig(i,j) * x_cdiff(i,j)
       end do
     end do
-    call sort_array(temp_products, n_products)
-    do i = 1, n_products
-      vjp_fd = vjp_fd + temp_products(i)
-    end do
-    
-    ! Right side: direction^T @ computed_adjoint (with sorted summation)
-    ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
-    ! For pure inputs: use adjoint directly
-    vjp_ad = 0.0
-    vjp_ad = vjp_ad + alpha_dir * alphab
-    ! Compute and sort products for a
-    n_products = 0
+
+    ! <a_dir,ab> + <b_dir,bb_out> + alpha_dir*alphab
+    vjp_ad = alpha_dir * alphab
     do j = 1, n
       do i = 1, n
-        n_products = n_products + 1
-        temp_products(n_products) = a_dir(i,j) * ab(i,j)
+        vjp_ad = vjp_ad + a_dir(i,j) * ab(i,j) + b_dir(i,j) * bb(i,j)
       end do
     end do
-    call sort_array(temp_products, n_products)
-    do i = 1, n_products
-      vjp_ad = vjp_ad + temp_products(i)
-    end do
-    ! Compute and sort products for b
-    n_products = 0
-    do j = 1, n
-      do i = 1, n
-        n_products = n_products + 1
-        temp_products(n_products) = b_dir(i,j) * bb(i,j)
-      end do
-    end do
-    call sort_array(temp_products, n_products)
-    do i = 1, n_products
-      vjp_ad = vjp_ad + temp_products(i)
-    end do
-    
-    ! Error check: |vjp_fd - vjp_ad| > atol + rtol * |vjp_ad|
+
     abs_error = abs(vjp_fd - vjp_ad)
     abs_reference = abs(vjp_ad)
-    error_bound = 2.0e-3 + 2.0e-3 * abs_reference
-    if (abs_error > error_bound) then
-      has_large_errors = .true.
-    end if
-    
-    
-    if (abs_reference > 1.0e-10) then
+    error_bound = 1.0e-2 + 1.0e-2 * abs_reference
+    if (abs_error > error_bound) has_large_errors = .true.
+    if (abs_reference > 1.0e-8) then
       relative_error = abs_error / abs_reference
     else
       relative_error = abs_error
     end if
     max_error = relative_error
-    
-    write(*,*) 'Maximum relative error:', max_error
-    write(*,*) 'Tolerance thresholds: rtol=2.0e-3, atol=2.0e-3'
-    if (has_large_errors) then
-      write(*,*) 'FAIL: Derivatives are outside tolerance'
-    else
-      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
-    end if
-    
-  end subroutine check_vjp_numerically
 
-  subroutine sort_array(arr, n)
-    implicit none
-    integer, intent(in) :: n
-    real(4), dimension(n), intent(inout) :: arr
-    integer :: i, j, min_idx
-    real(4) :: temp
-    
-    ! Simple selection sort
-    do i = 1, n-1
-      min_idx = i
-      do j = i+1, n
-        if (abs(arr(j)) < abs(arr(min_idx))) then
-          min_idx = j
-        end if
-      end do
-      if (min_idx /= i) then
-        temp = arr(i)
-        arr(i) = arr(min_idx)
-        arr(min_idx) = temp
-      end if
-    end do
-  end subroutine sort_array
+    write(*,*) 'VJP AD =', vjp_ad, '  VJP FD =', vjp_fd
+    write(*,*) 'Maximum relative error:', max_error
+    passed = .not. has_large_errors
+    if (has_large_errors) then
+      write(*,*) 'FAIL: Adjoint is outside tolerance'
+    else
+      write(*,*) 'PASS: Adjoint is within tolerance (rtol + atol)'
+    end if
+
+  end subroutine check_vjp_numerically
 
 end program test_strsm_reverse

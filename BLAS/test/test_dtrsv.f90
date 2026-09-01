@@ -1,180 +1,148 @@
-! Test program for DTRSV differentiation
-! Generated automatically by run_tapenade_blas.py
-! Using REAL*8 precision
+! Test program for DTRSV forward (tangent) mode differentiation
+! Hand-written driver following the structure of test_dgemv.f90.
+! Uses REAL*8. Multi-size, sweeps DIAG in {'N','U'}.
+! (UPLO='U', TRANS='N' held fixed for now.)
 
 program test_dtrsv
   implicit none
 
-  integer :: seed_array(33)
-
   external :: dtrsv
   external :: dtrsv_d
 
-  ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension (rows/cols of matrices)
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-
-  character :: uplo
-  character :: trans
+  integer :: n_test, seed_array(33), test_sizes(3), i, id
+  logical :: passed, all_passed
   character :: diag
-  integer :: nsize
-  real(8), dimension(max_size,max_size) :: a
-  integer :: lda_val
-  real(8), dimension(max_size) :: x
-  integer :: incx_val
 
-  ! Derivative variables
-  real(8), dimension(max_size,max_size) :: a_d
-  real(8), dimension(max_size) :: x_d
-
-  ! Storage variables for inout parameters
-  real(8), dimension(max_size) :: x_output
-
-  ! Array restoration variables for numerical differentiation
-  real(8), dimension(max_size) :: x_orig
-  real(8), dimension(max_size,max_size) :: a_orig
-
-  ! Variables for central difference computation
-  real(8), dimension(max_size) :: x_forward, x_backward
-  ! Scalar variables for central difference computation
-  real(8) :: central_diff, ad_result
-  logical :: has_large_errors
-
-  ! Variables for storing original derivative values
-  real(8), dimension(max_size,max_size) :: a_d_orig
-  real(8), dimension(max_size) :: x_d_orig
-
-  ! Temporary variables for matrix initialization
-  real(4) :: temp_real, temp_imag
-  integer :: i, j
-
-  ! Initialize random seed for reproducible results
   seed_array = 42
   call random_seed(put=seed_array)
 
-  uplo = 'U'
-  trans = 'N'
-  diag = 'N'
-  nsize = n
-  call random_number(a)
-  a = a * 2.0d0 - 1.0d0  ! Scale to [-1,1]
-  lda_val = lda  ! LDA must be at least max( 1
-  call random_number(x)
-  x = x * 2.0d0 - 1.0d0  ! Scale to [-1,1]
-  incx_val = 1  ! INCX 1
-
-  ! Initialize input derivatives to random values
-  call random_number(x_d)
-  x_d = x_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-  call random_number(a_d)
-  a_d = a_d * 2.0e0 - 1.0e0  ! Scale to [-1,1]
-
-  ! Store initial derivative values after random initialization
-  a_d_orig = a_d
-  x_d_orig = x_d
-
-  ! Store original values for central difference computation
-  x_orig = x
-  a_orig = a
-
-  write(*,*) 'Testing DTRSV'
-  ! Store input values of inout parameters before first function call
-  x_orig = x
-
-  ! Re-initialize data for differentiated function
-  ! Only reinitialize inout parameters - keep input-only parameters unchanged
-
-  ! uplo already has correct value from original call
-  ! trans already has correct value from original call
-  ! diag already has correct value from original call
-  nsize = n
-  ! a already has correct value from original call
-  lda_val = lda  ! LDA must be at least max( 1
-  x = x_orig
-  incx_val = 1  ! INCX 1
-
-  ! Call the differentiated function
-  call dtrsv_d(uplo, trans, diag, nsize, a, a_d, lda_val, x, x_d, incx_val)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically()
-
-  write(*,*) 'Test completed successfully'
+  test_sizes = (/ 4, 10, 25 /)
+  write(*,*) 'Testing DTRSV (forward mode)'
+  all_passed = .true.
+  do id = 1, 2
+    if (id == 1) then
+      diag = 'N'
+    else
+      diag = 'U'
+    end if
+    do i = 1, 3
+      n_test = test_sizes(i)
+      call run_test_for_size(n_test, diag, passed)
+      all_passed = all_passed .and. passed
+    end do
+  end do
+  if (all_passed) then
+    write(*,*) 'PASS: All sizes/diags completed successfully'
+  else
+    write(*,*) 'FAIL: One or more cases had derivative errors'
+  end if
 
 contains
 
-  subroutine check_derivatives_numerically()
+  subroutine run_test_for_size(n, diag, passed)
     implicit none
-    real(8), parameter :: h = 1.0e-6  ! Step size for finite differences
-    real(8) :: relative_error, max_error
-    real(8) :: output_orig, output_pert
-    real(8) :: numerical_result, analytical_result
-    real(8) :: abs_error, abs_reference, error_bound
+    integer, intent(in) :: n
+    character, intent(in) :: diag
+    logical, intent(out) :: passed
+
+    character :: uplo, trans
+    integer :: nsize, lda_val, incx
+    real(8), dimension(n,n) :: a, a_d
+    real(8), dimension(n) :: x, x_d
+    real(8), dimension(n,n) :: a_orig, a_d_orig
+    real(8), dimension(n) :: x_orig, x_d_orig
     integer :: i, j
-    
-    max_error = 0.0e0
+
+    uplo = 'U'
+    trans = 'N'
+    nsize = n
+    lda_val = n
+    incx = 1
+
+    call random_number(a)
+    a = (a * 2.0d0 - 1.0d0) / real(n, 8)
+    do i = 1, n
+      a(i,i) = 2.0d0 + abs(a(i,i))
+    end do
+    call random_number(x)
+    x = x * 2.0d0 - 1.0d0
+
+    call random_number(a_d)
+    a_d = a_d * 2.0d0 - 1.0d0
+    call random_number(x_d)
+    x_d = x_d * 2.0d0 - 1.0d0
+    if (diag == 'U' .or. diag == 'u') then
+      do i = 1, n
+        a_d(i,i) = 0.0d0
+      end do
+    end if
+
+    a_orig = a
+    x_orig = x
+    a_d_orig = a_d
+    x_d_orig = x_d
+
+    write(*,*) 'Testing DTRSV (n =', n, ', diag = ', diag, ')'
+
+    call dtrsv_d(uplo, trans, diag, nsize, a, a_d, lda_val, x, x_d, incx)
+
+    call check_derivatives_numerically(n, uplo, trans, diag, nsize, lda_val, &
+         incx, a_orig, x_orig, a_d_orig, x_d_orig, x_d, passed)
+
+  end subroutine run_test_for_size
+
+  subroutine check_derivatives_numerically(n, uplo, trans, diag, nsize, &
+       lda_val, incx, a_orig, x_orig, a_d_orig, x_d_orig, x_d, passed)
+    implicit none
+    integer, intent(in) :: n, nsize, lda_val, incx
+    character, intent(in) :: uplo, trans, diag
+    real(8), intent(in) :: a_orig(n,n), a_d_orig(n,n)
+    real(8), intent(in) :: x_orig(n), x_d_orig(n), x_d(n)
+    logical, intent(out) :: passed
+
+    real(8), parameter :: h = 1.0d-6
+    real(8) :: relative_error, max_error, abs_error, abs_reference, error_bound
+    real(8) :: central_diff, ad_result
+    logical :: has_large_errors
+    real(8), dimension(n,n) :: a
+    real(8), dimension(n) :: x, x_forward, x_backward
+    integer :: i
+
+    max_error = 0.0d0
     has_large_errors = .false.
-    
-    write(*,*) 'Checking derivatives against numerical differentiation:'
-    write(*,*) 'Step size h =', h
-    
-    ! Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5
-    
-    ! Original values already stored in main program
-    
-    ! Central difference computation: f(x + h) - f(x - h) / (2h)
-    ! Forward perturbation: f(x + h)
-    x = x_orig + h * x_d_orig
+
     a = a_orig + h * a_d_orig
-    call dtrsv(uplo, trans, diag, nsize, a, lda_val, x, incx_val)
-    ! Store forward perturbation results
+    x = x_orig + h * x_d_orig
+    call dtrsv(uplo, trans, diag, nsize, a, lda_val, x, incx)
     x_forward = x
-    
-    ! Backward perturbation: f(x - h)
-    x = x_orig - h * x_d_orig
+
     a = a_orig - h * a_d_orig
-    call dtrsv(uplo, trans, diag, nsize, a, lda_val, x, incx_val)
-    ! Store backward perturbation results
+    x = x_orig - h * x_d_orig
+    call dtrsv(uplo, trans, diag, nsize, a, lda_val, x, incx)
     x_backward = x
-    
-    ! Compute central differences and compare with AD results
-    ! Check derivatives for output X
-    do i = 1, min(2, n)  ! Check only first few elements
-      ! Central difference: (f(x+h) - f(x-h)) / (2h)
-      central_diff = (x_forward(i) - x_backward(i)) / (2.0e0 * h)
-      ! AD result
+
+    do i = 1, n
+      central_diff = (x_forward(i) - x_backward(i)) / (2.0d0 * h)
       ad_result = x_d(i)
-      ! Error check: |a - b| > atol + rtol * |b|
       abs_error = abs(central_diff - ad_result)
       abs_reference = abs(ad_result)
-      error_bound = 1.0e-5 + 1.0e-5 * abs_reference
+      error_bound = 1.0d-5 + 1.0d-5 * abs_reference
       if (abs_error > error_bound) then
         has_large_errors = .true.
-        relative_error = abs_error / max(abs_reference, 1.0e-10)
-        write(*,*) 'Large error in output X(', i, '):'
-        write(*,*) '  Central diff: ', central_diff
-        write(*,*) '  AD result:   ', ad_result
-        write(*,*) '  Absolute error:', abs_error
-        write(*,*) '  Error bound:', error_bound
-        write(*,*) '  Relative error:', relative_error
+        write(*,*) 'Large error in X(', i, '):', central_diff, ad_result
       end if
-      ! Track max error for reporting (normalized)
-      relative_error = abs_error / max(abs_reference, 1.0e-10)
+      relative_error = abs_error / max(abs_reference, 1.0d-10)
       max_error = max(max_error, relative_error)
     end do
-    
+
     write(*,*) 'Maximum relative error:', max_error
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
+    passed = .not. has_large_errors
     if (has_large_errors) then
       write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
       write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if
-    
+
   end subroutine check_derivatives_numerically
 
 end program test_dtrsv

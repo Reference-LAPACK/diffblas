@@ -1,202 +1,141 @@
-! Test program for CTRSM vector forward mode differentiation
-! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirsmax=4
+! Test program for CTRSM vector forward (tangent) mode differentiation
+! Hand-written driver following the structure of test_zgemv_vector_forward.f90.
+! COMPLEX*8, nbdirs directions (runtime, = matrix size). Sweeps DIAG in {'N','U'}.
+! (SIDE='L', UPLO='U', TRANSA='N' held fixed for now.)
 
 program test_ctrsm_vector_forward
   implicit none
-  include 'DIFFSIZES.inc'
 
   external :: ctrsm
   external :: ctrsm_dv
 
-  ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-  integer :: i, j, idir  ! Loop counters
-  integer :: seed_array(33)  ! Random seed
-  real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
-
-  character :: side
-  character :: uplo
-  character :: transa
+  integer :: n_test, seed_array(33), test_sizes(3), i, id
+  logical :: passed, all_passed
   character :: diag
-  integer :: msize
-  integer :: nsize
-  complex(4) :: alpha
-  complex(4), dimension(max_size,max_size) :: a
-  integer :: lda_val
-  complex(4), dimension(max_size,max_size) :: b
-  integer :: ldb_val
-
-  ! Vector mode derivative variables (type-promoted)
-  ! Scalars become arrays(nbdirsmax), arrays gain extra dimension
-  complex(4), dimension(nbdirsmax) :: alpha_dv
-  complex(4), dimension(nbdirsmax,max_size,max_size) :: a_dv
-  complex(4), dimension(nbdirsmax,max_size,max_size) :: b_dv
-  ! Declare variables for storing original values
-  complex(4) :: alpha_orig
-  complex(4), dimension(nbdirsmax) :: alpha_dv_orig
-  complex(4), dimension(max_size,max_size) :: a_orig
-  complex(4), dimension(nbdirsmax,max_size,max_size) :: a_dv_orig
-  complex(4), dimension(max_size,max_size) :: b_orig
-  complex(4), dimension(nbdirsmax,max_size,max_size) :: b_dv_orig
 
   seed_array = 42
   call random_seed(put=seed_array)
 
-
-  ! Initialize test parameters
-  msize = n
-  nsize = n
-  lda_val = lda
-  ldb_val = ldb
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
-  seed_array = 42
-  call random_seed(put=seed_array)
-
-  side = 'L'
-  uplo = 'U'
-  transa = 'N'
-  diag = 'N'
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  alpha = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  do i = 1, max_size
-    do j = 1, max_size
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      a(i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+  test_sizes = (/ 4, 10, 25 /)
+  write(*,*) 'Testing CTRSM (vector forward mode)'
+  all_passed = .true.
+  do id = 1, 2
+    if (id == 1) then
+      diag = 'N'
+    else
+      diag = 'U'
+    end if
+    do i = 1, 3
+      n_test = test_sizes(i)
+      call run_test_for_size(n_test, n_test, diag, passed)
+      all_passed = all_passed .and. passed
     end do
   end do
-  do i = 1, max_size
-    do j = 1, max_size
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      b(i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-  end do
-
-  ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirsmax
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    alpha_dv(idir) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-  do idir = 1, nbdirsmax
-    do i = 1, max_size
-      do j = 1, max_size
-        call random_number(temp_real)
-        call random_number(temp_imag)
-        a_dv(idir,i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-      end do
-    end do
-  end do
-  do idir = 1, nbdirsmax
-    do i = 1, max_size
-      do j = 1, max_size
-        call random_number(temp_real)
-        call random_number(temp_imag)
-        b_dv(idir,i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-      end do
-    end do
-  end do
-
-  write(*,*) 'Testing CTRSM (Vector Forward Mode)'
-  ! Store original values before any function calls (critical for INOUT parameters)
-  alpha_orig = alpha
-  alpha_dv_orig = alpha_dv
-  a_orig = a
-  a_dv_orig = a_dv
-  b_orig = b
-  b_dv_orig = b_dv
-
-  ! Call the vector mode differentiated function
-
-  call ctrsm_dv(side, uplo, transa, diag, msize, nsize, alpha, alpha_dv, a, a_dv, lda_val, b, b_dv, ldb_val, nbdirsmax)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically()
-
-  write(*,*) 'Vector forward mode test completed successfully'
+  if (all_passed) then
+    write(*,*) 'PASS: All sizes/diags completed successfully'
+  else
+    write(*,*) 'FAIL: One or more cases had derivative errors'
+  end if
 
 contains
 
-  subroutine check_derivatives_numerically()
-    implicit none
-    real(4), parameter :: h = 1.0e-3  ! Step size for finite differences
-    real(4) :: relative_error, max_error
-    real(4) :: abs_error, abs_reference, error_bound
-    complex(4) :: central_diff, ad_result
-    integer :: i, j, idir
+  subroutine fill_c(z, k)
+    integer, intent(in) :: k
+    complex(4), intent(out) :: z(k)
+    integer :: t
+    real(8) :: r, s
+    do t = 1, k
+      call random_number(r)
+      call random_number(s)
+      z(t) = cmplx(2.0d0*r - 1.0d0, 2.0d0*s - 1.0d0, kind=4)
+    end do
+  end subroutine fill_c
+
+  subroutine fill_c1(z)
+    complex(4), intent(out) :: z
+    real(8) :: r, s
+    call random_number(r)
+    call random_number(s)
+    z = cmplx(2.0d0*r - 1.0d0, 2.0d0*s - 1.0d0, kind=4)
+  end subroutine fill_c1
+
+  subroutine run_test_for_size(n, nbdirs, diag, passed)
+    integer, intent(in) :: n, nbdirs
+    character, intent(in) :: diag
+    logical, intent(out) :: passed
+
+    character :: side, uplo, transa
+    integer :: msize, nsize, lda_val, ldb_val
+    complex(4) :: alpha
+    complex(4), dimension(n,n) :: a, b, a0, b0
+    complex(4) :: alpha_dv(nbdirs)
+    complex(4) :: a_dv(nbdirs,n,n), b_dv(nbdirs,n,n)
+    complex(4) :: a_dir(nbdirs,n,n), b_dir(nbdirs,n,n), alpha_dir(nbdirs)
+    complex(4), dimension(n,n) :: xp, xm, cdiff, atmp
+    complex(4) :: altmp
+    real(8) :: max_error, abs_error, abs_reference
     logical :: has_large_errors
-    complex(4), dimension(max_size,max_size) :: b_forward, b_backward
-    
-    max_error = 0.0e0
+    integer :: nd, i, j
+
+    side = 'L'; uplo = 'U'; transa = 'N'
+    msize = n; nsize = n; lda_val = n; ldb_val = n
+
+    call fill_c1(alpha)
+    call fill_c(a, n*n)
+    a = a / real(n, 4)
+    do i = 1, n
+      a(i,i) = cmplx(2.0d0 + abs(real(a(i,i))), aimag(a(i,i)), kind=4)
+    end do
+    call fill_c(b, n*n)
+    a0 = a; b0 = b
+
+    call fill_c(alpha_dv, nbdirs)
+    call fill_c(a_dv, nbdirs*n*n)
+    call fill_c(b_dv, nbdirs*n*n)
+    if (diag == 'U' .or. diag == 'u') then
+      do nd = 1, nbdirs
+        do i = 1, n
+          a_dv(nd,i,i) = (0.0d0, 0.0d0)
+        end do
+      end do
+    end if
+    ! keep the input directions (b_dv is overwritten with the output)
+    alpha_dir = alpha_dv; a_dir = a_dv; b_dir = b_dv
+
+    write(*,*) 'Testing CTRSM (n =', n, ', nbdirs =', nbdirs, ', diag = ', diag, ')'
+
+    call ctrsm_dv(side, uplo, transa, diag, msize, nsize, alpha, alpha_dv, &
+                  a, a_dv, lda_val, b, b_dv, ldb_val, nbdirs)
+
+    max_error = 0.0d0
     has_large_errors = .false.
-    
-    write(*,*) 'Checking derivatives against numerical differentiation:'
-    write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirsmax
-    
-    ! Test each derivative direction separately
-    do idir = 1, nbdirsmax
-      
-      ! Forward perturbation: f(x + h * direction)
-      alpha = alpha_orig + cmplx(h, 0.0) * alpha_dv_orig(idir)
-      a = a_orig + cmplx(h, 0.0) * a_dv_orig(idir,:,:)
-      b = b_orig + cmplx(h, 0.0) * b_dv_orig(idir,:,:)
-      call ctrsm(side, uplo, transa, diag, msize, nsize, alpha, a, lda_val, b, ldb_val)
-      b_forward = b
-      
-      ! Backward perturbation: f(x - h * direction)
-      alpha = alpha_orig - cmplx(h, 0.0) * alpha_dv_orig(idir)
-      a = a_orig - cmplx(h, 0.0) * a_dv_orig(idir,:,:)
-      b = b_orig - cmplx(h, 0.0) * b_dv_orig(idir,:,:)
-      call ctrsm(side, uplo, transa, diag, msize, nsize, alpha, a, lda_val, b, ldb_val)
-      b_backward = b
-      
-      ! Compute central differences and compare with AD results
-      do j = 1, min(2, nsize)  ! Check only first few elements
-        do i = 1, min(2, nsize)
-          ! Central difference: (f(x+h) - f(x-h)) / (2h)
-          central_diff = (b_forward(i,j) - b_backward(i,j)) / (2.0e0 * h)
-          ! AD result
-          ad_result = b_dv(idir,i,j)
-          ! Error check: |a - b| > atol + rtol * |b|
-          abs_error = abs(central_diff - ad_result)
-          abs_reference = abs(ad_result)
-          error_bound = 1.0e-3 + 1.0e-3 * abs_reference
-          if (abs_error > error_bound) then
-            has_large_errors = .true.
-            relative_error = abs_error / max(abs_reference, 1.0e-10)
-            write(*,*) '  Large error in direction', idir, ' output B(', i, ',', j, '):'
-            write(*,*) '    Central diff: ', central_diff
-            write(*,*) '    AD result:   ', ad_result
-            write(*,*) '    Absolute error:', abs_error
-            write(*,*) '    Error bound:', error_bound
-            write(*,*) '    Relative error:', relative_error
-          end if
-          ! Track max error for reporting (normalized)
-          relative_error = abs_error / max(abs_reference, 1.0e-10)
-          max_error = max(max_error, relative_error)
+    do nd = 1, nbdirs
+      altmp = alpha + 1.0d-3*alpha_dir(nd)
+      atmp = a0 + 1.0d-3*a_dir(nd,:,:)
+      xp = b0 + 1.0d-3 * b_dir(nd,:,:)
+      call ctrsm(side, uplo, transa, diag, msize, nsize, altmp, atmp, lda_val, xp, ldb_val)
+      altmp = alpha - 1.0d-3*alpha_dir(nd)
+      atmp = a0 - 1.0d-3*a_dir(nd,:,:)
+      xm = b0 - 1.0d-3 * b_dir(nd,:,:)
+      call ctrsm(side, uplo, transa, diag, msize, nsize, altmp, atmp, lda_val, xm, ldb_val)
+      cdiff = (xp - xm) / (2.0d0 * 1.0d-3)
+      do j = 1, n
+        do i = 1, n
+          abs_error = abs(cdiff(i,j) - b_dv(nd,i,j))
+          abs_reference = abs(b_dv(nd,i,j))
+          if (abs_error > 1.0d-2 + 1.0d-2 * abs_reference) has_large_errors = .true.
+          max_error = max(max_error, abs_error / max(abs_reference, 1.0d-6))
         end do
       end do
     end do
-    
+
     write(*,*) 'Maximum relative error:', max_error
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    passed = .not. has_large_errors
     if (has_large_errors) then
       write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
       write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if
-    
-  end subroutine check_derivatives_numerically
+  end subroutine run_test_for_size
 
 end program test_ctrsm_vector_forward

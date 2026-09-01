@@ -1,285 +1,153 @@
-! Test program for ZTRSM vector reverse mode differentiation
-! Generated automatically by run_tapenade_blas.py
-! Using REAL*8 precision with nbdirsmax=4
+! Test program for ZTRSM vector reverse (adjoint) mode differentiation
+! Hand-written driver following the structure of test_zgemv_vector_reverse.f90.
+! Per-direction real-part Hermitian VJP identity:
+!   Re<bb_seed(k), dX> = Re<a_dir,ab(k)> + Re<b_dir,bb_out(k)>
+!                        + Re(conjg(alpha_dir)*alphab(k))
+! COMPLEX*16, nbdirs directions (runtime). Sweeps DIAG in {'N','U'}.
+! (SIDE='L', UPLO='U', TRANSA='N' held fixed for now.)
 
 program test_ztrsm_vector_reverse
   implicit none
-  include 'DIFFSIZES.inc'
 
   external :: ztrsm
   external :: ztrsm_bv
 
-  ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-  integer :: i, j, k  ! Loop counters
-  integer :: seed_array(33)  ! Random seed
-  real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
-
-  character :: side
-  character :: uplo
-  character :: transa
+  integer :: n_test, seed_array(33), test_sizes(3), i, id
+  logical :: passed, all_passed
   character :: diag
-  integer :: msize
-  integer :: nsize
-  complex(8) :: alpha
-  complex(8), dimension(max_size,max_size) :: a
-  integer :: lda_val
-  complex(8), dimension(max_size,max_size) :: b
-  integer :: ldb_val
 
-  ! Adjoint variables (reverse vector mode)
-  ! In reverse mode: output adjoints are INPUT (cotangents/seeds)
-  !                  input adjoints are OUTPUT (computed gradients)
-  complex(8), dimension(nbdirsmax) :: alphab
-  complex(8), dimension(nbdirsmax,max_size,max_size) :: ab
-  complex(8), dimension(nbdirsmax,max_size,max_size) :: bb
-
-  ! Storage for original cotangents (for INOUT parameters in VJP verification)
-  complex(8), dimension(nbdirsmax,max_size,max_size) :: bb_orig
-
-  ! Storage for original values (for VJP verification)
-  complex(8) :: alpha_orig
-  complex(8), dimension(max_size,max_size) :: a_orig
-  complex(8), dimension(max_size,max_size) :: b_orig
-
-  ! Variables for VJP verification via finite differences
-  real(8), parameter :: h = 1.0e-7
-  real(8) :: vjp_ad, vjp_fd, relative_error, max_error, abs_error, abs_reference, error_bound
-  logical :: has_large_errors
-  real(8), dimension(max_size*max_size) :: temp_products  ! For sorted summation
-  integer :: n_products
-
-  ! Initialize random seed for reproducibility
   seed_array = 42
   call random_seed(put=seed_array)
 
-
-  ! Initialize primal values
-  side = 'L'
-  uplo = 'U'
-  transa = 'N'
-  diag = 'N'
-  msize = n
-  nsize = n
-  call random_number(temp_real)
-  call random_number(temp_imag)
-  alpha = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-  do j = 1, n
-    do i = 1, n
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      a(i,j) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
+  test_sizes = (/ 4, 10, 25 /)
+  write(*,*) 'Testing ZTRSM (vector reverse mode)'
+  all_passed = .true.
+  do id = 1, 2
+    if (id == 1) then
+      diag = 'N'
+    else
+      diag = 'U'
+    end if
+    do i = 1, 3
+      n_test = test_sizes(i)
+      call run_test_for_size(n_test, n_test, diag, passed)
+      all_passed = all_passed .and. passed
     end do
   end do
-  lda_val = lda
-  do j = 1, n
-    do i = 1, n
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      b(i,j) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-    end do
-  end do
-  ldb_val = ldb
-
-  ! Store original primal values
-  alpha_orig = alpha
-  a_orig = a
-  b_orig = b
-
-  ! Initialize output adjoints (cotangents) with random values for each direction
-  ! These are the 'seeds' for reverse mode
-  do k = 1, nbdirsmax
-    do j = 1, n
-      do i = 1, n
-        call random_number(temp_real)
-        call random_number(temp_imag)
-        bb(k,i,j) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-      end do
-    end do
-  end do
-
-  ! Initialize input adjoints to zero (they will be computed)
-  ! Note: Inout parameters are skipped - they already have output adjoints initialized
-  alphab = 0.0
-  ab = 0.0
-
-  ! Save original cotangent seeds for OUTPUT/INOUT parameters (before function call)
-  bb_orig = bb
-
-  ! Set ISIZE globals required by differentiated routine (dimension 2 of arrays).
-  ! ISIZE1OF* (vectors): use n to match adjoint array size; ISIZE2OF* (matrices): use max_size.
-  call set_ISIZE2OFA(max_size)
-
-  ! Call reverse vector mode differentiated function
-  call ztrsm_bv(side, uplo, transa, diag, msize, nsize, alpha, alphab, a, ab, lda_val, b, bb, ldb_val, nbdirsmax)
-
-  ! Reset ISIZE globals to uninitialized (-1) for completeness
-  call set_ISIZE2OFA(-1)
-
-  ! VJP Verification using finite differences
-  call check_vjp_numerically()
-
-  write(*,*) ''
-  write(*,*) 'Test completed successfully'
+  if (all_passed) then
+    write(*,*) 'PASS: All sizes/diags completed successfully'
+  else
+    write(*,*) 'FAIL: One or more cases had derivative errors'
+  end if
 
 contains
 
-  subroutine check_vjp_numerically()
-    implicit none
-    
-    ! Direction vectors for VJP testing
-    complex(8) :: alpha_dir
-    complex(8), dimension(max_size,max_size) :: a_dir
-    complex(8), dimension(max_size,max_size) :: b_dir
-    complex(8), dimension(max_size,max_size) :: b_plus, b_minus, b_central_diff
-    
+  subroutine fill_c(z, k)
+    integer, intent(in) :: k
+    complex(8), intent(out) :: z(k)
+    integer :: t
+    real(8) :: r, s
+    do t = 1, k
+      call random_number(r)
+      call random_number(s)
+      z(t) = cmplx(2.0d0*r - 1.0d0, 2.0d0*s - 1.0d0, kind=8)
+    end do
+  end subroutine fill_c
+
+  subroutine fill_c1(z)
+    complex(8), intent(out) :: z
+    real(8) :: r, s
+    call random_number(r)
+    call random_number(s)
+    z = cmplx(2.0d0*r - 1.0d0, 2.0d0*s - 1.0d0, kind=8)
+  end subroutine fill_c1
+
+  subroutine run_test_for_size(n, nbdirs, diag, passed)
+    integer, intent(in) :: n, nbdirs
+    character, intent(in) :: diag
+    logical, intent(out) :: passed
+
+    character :: side, uplo, transa
+    integer :: msize, nsize, lda_val, ldb_val
+    complex(8) :: alpha
+    complex(8), dimension(n,n) :: a, b, a0, b0
+    complex(8) :: alphab(nbdirs)
+    complex(8) :: ab(nbdirs,n,n), bb(nbdirs,n,n), bb_seed(nbdirs,n,n)
+    complex(8) :: alpha_dir, a_dir(n,n), b_dir(n,n), altmp
+    complex(8), dimension(n,n) :: xp, xm, cdiff, atmp
+    real(8), parameter :: h = 1.0d-7
+    real(8) :: max_error, vjp_fd, vjp_ad, abs_error, abs_reference, relerr
+    logical :: has_large_errors
+    integer :: nd, i, j
+
+    side = 'L'; uplo = 'U'; transa = 'N'
+    msize = n; nsize = n; lda_val = n; ldb_val = n
+
+    call fill_c1(alpha)
+    call fill_c(a, n*n)
+    a = a / real(n, 8)
+    do i = 1, n
+      a(i,i) = cmplx(2.0d0 + abs(real(a(i,i))), aimag(a(i,i)), kind=8)
+    end do
+    call fill_c(b, n*n)
+    a0 = a; b0 = b
+
+    call fill_c(bb, nbdirs*n*n)
+    bb_seed = bb
+    ab = (0.0d0, 0.0d0)
+    alphab = (0.0d0, 0.0d0)
+
+    write(*,*) 'Testing ZTRSM (n =', n, ', nbdirs =', nbdirs, ', diag = ', diag, ')'
+
+    call ztrsm_bv(side, uplo, transa, diag, msize, nsize, alpha, alphab, &
+                  a, ab, lda_val, b, bb, ldb_val, nbdirs)
+
     max_error = 0.0d0
     has_large_errors = .false.
-    
-    write(*,*) 'Function calls completed successfully'
-    
-    write(*,*) 'Checking derivatives against numerical differentiation:'
-    write(*,*) 'Step size h =', h
-    
-    ! Test each differentiation direction separately
-    do k = 1, nbdirsmax
-      
-      ! Initialize random direction vectors for all inputs
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      alpha_dir = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-      do j = 1, n
-        do i = 1, n
-          call random_number(temp_real)
-          call random_number(temp_imag)
-          a_dir(i,j) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-        end do
-      end do
-      do j = 1, n
-        do i = 1, n
-          call random_number(temp_real)
-          call random_number(temp_imag)
-          b_dir(i,j) = cmplx(temp_real * 2.0 - 1.0, temp_imag * 2.0 - 1.0)
-        end do
-      end do
-      
-      ! Forward perturbation: f(x + h*dir)
-      alpha = alpha_orig + cmplx(h, 0.0) * alpha_dir
-      a = a_orig + cmplx(h, 0.0) * a_dir
-      b = b_orig + cmplx(h, 0.0) * b_dir
-      call ztrsm(side, uplo, transa, diag, msize, nsize, alpha, a, lda_val, b, ldb_val)
-      b_plus = b
-      
-      ! Backward perturbation: f(x - h*dir)
-      alpha = alpha_orig - cmplx(h, 0.0) * alpha_dir
-      a = a_orig - cmplx(h, 0.0) * a_dir
-      b = b_orig - cmplx(h, 0.0) * b_dir
-      call ztrsm(side, uplo, transa, diag, msize, nsize, alpha, a, lda_val, b, ldb_val)
-      b_minus = b
-      
-      ! Compute central differences and VJP verification
-      ! VJP check: direction^T @ adjoint should equal finite difference
-      
-      ! Compute central differences: (f(x+h*dir) - f(x-h*dir)) / (2h)
-      b_central_diff = (b_plus - b_minus) / (2.0d0 * h)
-      
-      ! VJP verification:
-      ! cotangent^T @ central_diff should equal direction^T @ computed_adjoint
-      ! Left side: cotangent^T @ Jacobian @ direction (via finite differences, with sorted summation)
+    do nd = 1, nbdirs
+      call fill_c1(alpha_dir)
+      call fill_c(a_dir, n*n)
+      call fill_c(b_dir, n*n)
+
+      altmp = alpha + h*alpha_dir
+      atmp = a0 + h*a_dir
+      xp = b0 + h * b_dir
+      call ztrsm(side, uplo, transa, diag, msize, nsize, altmp, atmp, lda_val, xp, ldb_val)
+      altmp = alpha - h*alpha_dir
+      atmp = a0 - h*a_dir
+      xm = b0 - h * b_dir
+      call ztrsm(side, uplo, transa, diag, msize, nsize, altmp, atmp, lda_val, xm, ldb_val)
+      cdiff = (xp - xm) / (2.0d0 * h)
+
       vjp_fd = 0.0d0
-      ! Compute and sort products for b (FD)
-      n_products = 0
       do j = 1, n
         do i = 1, n
-          n_products = n_products + 1
-          temp_products(n_products) = real(conjg(bb_orig(k,i,j)) * b_central_diff(i,j))
+          vjp_fd = vjp_fd + real(conjg(bb_seed(nd,i,j)) * cdiff(i,j))
         end do
       end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_fd = vjp_fd + temp_products(i)
-      end do
-      
-      ! Right side: direction^T @ computed_adjoint (with sorted summation)
-      ! For INOUT parameters: use cb directly (it contains the computed input adjoint after reverse pass)
-      ! For pure inputs: use adjoint directly
-      vjp_ad = 0.0d0
-      vjp_ad = vjp_ad + real(conjg(alpha_dir) * alphab(k))
-      ! Compute and sort products for b
-      n_products = 0
+
+      vjp_ad = real(conjg(alpha_dir) * alphab(nd))
       do j = 1, n
         do i = 1, n
-          n_products = n_products + 1
-          temp_products(n_products) = real(conjg(b_dir(i,j)) * bb(k,i,j))
+          vjp_ad = vjp_ad + real(conjg(a_dir(i,j)) * ab(nd,i,j)) &
+                          + real(conjg(b_dir(i,j)) * bb(nd,i,j))
         end do
       end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_ad = vjp_ad + temp_products(i)
-      end do
-      ! Compute and sort products for a
-      n_products = 0
-      do j = 1, n
-        do i = 1, n
-          n_products = n_products + 1
-          temp_products(n_products) = real(conjg(a_dir(i,j)) * ab(k,i,j))
-        end do
-      end do
-      call sort_array(temp_products, n_products)
-      do i = 1, n_products
-        vjp_ad = vjp_ad + temp_products(i)
-      end do
-      
-      ! Error check: |vjp_fd - vjp_ad| > atol + rtol * |vjp_ad|
+
       abs_error = abs(vjp_fd - vjp_ad)
       abs_reference = abs(vjp_ad)
-      error_bound = 1.0e-5 + 1.0e-5 * abs_reference
-      if (abs_error > error_bound) then
-        has_large_errors = .true.
-      end if
-      
-      ! Compute relative error for reporting
-      if (abs_reference > 1.0e-10) then
-        relative_error = abs_error / abs_reference
-      else
-        relative_error = abs_error
-      end if
-      if (relative_error > max_error) max_error = relative_error
+      if (abs_error > 1.0d-5 + 1.0d-5 * abs_reference) has_large_errors = .true.
+      relerr = abs_error / max(abs_reference, 1.0d-10)
+      max_error = max(max_error, relerr)
     end do
-    
-    write(*,*) 'Maximum relative error:', max_error
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-5, atol=1.0e-5'
-    if (has_large_errors) then
-      write(*,*) 'FAIL: Derivatives are outside tolerance'
-    else
-      write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
-    end if
-    
-  end subroutine check_vjp_numerically
 
-  subroutine sort_array(arr, n)
-    implicit none
-    integer, intent(in) :: n
-    real(8), dimension(n), intent(inout) :: arr
-    integer :: i, j, min_idx
-    real(8) :: temp
-    
-    ! Simple selection sort
-    do i = 1, n-1
-      min_idx = i
-      do j = i+1, n
-        if (abs(arr(j)) < abs(arr(min_idx))) then
-          min_idx = j
-        end if
-      end do
-      if (min_idx /= i) then
-        temp = arr(i)
-        arr(i) = arr(min_idx)
-        arr(min_idx) = temp
-      end if
-    end do
-  end subroutine sort_array
+    write(*,*) 'Maximum relative error:', max_error
+    passed = .not. has_large_errors
+    if (has_large_errors) then
+      write(*,*) 'FAIL: Adjoint is outside tolerance'
+    else
+      write(*,*) 'PASS: Adjoint is within tolerance (rtol + atol)'
+    end if
+  end subroutine run_test_for_size
 
 end program test_ztrsm_vector_reverse

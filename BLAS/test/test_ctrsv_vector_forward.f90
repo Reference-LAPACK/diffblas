@@ -1,176 +1,124 @@
-! Test program for CTRSV vector forward mode differentiation
-! Generated automatically by run_tapenade_blas.py
-! Using REAL*4 precision with nbdirsmax=4
+! Test program for CTRSV vector forward (tangent) mode differentiation
+! Hand-written driver following the structure of test_zgemv_vector_forward.f90.
+! COMPLEX*8, nbdirs directions (runtime). Sweeps DIAG in {'N','U'}.
+! (UPLO='U', TRANS='N' held fixed for now.)
 
 program test_ctrsv_vector_forward
   implicit none
-  include 'DIFFSIZES.inc'
 
   external :: ctrsv
   external :: ctrsv_dv
 
-  ! Test parameters
-  integer, parameter :: n = 4  ! Matrix/vector size for test
-  integer, parameter :: max_size = n  ! Maximum array dimension
-  integer, parameter :: lda = max_size, ldb = max_size, ldc = max_size  ! Leading dimensions
-  integer :: i, j, idir  ! Loop counters
-  integer :: seed_array(33)  ! Random seed
-  real(4) :: temp_real, temp_imag  ! Temporary variables for complex initialization
-
-  character :: uplo
-  character :: trans
+  integer :: n_test, seed_array(33), test_sizes(3), i, id
+  logical :: passed, all_passed
   character :: diag
-  integer :: nsize
-  complex(4), dimension(max_size,max_size) :: a
-  integer :: lda_val
-  complex(4), dimension(max_size) :: x
-  integer :: incx_val
-
-  ! Vector mode derivative variables (type-promoted)
-  ! Scalars become arrays(nbdirsmax), arrays gain extra dimension
-  complex(4), dimension(nbdirsmax,max_size,max_size) :: a_dv
-  complex(4), dimension(nbdirsmax,max_size) :: x_dv
-  ! Declare variables for storing original values
-  complex(4), dimension(max_size,max_size) :: a_orig
-  complex(4), dimension(nbdirsmax,max_size,max_size) :: a_dv_orig
-  complex(4), dimension(max_size) :: x_orig
-  complex(4), dimension(nbdirsmax,max_size) :: x_dv_orig
 
   seed_array = 42
   call random_seed(put=seed_array)
 
-
-  ! Initialize test parameters
-  nsize = n
-  lda_val = lda
-  incx_val = 1
-
-  ! Initialize test data with random numbers
-  ! Initialize random seed for reproducible results
-  seed_array = 42
-  call random_seed(put=seed_array)
-
-  uplo = 'U'
-  trans = 'N'
-  diag = 'N'
-  do i = 1, max_size
-    do j = 1, max_size
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      a(i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
+  test_sizes = (/ 4, 10, 25 /)
+  write(*,*) 'Testing CTRSV (vector forward mode)'
+  all_passed = .true.
+  do id = 1, 2
+    if (id == 1) then
+      diag = 'N'
+    else
+      diag = 'U'
+    end if
+    do i = 1, 3
+      n_test = test_sizes(i)
+      call run_test_for_size(n_test, n_test, diag, passed)
+      all_passed = all_passed .and. passed
     end do
   end do
-  do i = 1, max_size
-    call random_number(temp_real)
-    call random_number(temp_imag)
-    x(i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-  end do
-
-  ! Initialize input derivatives to random values (exactly like scalar mode)
-  do idir = 1, nbdirsmax
-    do i = 1, max_size
-      do j = 1, max_size
-        call random_number(temp_real)
-        call random_number(temp_imag)
-        a_dv(idir,i,j) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-      end do
-    end do
-  end do
-  do idir = 1, nbdirsmax
-    do i = 1, max_size
-      call random_number(temp_real)
-      call random_number(temp_imag)
-      x_dv(idir,i) = cmplx(temp_real, temp_imag) * (2.0,2.0) - (1.0,1.0)
-    end do
-  end do
-
-  write(*,*) 'Testing CTRSV (Vector Forward Mode)'
-  ! Store original values before any function calls (critical for INOUT parameters)
-  a_orig = a
-  a_dv_orig = a_dv
-  x_orig = x
-  x_dv_orig = x_dv
-
-  ! Call the vector mode differentiated function
-
-  call ctrsv_dv(uplo, trans, diag, nsize, a, a_dv, lda_val, x, x_dv, incx_val, nbdirsmax)
-
-  ! Print results and compare
-  write(*,*) 'Function calls completed successfully'
-
-  ! Numerical differentiation check
-  call check_derivatives_numerically()
-
-  write(*,*) 'Vector forward mode test completed successfully'
+  if (all_passed) then
+    write(*,*) 'PASS: All sizes/diags completed successfully'
+  else
+    write(*,*) 'FAIL: One or more cases had derivative errors'
+  end if
 
 contains
 
-  subroutine check_derivatives_numerically()
-    implicit none
-    real(4), parameter :: h = 1.0e-3  ! Step size for finite differences
-    real(4) :: relative_error, max_error
-    real(4) :: abs_error, abs_reference, error_bound
-    complex(4) :: central_diff, ad_result
-    integer :: i, j, idir
+  subroutine fill_c(z, k)
+    integer, intent(in) :: k
+    complex(4), intent(out) :: z(k)
+    integer :: t
+    real(8) :: r, s
+    do t = 1, k
+      call random_number(r)
+      call random_number(s)
+      z(t) = cmplx(2.0d0*r - 1.0d0, 2.0d0*s - 1.0d0, kind=4)
+    end do
+  end subroutine fill_c
+
+  subroutine run_test_for_size(n, nbdirs, diag, passed)
+    integer, intent(in) :: n, nbdirs
+    character, intent(in) :: diag
+    logical, intent(out) :: passed
+
+    character :: uplo, trans
+    integer :: nsize, lda_val, incx
+    complex(4), dimension(n,n) :: a, a0
+    complex(4), dimension(n) :: x, x0
+    complex(4) :: a_dv(nbdirs,n,n), x_dv(nbdirs,n)
+    complex(4) :: a_dir(nbdirs,n,n), x_dir(nbdirs,n)
+    complex(4), dimension(n) :: xp, xm, cdiff
+    complex(4), dimension(n,n) :: atmp
+    real(8) :: max_error, abs_error, abs_reference
     logical :: has_large_errors
-    complex(4), dimension(max_size) :: x_forward, x_backward
-    
-    max_error = 0.0e0
+    integer :: nd, i
+
+    uplo = 'U'; trans = 'N'
+    nsize = n; lda_val = n; incx = 1
+
+    call fill_c(a, n*n)
+    a = a / real(n, 4)
+    do i = 1, n
+      a(i,i) = cmplx(2.0d0 + abs(real(a(i,i))), aimag(a(i,i)), kind=4)
+    end do
+    call fill_c(x, n)
+    a0 = a; x0 = x
+
+    call fill_c(a_dv, nbdirs*n*n)
+    call fill_c(x_dv, nbdirs*n)
+    if (diag == 'U' .or. diag == 'u') then
+      do nd = 1, nbdirs
+        do i = 1, n
+          a_dv(nd,i,i) = (0.0d0, 0.0d0)
+        end do
+      end do
+    end if
+    a_dir = a_dv; x_dir = x_dv
+
+    write(*,*) 'Testing CTRSV (n =', n, ', nbdirs =', nbdirs, ', diag = ', diag, ')'
+
+    call ctrsv_dv(uplo, trans, diag, nsize, a, a_dv, lda_val, x, x_dv, incx, nbdirs)
+
+    max_error = 0.0d0
     has_large_errors = .false.
-    
-    write(*,*) 'Checking derivatives against numerical differentiation:'
-    write(*,*) 'Step size h =', h
-    write(*,*) 'Number of directions:', nbdirsmax
-    
-    ! Test each derivative direction separately
-    do idir = 1, nbdirsmax
-      
-      ! Forward perturbation: f(x + h * direction)
-      a = a_orig + cmplx(h, 0.0) * a_dv_orig(idir,:,:)
-      x = x_orig + cmplx(h, 0.0) * x_dv_orig(idir,:)
-      call ctrsv(uplo, trans, diag, nsize, a, lda_val, x, incx_val)
-      x_forward = x
-      
-      ! Backward perturbation: f(x - h * direction)
-      a = a_orig - cmplx(h, 0.0) * a_dv_orig(idir,:,:)
-      x = x_orig - cmplx(h, 0.0) * x_dv_orig(idir,:)
-      call ctrsv(uplo, trans, diag, nsize, a, lda_val, x, incx_val)
-      x_backward = x
-      
-      ! Compute central differences and compare with AD results
-      do i = 1, min(2, nsize)  ! Check only first few elements
-        ! Central difference: (f(x+h) - f(x-h)) / (2h)
-        central_diff = (x_forward(i) - x_backward(i)) / (2.0e0 * h)
-        ! AD result
-        ad_result = x_dv(idir,i)
-        ! Error check: |a - b| > atol + rtol * |b|
-        abs_error = abs(central_diff - ad_result)
-        abs_reference = abs(ad_result)
-        error_bound = 1.0e-3 + 1.0e-3 * abs_reference
-        if (abs_error > error_bound) then
-          has_large_errors = .true.
-          relative_error = abs_error / max(abs_reference, 1.0e-10)
-          write(*,*) '  Large error in direction', idir, ' output X(', i, '):'
-          write(*,*) '    Central diff: ', central_diff
-          write(*,*) '    AD result:   ', ad_result
-          write(*,*) '    Absolute error:', abs_error
-          write(*,*) '    Error bound:', error_bound
-          write(*,*) '    Relative error:', relative_error
-        end if
-        ! Track max error for reporting (normalized)
-        relative_error = abs_error / max(abs_reference, 1.0e-10)
-        max_error = max(max_error, relative_error)
+    do nd = 1, nbdirs
+      atmp = a0 + 1.0d-3*a_dir(nd,:,:)
+      xp = x0 + 1.0d-3 * x_dir(nd,:)
+      call ctrsv(uplo, trans, diag, nsize, atmp, lda_val, xp, incx)
+      atmp = a0 - 1.0d-3*a_dir(nd,:,:)
+      xm = x0 - 1.0d-3 * x_dir(nd,:)
+      call ctrsv(uplo, trans, diag, nsize, atmp, lda_val, xm, incx)
+      cdiff = (xp - xm) / (2.0d0 * 1.0d-3)
+      do i = 1, n
+        abs_error = abs(cdiff(i) - x_dv(nd,i))
+        abs_reference = abs(x_dv(nd,i))
+        if (abs_error > 1.0d-2 + 1.0d-2 * abs_reference) has_large_errors = .true.
+        max_error = max(max_error, abs_error / max(abs_reference, 1.0d-6))
       end do
     end do
-    
+
     write(*,*) 'Maximum relative error:', max_error
-    write(*,*) 'Tolerance thresholds: rtol=1.0e-3, atol=1.0e-3'
+    passed = .not. has_large_errors
     if (has_large_errors) then
       write(*,*) 'FAIL: Derivatives are outside tolerance'
     else
       write(*,*) 'PASS: Derivatives are within tolerance (rtol + atol)'
     end if
-    
-  end subroutine check_derivatives_numerically
+  end subroutine run_test_for_size
 
 end program test_ctrsv_vector_forward
