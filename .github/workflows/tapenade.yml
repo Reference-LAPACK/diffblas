@@ -61,15 +61,15 @@ jobs:
         run: |
           python3 run_tapenade_blas.py --input-dir=$LAPACKDIR/BLAS/SRC --out-dir=./BLAS --flat
 
-      # - name: Show diff for diff-BLAS
-      #   run: |
-      #     git status
-      #     git diff --stat
-      #     git diff > blas.diff
-      #     git diff --quiet || exit 1
+      - name: Show diff for diff-BLAS
+        run: |
+          git status
+          git diff BLAS/src --stat
+          git diff BLAS/src > blas.diff
+          git diff BLAS/src --quiet || exit 1
 
-      # - uses: actions/upload-artifact@v4
-      #   if: always()
-      #   with:
-      #     name: blas-diff
-      #     path: blas.diff
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: blas-diff
+          path: blas.diff
